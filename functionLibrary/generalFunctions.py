@@ -258,7 +258,6 @@ def hasTransformValues(srt):
 def jointHasOrientValues(jnt):
     for channel in "XYZ":
         channelValue = cmds.getAttr(f"{jnt}.jointOrient{channel}")
-        print(channelValue)
         if channelValue != 0:
             return True
     return False
@@ -399,6 +398,18 @@ def createComposeMatrixFromSRT(srt, name = None) -> str:
 
     return newCmNode
 
+#function to create a decompose Matrix from an srt 
+def createDecomposeMatrixFromSrt(srt, rotateOrder = True) -> str:
+    
+    newDcmNode = cmds.createNode("decomposeMatrix", name = f"{srt}_wrldDcm_fNode")
+    
+    if rotateOrder:
+        cmds.connectAttr(f"{srt}.rotateOrder", f"{newDcmNode}.inputRotateOrder")
+
+    cmds.connectAttr(f"{srt}.worldMatrix[0]", f"{newDcmNode}.inputMatrix")
+    
+    return newDcmNode
+
 #function to create a matrix constraint from an object to another object without joint orients
 def createMatrixParentConstraintSRT(sourceRotateOrder, targetRotateOrder, source, target, t, r, s):
     
@@ -457,72 +468,77 @@ def createMatrixParentConstraint(source, target, t = True, r = True, s = True):
     # check if we are working with a joint or an srt
         if cmds.nodeType(target) == "joint":
             #check the joint Orients
-            if not jointHasOrientValues(target):
-                createMatrixParentConstraintSRT(sourceRotateOrder, targetRotateOrder, source, target, t, r, s)
+            
+            
+            #get Joint Orient Matrix
+            jointOrientComposeMatrix = cmds.createNode("composeMatrix", name = f"{target}_orientMtx_cm_fNode")
+
+            for channel in "XYZ":
+                jointOrientValue = cmds.getAttr(f"{target}.jointOrient{channel}")
+                cmds.setAttr(f"{jointOrientComposeMatrix}.inputRotate{channel}", jointOrientValue)
+            
+            #multiply orient Matrix with target parent Matrix
+            jointOrientMultParentWorldMatrix = cmds.createNode("multMatrix", name = f"{target}_orientMtxMultParentMtx_mmtx_fNode")
+            cmds.connectAttr(f"{jointOrientComposeMatrix}.outputMatrix", f"{jointOrientMultParentWorldMatrix}.matrixIn[0]")
+            cmds.connectAttr(f"{target}.parentMatrix[0]", f"{jointOrientMultParentWorldMatrix}.matrixIn[1]")
+
+
+            #Multiply by the inverse of the orient Matrix
+            jointOrientInverseMatrix = cmds.createNode("inverseMatrix", name = f"{target}_inverseOrientMtx_fNode")
+            cmds.connectAttr(f"{jointOrientMultParentWorldMatrix}.matrixSum", f"{jointOrientInverseMatrix}.inputMatrix")
+            jointRotationMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_rotateParentConstraint_mmtx_fNode")
+
+            cmds.connectAttr(f"{source}.worldMatrix[0]", f"{jointRotationMatrixMultiplication}.matrixIn[0]")
+            cmds.connectAttr(f"{jointOrientInverseMatrix}.outputMatrix", f"{jointRotationMatrixMultiplication}.matrixIn[1]")
+
+            #calculate Translate and Scale part of the constraint
+            jointTranslateScaleMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_translateScaleParentConstraint_mmtx_fNode")
+
+            cmds.connectAttr(f"{source}.worldMatrix[0]", f"{jointTranslateScaleMatrixMultiplication}.matrixIn[0]")
+            cmds.connectAttr(f"{target}.parentInverseMatrix[0]", f"{jointTranslateScaleMatrixMultiplication}.matrixIn[1]")
+
+            #decompose Result nodes
+            jointRotationDecompositionNode = cmds.createNode("decomposeMatrix", name = f"{target}_rotateParentConstraint_dcm_fNode")
+            jointTranslateScaleDecomposeMatrix = cmds.createNode("decomposeMatrix", name = f"{target}_translateScaleParentConstraint_dcm_fNode")
+
+            #check for offsets
+            temporaryOffsetReaderObject = cmds.createNode("transform", name = "tmp_offset_Reader")
+
+            cmds.setAttr(f"{temporaryOffsetReaderObject}.rotateOrder", sourceRotateOrder)
+            cmds.matchTransform(temporaryOffsetReaderObject, target)
+            cmds.parent(temporaryOffsetReaderObject, source)
+
+            offsetMatrix, jointIsOffset = hasTransformValues(temporaryOffsetReaderObject)
+
+            if jointIsOffset:
+
+                offsetComposeMatrix = createComposeMatrixFromSRT(temporaryOffsetReaderObject, name = f"{target}_parentConstraintOffset_cm_fNode")
+
+                rotateOffsetMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_rParentConstraintOffset_mmtx_fNode")
+                translateScaleOffsetMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_tsParentConstraintOffset_mtx_fNode")
+
+                cmds.connectAttr(f"{offsetComposeMatrix}.outputMatrix", f"{rotateOffsetMatrixMultiplication}.matrixIn[0]")
+                cmds.connectAttr(f"{offsetComposeMatrix}.outputMatrix", f"{translateScaleOffsetMatrixMultiplication}.matrixIn[0]")
+
+                cmds.connectAttr(f"{jointRotationMatrixMultiplication}.matrixSum", f"{rotateOffsetMatrixMultiplication}.matrixIn[1]")
+                cmds.connectAttr(f"{jointTranslateScaleMatrixMultiplication}.matrixSum", f"{translateScaleOffsetMatrixMultiplication}.matrixIn[1]")
+                
+                cmds.connectAttr(f"{rotateOffsetMatrixMultiplication}.matrixSum", f"{jointRotationDecompositionNode}.inputMatrix")
+                cmds.connectAttr(f"{translateScaleOffsetMatrixMultiplication}.matrixSum", f"{jointTranslateScaleDecomposeMatrix}.inputMatrix")
+
+                disconnectComposeMatrixFromSrt(temporaryOffsetReaderObject, offsetComposeMatrix)
+
             else:
-                #get Joint Orient Matrix
-                jointOrientComposeMatrix = cmds.createNode("composeMatrix", name = f"{target}_orientMtx_cm_fNode")
 
-                for channel in "XYZ":
-                    jointOrientValue = cmds.getAttr(f"{target}.jointOrient{channel}")
-                    cmds.setAttr(f"{jointOrientComposeMatrix}.inputRotate{channel}", jointOrientValue)
+                cmds.connectAttr(f"{jointRotationMatrixMultiplication}.matrixSum", f"{jointRotationDecompositionNode}.inputMatrix")
 
-                #Multiply by the inverse of the orient Matrix
-                jointOrientInverseMatrix = cmds.createNode("inverseMatrix", name = f"{target}_inverseOrientMtx_fNode")
-                cmds.connectAttr(f"{jointOrientComposeMatrix}.outputMatrix", f"{jointOrientInverseMatrix}.inputMatrix")
-                jointRotationMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_rotateParentConstraint_mmtx_fNode")
+                cmds.connectAttr(f"{jointTranslateScaleMatrixMultiplication}.matrixSum", f"{jointTranslateScaleDecomposeMatrix}.inputMatrix")
 
-                cmds.connectAttr(f"{source}.worldMatrix[0]", f"{jointRotationMatrixMultiplication}.matrixIn[0]")
-                cmds.connectAttr(f"{jointOrientInverseMatrix}.outputMatrix", f"{jointRotationMatrixMultiplication}.matrixIn[1]")
+            connectDecomposeMatrixToSrt(jointRotationDecompositionNode, target, rotateOrder=False, t = False, r = True, s = False)
 
-                #calculate Translate and Scale part of the constraint
-                jointTranslateScaleMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_translateScaleParentConstraint_mmtx_fNode")
+            connectDecomposeMatrixToSrt(jointTranslateScaleDecomposeMatrix, target, rotateOrder=False, t = True, r = False, s = True)
 
-                cmds.connectAttr(f"{source}.worldMatrix[0]", f"{jointTranslateScaleMatrixMultiplication}.matrixIn[0]")
-                cmds.connectAttr(f"{target}.parentInverseMatrix[0]", f"{jointTranslateScaleMatrixMultiplication}.matrixIn[1]")
-
-                #decompose Result nodes
-                jointRotationDecompositionNode = cmds.createNode("decomposeMatrix", name = f"{target}_rotateParentConstraint_dcm_fNode")
-                jointTranslateScaleDecomposeMatrix = cmds.createNode("decomposeMatrix", name = f"{target}_translateScaleParentConstraint_dcm_fNode")
-
-                #check for offsets
-                temporaryOffsetReaderObject = cmds.createNode("transform", name = "tmp_offset_Reader")
-
-                cmds.setAttr(f"{temporaryOffsetReaderObject}.rotateOrder", sourceRotateOrder)
-                cmds.matchTransform(temporaryOffsetReaderObject, target)
-                cmds.parent(temporaryOffsetReaderObject, source)
-
-                offsetMatrix, jointIsOffset = hasTransformValues(temporaryOffsetReaderObject)
-
-                if jointIsOffset:
-
-                    offsetComposeMatrix = createComposeMatrixFromSRT(temporaryOffsetReaderObject, name = f"{target}_parentConstraintOffset_cm_fNode")
-
-                    rotateOffsetMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_rParentConstraintOffset_mmtx_fNode")
-                    translateScaleOffsetMatrixMultiplication = cmds.createNode("multMatrix", name = f"{target}_tsParentConstraintOffset_mtx_fNode")
-
-                    cmds.connectAttr(f"{offsetComposeMatrix}.outputMatrix", f"{rotateOffsetMatrixMultiplication}.matrixIn[0]")
-                    cmds.connectAttr(f"{offsetComposeMatrix}.outputMatrix", f"{translateScaleOffsetMatrixMultiplication}.matrixIn[0]")
-
-                    cmds.connectAttr(f"{jointRotationMatrixMultiplication}.matrixSum", f"{rotateOffsetMatrixMultiplication}.matrixIn[1]")
-                    cmds.connectAttr(f"{jointTranslateScaleMatrixMultiplication}.matrixSum", f"{translateScaleOffsetMatrixMultiplication}.matrixIn[1]")
-                    
-                    cmds.connectAttr(f"{rotateOffsetMatrixMultiplication}.matrixSum", f"{jointRotationDecompositionNode}.inputMatrix")
-                    cmds.connectAttr(f"{translateScaleOffsetMatrixMultiplication}.matrixSum", f"{jointTranslateScaleDecomposeMatrix}.inputMatrix")
-
-                    disconnectComposeMatrixFromSrt(temporaryOffsetReaderObject, offsetComposeMatrix)
-
-                else:
-
-                    cmds.connectAttr(f"{jointRotationMatrixMultiplication}.matrixSum", f"{jointRotationDecompositionNode}.inputMatrix")
-
-                    cmds.connectAttr(f"{jointTranslateScaleMatrixMultiplication}.matrixSum", f"{jointTranslateScaleDecomposeMatrix}.inputMatrix")
-
-                connectDecomposeMatrixToSrt(jointRotationDecompositionNode, target, rotateOrder=False, t = False, r = True, s = False)
-
-                connectDecomposeMatrixToSrt(jointTranslateScaleDecomposeMatrix, target, rotateOrder=False, t = True, r = False, s = True)
-
-                cmds.delete(temporaryOffsetReaderObject)
+            cmds.delete(temporaryOffsetReaderObject)
 
         else:
             constrainedNodes = createMatrixParentConstraintSRT(sourceRotateOrder, targetRotateOrder, source, target, t, r, s)
