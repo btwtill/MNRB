@@ -11,12 +11,25 @@ def createMainComponentGuide(rigName, cmpntName = "main"):
     mainCmpntGuidehirarchy = cmds.createNode("transform", name = f"{cmpntName}_guides_hrc", parent = f"{rigName}_guide_hrc")
 
     #create main Component Guide
-    mainGuide = gf.createGuide("globalCtrl", gVar.CENTERDECLARATION, "main", [1, 1, 0], 10)
-
+    mainGuide = gf.createGuide("globalCtrl", gVar.CENTERDECLARATION, cmpntName, [1, 1, 0], 10)
+    print(cmpntName)
+    print(mainGuide)
     #parent main Component Guide to guide Hirarchy
     cmds.parent(mainGuide, mainCmpntGuidehirarchy)
 
-    return guides
+    return guides, mainCmpntGuidehirarchy
+
+def createMainComponentSkeleton(guide, deformHirarchy):
+    guidePosMtx = cmds.xform(query = True, m = True, ws = True)
+
+    rootJoint = cmds.joint(name = f"{guide.replace('srt', 'skn')}")
+
+    cmds.xform(rootJoint, m =guidePosMtx, ws = True)
+
+    print(deformHirarchy)
+    cmds.parent(rootJoint, deformHirarchy)
+
+    return rootJoint
 
 #compose character Main component
 def composeMainComponent(rigName, guideDir, characterMesh = None, numOfMainControlOffsets = 1, 
@@ -88,6 +101,11 @@ def composeMainComponent(rigName, guideDir, characterMesh = None, numOfMainContr
     mainComponentDeformOutputNode = cmds.createNode("transform", name = f"{gVar.CENTERDECLARATION}_{cmpntName}_root_{gVar.NODEUSAGETYPEDEFORM}", parent = mainComponentStructureNodes[3])
     cmds.connectAttr(f"{lastOffsetCtrlMember}.worldMatrix[0]", f"{mainComponentDeformOutputNode}.offsetParentMatrix")
     cmds.connectAttr(f"{lastOffsetCtrlMember}.rotateOrder", f"{mainComponentDeformOutputNode}.rotateOrder")
+
+    #createRootSkeletonJoint
+    rootJoint = createMainComponentSkeleton(mainGuide, "skeleton_hrc")
+
+    gf.createMatrixParentConstraint(mainComponentDeformOutputNode, rootJoint)
 
     #get rig of the construction history of the initial ctrl shapes
     #get ctrl shapes

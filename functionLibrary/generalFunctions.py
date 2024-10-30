@@ -105,8 +105,12 @@ def createRigComponent(name, parentNode = "world", side = gVar.CENTERDECLARATION
 
 #function to create a single guide
 def createGuide(name, side = gVar.CENTERDECLARATION, cmpnt = "world", color = [0.5, 0.5, 0.5], size = 5):
+    
+    print(cmpnt)
+    print(name)
     #create guide locator
     guideLoc = cmds.spaceLocator(name = f"{side}_{cmpnt}_{name}_guide_srt")[0]
+    print(guideLoc)
 
     #get Guide Shape
     guideLocShape = cmds.listRelatives(guideLoc, children = True)[0]
