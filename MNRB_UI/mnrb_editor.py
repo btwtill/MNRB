@@ -20,32 +20,30 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setWindowTitle("mnrb Editor")
         self.setGeometry(300, 300, 800, 600)
 
-        self.tabs = QtWidgets.QTabWidget()
-        self.setCentralWidget(self.tabs)
-
-        self.setupNodeEditorTab()
-        self.setupControlEditorTab()
+        self.setupProjectOverlay()
+        
+        self.createEditorActions()
+        self.setupMenuBar()
+        self.setupStatusBar()
 
     def setupNodeEditorTab(self):
 
-        """Set up the first tab with an embedded main window containing dock widgets."""
-        # Secondary main window within the first tab
-        self.secondary_main_window = mnrb_NodeEditorTab()
+        #Set Up the NodeEditor Tab Object
+        self.nodeEditorTabWindow = mnrb_NodeEditorTab()
 
-        # First tab widget that will act as a container for the secondary main window
+        # Create a Widget acting as a container for the NodeEditor Window
         first_tab_container = QtWidgets.QWidget()
         first_tab_layout = QtWidgets.QVBoxLayout(first_tab_container)
 
         # Add the secondary main window to the first tab's layout
-        first_tab_layout.addWidget(self.secondary_main_window)
+        first_tab_layout.addWidget(self.nodeEditorTabWindow)
         
         # Add the first tab to the QTabWidget
         self.tabs.addTab(first_tab_container, "MNRB")
 
-
     def setupControlEditorTab(self):
-        """Set up the second tab with a widget containing a box layout."""
-        # Second tab central widget
+        
+        # Second tab PlaceHolder Widget
         second_tab_widget = QtWidgets.QWidget()
         second_tab_layout = QtWidgets.QHBoxLayout(second_tab_widget)
 
@@ -57,10 +55,54 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         # Add the second tab to the QTabWidget
         self.tabs.addTab(second_tab_widget, "Tab 2")
-    
-    def on_button_clicked(self):
-        """Handle button click event."""
-        QtWidgets.QMessageBox.information(self, "Button Clicked", "You clicked the button!")
+
+    def setupProjectOverlay(self):
+
+        self.overlay_Widget = QtWidgets.QWidget()
+
+        self.outer_Layout = QtWidgets.QHBoxLayout()
+        self.innerLayout = QtWidgets.QVBoxLayout()
+
+        self.overlayNewActionButton = QtWidgets.QPushButton("New Project")
+        self.overlayNewActionButton.clicked.connect(self.onNewProject)
+
+        self.innerLayout.addWidget(self.overlayNewActionButton)
+        self.innerLayout.setContentsMargins(60, 20, 60, 20)
+
+        self.outer_Layout.addStretch(1)
+        self.outer_Layout.addLayout(self.innerLayout)
+        self.outer_Layout.addStretch(1)
+
+        self.overlay_Widget.setLayout(self.outer_Layout)
+        self.setCentralWidget(self.overlay_Widget)
+
+    def createEditorActions(self):
+        self.actionNew = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='Create New Project', triggered=self.onNewProject)
+        self.actionOpen = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='Open a Project', triggered=self.onOpenProject)
+
+    def setupMenuBar(self):
+        menuBar = self.menuBar()
+
+        self.fileMenu = menuBar.addMenu('&File')
+        self.fileMenu.addAction(self.actionNew)
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.actionOpen)
+
+    def setupStatusBar(self):
+
+        self.statusBar().showMessage('')
+        self.statusMousePosition = QtWidgets.QLabel('')
+
+    def onNewProject(self,):
+
+        self.tabs = QtWidgets.QTabWidget()
+        self.setCentralWidget(self.tabs)
+
+        self.setupNodeEditorTab()
+        self.setupControlEditorTab()
+
+    def onOpenProject(self):
+        if DEBUG : print("Open a Project")
 
     def validateWorkingDirectory(self, directory):
         if DEBUG : print(directory)
