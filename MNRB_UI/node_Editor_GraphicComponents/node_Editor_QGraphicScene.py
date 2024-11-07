@@ -15,8 +15,8 @@ class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
 
         #Initilize Color variables
         self._backgroundColor = QColor("#2A2A2A")
-        self._lightColor = QColor("#3A3A3A")
-        self._darkColor = QColor("#191919")
+        self._lightColor = QColor("#2E2E2E")
+        self._darkColor = QColor("#1C1C1C")
 
         #initialize Pens for Drawing
         self._lightPen = QPen(self._lightColor)

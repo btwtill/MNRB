@@ -1,5 +1,5 @@
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
 
 CLASS_DEBUG = True
 
