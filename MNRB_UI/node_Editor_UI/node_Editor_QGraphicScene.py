@@ -11,13 +11,12 @@ class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
 
         self.initUI()
         
-        
     def initUI(self):
 
         #Initilize Color variables
         self._backgroundColor = QColor("#2A2A2A")
         self._lightColor = QColor("#3A3A3A")
-        self._darkColor = QColor("#0A0A0A")
+        self._darkColor = QColor("#191919")
 
         #initialize Pens for Drawing
         self._lightPen = QPen(self._lightColor)
