@@ -18,7 +18,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def initUI(self):
 
         self.setWindowTitle("mnrb Editor")
-        self.setGeometry(300, 300, 800, 600)
+        self.setGeometry(300, 300, 1200, 700)
 
         self.setupProjectOverlay()
         

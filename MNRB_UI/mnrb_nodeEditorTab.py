@@ -1,5 +1,5 @@
 from PySide2 import QtWidgets, QtCore
-
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
@@ -9,13 +9,10 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def initUI(self):
         # Central widget for secondary main window
-        central_widget = QtWidgets.QWidget()
-        central_layout = QtWidgets.QVBoxLayout(central_widget)
-        central_label = QtWidgets.QLabel("This is the main content area within the secondary main window.")
-        central_layout.addWidget(central_label)
+
+        central_widget = NodeEditorWidget()
 
         # Set the central widget for the secondary main window
-        central_widget.setLayout(central_layout)
         self.setCentralWidget(central_widget)
 
         # Add dock widgets to the secondary main window
