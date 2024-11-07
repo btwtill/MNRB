@@ -32,7 +32,7 @@ class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
         self._grid_Size = 20
         self._dark_Grid_Size = 5
 
-    def setSceneSize(self, width, height):
+    def setGrSceneSize(self, width, height):
         self.setSceneRect(-width // 2, -height // 2, width, height)
         print(self.setSceneRect)
 

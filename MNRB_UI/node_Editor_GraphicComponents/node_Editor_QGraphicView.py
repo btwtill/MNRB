@@ -22,7 +22,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.zoomIn_Factor = 1.25
         self.zoom = 10
         self.zoom_Step = 1
-        self.zoomRange = [5, 10]
+        self.zoomRange = [1, 20]
 
         #set scroll Bar Policies
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
