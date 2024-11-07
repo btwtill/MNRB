@@ -1,4 +1,5 @@
 from PySide2 import QtWidgets
+from PySide2.QtCore import *
 
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
@@ -8,8 +9,15 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         
         self.setScene = self.grScene
 
+        self.centerOn(0, 0)
+
         self.initUI()
 
-
     def initUI(self):
-        pass
+
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_F:
+            self.centerOn(0, 0)
