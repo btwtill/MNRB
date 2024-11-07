@@ -9,7 +9,7 @@ class NodeEditorScene(Serializable):
         self.grScene = NodeEditor_QGraphicScene(self)
         
         self.nodes = []
-        self.edge = []
+        self.edges = []
         
         self.initUI()
 
@@ -23,7 +23,7 @@ class NodeEditorScene(Serializable):
         self.grScene.setGrSceneSize(self.grSceneWidth, self.grSceneHeight)
 
     def addNode(self, node):
-        self.nodes.appen(node)
+        self.nodes.append(node)
     
     def addEdge(self, edge):
         self.edges.append(edge)

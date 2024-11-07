@@ -1,8 +1,9 @@
 from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt, QEvent # type: ignore
 from PySide2.QtGui import QPainter, QMouseEvent # type:ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
@@ -60,6 +61,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         #center view
         if event.key() == Qt.Key_F:
             self.centerOn(0, 0)
+        if event.key() == Qt.Key_N:
+            newNode = NodeEditorNode(self.grScene.scene, title="TestNode")
 
     def middleMouseButtonPress(self, event) -> None:
         if CLASS_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")

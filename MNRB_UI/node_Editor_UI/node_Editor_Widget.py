@@ -13,7 +13,6 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.initUI()
 
-        
     def initUI(self):
 
         self.layout = QtWidgets.QVBoxLayout()
