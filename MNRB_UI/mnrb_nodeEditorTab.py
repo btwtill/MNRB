@@ -1,5 +1,5 @@
-from PySide2 import QtWidgets, QtCore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget
+from PySide2 import QtWidgets, QtCore # type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):

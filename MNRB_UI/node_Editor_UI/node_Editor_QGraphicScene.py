@@ -1,7 +1,7 @@
 import math
-from PySide2 import QtWidgets
-from PySide2.QtGui import QColor, QPen, QBrush
-from PySide2.QtCore import QLine, QPoint, Qt
+from PySide2 import QtWidgets # type: ignore
+from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
+from PySide2.QtCore import QLine, QPoint, Qt # type: ignore
 
 class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
     def __init__(self, scene, parent=None):

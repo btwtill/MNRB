@@ -1,6 +1,6 @@
-from PySide2 import QtWidgets
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_QGraphicView import NodeEditor_QGraphicView
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene
+from PySide2 import QtWidgets # type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_QGraphicView import NodeEditor_QGraphicView # type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene # type: ignore
 
 
 CLASS_DEBUG = True

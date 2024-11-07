@@ -1,6 +1,6 @@
-from PySide2 import QtWidgets
-from shiboken2 import wrapInstance
-import maya.OpenMayaUI as omui
+from PySide2 import QtWidgets # type: ignore
+from shiboken2 import wrapInstance # type: ignore
+import maya.OpenMayaUI as omui # type: ignore
 
 def get_maya_window():
     main_window_pointer =  omui.MQtUtil.mainWindow()

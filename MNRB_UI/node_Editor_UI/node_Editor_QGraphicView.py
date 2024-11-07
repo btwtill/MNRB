@@ -1,5 +1,5 @@
-from PySide2 import QtWidgets
-from PySide2.QtCore import *
+from PySide2 import QtWidgets # type: ignore
+from PySide2.QtCore import Qt # type: ignore
 
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
