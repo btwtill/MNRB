@@ -25,10 +25,18 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
 
     def mousePressEvent(self, event):
+        #decide what button has been pressed and execute the according action
         if event.button() == Qt.MiddleButton:
             self.middleMouseButtonPress(event)
         else:
             super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        #decide what button has been Released and execute the according action
+        if event.button() == Qt.MiddleButton :
+            self.middleMouseButtonRelease(event)
+        else:
+            super().mouseReleaseEvent(event)
 
     def keyPressEvent(self, event):
 
@@ -37,4 +45,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.centerOn(0, 0)
 
     def middleMouseButtonPress(self, event):
-        print("Middle Mouse Button")
+        if CLASS_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
+    
+    def middleMouseButtonRelease(self, event):
+        if CLASS_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonRelease:: Middle Mouse Button Release Start")
