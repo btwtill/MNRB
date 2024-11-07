@@ -1,5 +1,5 @@
 from PySide2 import QtWidgets
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_GraphicView import NodeEditor_GraphicView
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_QGraphicView import NodeEditor_QGraphicView
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene
 
 
@@ -22,5 +22,5 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.scene = NodeEditorScene()
 
-        self.view = NodeEditor_GraphicView(self, self.scene.grScene)
+        self.view = NodeEditor_QGraphicView(self, self.scene.grScene)
         self.layout.addWidget(self.view)

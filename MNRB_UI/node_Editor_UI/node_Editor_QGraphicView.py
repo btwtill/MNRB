@@ -1,6 +1,6 @@
 from PySide2 import QtWidgets
 
-class NodeEditor_GraphicView(QtWidgets.QGraphicsView):
+class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
         super().__init__(parent)
 
