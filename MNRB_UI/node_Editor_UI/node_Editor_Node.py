@@ -1,6 +1,6 @@
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGrpahicNode import NodeEditor_QGraphicNode # type: ignore
-
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent import NodeEditor_QGraphicContent # type: ignore
 from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
 
 
@@ -12,7 +12,10 @@ class NodeEditorNode(Serializable):
 
         self.scene = scene
         self.title = title
+        
+        self.initSockets()
 
+        self.content = NodeEditor_QGraphicContent(self)
         self.grNode = NodeEditor_QGraphicNode(self)
 
         self.scene.addNode(self)
@@ -22,8 +25,6 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODEEDITORNODE:: -__init__:: self.grNode", self.grNode)
 
         self.scene.grScene.addItem(self.grNode)
-
-        self.initSockets()
 
     def initSockets(self):
             self.inputs = []

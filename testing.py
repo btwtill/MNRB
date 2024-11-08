@@ -11,6 +11,7 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node as nodeEditorNode
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as nodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as nodeEditorGraphicsView
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGrpahicNode as nodeEditorGraphicsNode
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent as nodeEditorGraphicContent
 
 
 importlib.reload(mnrb_editor)
@@ -25,6 +26,7 @@ importlib.reload(nodeEditorNode)
 importlib.reload(nodeEditorGraphicsScene)
 importlib.reload(nodeEditorGraphicsView)
 importlib.reload(nodeEditorGraphicsNode)
+importlib.reload(nodeEditorGraphicContent)
 
 newEditor = mnrb_editor.mnrb_Editor()
 
