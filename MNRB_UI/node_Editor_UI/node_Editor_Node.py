@@ -34,7 +34,7 @@ class NodeEditorNode(Serializable):
             counter = 0
             for input in inputs:
                 if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing Input Sockets!")
-                socket = NodeEditor_Socket()
+                socket = NodeEditor_Socket(self, index=counter, position=1, socket_type = 0, accept_multi_edges=False, index_on_drawn_node_Side=counter, is_input = True)
 
                 counter += 1
                 self.inputs.append(socket)
@@ -42,7 +42,7 @@ class NodeEditorNode(Serializable):
             counter = 0
             for output in outputs:
                 if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing output Sockets!")
-                socket = NodeEditor_Socket()
+                socket = NodeEditor_Socket(self, index=counter, position=2, socket_type = 0, accept_multi_edges=True, index_on_drawn_node_Side=counter, is_input = False)
 
                 counter += 1
                 self.outputs.append(socket)

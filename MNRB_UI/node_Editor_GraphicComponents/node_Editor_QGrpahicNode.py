@@ -71,10 +71,10 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
 
-        self.isDrawingBoundingBox = False
+        self.is_drawing_bounding_box = False
     
     def setIsDrawingBoundingBox(self, value=True):
-        self.isDrawingBoundingBox = value
+        self.is_drawing_bounding_box = value
 
     def calculateGrNodeSize(self, inputs, outputs):
         socket_padding = 40
@@ -118,6 +118,6 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         painter.drawPath(path_outline.simplified())
         
         #paintBounding Rect
-        if self.isDrawingBoundingBox:
+        if self.is_drawing_bounding_box:
             painter.setPen(QPen(Qt.red, 1, Qt.DashLine))
             painter.drawRect(self.boundingRect())
