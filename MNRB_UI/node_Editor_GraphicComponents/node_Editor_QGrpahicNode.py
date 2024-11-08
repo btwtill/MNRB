@@ -1,18 +1,16 @@
 from PySide2 import QtWidgets # type:ignore
 from PySide2.QtCore import Qt, QRectF # type: ignore
-from PySide2.QtGui import QFont, QBrush, QPen # type: ignore
-
+from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
 
 
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
-    def __init__(self, node, parent = None):
+    def __init__(self, node, content, parent = None):
         super().__init__(parent)
 
         self.node = node
-
-        self._size = 40
-    
+        self.content = content
+        
         self.initGraphicElements()
         self.initUI()
 
@@ -23,25 +21,90 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._title = value
         self.title_item.setPlainText(self.title)
 
-    def initUI(self):
-        pass
-    
     def initGraphicElements(self):
+        #initialize Graphic element variables
+        self.width, self.height = self.calculateGrNodeSize(self.node.inputs, self.node.outputs)
+        self._edgeRoundness = 5
+        self._title_height = 20
+
         #initialize the variables for the Graphical Elements
+        self._title_font = QFont("Helvetica", 8)
+        self._title_padding = 10
+
+        self._default_color = QColor("#7F000000")
+        self._selected_color = QColor("#FFFFA637")
         self._title_color = Qt.white
-        self._title_font = QFont("Helvetica", 10)
+        self._title_backgroundColor = QColor("#FF181818")
+        self._content_color = QColor("#EF1F1F1F")
+
+        self._default_pen = QPen(self._default_color)
+        self._selected_pen = QPen(self._selected_color)
+
+        self._title_background_brush = QBrush(self._title_backgroundColor)
+        self._content_brush = QBrush(self._content_color)
 
         #initialize the node title
         self.title_item = QtWidgets.QGraphicsTextItem(self)
         self.title_item.setDefaultTextColor(self._title_color)
         self.title_item.setFont(self._title_font)
+        self.title_item.setPos(self._title_padding, 0)
+        self.title_item.setTextWidth(
+            self.width  - 2 * self._title_padding
+        )
         self.title = self.node.title
 
+    def initUI(self):
+        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+
+        self.isDrawingBoundingBox = False
+    
+    def setIsDrawingBoundingBox(self, value=True):
+        self.isDrawingBoundingBox = value
+
+    def calculateGrNodeSize(self, inputs, outputs):
+        
+        if (len(inputs) == 0) and (len(outputs) == 0): 
+            return 100, 60
+        else:
+            return 100, 60
+
     def boundingRect(self):
-        return QRectF(0, 0, self._size, self._size)
+        return QRectF(
+            0, 
+            0, 
+            self.width,
+            self.height,
+            ).normalized()
 
     # Paint method to draw the square
     def paint(self, painter, option, widget=None):
-        painter.setBrush(QBrush(Qt.blue))  # Fill color
-        painter.setPen(QPen(Qt.black, 2))  # Border color and thickness
-        painter.drawRect(0, 0, self._size, self._size)    # Draw the square
+
+        path_title = QPainterPath()
+        path_title.setFillRule(Qt.WindingFill)
+        path_title.addRoundedRect(0,0, self.width, self._title_height, self._edgeRoundness, self._edgeRoundness)
+        path_title.addRect(0, self._title_height -self._edgeRoundness, self._edgeRoundness, self._edgeRoundness)
+        path_title.addRect(self.width - self._edgeRoundness, self._title_height -self._edgeRoundness, self._edgeRoundness, self._edgeRoundness)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(self._title_background_brush)
+        painter.drawPath(path_title.simplified())
+
+        path_content = QPainterPath()
+        path_content.setFillRule(Qt.WindingFill)
+        path_content.addRoundedRect(0, self._title_height, self.width, self.height - self._title_height, self._edgeRoundness, self._edgeRoundness)
+        path_content.addRect(0, self._title_height, self._edgeRoundness, self._edgeRoundness)
+        path_content.addRect(self.width - self._edgeRoundness, self._title_height, self._edgeRoundness, self._edgeRoundness)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(self._content_brush)
+        painter.drawPath(path_content.simplified())
+
+        path_outline = QPainterPath()
+        path_outline.addRoundedRect(0, 0, self.width, self.height, self._edgeRoundness, self._edgeRoundness)
+        painter.setPen(self._default_pen if not self.isSelected() else self._selected_pen)
+        painter.setBrush(Qt.NoBrush)
+        painter.drawPath(path_outline.simplified())
+        
+        #paintBounding Rect
+        if self.isDrawingBoundingBox:
+            painter.setPen(QPen(Qt.red, 1, Qt.DashLine))
+            painter.drawRect(self.boundingRect())
