@@ -1,5 +1,5 @@
 from PySide2 import QtWidgets # type: ignore
-from PySide2.Gui import QColor, QPen, QBrush # type: ignore
+from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
 from PySide2.QtCore import QRectF, Qt #type: ignore
 
 
