@@ -16,6 +16,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     @property
     def title(self): return self._title
+    
     @title.setter
     def title(self, value):
         self._title = value

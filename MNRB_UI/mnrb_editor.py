@@ -1,17 +1,18 @@
-import maya.cmds as cmds # type: ignore
 import os
-from PySide2 import QtWidgets, QtCore # type: ignore
+import maya.cmds as cmds # type: ignore
+from PySide2 import QtWidgets # type: ignore
+from PySide2.QtCore import QFile #type:  ignore 
 from MNRB.MNRB_UI.mnrb_ui_utils import get_maya_window # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 
-DEBUG = True
+CLASS_DEBUG = True
 
 class mnrb_Editor(QtWidgets.QMainWindow):
     def __init__(self, parent = get_maya_window()):
         super(mnrb_Editor, self).__init__(parent)
 
-        self.workingDirectory = cmds.workspace(query=True, directory=True)
-        self.isActiveProject = self.validateWorkingDirectory(self.workingDirectory)
+        self.working_directory = cmds.workspace(query=True, directory=True)
+        self.is_active_project = self.validateWorkingDirectory(self.working_directory)
 
         self.initUI()
 
@@ -103,10 +104,10 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupControlEditorTab()
 
     def onOpenProject(self):
-        if DEBUG : print("Open a Project")
+        if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject:: Start opening a Project")
 
     def validateWorkingDirectory(self, directory):
-        if DEBUG : print(directory)
-        if DEBUG : print(os.path.basename(os.path.dirname(directory)))
+        if CLASS_DEBUG : print("MNRB_EDITOR:: -validateWorkingDirectory:: Full Directory Path: ", directory)
+        if CLASS_DEBUG : print("MNRB_EDITOR:: -validateWorkingDirectory:: WorkingDirectoryName: ", os.path.basename(os.path.dirname(directory)))
 
         return not os.path.basename(os.path.dirname(directory)) == "default"
