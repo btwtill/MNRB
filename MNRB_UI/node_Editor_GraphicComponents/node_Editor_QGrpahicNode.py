@@ -16,7 +16,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     @property
     def title(self): return self._title
-    
+
     @title.setter
     def title(self, value):
         self._title = value
@@ -27,6 +27,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     def initGraphicElements(self):
         #initialize Graphic element variables
+        self._min_width = 100
+        self._min_height = 60
         self.width, self.height = self.calculateGrNodeSize(self.node.inputs, self.node.outputs)
         self._edge_roundness = 5
         self._edge_padding = 5
@@ -75,11 +77,10 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.isDrawingBoundingBox = value
 
     def calculateGrNodeSize(self, inputs, outputs):
-        
-        if (len(inputs) == 0) and (len(outputs) == 0): 
-            return 100, 60
-        else:
-            return 100, 60
+        socket_padding = 40
+        max_height = (len(inputs) * socket_padding) + (len(outputs) * socket_padding) + self._min_height
+        max_width = self._min_width
+        return max_width, max_height
 
     def boundingRect(self):
         return QRectF(

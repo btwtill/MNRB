@@ -62,7 +62,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if event.key() == Qt.Key_F:
             self.centerOn(0, 0)
         if event.key() == Qt.Key_N:
-            newNode = NodeEditorNode(self.grScene.scene, title="TestNode")
+            newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [1], outputs=[1, 1])
 
     def middleMouseButtonPress(self, event) -> None:
         if CLASS_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")

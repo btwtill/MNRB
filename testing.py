@@ -7,6 +7,7 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget as nodeEditorWidget
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable as nodeEditorSerializable
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene as nodeEditorScene
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node as nodeEditorNode
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket as nodeEditorSocket
 
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as nodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as nodeEditorGraphicsView
@@ -22,6 +23,7 @@ importlib.reload(nodeEditorWidget)
 importlib.reload(nodeEditorSerializable)
 importlib.reload(nodeEditorScene)
 importlib.reload(nodeEditorNode)
+importlib.reload(nodeEditorSocket)
 
 importlib.reload(nodeEditorGraphicsScene)
 importlib.reload(nodeEditorGraphicsView)
