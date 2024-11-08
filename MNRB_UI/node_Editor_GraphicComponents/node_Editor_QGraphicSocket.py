@@ -12,7 +12,7 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
         self.initGraphicElements()
         self.initUI()
     
-    def initGraphicsElements(self):
+    def initGraphicElements(self):
         self.radius = 6.0
         self._outline_width = 1.0
 
