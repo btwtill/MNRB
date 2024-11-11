@@ -8,12 +8,16 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable as nodeEditorSeriali
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene as nodeEditorScene
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node as nodeEditorNode
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket as nodeEditorSocket
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge as nodeEditorEdge
 
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as nodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as nodeEditorGraphicsView
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGrpahicNode as nodeEditorGraphicsNode
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent as nodeEditorGraphicContent
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket as nodeEditorGraphicSocket 
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath as nodeEditorGraphicEdgePath
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge as nodeEditorGraphicEdge
+
 
 importlib.reload(mnrb_editor)
 importlib.reload(utils)
@@ -24,12 +28,16 @@ importlib.reload(nodeEditorSerializable)
 importlib.reload(nodeEditorScene)
 importlib.reload(nodeEditorNode)
 importlib.reload(nodeEditorSocket)
+importlib.reload(nodeEditorEdge)
 
 importlib.reload(nodeEditorGraphicsScene)
 importlib.reload(nodeEditorGraphicsView)
 importlib.reload(nodeEditorGraphicsNode)
 importlib.reload(nodeEditorGraphicContent)
 importlib.reload(nodeEditorGraphicSocket)
+importlib.reload(nodeEditorGraphicEdgePath)
+importlib.reload(nodeEditorGraphicEdge)
+
 
 newEditor = mnrb_editor.mnrb_Editor()
 
