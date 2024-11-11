@@ -1,5 +1,5 @@
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class Serializable():
     def __init__(self) -> None:
