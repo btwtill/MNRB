@@ -2,7 +2,7 @@ from PySide2 import QtWidgets # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView import NodeEditor_QGraphicView # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
-
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge#type: ignore
 
 CLASS_DEBUG = True
 
@@ -34,3 +34,6 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         content_node_01.setPosition(-120, 20)
         content_node_02.setPosition(140, -20)
+
+        content_edge_01 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[0])
+

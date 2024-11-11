@@ -13,7 +13,14 @@ class NodeEditorEdge(Serializable):
         self.start_socket = start_socket
         self.end_socket = end_socket
 
-        self._edge_type = edge_type
+        self.edge_type = edge_type
 
         self.grEdge = NodeEditor_QGraphicEdge(self)
         self.scene.grScene.addItem(self.grEdge)
+
+    @property
+    def edge_type(self): return self._edge_type
+
+    @edge_type.setter
+    def edge_type(self, value):
+        self._edge_type = value
