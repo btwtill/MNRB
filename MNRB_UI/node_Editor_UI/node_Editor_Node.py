@@ -91,17 +91,11 @@ class NodeEditorNode(Serializable):
         x = 0 if position == LEFT else self.grNode.width
 
         socket_area_distance = self.grNode.height - self.grNode.title_height
-        if CLASS_DEBUG : print("NODE:: -getSocketPosition:: totalAmoun of Sockets: ", total_amount_sockets)
-        if CLASS_DEBUG : print("NODE:: -getSocketPosition:: socket Area Height: ", socket_area_distance)
-
         socket_distance = socket_area_distance / total_amount_sockets
-
-        if CLASS_DEBUG : print("NODE:: -getSocketPosition:: socket Area Height: ", socket_area_distance)
 
         y = self.grNode.title_height + (socket_distance * index) + self.grNode.socket_padding
 
         if CLASS_DEBUG : print("NODE:: -getSocketPosition:: X Position of Socket: ", x)
         if CLASS_DEBUG : print("NODE:: -getSocketPosition:: Y Position of Socket: ", y)
         
-
         return [x, y]
