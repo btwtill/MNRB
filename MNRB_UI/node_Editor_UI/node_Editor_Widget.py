@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView import NodeEditor_QGraphicView # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene # type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 
 
 CLASS_DEBUG = True
@@ -13,6 +14,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.initUI()
 
+        #debug use only remove later
+        self.addTestContent()
+
     def initUI(self):
 
         self.layout = QtWidgets.QVBoxLayout()
@@ -23,3 +27,10 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.view = NodeEditor_QGraphicView(self, self.scene.grScene)
         self.layout.addWidget(self.view)
+
+    def addTestContent(self):
+        content_node_01 = NodeEditorNode(self.scene, title = "Node 01", inputs = [1], outputs=[1] )
+        content_node_02 = NodeEditorNode(self.scene, title = "Node 01", inputs = [1,1], outputs=[1,1] )
+
+        content_node_01.setPosition(-120, 20)
+        content_node_02.setPosition(140, -20)
