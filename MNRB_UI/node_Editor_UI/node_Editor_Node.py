@@ -6,7 +6,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ig
 from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
 
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NodeEditorNode(Serializable):
     def __init__(self, scene, title="No Title", inputs=[], outputs=[]) -> None:

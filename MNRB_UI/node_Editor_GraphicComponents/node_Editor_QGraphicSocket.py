@@ -13,7 +13,7 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
         self.initUI()
     
     def initGraphicElements(self):
-        self.radius = 6.0
+        self.radius = self.socket.node.grNode.socket_radius
         self._outline_width = 1.0
 
         self._background_color = QColor("#FFFF7700")

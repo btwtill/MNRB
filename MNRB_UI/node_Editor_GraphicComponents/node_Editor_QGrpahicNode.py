@@ -45,7 +45,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.height = 60
 
         self.socket_padding = 12.0
-        self.socket_radius = 6.0
+        self.socket_radius = 5.0
 
         self._edge_roundness = 5
         self._edge_padding = 5
