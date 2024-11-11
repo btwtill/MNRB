@@ -18,11 +18,10 @@ class NodeEditorNode(Serializable):
         self.inputs = inputs
         self.outputs = outputs
 
-        self.initSocketSettings()
         self.content = NodeEditor_QGraphicContent(self)
         self.grNode = NodeEditor_QGraphicNode(self)
-        self.grNode.wrapGrNodeToSockets()
 
+        self.initSocketSettings()
         self.initSockets(inputs, outputs)
 
         self.scene.addNode(self)
@@ -34,7 +33,6 @@ class NodeEditorNode(Serializable):
         self.scene.grScene.addItem(self.grNode)
 
     def initSocketSettings(self):
-
         self.input_socket_position = LEFT
         self.output_socket_position = RIGHT
         self.input_multi_edged = False

@@ -13,6 +13,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.initGraphicElements()
         self.initContent()
         self.initUI()
+        self.wrapGrNodeToSockets()
 
     @property
     def title(self): return self._title
@@ -30,14 +31,17 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     @width.setter
     def width(self, value):
-        self._width = value
+            self._width = value
 
     @property
     def height(self): return self._height
 
     @height.setter
     def height(self, value):
-        self._height = value
+        if value >= 60:
+            self._height = value
+        else:
+            self._height = 60
 
     def initGraphicElements(self):
         #initialize Graphic element variables
@@ -97,7 +101,6 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     def wrapGrNodeToSockets(self):
         full_socket_height = self.socket_padding + self.socket_radius
         full_node_length = (len(self.node.inputs) * full_socket_height) + (len(self.node.outputs) * full_socket_height) + self.title_height + self.socket_padding
-
         self.height = full_node_length
 
     def boundingRect(self):
