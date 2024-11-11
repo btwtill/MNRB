@@ -35,5 +35,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         content_node_01.setPosition(-120, 20)
         content_node_02.setPosition(140, -20)
 
-        content_edge_01 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[0])
+        content_edge_01 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[0], edge_type = 1)
+
+        content_edge_02 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[1], edge_type = 2)
 

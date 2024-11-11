@@ -17,4 +17,17 @@ class NodeEditor_QGaphicEdgePathDirect(NodeEditor_QGraphicEdgePathBase):
 
 class NodeEditor_QGraphicEdgePathBezier(NodeEditor_QGraphicEdgePathBase):
    def calculatePath(self):
-        return None
+        
+        s = self.parent.source_position
+        d = self.parent.destination_position
+        dist = (d[0] - s[0]) * 0.5
+        if s[0] > d[0]: dist *= -1
+
+        path = QPainterPath(QPointF(self.parent.source_position[0], self.parent.source_position[1]))
+
+        path.cubicTo( s[0] + dist, s[1], d[0] - dist, d[1],
+            self.parent.destination_position[0], 
+            self.parent.destination_position[1]
+            )
+        
+        return path
