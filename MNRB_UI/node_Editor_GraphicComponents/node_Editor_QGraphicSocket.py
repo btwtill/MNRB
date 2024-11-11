@@ -4,8 +4,8 @@ from PySide2.QtCore import QRectF, Qt #type: ignore
 
 
 class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
-    def __init__(self, socket, parent=None):
-        super().__init__(parent)
+    def __init__(self, socket):
+        super().__init__(socket.node.grNode)
 
         self.socket = socket
 
@@ -28,10 +28,10 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
 
     def boundingRect(self):
         return QRectF(
-            -self.radius, 
-            -self.radius, 
-            2 * self.width,
-            2 * self.height,
+            -self.radius - self._outline_width, 
+            -self.radius - self._outline_width, 
+            2 * (self.radius + self._outline_width),
+            2 * (self.radius + self._outline_width),
             ).normalized()
 
     def paint(self, painter, option, widget=None):
@@ -42,4 +42,5 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
 
         if self.is_drawing_bounding_box:
             painter.setPen(QPen(Qt.red, 1, Qt.DashLine))
+            painter.setBrush(Qt.NoBrush)
             painter.drawRect(self.boundingRect())

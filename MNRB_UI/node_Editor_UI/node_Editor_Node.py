@@ -14,10 +14,15 @@ class NodeEditorNode(Serializable):
         self.scene = scene
         self.title = title
         
-        self.initSockets(inputs, outputs)
-
+        self.inputs = inputs
+        self.outputs = outputs
+        
         self.content = NodeEditor_QGraphicContent(self)
         self.grNode = NodeEditor_QGraphicNode(self)
+
+        self.initSockets(inputs, outputs)
+
+        
 
         self.scene.addNode(self)
 
