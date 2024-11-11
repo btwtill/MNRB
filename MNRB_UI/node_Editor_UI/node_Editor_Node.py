@@ -34,9 +34,6 @@ class NodeEditorNode(Serializable):
 
     @property
     def position(self): return self.grNode.pos()
-    @position.setter
-    def position(self, x, y):
-        self.grNode.setPos(x, y)
 
     def initSocketSettings(self):
         self.input_socket_position = LEFT
@@ -88,6 +85,9 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -initSockets:: input Array After:: ", self.inputs)
         if CLASS_DEBUG: print("NODE:: -initSockets:: output Array After:: ", self.outputs)
 
+
+    def setPosition(self, x, y):
+        self.grNode.setPos(x, y)
 
 
     def getSocketPosition(self, index, position):
