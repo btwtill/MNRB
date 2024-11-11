@@ -25,14 +25,32 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     @property
     def content(self): return self.node.content if self.node else None
 
+    @property
+    def width(self): return self._width
+
+    @width.setter
+    def width(self, value):
+        self._width = value
+
+    @property
+    def height(self): return self._height
+
+    @height.setter
+    def height(self, value):
+        self._height = value
+
     def initGraphicElements(self):
         #initialize Graphic element variables
-        self._min_width = 100
-        self._min_height = 60
-        self.width, self.height = self.calculateGrNodeSize(self.node.inputs, self.node.outputs)
+        self.width = 100
+        self.height = 60
+
+        self.socket_padding = 12.0
+        self.socket_radius = 6.0
+
         self._edge_roundness = 5
         self._edge_padding = 5
-        self._title_height = 20
+
+        self.title_height = 20
 
         #initialize the variables for the Graphical Elements
         self._title_font = QFont("Helvetica", 8)
@@ -62,7 +80,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     def initContent(self):
         if self.content is not None:
-            self.content.setGeometry(self._edge_padding, self._title_height + self._edge_padding, self.width - 2 * self._edge_padding, self.height - 2 *  self._edge_padding - self._title_height )
+            self.content.setGeometry(self._edge_padding, self.title_height + self._edge_padding, self.width - 2 * self._edge_padding, self.height - 2 *  self._edge_padding - self.title_height )
 
         self.grContent = self.node.scene.grScene.addWidget(self.content)
         self.grContent.setParentItem(self)
@@ -76,11 +94,11 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     def setIsDrawingBoundingBox(self, value=True):
         self.is_drawing_bounding_box = value
 
-    def calculateGrNodeSize(self, inputs, outputs):
-        socket_padding = 40
-        max_height = (len(inputs) * socket_padding) + (len(outputs) * socket_padding) + self._min_height
-        max_width = self._min_width
-        return max_width, max_height
+    def wrapGrNodeToSockets(self):
+        full_socket_height = self.socket_padding + self.socket_radius
+        full_node_length = (len(self.node.inputs) * full_socket_height) + (len(self.node.outputs) * full_socket_height) + self.title_height + self.socket_padding
+
+        self.height = full_node_length
 
     def boundingRect(self):
         return QRectF(
@@ -95,18 +113,18 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         path_title = QPainterPath()
         path_title.setFillRule(Qt.WindingFill)
-        path_title.addRoundedRect(0,0, self.width, self._title_height, self._edge_roundness, self._edge_roundness)
-        path_title.addRect(0, self._title_height -self._edge_roundness, self._edge_roundness, self._edge_roundness)
-        path_title.addRect(self.width - self._edge_roundness, self._title_height -self._edge_roundness, self._edge_roundness, self._edge_roundness)
+        path_title.addRoundedRect(0,0, self.width, self.title_height, self._edge_roundness, self._edge_roundness)
+        path_title.addRect(0, self.title_height -self._edge_roundness, self._edge_roundness, self._edge_roundness)
+        path_title.addRect(self.width - self._edge_roundness, self.title_height -self._edge_roundness, self._edge_roundness, self._edge_roundness)
         painter.setPen(Qt.NoPen)
         painter.setBrush(self._title_background_brush)
         painter.drawPath(path_title.simplified())
 
         path_content = QPainterPath()
         path_content.setFillRule(Qt.WindingFill)
-        path_content.addRoundedRect(0, self._title_height, self.width, self.height - self._title_height, self._edge_roundness, self._edge_roundness)
-        path_content.addRect(0, self._title_height, self._edge_roundness, self._edge_roundness)
-        path_content.addRect(self.width - self._edge_roundness, self._title_height, self._edge_roundness, self._edge_roundness)
+        path_content.addRoundedRect(0, self.title_height, self.width, self.height - self.title_height, self._edge_roundness, self._edge_roundness)
+        path_content.addRect(0, self.title_height, self._edge_roundness, self._edge_roundness)
+        path_content.addRect(self.width - self._edge_roundness, self.title_height, self._edge_roundness, self._edge_roundness)
         painter.setPen(Qt.NoPen)
         painter.setBrush(self._content_brush)
         painter.drawPath(path_content.simplified())

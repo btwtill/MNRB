@@ -24,7 +24,10 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
         self._brush = QBrush(self._background_color)
 
     def initUI(self):
-        self.is_drawing_bounding_box = True
+        self.is_drawing_bounding_box = False
+
+    def setSize(self, size):
+        self.radius = size
 
     def boundingRect(self):
         return QRectF(

@@ -17,3 +17,11 @@ class NodeEditor_Socket(Serializable):
         self.is_input = is_input
 
         self.grSocket = NodeEditor_QGraphicSocket(self)
+
+        self.setPosition()
+
+    def setPosition(self):
+        self.grSocket.setPos(*self.node.getSocketPosition(self.index, self.position))
+
+    def setSize(self, size):
+        self.grSocket.setSize(size)
