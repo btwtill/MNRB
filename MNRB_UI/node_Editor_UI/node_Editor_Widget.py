@@ -29,8 +29,8 @@ class NodeEditorWidget(QtWidgets.QWidget):
         self.layout.addWidget(self.view)
 
     def addTestContent(self):
-        content_node_01 = NodeEditorNode(self.scene, title = "Node 01", inputs = [1], outputs=[1] )
-        content_node_02 = NodeEditorNode(self.scene, title = "Node 01", inputs = [1,1], outputs=[1,1] )
+        content_node_01 = NodeEditorNode(self.scene, title = "Node 01", inputs = [["input 01", 1]], outputs=[["output 01", 1]] )
+        content_node_02 = NodeEditorNode(self.scene, title = "Node 02", inputs = [["arm_def",1],["arm_ctrl",1]], outputs=[["arm_def",1],["arm_ctrl",1]] )
 
         content_node_01.setPosition(-120, 20)
         content_node_02.setPosition(140, -20)

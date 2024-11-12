@@ -58,6 +58,7 @@ class NodeEditorNode(Serializable):
             socket = NodeEditor_Socket(self, index=index_counter, 
                                        position=1, 
                                        socket_type = 0, 
+                                       socket_value=input[0],
                                        accept_multi_edges=False, 
                                        index_on_drawn_node_Side=on_drawn_side_counter, 
                                        is_input = True)
@@ -70,10 +71,12 @@ class NodeEditorNode(Serializable):
         for output in outputs:
             if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing output Sockets!")
             socket = NodeEditor_Socket(self, index=index_counter, 
-                                       position=2, socket_type = 0, 
-                                       accept_multi_edges=True, 
-                                       index_on_drawn_node_Side=on_drawn_side_counter, 
-                                       is_input = False)
+                                        position=2,
+                                        socket_type = 0, 
+                                        socket_value=output[0],
+                                        accept_multi_edges=True, 
+                                        index_on_drawn_node_Side=on_drawn_side_counter, 
+                                        is_input = False)
 
             index_counter += 1
             on_drawn_side_counter += 1
@@ -84,7 +87,6 @@ class NodeEditorNode(Serializable):
 
         if CLASS_DEBUG: print("NODE:: -initSockets:: input Array After:: ", self.inputs)
         if CLASS_DEBUG: print("NODE:: -initSockets:: output Array After:: ", self.outputs)
-
 
     def setPosition(self, x, y):
         self.grNode.setPos(x, y)
