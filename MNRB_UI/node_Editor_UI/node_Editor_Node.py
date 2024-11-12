@@ -88,6 +88,11 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -initSockets:: input Array After:: ", self.inputs)
         if CLASS_DEBUG: print("NODE:: -initSockets:: output Array After:: ", self.outputs)
 
+    def updateConnectedEdges(self):
+        for socket in (self.inputs + self.outputs):
+            for edge in socket.edges:
+                edge.updatePositions()
+
     def setPosition(self, x, y):
         self.grNode.setPos(x, y)
 

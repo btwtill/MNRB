@@ -15,6 +15,10 @@ class NodeEditorEdge(Serializable):
         self.start_socket = start_socket
         self.end_socket = end_socket
 
+        self.start_socket.addEdge(self)
+        if self.end_socket is not None:
+            self.end_socket.addEdge(self)
+
         self.edge_type = edge_type
 
         self.grEdge = NodeEditor_QGraphicEdge(self)
@@ -55,7 +59,7 @@ class NodeEditorEdge(Serializable):
         self.end_socket = None
 
     def remove(self):
-        
+
         self.removeFromSockets()
         self.scene.grScene.removeItem(self.grEdge)
         self.grEdge = None

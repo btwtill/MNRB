@@ -2,7 +2,7 @@ from PySide2 import QtWidgets # type:ignore
 from PySide2.QtCore import Qt, QRectF # type: ignore
 from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
 
-
+EVENT_DEBUG = True
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     def __init__(self, node, parent = None):
@@ -95,6 +95,11 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         self.is_drawing_bounding_box = False
     
+    def mouseMoveEvent(self, event):
+        super().mouseMoveEvent(event)
+        if EVENT_DEBUG: print("GRAPHICSNODE:: -mouseMoveEvent:: Start")
+        self.node.updateConnectedEdges()
+
     def setIsDrawingBoundingBox(self, value=True):
         self.is_drawing_bounding_box = value
 
