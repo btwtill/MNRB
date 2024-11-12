@@ -18,7 +18,15 @@ class NodeEditor_Socket(Serializable):
 
         self.grSocket = NodeEditor_QGraphicSocket(self)
 
+        self.edge = None
+
         self.setPosition()
+
+    def getPosition(self):
+        return self.node.getSocketPosition(self.index, self.position)
+
+    def setConnectedEdge(self, edge=None):
+        self.edge = edge
 
     def setPosition(self):
         self.grSocket.setPos(*self.node.getSocketPosition(self.index, self.position))

@@ -89,7 +89,6 @@ class NodeEditorNode(Serializable):
     def setPosition(self, x, y):
         self.grNode.setPos(x, y)
 
-
     def getSocketPosition(self, index, position):
 
         if CLASS_DEBUG : print("NODE:: -getSocketPosition:: Calculating positions for Socket at Index: ", index, " Position: ", position)

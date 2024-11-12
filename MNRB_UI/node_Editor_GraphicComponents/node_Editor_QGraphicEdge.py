@@ -16,10 +16,10 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         self.initGraphicElements()
 
     def initGraphicElements(self):
-
         #set QItem Flags
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.is_drawing_bounding_box = False
+        self.setZValue(-1)
 
         #path edge colors
         self._default_color = QColor("#001000")
@@ -42,13 +42,22 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
     def calculatePath(self):
         return self.edge_path_calculator.calculatePath()
 
+    def setSourceSocketPosition(self, x, y):
+        self.source_position = [x, y]
+    
+    def setDestinationSocketPosition(self, x, y):
+        self.destination_position = [x, y]
+
     def paint(self, painter, options, widget=None):
+        #get path from the path calculator
         self.setPath(self.calculatePath())
 
+        #paint the edge
         painter.setPen(self._default_pen if not self.isSelected() else self._selected_color)
         painter.setBrush(Qt.NoBrush)
         painter.drawPath(self.path())
 
+        #drawing the bounding box of the path
         if self.is_drawing_bounding_box:
             painter.setPen(QPen(Qt.red, 1, Qt.DashLine))
             painter.setBrush(Qt.NoBrush)
