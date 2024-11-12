@@ -2,8 +2,9 @@ from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt, QEvent # type: ignore
 from PySide2.QtGui import QPainter, QMouseEvent # type:ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
 
-CLASS_DEBUG = False
+EVENT_DEBUG = True
 
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
@@ -12,9 +13,11 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.grScene = grScene
         self.setScene = self.grScene
 
+        self.initViewItems()
         self.initUI()
 
-        self.centerOn(0, 0)
+    def initViewItems(self):
+        self.dragging = NodeEditorDragEdge(self)
 
     def initUI(self) -> None:
 
@@ -67,7 +70,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1], ["input", 1]], outputs=[["output",1], ["output", 1], ["output",1]])
 
     def middleMouseButtonPress(self, event) -> None:
-        if CLASS_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
+        if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
 
         #fake the middle mouse button release
         fake_releaseEvent = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.MiddleButton, Qt.NoButton, event.modifiers())
@@ -81,7 +84,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
     
     def middleMouseButtonRelease(self, event):
-        if CLASS_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonRelease:: Middle Mouse Button Release Start")
+        if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonRelease:: Middle Mouse Button Release Start")
 
         #fake left mouse button Release
         fake_left_MouseRelease_Event = QMouseEvent(event.type(), event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | ~Qt.MouseButton.LeftButton, event.modifiers())
@@ -90,7 +93,10 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def LeftMouseButtonPress(self, event):
-        return super().mousePressEvent(event)
+        super().mousePressEvent(event)
+        item_on_click = self.getItemAtClick(event)
+
+        if EVENT_DEBUG: print("GRAPHICSVIEW:: -LeftMouseButtonPress:: Item Clicked On:: ", item_on_click )
 
     def RightMouseButtonPress(self, event):
         return super().mousePressEvent(event)
@@ -102,7 +108,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         return super().mouseReleaseEvent(event)
     
     def wheelEvent(self, event):
-        if CLASS_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
+        if EVENT_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
 
         zoomOutFactor = 1 / self.zoomIn_Factor
 
@@ -132,3 +138,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                     node.content.show()
             self.is_content_visible = True
         
+    def getItemAtClick(self, event):
+        position = event.pos()
+        object = self.itemAt(position)
+        return object

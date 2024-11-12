@@ -40,3 +40,5 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         content_edge_02 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[1], edge_type = EDGE_TYPE_BEZIER)
 
+        self.view.centerOn(0, 0)
+
