@@ -24,6 +24,10 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
 
     def addSocketLabel(self, value, alignment, position):
         new_socket_label = QtWidgets.QLabel(value)
+        new_socket_label_font = new_socket_label.font()
+        new_socket_label_font.setPointSize(7)
+        new_socket_label.setFont(new_socket_label_font)
+
         if alignment == RIGHT:
             new_socket_label.setAlignment(Qt.AlignRight)
         self.socket_labels.append(new_socket_label)

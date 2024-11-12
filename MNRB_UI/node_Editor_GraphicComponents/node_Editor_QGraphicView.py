@@ -31,6 +31,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
 
+        self.is_content_visible = False if self.zoom <= 9 else True
+
         #Set Render Attributes
         self.setRenderHints(QPainter.Antialiasing | QPainter.HighQualityAntialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
         self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
@@ -62,7 +64,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if event.key() == Qt.Key_F:
             self.centerOn(0, 0)
         if event.key() == Qt.Key_N:
-            newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [1, 1], outputs=[1, 1, 1])
+            newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1], ["input", 1]], outputs=[["output",1], ["output", 1], ["output",1]])
 
     def middleMouseButtonPress(self, event) -> None:
         if CLASS_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
@@ -117,4 +119,16 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         if not clamped or self.clamp_Zoom is False:
             self.scale(zoomFactor, zoomFactor)
+
+        #Set Visibility of the nodes content depending on the zoom Level
+        if self.zoom <= 9:
+            if self.is_content_visible:
+                for node in self.grScene.scene.nodes:
+                    node.content.hide()
+            self.is_content_visible = False
+        else:
+            if not self.is_content_visible:
+                for node in self.grScene.scene.nodes:
+                    node.content.show()
+            self.is_content_visible = True
         
