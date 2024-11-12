@@ -2,6 +2,14 @@ from PySide2 import QtWidgets # type: ignore
 from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
 from PySide2.QtCore import QRectF, Qt #type: ignore
 
+SOCKET_COLOR = [
+    QColor("#FFFF7700"),
+    QColor("#FF528220"),
+    QColor("#FF0056a6"),
+    QColor("#FFa86db1"),
+    QColor("#FFb54747"),
+    QColor("#FFdbe220")
+]
 
 class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
     def __init__(self, socket):
@@ -16,7 +24,7 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
         self.radius = self.socket.node.grNode.socket_radius
         self._outline_width = 1.0
 
-        self._background_color = QColor("#FFFF7700")
+        self._background_color = SOCKET_COLOR[self.socket.socket_type]
         self._outline_color = QColor("#FF000000")
 
         self._pen = QPen(self._outline_color)

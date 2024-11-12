@@ -1,7 +1,7 @@
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 EDGE_TYPE_DIRECT = 1
 EDGE_TYPE_BEZIER = 2

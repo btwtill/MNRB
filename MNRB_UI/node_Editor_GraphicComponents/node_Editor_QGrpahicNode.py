@@ -2,7 +2,7 @@ from PySide2 import QtWidgets # type:ignore
 from PySide2.QtCore import Qt, QRectF # type: ignore
 from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
 
-EVENT_DEBUG = True
+EVENT_DEBUG = False
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     def __init__(self, node, parent = None):

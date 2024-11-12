@@ -1,9 +1,10 @@
+from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGrpahicNode import NodeEditor_QGraphicNode # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent import NodeEditor_QGraphicContent # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
-from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
+
 
 
 CLASS_DEBUG = False
@@ -57,8 +58,8 @@ class NodeEditorNode(Serializable):
             if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing Input Sockets!")
             socket = NodeEditor_Socket(self, index=index_counter, 
                                        position=1, 
-                                       socket_type = 0, 
-                                       socket_value=input[0],
+                                       socket_type = input[1], 
+                                       socket_value = input[0],
                                        accept_multi_edges=False, 
                                        index_on_drawn_node_Side=on_drawn_side_counter, 
                                        is_input = True)
@@ -72,10 +73,10 @@ class NodeEditorNode(Serializable):
             if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing output Sockets!")
             socket = NodeEditor_Socket(self, index=index_counter, 
                                         position=2,
-                                        socket_type = 0, 
-                                        socket_value=output[0],
-                                        accept_multi_edges=True, 
-                                        index_on_drawn_node_Side=on_drawn_side_counter, 
+                                        socket_type = output[1], 
+                                        socket_value = output[0],
+                                        accept_multi_edges =True, 
+                                        index_on_drawn_node_Side = on_drawn_side_counter, 
                                         is_input = False)
 
             index_counter += 1
