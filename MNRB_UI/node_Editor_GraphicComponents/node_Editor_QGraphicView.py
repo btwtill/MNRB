@@ -183,6 +183,12 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         return super().mouseReleaseEvent(event)
     
     def mouseMoveEvent(self, event):
+
+        event_mouse_position = self.mapToScene(event.pos())
+
+        if self.mode == MODE_EDGEDRAG:
+            self.dragging_edge.updateDestination(event_mouse_position.x(), event_mouse_position.y())
+
         super().mouseMoveEvent(event)
 
     def wheelEvent(self, event):

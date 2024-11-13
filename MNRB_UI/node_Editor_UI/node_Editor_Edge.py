@@ -50,7 +50,9 @@ class NodeEditorEdge(Serializable):
             destination_position[1] += self.end_socket.node.grNode.pos().y()
 
             self.grEdge.setDestinationSocketPosition(*destination_position)
-
+        else:
+            self.grEdge.setDestinationSocketPosition(*source_position)
+            
         if CLASS_DEBUG: print("EDGE:: -updatePositions: sourcePositions: ", self.grEdge.source_position)
         if CLASS_DEBUG: print("EDGE:: -updatePositions: destinationPosition: ", self.grEdge.destination_position)
 

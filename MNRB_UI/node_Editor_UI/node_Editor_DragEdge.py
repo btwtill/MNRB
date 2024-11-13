@@ -24,6 +24,8 @@ class NodeEditorDragEdge():
         
         if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: End Dragging Edge")
         if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: \tRemove Dragging Edge")
+        self.drag_edge.remove()
+        self.drag_edge = None
 
         if isinstance(item_on_click, NodeEditor_QGraphicSocket) and item_on_click.socket != self.drag_edge_start_socket:
 
@@ -38,3 +40,8 @@ class NodeEditorDragEdge():
 
         if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: Finished ending Dragging!")
         return False
+    
+    def updateDestination(self, x, y):
+        if self.drag_edge is not None and self.drag_edge.grEdge is not None:
+            self.drag_edge.grEdge.setDestinationSocketPosition(x, y)
+            self.drag_edge.grEdge.update()

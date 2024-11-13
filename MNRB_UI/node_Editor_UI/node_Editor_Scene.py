@@ -36,6 +36,6 @@ class NodeEditorScene(Serializable):
     
     def removeEdge(self, edge):
         if CLASS_DEBUG: print("NODE_EDITOR_SCENE:: -removeEdge:: Before:: Edges:: ", self.edges)
-        self.edges.remove(self, edge)
+        self.edges.remove(edge)
         if CLASS_DEBUG: print("NODE_EDITOR_SCENE:: -removeEdge:: After:: Edges:: ", self.edges)
 
