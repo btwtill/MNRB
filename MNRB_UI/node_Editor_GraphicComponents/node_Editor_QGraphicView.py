@@ -55,6 +55,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.is_content_visible = False if self.zoom <= 9 else True
 
+        self.centerOn(0, 0)
+
     def mousePressEvent(self, event) -> None:
         #decide what button has been pressed and execute the according action
         if event.button() == Qt.MiddleButton:
@@ -117,14 +119,15 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             for edge in self.grScene.scene.edges:
                 print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \t\t", edge)
             print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Items in GraphicScene:: ")
+            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tGraphicNodes")
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicNode):
-                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Node:: ", item)
+                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Node:: \t", item)
+            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tGraphicEdges")
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicEdge):
-                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Edge:: ", item)
+                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Edge:: \t", item)
             
-
     def LeftMouseButtonPress(self, event):
 
         item_on_click = self.getItemAtEvent(event)

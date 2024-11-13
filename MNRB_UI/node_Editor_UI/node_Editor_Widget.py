@@ -28,7 +28,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.view = NodeEditor_QGraphicView(self.scene.grScene, self)
         self.layout.addWidget(self.view)
-
+        self.view.centerOn(0, 0)
 
     def addTestContent(self):
         content_node_01 = NodeEditorNode(self.scene, title = "Node 01", inputs = [["input 01", 0]], outputs=[["output 01", 3]] )
@@ -41,5 +41,5 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         content_edge_02 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[1], edge_type = EDGE_TYPE_BEZIER)
 
-        self.view.centerOn(0, 0)
+        
 

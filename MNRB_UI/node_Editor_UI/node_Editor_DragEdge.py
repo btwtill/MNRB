@@ -21,12 +21,13 @@ class NodeEditorDragEdge():
         if CLASS_DEBUG: print("DRAGEDGE:: -endEdgeDrag:: Remove Dragging Edge")
 
         if isinstance(item_on_click, NodeEditor_QGraphicSocket):
-            if CLASS_DEBUG: print("DRAGEDGE:: -endEdgeDrag:: \tAssigning end Socket to Drag Edge and Store")
-
+           
             if item_on_click.socket != self.drag_edge_start_socket:
+                if CLASS_DEBUG: print("DRAGEDGE:: -endEdgeDrag:: \tAssigning Socket: ", item_on_click.socket, " to Drag Edge end Socket!")
+
                 for socket in (item_on_click.socket, self.drag_edge_start_socket):
                     if socket.accept_multi_edges:
-                        if CLASS_DEBUG: print("DRAGEDGE:: -endEdgeDrag:: Remove Old Connections if Socket is not Multi edged")
+                        if CLASS_DEBUG: print("DRAGEDGE:: -endEdgeDrag:: Socket:", socket," is not Multi Edged! Removing Old Connected Edges")
 
                 if CLASS_DEBUG: print("DRAGEDGE:: -endEdgeDrag:: Create New Edge from the Drag Edge Data")
             return True
