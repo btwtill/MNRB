@@ -30,6 +30,9 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         self._default_pen.setWidthF(2.0)
         self._selected_pen = QPen(self._selected_color)
         self._selected_pen.setWidthF(2.0)
+        self._dragging_pen = QPen(self._default_color)
+        self._dragging_pen.setWidthF(2.0)
+        self._dragging_pen.setStyle(Qt.DashLine)
        
     def determin_edge_path_class(self):
         #sort out what subcluss should be created as the path calculator to use there calculate path method and draw that path
@@ -53,7 +56,10 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         self.setPath(self.calculatePath())
 
         #paint the edge
-        painter.setPen(self._default_pen if not self.isSelected() else self._selected_color)
+        if self.edge.end_socket is None:
+            painter.setPen(self._dragging_pen)
+        else:
+            painter.setPen(self._default_pen if not self.isSelected() else self._selected_color)
         painter.setBrush(Qt.NoBrush)
         painter.drawPath(self.path())
 
