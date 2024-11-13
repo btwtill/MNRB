@@ -32,10 +32,15 @@ class NodeEditorDragEdge():
             if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: \tAssigning Socket: ", item_on_click.socket, " to Drag Edge end Socket!")
 
             for socket in (item_on_click.socket, self.drag_edge_start_socket):
-                if socket.accept_multi_edges:
+                if not socket.accept_multi_edges:
                     if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: Socket:", socket," is not Multi Edged! Removing Old Connected Edges")
+            
+            new_edge = NodeEditorEdge(item_on_click.socket.node.scene, self.drag_edge_start_socket, item_on_click.socket, EDGE_TYPE_BEZIER)
 
-            if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: Create New Edge from the Drag Edge Data")
+            if CLASS_DEBUG: 
+                print("DRAGEDGE:: --endEdgeDrag:: Create New Edge from the Drag Edge Data:: ", new_edge)
+                print("DRAGEDGE:: --endEdgeDrag:: Connecting Socket", new_edge.start_socket,"<----> ", new_edge.end_socket)
+            
             return True
 
         if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: Finished ending Dragging!")
