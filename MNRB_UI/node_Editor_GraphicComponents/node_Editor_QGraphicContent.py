@@ -19,7 +19,7 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setContentsMargins(3,0,3,0)
-        self.layout.setSpacing(7)
+        self.layout.setSpacing(5)
         self.setLayout(self.layout)
 
     def addSocketLabel(self, value, alignment, position):

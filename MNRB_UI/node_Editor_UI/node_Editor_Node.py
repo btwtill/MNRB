@@ -105,7 +105,7 @@ class NodeEditorNode(Serializable):
 
         x = 0 if position == LEFT else self.grNode.width
 
-        socket_area_distance = self.grNode.height - self.grNode.title_height
+        socket_area_distance = self.grNode.height - self.grNode.title_height - self.grNode.socket_padding
         socket_distance = socket_area_distance / total_amount_sockets
 
         y = self.grNode.title_height + (socket_distance * index) + self.grNode.socket_padding
