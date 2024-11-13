@@ -18,7 +18,7 @@ class NodeEditorDragEdge():
     def endEdgeDrag(self, item_on_click):
         
         if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: End Dragging Edge")
-        if CLASS_DEBUG: print("DRAGEDGE:: -endEdgeDrag:: Remove Dragging Edge")
+        if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: \tRemove Dragging Edge")
 
         if isinstance(item_on_click, NodeEditor_QGraphicSocket):
            
