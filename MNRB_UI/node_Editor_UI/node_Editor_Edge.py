@@ -22,7 +22,10 @@ class NodeEditorEdge(Serializable):
         self.edge_type = edge_type
 
         self.grEdge = NodeEditor_QGraphicEdge(self)
+        
         self.updatePositions()
+
+        self.scene.addEdge(self)
         self.scene.grScene.addItem(self.grEdge)
 
     @property

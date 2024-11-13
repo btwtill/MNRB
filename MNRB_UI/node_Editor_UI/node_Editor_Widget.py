@@ -26,8 +26,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.scene = NodeEditorScene()
 
-        self.view = NodeEditor_QGraphicView(self, self.scene.grScene)
+        self.view = NodeEditor_QGraphicView(self.scene.grScene, self)
         self.layout.addWidget(self.view)
+
 
     def addTestContent(self):
         content_node_01 = NodeEditorNode(self.scene, title = "Node 01", inputs = [["input 01", 0]], outputs=[["output 01", 3]] )

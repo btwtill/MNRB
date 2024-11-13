@@ -3,23 +3,48 @@ from PySide2.QtCore import Qt, QEvent # type: ignore
 from PySide2.QtGui import QPainter, QMouseEvent # type:ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket #type: ignore
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 
 EVENT_DEBUG = True
+CLASS_DEBUG = False
+SCENE_DEBUG = True
+
+MODE_NOOP = 1
+MODE_EDGEDRAG = 2
 
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
         super().__init__(parent)
 
+        print(parent)
+        print(grScene)
+
         self.grScene = grScene
-        self.setScene = self.grScene
 
         self.initViewItems()
+        self.initViewStates()
         self.initUI()
 
     def initViewItems(self):
-        self.dragging = NodeEditorDragEdge(self)
+        self.dragging_edge = NodeEditorDragEdge(self)
+
+    def initViewStates(self):
+        self.mode = MODE_NOOP
 
     def initUI(self) -> None:
+        #Set Render Attributes
+        self.setRenderHints(QPainter.Antialiasing | QPainter.HighQualityAntialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
+        self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
+
+        #set scroll Bar Policies
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+
+        self.setScene(self.grScene)
 
         #zoom Properties
         self.clamp_Zoom = True
@@ -28,17 +53,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.zoom_Step = 1
         self.zoomRange = [1, 20]
 
-        #set scroll Bar Policies
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
-
         self.is_content_visible = False if self.zoom <= 9 else True
-
-        #Set Render Attributes
-        self.setRenderHints(QPainter.Antialiasing | QPainter.HighQualityAntialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
-        self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
 
     def mousePressEvent(self, event) -> None:
         #decide what button has been pressed and execute the according action
@@ -92,16 +107,54 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
-    def LeftMouseButtonPress(self, event):
-        super().mousePressEvent(event)
-        item_on_click = self.getItemAtClick(event)
+        if SCENE_DEBUG: print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Item Clicked On:: ", self.getItemAtEvent(event))
+        if SCENE_DEBUG and event.modifiers() == Qt.CTRL: 
+            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Items in Scene:: ")
+            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tNodes:: ")
+            for node in self.grScene.scene.nodes:
+                print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \t\t", node)
+            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tEdges:: ")
+            for edge in self.grScene.scene.edges:
+                print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \t\t", edge)
+            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Items in GraphicScene:: ")
+            for item in self.grScene.items():
+                if isinstance(item, NodeEditor_QGraphicNode):
+                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Node:: ", item)
+            for item in self.grScene.items():
+                if isinstance(item, NodeEditor_QGraphicEdge):
+                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Edge:: ", item)
+            
 
-        if EVENT_DEBUG: print("GRAPHICSVIEW:: -LeftMouseButtonPress:: Item Clicked On:: ", item_on_click )
+    def LeftMouseButtonPress(self, event):
+
+        item_on_click = self.getItemAtEvent(event)
+
+        if isinstance(item_on_click, NodeEditor_QGraphicSocket):
+            if EVENT_DEBUG: print("GRAPHICSVIEW:: -LeftMouseButtonPress:: Socket Detected")
+            if self.mode == MODE_NOOP:
+                self.mode = MODE_EDGEDRAG
+                self.dragging_edge.startEdgeDrag(item_on_click)
+                return
+        
+        if self.mode == MODE_EDGEDRAG:
+            self.mode = MODE_NOOP
+            drag_result = self.dragging_edge.endEdgeDrag(item_on_click)
+            if drag_result: return
+
+        super().mousePressEvent(event)
 
     def RightMouseButtonPress(self, event):
         return super().mousePressEvent(event)
     
     def LeftMouseButtonRelease(self, event):
+
+        item_on_release = self.getItemAtEvent(event)
+
+        if self.mode == MODE_EDGEDRAG:
+            self.mode = MODE_NOOP
+            drag_result = self.dragging_edge.endEdgeDrag(item_on_release)
+            if drag_result: return
+
         return super().mouseReleaseEvent(event)
     
     def RightMouseButtonRelease(self, event):
@@ -138,7 +191,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                     node.content.show()
             self.is_content_visible = True
         
-    def getItemAtClick(self, event):
+    def getItemAtEvent(self, event):
         position = event.pos()
         object = self.itemAt(position)
         return object

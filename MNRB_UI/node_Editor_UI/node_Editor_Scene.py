@@ -5,7 +5,8 @@ CLASS_DEBUG = True
 
 class NodeEditorScene(Serializable):
     def __init__(self):
-
+        super().__init__()
+        
         self.grScene = NodeEditor_QGraphicScene(self)
         
         self.nodes = []
