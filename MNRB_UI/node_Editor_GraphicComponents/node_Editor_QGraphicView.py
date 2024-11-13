@@ -109,31 +109,31 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
-        if SCENE_DEBUG: print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Item Clicked On:: ", self.getItemAtEvent(event))
+        if SCENE_DEBUG: print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", self.getItemAtEvent(event))
         if SCENE_DEBUG and event.modifiers() == Qt.CTRL: 
-            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Items in Scene:: ")
-            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tNodes:: ")
+            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Items in Scene:: ")
+            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tNodes:: ")
             for node in self.grScene.scene.nodes:
-                print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \t\t", node)
-            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tEdges:: ")
+                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\t", node)
+            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tEdges:: ")
             for edge in self.grScene.scene.edges:
-                print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \t\t", edge)
-            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Items in GraphicScene:: ")
-            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tGraphicNodes")
+                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\t", edge)
+            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Items in GraphicScene:: ")
+            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tGraphicNodes")
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicNode):
-                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Node:: \t", item)
-            print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: \tGraphicEdges")
+                    print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Graphic Node:: \t", item)
+            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tGraphicEdges")
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicEdge):
-                    print("GRAPHICSVIEW:: -MiddleMouseButtonPress:: Graphic Edge:: \t", item)
+                    print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Graphic Edge:: \t", item)
             
     def LeftMouseButtonPress(self, event):
 
         item_on_click = self.getItemAtEvent(event)
 
         if isinstance(item_on_click, NodeEditor_QGraphicSocket):
-            if EVENT_DEBUG: print("GRAPHICSVIEW:: -LeftMouseButtonPress:: Socket Detected")
+            if EVENT_DEBUG: print("GRAPHICSVIEW:: --LeftMouseButtonPress:: Socket Detected")
             if self.mode == MODE_NOOP:
                 self.mode = MODE_EDGEDRAG
                 self.dragging_edge.startEdgeDrag(item_on_click)
