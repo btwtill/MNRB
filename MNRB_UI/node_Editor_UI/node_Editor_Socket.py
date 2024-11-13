@@ -16,6 +16,7 @@ class NodeEditor_Socket(Serializable):
         self.accept_multi_edges = accept_multi_edges
         self.index_on_drawn_node_Side = index_on_drawn_node_Side
         self.is_input = is_input
+        self.is_output = not is_input
 
         self.grSocket = NodeEditor_QGraphicSocket(self)
 
