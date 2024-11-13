@@ -50,13 +50,14 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.setScene(self.grScene)
 
         #zoom Properties
-        self.clamp_Zoom = True
-        self.zoomIn_Factor = 1.25
+        self.zoom_content_visibility_threshold = 9
+        self.clamp_zoom = True
+        self.zoom_in_factor = 1.25
         self.zoom = 10
-        self.zoom_Step = 1
-        self.zoomRange = [1, 20]
+        self.zoom_step = 1
+        self.zoom_range = [1, 20]
 
-        self.is_content_visible = False if self.zoom <= 9 else True
+        self.is_content_visible = False if self.zoom <= self.zoom_content_visibility_threshold else True
 
         self.centerOn(0, 0)
 
@@ -171,24 +172,24 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def wheelEvent(self, event):
         if EVENT_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
 
-        zoomOutFactor = 1 / self.zoomIn_Factor
+        zoomOutFactor = 1 / self.zoom_in_factor
 
         if event.angleDelta().y() > 0:
-            zoomFactor = self.zoomIn_Factor
-            self.zoom += self.zoom_Step
+            zoomFactor = self.zoom_in_factor
+            self.zoom += self.zoom_step
         else:
             zoomFactor = zoomOutFactor
-            self.zoom -= self.zoom_Step
+            self.zoom -= self.zoom_step
         
         clamped = False
-        if self.zoom < self.zoomRange[0]:  self.zoom, clamped = self.zoomRange[0], True
-        if self.zoom > self.zoomRange[1]:  self.zoom, clamped = self.zoomRange[1], True
+        if self.zoom < self.zoom_range[0]:  self.zoom, clamped = self.zoom_range[0], True
+        if self.zoom > self.zoom_range[1]:  self.zoom, clamped = self.zoom_range[1], True
 
-        if not clamped or self.clamp_Zoom is False:
+        if not clamped or self.clamp_zoom is False:
             self.scale(zoomFactor, zoomFactor)
 
         #Set Visibility of the nodes content depending on the zoom Level
-        if self.zoom <= 9:
+        if self.zoom <= self.zoom_content_visibility_threshold:
             if self.is_content_visible:
                 for node in self.grScene.scene.nodes:
                     node.content.hide()
@@ -200,12 +201,10 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.is_content_visible = True
         
     def getItemAtEvent(self, event):
-        position = event.pos()
-        object = self.itemAt(position)
-        return object
+        return self.itemAt(event.pos())
     
     def getDistanceFromLastLeftMousePressEvent(self, event):
-        event_scene_position = self.mapToScene(event.pos())
-        distance_to_last_left_mouse_press = event_scene_position - self.last_mouse_button_press_position
+        current_event_scene_position = self.mapToScene(event.pos())
+        distance_to_last_left_mouse_press = current_event_scene_position - self.last_mouse_button_press_position
 
         return math.pow(distance_to_last_left_mouse_press.x(), 2) + math.pow(distance_to_last_left_mouse_press.y(), 2)
