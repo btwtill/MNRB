@@ -34,6 +34,7 @@ class NodeEditorDragEdge():
             for socket in (item_on_click.socket, self.drag_edge_start_socket):
                 if not socket.accept_multi_edges:
                     if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: Socket:", socket," is not Multi Edged! Removing Old Connected Edges")
+                    socket.removeAllEdges()
             
             new_edge = NodeEditorEdge(item_on_click.socket.node.scene, self.drag_edge_start_socket, item_on_click.socket, EDGE_TYPE_BEZIER)
 

@@ -34,7 +34,16 @@ class NodeEditor_Socket(Serializable):
         self.edges.append(edge)
 
     def removeEdge(self, edge):
-        self.edges.remove(edge)
+        if edge in self.edges: self.edges.remove(edge)
+        else: 
+            print("SOCKET:: --removeEdge:: Edge ", edge, "is not found in the currently connected Edges: ")
+            for edge in self.edges:
+                print("SOCKET:: --removeEdge:: \t\t", edge)
+
+    def removeAllEdges(self):
+        while(self.edges):
+            edge = self.edges.pop(0)
+            edge.remove()
 
     def setPosition(self):
         self.grSocket.setPos(*self.node.getSocketPosition(self.index, self.position))
