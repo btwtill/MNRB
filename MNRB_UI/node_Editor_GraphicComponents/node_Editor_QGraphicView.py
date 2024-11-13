@@ -134,18 +134,26 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tNodes:: ")
             for node in self.grScene.scene.nodes:
                 print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", node)
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", len(self.grScene.scene.nodes)," Node")
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tEdges:: ")
             for edge in self.grScene.scene.edges:
                 print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", edge)
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", len(self.grScene.scene.edges), " Edges")
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in GraphicScene:: ")
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicNodes")
+            item_counter = 0
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicNode):
                     print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Node:: \t", item)
+                    item_counter += 1
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicNodes")
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicEdges")
+            item_counter = 0
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicEdge):
                     print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Edge:: \t", item)
+                    item_counter += 1
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicEdges")
             
     def leftMouseButtonPress(self, event):
 

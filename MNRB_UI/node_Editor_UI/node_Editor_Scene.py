@@ -32,19 +32,23 @@ class NodeEditorScene(Serializable):
     def removeNode(self, node):
         if CLASS_DEBUG: 
             print("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ")
+            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
             for node in self.nodes:
                 print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", node)
+            
 
         self.nodes.remove(node)
 
         if CLASS_DEBUG: 
             print("NODE_EDITOR_SCENE:: -removeNode:: After:: After:: ")
+            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
             for node in self.nodes:
                 print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", node)
     
     def removeEdge(self, edge):
         if CLASS_DEBUG: 
             print("NODE_EDITOR_SCENE:: -removeEdge:: Before:: Edges:: ")
+            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.edges))
             for edge in self.edges:
                 print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", edge)
 
@@ -52,6 +56,7 @@ class NodeEditorScene(Serializable):
 
         if CLASS_DEBUG:
             print("NODE_EDITOR_SCENE:: -removeEdge:: After:: Edges:: ")
+            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.edges))
             for edge in self.edges:
                 print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", edge)
 
