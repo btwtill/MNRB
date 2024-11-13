@@ -35,3 +35,5 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
             new_socket_label.setAlignment(Qt.AlignRight)
         self.socket_labels.append(new_socket_label)
         self.layout.addWidget(new_socket_label)
+        
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

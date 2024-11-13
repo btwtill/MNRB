@@ -113,7 +113,20 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
-        if SCENE_DEBUG: print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", self.getItemAtEvent(event))
+        item_on_relase_event = self.getItemAtEvent(event)
+
+        if SCENE_DEBUG: 
+            if isinstance(item_on_relase_event, NodeEditor_QGraphicSocket):
+                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event.socket)
+                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \thasEdges:: ")
+                for edge in item_on_relase_event.socket.edges:
+                    print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\t", edge)
+            elif isinstance(item_on_relase_event, NodeEditor_QGraphicEdge):
+                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\tConnecting Socket:: ", item_on_relase_event.edge.start_socket,"<---->", item_on_relase_event.edge.end_socket)
+            else:
+                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+
         if SCENE_DEBUG and event.modifiers() == Qt.CTRL: 
             print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Items in Scene:: ")
             print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tNodes:: ")
