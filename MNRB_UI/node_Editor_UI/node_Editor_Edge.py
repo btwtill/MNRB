@@ -67,3 +67,5 @@ class NodeEditorEdge(Serializable):
         self.scene.grScene.removeItem(self.grEdge)
         self.grEdge = None
         self.scene.removeEdge(self)
+
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

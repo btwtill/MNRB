@@ -114,3 +114,5 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG : print("NODE:: -getSocketPosition:: Y Position of Socket: ", y)
         
         return [x, y]
+    
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

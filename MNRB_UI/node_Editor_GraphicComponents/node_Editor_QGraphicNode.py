@@ -147,3 +147,5 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         if self.is_drawing_bounding_box:
             painter.setPen(QPen(Qt.red, 1, Qt.DashLine))
             painter.drawRect(self.boundingRect())
+            
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
