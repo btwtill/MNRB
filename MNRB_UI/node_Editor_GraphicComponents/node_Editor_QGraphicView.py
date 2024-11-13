@@ -12,6 +12,7 @@ EVENT_DEBUG = True
 CLASS_DEBUG = False
 SCENE_DEBUG = True
 MOVE_DEBUG = False
+WHEEL_DEBUG = False
 
 MODE_NOOP = 1
 MODE_EDGEDRAG = 2
@@ -197,7 +198,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         super().mouseMoveEvent(event)
 
     def wheelEvent(self, event):
-        if EVENT_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
+        if WHEEL_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
 
         zoomOutFactor = 1 / self.zoom_in_factor
 
