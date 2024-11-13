@@ -27,7 +27,7 @@ class NodeEditorDragEdge():
         self.drag_edge.remove()
         self.drag_edge = None
 
-        if isinstance(item_on_click, NodeEditor_QGraphicSocket) and item_on_click.socket != self.drag_edge_start_socket:
+        if isinstance(item_on_click, NodeEditor_QGraphicSocket) and item_on_click.socket != self.drag_edge_start_socket and (item_on_click.socket.is_input  !=  self.drag_edge_start_socket.is_input):
 
             if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: \tAssigning Socket: ", item_on_click.socket, " to Drag Edge end Socket!")
 
