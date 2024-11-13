@@ -52,13 +52,17 @@ class NodeEditorEdge(Serializable):
             self.grEdge.setDestinationSocketPosition(*destination_position)
         else:
             self.grEdge.setDestinationSocketPosition(*source_position)
-            
+
         if CLASS_DEBUG: print("EDGE:: -updatePositions: sourcePositions: ", self.grEdge.source_position)
         if CLASS_DEBUG: print("EDGE:: -updatePositions: destinationPosition: ", self.grEdge.destination_position)
 
         self.grEdge.update()
 
     def removeFromSockets(self):
+        self.start_socket.removeEdge(self)
+        
+        if self.end_socket is not None:
+            self.end_socket.removeEdge(self)
 
         self.start_socket = None
         self.end_socket = None

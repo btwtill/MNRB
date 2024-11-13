@@ -33,6 +33,9 @@ class NodeEditor_Socket(Serializable):
     def addEdge(self, edge):
         self.edges.append(edge)
 
+    def removeEdge(self, edge):
+        self.edges.remove(edge)
+
     def setPosition(self):
         self.grSocket.setPos(*self.node.getSocketPosition(self.index, self.position))
 

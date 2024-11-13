@@ -11,6 +11,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 EVENT_DEBUG = True
 CLASS_DEBUG = False
 SCENE_DEBUG = True
+MOVE_DEBUG = False
 
 MODE_NOOP = 1
 MODE_EDGEDRAG = 2
@@ -185,6 +186,10 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def mouseMoveEvent(self, event):
 
         event_mouse_position = self.mapToScene(event.pos())
+
+        if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: ", self.mode)
+        if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: is EdgeDrag:: ", self.mode == MODE_EDGEDRAG)
+        if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: MODE_EDGE_DRAG ", MODE_EDGEDRAG)
 
         if self.mode == MODE_EDGEDRAG:
             self.dragging_edge.updateDestination(event_mouse_position.x(), event_mouse_position.y())

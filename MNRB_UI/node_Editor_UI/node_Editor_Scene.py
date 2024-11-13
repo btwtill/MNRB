@@ -30,12 +30,28 @@ class NodeEditorScene(Serializable):
         self.edges.append(edge)
     
     def removeNode(self, node):
-        if CLASS_DEBUG: print("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ", self.nodes)
+        if CLASS_DEBUG: 
+            print("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ")
+            for node in self.nodes:
+                print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", node)
+
         self.nodes.remove(node)
-        if CLASS_DEBUG: print("NODE_EDITOR_SCENE:: -removeNode:: After:: After:: ", self.nodes)
+
+        if CLASS_DEBUG: 
+            print("NODE_EDITOR_SCENE:: -removeNode:: After:: After:: ")
+            for node in self.nodes:
+                print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", node)
     
     def removeEdge(self, edge):
-        if CLASS_DEBUG: print("NODE_EDITOR_SCENE:: -removeEdge:: Before:: Edges:: ", self.edges)
+        if CLASS_DEBUG: 
+            print("NODE_EDITOR_SCENE:: -removeEdge:: Before:: Edges:: ")
+            for edge in self.edges:
+                print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", edge)
+
         self.edges.remove(edge)
-        if CLASS_DEBUG: print("NODE_EDITOR_SCENE:: -removeEdge:: After:: Edges:: ", self.edges)
+
+        if CLASS_DEBUG:
+            print("NODE_EDITOR_SCENE:: -removeEdge:: After:: Edges:: ")
+            for edge in self.edges:
+                print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", edge)
 
