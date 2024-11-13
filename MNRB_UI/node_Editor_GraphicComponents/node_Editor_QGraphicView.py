@@ -1,3 +1,4 @@
+import math
 from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt, QEvent # type: ignore
 from PySide2.QtGui import QPainter, QMouseEvent # type:ignore
@@ -13,6 +14,8 @@ SCENE_DEBUG = True
 
 MODE_NOOP = 1
 MODE_EDGEDRAG = 2
+
+EDGE_DRAG_START_THRESHOLD = 20
 
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
@@ -131,6 +134,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def LeftMouseButtonPress(self, event):
 
         item_on_click = self.getItemAtEvent(event)
+        self.last_mouse_button_press_position = self.mapToScene(event.pos())
 
         if isinstance(item_on_click, NodeEditor_QGraphicSocket):
             if EVENT_DEBUG: print("GRAPHICSVIEW:: --LeftMouseButtonPress:: Socket Detected")
@@ -153,10 +157,11 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         item_on_release = self.getItemAtEvent(event)
 
-        if self.mode == MODE_EDGEDRAG:
-            self.mode = MODE_NOOP
-            drag_result = self.dragging_edge.endEdgeDrag(item_on_release)
-            if drag_result: return
+        if self.getDistanceFromLastLeftMousePressEvent(event) > math.pow(EDGE_DRAG_START_THRESHOLD, 2):
+            if self.mode == MODE_EDGEDRAG:
+                self.mode = MODE_NOOP
+                drag_result = self.dragging_edge.endEdgeDrag(item_on_release)
+                if drag_result: return
 
         return super().mouseReleaseEvent(event)
     
@@ -198,3 +203,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         position = event.pos()
         object = self.itemAt(position)
         return object
+    
+    def getDistanceFromLastLeftMousePressEvent(self, event):
+        event_scene_position = self.mapToScene(event.pos())
+        distance_to_last_left_mouse_press = event_scene_position - self.last_mouse_button_press_position
+
+        return math.pow(distance_to_last_left_mouse_press.x(), 2) + math.pow(distance_to_last_left_mouse_press.y(), 2)
