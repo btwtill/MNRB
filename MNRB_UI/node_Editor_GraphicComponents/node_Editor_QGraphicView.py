@@ -66,9 +66,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if event.button() == Qt.MiddleButton:
             self.middleMouseButtonPress(event)
         elif event.button() == Qt.LeftButton:
-            self.LeftMouseButtonPress(event)
+            self.leftMouseButtonPress(event)
         elif event.button() == Qt.RightButton:
-            self.RightMouseButtonPress(event)
+            self.rightMouseButtonPress(event)
         else:
             super().mousePressEvent(event)
 
@@ -77,9 +77,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if event.button() == Qt.MiddleButton :
             self.middleMouseButtonRelease(event)
         elif event.button() == Qt.LeftButton:
-            self.LeftMouseButtonRelease(event)
+            self.leftMouseButtonRelease(event)
         elif event.button() == Qt.RightButton:
-            self.RightMouseButtonRelease(event)
+            self.rightMouseButtonRelease(event)
         else:
             super().mouseReleaseEvent(event)
 
@@ -117,41 +117,41 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         if SCENE_DEBUG: 
             if isinstance(item_on_relase_event, NodeEditor_QGraphicSocket):
-                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event.socket)
-                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \thasEdges:: ")
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event.socket)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \thasEdges:: ")
                 for edge in item_on_relase_event.socket.edges:
-                    print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\t", edge)
+                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", edge)
             elif isinstance(item_on_relase_event, NodeEditor_QGraphicEdge):
-                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
-                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\tConnecting Socket:: ", item_on_relase_event.edge.start_socket,"<---->", item_on_relase_event.edge.end_socket)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\tConnecting Socket:: ", item_on_relase_event.edge.start_socket,"<---->", item_on_relase_event.edge.end_socket)
             else:
-                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
 
         if SCENE_DEBUG and event.modifiers() == Qt.CTRL: 
-            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Items in Scene:: ")
-            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tNodes:: ")
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in Scene:: ")
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tNodes:: ")
             for node in self.grScene.scene.nodes:
-                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\t", node)
-            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tEdges:: ")
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", node)
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tEdges:: ")
             for edge in self.grScene.scene.edges:
-                print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \t\t", edge)
-            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Items in GraphicScene:: ")
-            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tGraphicNodes")
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", edge)
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in GraphicScene:: ")
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicNodes")
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicNode):
-                    print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Graphic Node:: \t", item)
-            print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: \tGraphicEdges")
+                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Node:: \t", item)
+            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicEdges")
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicEdge):
-                    print("GRAPHICSVIEW:: --MiddleMouseButtonPress:: Graphic Edge:: \t", item)
+                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Edge:: \t", item)
             
-    def LeftMouseButtonPress(self, event):
+    def leftMouseButtonPress(self, event):
 
         item_on_click = self.getItemAtEvent(event)
         self.last_mouse_button_press_position = self.mapToScene(event.pos())
 
         if isinstance(item_on_click, NodeEditor_QGraphicSocket):
-            if EVENT_DEBUG: print("GRAPHICSVIEW:: --LeftMouseButtonPress:: Socket Detected")
+            if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Socket Detected")
             if self.mode == MODE_NOOP:
                 self.mode = MODE_EDGEDRAG
                 self.dragging_edge.startEdgeDrag(item_on_click)
@@ -164,10 +164,10 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         super().mousePressEvent(event)
 
-    def RightMouseButtonPress(self, event):
+    def rightMouseButtonPress(self, event):
         return super().mousePressEvent(event)
     
-    def LeftMouseButtonRelease(self, event):
+    def leftMouseButtonRelease(self, event):
 
         item_on_release = self.getItemAtEvent(event)
 
@@ -179,9 +179,12 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         return super().mouseReleaseEvent(event)
     
-    def RightMouseButtonRelease(self, event):
+    def rightMouseButtonRelease(self, event):
         return super().mouseReleaseEvent(event)
     
+    def mouseMoveEvent(self, event):
+        super().mouseMoveEvent(event)
+
     def wheelEvent(self, event):
         if EVENT_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
 
