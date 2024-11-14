@@ -77,7 +77,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
     def mouseReleaseEvent(self, event) -> None:
         #decide what button has been Released and execute the according action
-        if event.button() == Qt.MiddleButton :
+        if event.button() == Qt.MiddleButton:
             self.middleMouseButtonRelease(event)
         elif event.button() == Qt.LeftButton:
             self.leftMouseButtonRelease(event)
