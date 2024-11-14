@@ -1,7 +1,9 @@
 from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import Qt #type: ignore
-from PySide2.QtGui import QColor, QPen #type: ignore
+from PySide2.QtGui import QColor, QPen, QPainterPath #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath import  NodeEditor_QGaphicEdgePathDirect, NodeEditor_QGraphicEdgePathBezier #type: ignore
+
+INTERSECT_DEBUG = True
 
 class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
     def __init__(self, edge, parent = None):
@@ -44,6 +46,16 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
 
     def calculatePath(self):
         return self.edge_path_calculator.calculatePath()
+
+    def intersectsWith(self, point1, point2):
+        if INTERSECT_DEBUG: print("GRAPHICEDGE:: --intersectsWith:: Checking for Intersection:: Edge: ", self, " with Point 1", point1, " and Point2 ", point2)
+        cut_path = QPainterPath(point1)
+        cut_path.lineTo(point2)
+        path = self.calculatePath()
+        result = cut_path.intersects(path)
+        if INTERSECT_DEBUG: print("GRAPHICEDGE:: --intersectsWith:: Intersection With Edge:: ", result)
+    
+        return result
 
     def setSourceSocketPosition(self, x, y):
         self.source_position = [x, y]

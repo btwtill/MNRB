@@ -9,7 +9,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import 
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
 
-EVENT_DEBUG = True
+EVENT_DEBUG = False
 CLASS_DEBUG = False
 SCENE_DEBUG = True
 MOVE_DEBUG = False
@@ -262,9 +262,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Item:: ", item_on_release)
         
         if self.mode == MODE_EDGE_CUT:
-            
             if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Cutting Intersecting Edges")
-                
+            self.cutIntersectingEdges()
+
             if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Resetting Cut Line Points")
             self.cutting_edge.line_points = []
 
@@ -330,7 +330,18 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 for node in self.grScene.scene.nodes:
                     node.content.show()
             self.is_content_visible = True
+    
+    def cutIntersectingEdges(self):
         
+        for index in range(len(self.cutting_edge.line_points ) -1):
+
+            point1 = self.cutting_edge.line_points[index]
+            point2 = self.cutting_edge.line_points[index + 1]
+
+            for edge in self.grScene.scene.edges:
+                if edge.grEdge.intersectsWith(point1, point2):
+                    edge.remove()
+
     def deleteSelected(self):
         selected_items = self.grScene.selectedItems()
         selected_nodes = []
