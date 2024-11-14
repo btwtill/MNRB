@@ -1,7 +1,7 @@
 import math
 from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt, QEvent # type: ignore
-from PySide2.QtGui import QPainter, QMouseEvent # type:ignore
+from PySide2.QtGui import QPainter, QMouseEvent, QPen, QColor # type:ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket #type: ignore
@@ -48,6 +48,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)
 
         self.setScene(self.grScene)
 
@@ -113,7 +114,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         fake_left_MouseRelease_Event = QMouseEvent(event.type(), event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | ~Qt.MouseButton.LeftButton, event.modifiers())
         super().mouseReleaseEvent(fake_left_MouseRelease_Event)
 
-        self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+        self.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)
 
         item_on_relase_event = self.getItemAtEvent(event)
 
@@ -244,3 +245,18 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         distance_to_last_left_mouse_press = current_event_scene_position - self.last_mouse_button_press_position
 
         return math.pow(distance_to_last_left_mouse_press.x(), 2) + math.pow(distance_to_last_left_mouse_press.y(), 2)
+    
+    def drawForeground(self, painter, rect):
+
+        rubber_band_rect = self.rubberBandRect()
+
+        if not rubber_band_rect.isNull():
+            # Set custom pen and brush for the rubber band appearance
+            painter.setPen(QPen(QColor(0, 0, 0, 0)))
+            painter.setBrush(QColor(150, 150, 150, 80))  # Translucent fill color
+
+            # Convert rubber band rectangle to scene coordinates and draw
+            scene_rect = self.mapToScene(rubber_band_rect).boundingRect()
+            painter.drawRect(scene_rect)
+        
+        super().drawForeground(painter, rect)
