@@ -10,10 +10,10 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 
 EVENT_DEBUG = False
 CLASS_DEBUG = False
-SCENE_DEBUG = False
+SCENE_DEBUG = True
 MOVE_DEBUG = False
 WHEEL_DEBUG = False
-REMOVE_DEBUG = False
+REMOVE_DEBUG = True
 
 MODE_NOOP = 1
 MODE_EDGEDRAG = 2
@@ -23,9 +23,6 @@ EDGE_DRAG_START_THRESHOLD = 20
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def __init__(self, grScene, parent=None):
         super().__init__(parent)
-
-        print(parent)
-        print(grScene)
 
         self.grScene = grScene
 
@@ -228,8 +225,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             item_on_release is None):
 
             if event.modifiers() & Qt.SHIFT:
-                if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Shift Release On Node")
-                print("GRAPHICSVIEW:: --leftMouseButtonPress:: Adding ", item_on_release, " to selection")
+                if EVENT_DEBUG: 
+                    print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Shift Release On Node")
+                    print("GRAPHICSVIEW:: --leftMouseButtonPress:: Adding ", item_on_release, " to selection")
                 event.ignore()
                 fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers() | Qt.CTRL)
                 super().mouseReleaseEvent(fake_mouse_event)

@@ -1,6 +1,7 @@
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket # type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
+
 LEFT = 1
 RIGHT = 2
 

@@ -61,7 +61,7 @@ class NodeEditorNode(Serializable):
                                        position=1, 
                                        socket_type = input[1], 
                                        socket_value = input[0],
-                                       accept_multi_edges=False, 
+                                       accept_multi_edges=True, 
                                        index_on_drawn_node_Side=on_drawn_side_counter, 
                                        is_input = True)
             
