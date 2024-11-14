@@ -1,7 +1,7 @@
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge, EDGE_TYPE_BEZIER #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NodeEditorDragEdge():
     def __init__(self, grView):

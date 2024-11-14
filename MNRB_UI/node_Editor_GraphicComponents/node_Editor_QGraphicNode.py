@@ -102,6 +102,10 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             if EVENT_DEBUG: 
                 print("GRAPHICSNODE:: -mouseMoveEvent:: Start")
                 print("GRAPHICSNODE:: -mouseMoveEvent:: Left Button Mouse Moved")
+                print("GRAPHICSNODE:: -mouseMoveEvent:: Nodes to be updated:: ")
+                for node in self.node.scene.nodes:
+                    print("GRAPHICSNODE:: -mouseMoveEvent:: Node: ", node)
+                    print("GRAPHICSNODE:: -mouseMoveEvent:: \t with GrNode:: ", node.grNode)
 
             for node in self.node.scene.nodes:
                 if node.grNode.isSelected():

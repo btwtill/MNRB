@@ -8,11 +8,12 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket impor
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 
-EVENT_DEBUG = True
+EVENT_DEBUG = False
 CLASS_DEBUG = False
-SCENE_DEBUG = True
+SCENE_DEBUG = False
 MOVE_DEBUG = False
 WHEEL_DEBUG = False
+REMOVE_DEBUG = False
 
 MODE_NOOP = 1
 MODE_EDGEDRAG = 2
@@ -90,9 +91,13 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         #center view
         if event.key() == Qt.Key_F:
             self.centerOn(0, 0)
-        if event.key() == Qt.Key_N:
+        elif event.key() == Qt.Key_N:
             newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1], ["input", 1]], outputs=[["output",1], ["output", 1], ["output",1]])
-
+        elif event.key() == Qt.Key_Delete:
+            self.deleteSelected()
+        else:
+            super().keyPressEvent(event)
+        
     def middleMouseButtonPress(self, event) -> None:
         if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
 
@@ -127,6 +132,26 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             elif isinstance(item_on_relase_event, NodeEditor_QGraphicEdge):
                 print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
                 print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\tConnecting Socket:: ", item_on_relase_event.edge.start_socket,"<---->", item_on_relase_event.edge.end_socket)
+            elif isinstance(item_on_relase_event, QtWidgets.QGraphicsProxyWidget):
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Node has sockets:: ")
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Amount of Sockets:: ", len(item_on_relase_event.widget().node.inputs + item_on_relase_event.widget().node.outputs))
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Input Sockets:: " )
+                for socket in item_on_relase_event.widget().node.inputs:
+                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Output Sockets:: " )
+                for socket in item_on_relase_event.widget().node.outputs:
+                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
+            elif isinstance(item_on_relase_event, NodeEditor_QGraphicNode) or isinstance(item_on_relase_event, QtWidgets.QGraphicsTextItem):
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Node has sockets:: ")
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Amount of Sockets:: ", len(item_on_relase_event.node.inputs + item_on_relase_event.node.outputs))
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Input Sockets:: " )
+                for socket in item_on_relase_event.node.inputs:
+                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Output Sockets:: " )
+                for socket in item_on_relase_event.node.outputs:
+                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
             else:
                 print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
 
@@ -265,6 +290,40 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                     node.content.show()
             self.is_content_visible = True
         
+    def deleteSelected(self):
+        selected_items = self.grScene.selectedItems()
+        selected_nodes = []
+        selected_edges = []
+
+        for item in selected_items:
+            if isinstance(item, NodeEditor_QGraphicEdge):
+                selected_edges.append(item)
+            elif (isinstance(item, QtWidgets.QGraphicsTextItem) or 
+                isinstance(item, QtWidgets.QGraphicsProxyWidget) or 
+                isinstance(item, NodeEditor_QGraphicNode)):
+                selected_nodes.append(item)
+
+        if REMOVE_DEBUG: 
+            print("GRAPHICSVIEW:: --deleteSelected:: Selected Items to be Removed: ")
+            for item in selected_items:
+                print("GRAPHICSVIEW:: --deleteSelected:: Graphical Item:: \t", item)
+            print("GRAPHICSVIEW:: --deleteSelected:: Selected Nodes to be Removed:: ")
+            for node in selected_nodes:
+                print("GRAPHICSVIEW:: --deleteSelected:: \tGraphical Node \t", node)
+                print("GRAPHICSVIEW:: --deleteSelected:: \tLogical Node \t", node.node)
+            print("GRAPHICSVIEW:: --deleteSelected:: Selected Edges to be Removed:: ")
+            for edge in selected_edges:
+                print("GRAPHICSVIEW:: --deleteSelected:: \tGraphical Edge\t", edge)
+                print("GRAPHICSVIEW:: --deleteSelected:: \tLogical Edge \t", edge.edge)
+
+        for node in selected_nodes:
+            if node.node in node.node.scene.nodes:
+                node.node.remove()
+
+        for edge in selected_edges:
+            if edge.edge in edge.edge.scene.edges:
+                edge.edge.remove()
+
     def getItemAtEvent(self, event):
         return self.itemAt(event.pos())
     

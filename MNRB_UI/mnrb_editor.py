@@ -2,13 +2,13 @@ import os
 import maya.cmds as cmds # type: ignore
 from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import QFile #type:  ignore 
-from MNRB.MNRB_UI.mnrb_ui_utils import get_maya_window # type: ignore
+from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class mnrb_Editor(QtWidgets.QMainWindow):
-    def __init__(self, parent = get_maya_window()):
+    def __init__(self, parent = getMayaWindow()):
         super(mnrb_Editor, self).__init__(parent)
 
         self.working_directory = cmds.workspace(query=True, directory=True)

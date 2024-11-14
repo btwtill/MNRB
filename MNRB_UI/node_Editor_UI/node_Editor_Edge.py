@@ -2,6 +2,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #t
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 
 CLASS_DEBUG = False
+REMOVE_DEBUG = False
 
 EDGE_TYPE_DIRECT = 1
 EDGE_TYPE_BEZIER = 2
@@ -59,17 +60,25 @@ class NodeEditorEdge(Serializable):
         self.grEdge.update()
 
     def removeFromSockets(self):
+
+        if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Start Removing Edge:: ", self, "fromSockets")
+        if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from Start Socket::", self.start_socket)
         self.start_socket.removeEdge(self)
         
         if self.end_socket is not None:
+            if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from End Socket::", self.end_socket)
             self.end_socket.removeEdge(self)
 
+        if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Setting Start and End Socket of Edge:: ", self, " to None")
         self.start_socket = None
         self.end_socket = None
 
     def remove(self):
+        if REMOVE_DEBUG: print("EDGE:: --remove:: Start Removing Edge:: ", self)
 
         self.removeFromSockets()
+
+        if REMOVE_DEBUG: print("EDGE:: --remove:: Removing Edge from Scene and GrScene -  Edge", self)
         self.scene.grScene.removeItem(self.grEdge)
         self.scene.removeEdge(self)
         self.grEdge = None

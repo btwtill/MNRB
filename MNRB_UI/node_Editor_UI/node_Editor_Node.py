@@ -8,6 +8,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ig
 
 
 CLASS_DEBUG = False
+EVENT_DEBUG = False
 
 class NodeEditorNode(Serializable):
     def __init__(self, scene, title="No Title", inputs=[], outputs=[]) -> None:
@@ -99,7 +100,7 @@ class NodeEditorNode(Serializable):
 
     def getSocketPosition(self, index, position):
 
-        if CLASS_DEBUG : print("NODE:: -getSocketPosition:: Calculating positions for Socket at Index: ", index, " Position: ", position)
+        if EVENT_DEBUG : print("NODE:: -getSocketPosition:: Calculating positions for Socket at Index: ", index, " Position: ", position)
 
         total_amount_sockets = len(self.inputs) + len(self.outputs)
 
@@ -110,9 +111,29 @@ class NodeEditorNode(Serializable):
 
         y = self.grNode.title_height + (socket_distance * index) + self.grNode.socket_padding
 
-        if CLASS_DEBUG : print("NODE:: -getSocketPosition:: X Position of Socket: ", x)
-        if CLASS_DEBUG : print("NODE:: -getSocketPosition:: Y Position of Socket: ", y)
+        if EVENT_DEBUG : print("NODE:: -getSocketPosition:: X Position of Socket: ", x)
+        if EVENT_DEBUG : print("NODE:: -getSocketPosition:: Y Position of Socket: ", y)
         
         return [x, y]
     
+    def remove(self):
+        if CLASS_DEBUG: print("NODE:: -remove:: Start Removing Node:: ", self)
+        if CLASS_DEBUG: print("NODE:: -remove:: Removing all Edges from Sockets")
+        for socket in (self.inputs + self.outputs):
+            if CLASS_DEBUG: print("NODE:: -remove:: Start to Remove Edges from::", socket)
+            if socket.hasEdge():
+                if CLASS_DEBUG: 
+                    print("NODE:: -remove:: Edges to be Removed::")
+                    for edge in socket.edges:
+                        print("NODE:: -remove:: \t\t ", edge)
+                socket.removeAllEdges()
+            else:
+                if CLASS_DEBUG: print("NODE:: -remove:: \t\t None")
+
+        if CLASS_DEBUG: print("NODE:: -remove:: Remove GrNode from the Scene")
+        self.scene.grScene.removeItem(self.grNode)
+        if CLASS_DEBUG: print("NODE:: -remove:: Remove Node from the Scene")
+        self.scene.removeNode(self)
+        if CLASS_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
+
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
