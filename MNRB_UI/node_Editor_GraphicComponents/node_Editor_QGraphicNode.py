@@ -98,7 +98,10 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     def mouseMoveEvent(self, event):
         super().mouseMoveEvent(event)
         if EVENT_DEBUG: print("GRAPHICSNODE:: -mouseMoveEvent:: Start")
-        self.node.updateConnectedEdges()
+        
+        for node in self.node.scene.nodes:
+            if node.grNode.isSelected():
+                node.updateConnectedEdges()
 
     def setIsDrawingBoundingBox(self, value=True):
         self.is_drawing_bounding_box = value
