@@ -161,6 +161,19 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         item_on_click = self.getItemAtEvent(event)
         self.last_mouse_button_press_position = self.mapToScene(event.pos())
 
+        if (isinstance(item_on_click, QtWidgets.QGraphicsTextItem) or 
+            isinstance(item_on_click, QtWidgets.QGraphicsProxyWidget) or 
+            isinstance(item_on_click, NodeEditor_QGraphicNode) or 
+            isinstance(item_on_click, NodeEditor_QGraphicEdge)):
+            
+            if event.modifiers() & Qt.SHIFT:
+                if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Shift Click On Node")
+                    
+                event.ignore()
+                fake_mouse_event = QMouseEvent(QEvent.MouseButtonPress, event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | Qt.LeftButton, event.modifiers() | Qt.CTRL)
+                super().mousePressEvent(fake_mouse_event)
+                return
+
         if isinstance(item_on_click, NodeEditor_QGraphicSocket):
             if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Socket Detected")
             if self.mode == MODE_NOOP:
@@ -181,6 +194,19 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def leftMouseButtonRelease(self, event):
 
         item_on_release = self.getItemAtEvent(event)
+
+        if (isinstance(item_on_release, QtWidgets.QGraphicsTextItem) or 
+            isinstance(item_on_release, QtWidgets.QGraphicsProxyWidget) or 
+            isinstance(item_on_release, NodeEditor_QGraphicNode) or 
+            isinstance(item_on_release, NodeEditor_QGraphicEdge)):
+
+            if event.modifiers() & Qt.SHIFT:
+                if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Shift Release On Node")
+                print("GRAPHICSVIEW:: --leftMouseButtonPress:: Adding ", item_on_release, " to selection")
+                event.ignore()
+                fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers() | Qt.CTRL)
+                super().mouseReleaseEvent(fake_mouse_event)
+                return
 
         if self.getDistanceFromLastLeftMousePressEvent(event) > math.pow(EDGE_DRAG_START_THRESHOLD, 2):
             if self.mode == MODE_EDGEDRAG:
