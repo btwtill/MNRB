@@ -74,6 +74,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         #initialize the node title
         self.title_item = QtWidgets.QGraphicsTextItem(self)
+        self.title_item.node = self.node
         self.title_item.setDefaultTextColor(self._title_color)
         self.title_item.setFont(self._title_font)
         self.title_item.setPos(self._title_padding, 0)
