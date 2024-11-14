@@ -164,7 +164,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if (isinstance(item_on_click, QtWidgets.QGraphicsTextItem) or 
             isinstance(item_on_click, QtWidgets.QGraphicsProxyWidget) or 
             isinstance(item_on_click, NodeEditor_QGraphicNode) or 
-            isinstance(item_on_click, NodeEditor_QGraphicEdge)):
+            isinstance(item_on_click, NodeEditor_QGraphicEdge) or
+            item_on_click is None):
             
             if event.modifiers() & Qt.SHIFT:
                 if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Shift Click On Node")
@@ -198,7 +199,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if (isinstance(item_on_release, QtWidgets.QGraphicsTextItem) or 
             isinstance(item_on_release, QtWidgets.QGraphicsProxyWidget) or 
             isinstance(item_on_release, NodeEditor_QGraphicNode) or 
-            isinstance(item_on_release, NodeEditor_QGraphicEdge)):
+            isinstance(item_on_release, NodeEditor_QGraphicEdge) or 
+            item_on_release is None):
 
             if event.modifiers() & Qt.SHIFT:
                 if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Shift Release On Node")
