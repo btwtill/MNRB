@@ -2,6 +2,8 @@ import json
 from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 
 CLASS_DEBUG = False
@@ -80,7 +82,7 @@ class NodeEditorScene(Serializable):
 
         with open(filename, "r") as file:
             raw_data = file.read()
-            data = json.loads(raw_data, encoding='utf-8')
+            data = json.loads(raw_data)
             self.deserialize(data)
         if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
 
@@ -104,5 +106,50 @@ class NodeEditorScene(Serializable):
         return serialized_data
 
     def deserialize(self, data, hashmap={}, restore_id = True):
+
+        hashmap = {}
+
+        if restore_id: self.id = data['id']
+
+        all_current_nodes_in_scene = self.nodes.copy()
+
+        for node_data in data['nodes']:
+            found = False
+            for node in all_current_nodes_in_scene:
+                if node.id == node_data['id']:
+                    found = node
+                    break
+            if not found:
+                new_node = NodeEditorNode(self)
+                new_node.deserialize(node_data, hashmap)
+            else:
+                found.deserialize(node_data, hashmap)
+                index_to_remove = findIndexByAttribute(all_current_nodes_in_scene, found.id)
+                del all_current_nodes_in_scene[index_to_remove]
+        
+        while all_current_nodes_in_scene != []:
+            node = all_current_nodes_in_scene.pop()
+            node.remove()
+
+        all_current_edges_in_scene = self.edges.copy()
+
+        for edge_data in data['edges']:
+            found = False
+            for edge in all_current_edges_in_scene:
+                if edge.id == edge_data['id']:
+                    found  = edge
+                    break
+            if not found:
+                new_edge = NodeEditorEdge(self)
+                new_edge.deserialize(edge_data, hashmap)
+            else:
+                found.deserialize(edge_data, hashmap)
+                index_to_remove = findIndexByAttribute(all_current_edges_in_scene, found.id)
+                del all_current_edges_in_scene[index_to_remove]
+
+        while all_current_edges_in_scene != []:
+            edge = all_current_edges_in_scene.pop()
+            edge.remove()
+
         if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Data:: ", data)
-        return False
+        return True

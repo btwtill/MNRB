@@ -11,25 +11,26 @@ EDGE_TYPE_BEZIER = 2
 
 
 class NodeEditorEdge(Serializable):
-    def __init__(self, scene, start_socket, end_socket, edge_type = EDGE_TYPE_DIRECT):
+    def __init__(self, scene, start_socket = None, end_socket = None, edge_type = EDGE_TYPE_DIRECT):
         super().__init__()
 
         self.scene = scene
         self.start_socket = start_socket
         self.end_socket = end_socket
 
-        self.start_socket.addEdge(self)
+        if self.start_socket is not None:
+            self.start_socket.addEdge(self)
         if self.end_socket is not None:
             self.end_socket.addEdge(self)
 
         self.edge_type = edge_type
 
         self.grEdge = NodeEditor_QGraphicEdge(self)
-        
-        self.updatePositions()
-
         self.scene.addEdge(self)
         self.scene.grScene.addItem(self.grEdge)
+
+        if start_socket is not None:
+            self.updatePositions()
 
     @property
     def edge_type(self): return self._edge_type
@@ -88,6 +89,9 @@ class NodeEditorEdge(Serializable):
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
+            ('edge_type', self.edge_type),
+            ('start_socket', self.start_socket.id),
+            ('end_socket', self.end_socket.id)
         ])
 
         if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Serialized Edge:: ", self, " to Data:: ", serialized_data)

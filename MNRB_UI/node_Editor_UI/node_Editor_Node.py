@@ -17,7 +17,8 @@ class NodeEditorNode(Serializable):
         super().__init__()
 
         self.scene = scene
-        self.title = title
+
+        self._title = title
         
         self.inputs = inputs
         self.outputs = outputs
@@ -38,6 +39,13 @@ class NodeEditorNode(Serializable):
 
     @property
     def position(self): return self.grNode.pos()
+
+    @property
+    def title(self): return self._title
+    @title.setter
+    def title(self, value):
+        self._title = value
+        self.grNode.title = self._title
 
     def initSocketSettings(self):
         self.input_socket_position = LEFT
@@ -139,8 +147,19 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
 
     def serialize(self):
+
+        inputs, outputs = [], []
+
+        for socket in self.inputs: inputs.append(socket.serialize())
+        for socket in self.outputs: outputs.append(socket.serialize())
+
         serialized_data = OrderedDict([
-            ('id', self.id)
+            ('id', self.id),
+            ('title', self.title),
+            ("position_x", self.grNode.scenePos().x()),
+            ("position_y", self.grNode.scenePos().y()),
+            ('inputs', inputs),
+            ('outputs', outputs)
         ])
 
         if SERIALIZE_DEBUG: print("NODE: --serialize:: Serialized Node:: ", self, " to Data:: ", serialized_data)
@@ -148,6 +167,12 @@ class NodeEditorNode(Serializable):
         return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
+
+        if restore_id: self.id = data['id']
+        hashmap[data['id']] = self
+
+        self.title = data['title']
+
         return False
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

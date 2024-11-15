@@ -86,7 +86,13 @@ class NodeEditor_Socket(Serializable):
     
     def serialize(self):
         serialized_data = OrderedDict([
-            ('id', self.id)
+            ('id', self.id),
+            ('index', self.index),
+            ('position', self.position),
+            ('socket_type', self.socket_type),
+            ('socket_value', self.socket_value),
+            ('accepts_multi_edges', self.accept_multi_edges),
+            ('is_input', self.is_input)
         ])
 
         if SERIALIZE_DEBUG: print("SOCKET: --serialize:: Serialized Socket:: ", self, " to Data:: ", serialized_data)
