@@ -1,29 +1,73 @@
 import os
+import json
 import maya.cmds as cmds # type: ignore
 from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import QFile #type:  ignore 
 from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 
 class mnrb_Editor(QtWidgets.QMainWindow):
     def __init__(self, parent = getMayaWindow()):
         super(mnrb_Editor, self).__init__(parent)
 
+        self.project_settings_path = os.path.join(os.path.dirname(__file__), "project_settings.json")
+        self.project_settings = self.loadProjectSettings()
+
         self.working_directory = cmds.workspace(query=True, directory=True)
         self.is_active_project = self.validateWorkingDirectory(self.working_directory)
 
+        self.mnrb_path = os.path.join(self.working_directory, self.project_settings['ProjectSubPath'], "MNRB")
+
+        self._project_path = None
+        self._mnrb_base_editor_path = None
+
+        self.display_overlay = True
+
+        self.initProject()
         self.initUI()
+
+    @property
+    def project_path(self): return self._project_path
+    @project_path.setter
+    def project_path(self, path):
+        self._project_path = path
+        self._mnrb_base_editor_path = os.path.join(self._project_path, "mnrb_editor")
+
+
+    def initProject(self):
+
+        #Check if in the Current Working Directory + The Defined Subfolder for the ProjectDirectory is an MNRB Folder and how many Projects are in it
+        if os.path.isdir(self.mnrb_path):
+            if CLASS_DEBUG: print("MNRB_EDITOR:: --initProject:: MNRB Directory found in current working Directory!")
+            projects = os.listdir(self.mnrb_path)
+            if CLASS_DEBUG: print("MNRB_EDITR:: --initProject:: MNRB Content:: ", projects)
+
+            if len(projects) == 1 and os.path.isdir(os.path.join(self.mnrb_path, projects[0])):
+                if CLASS_DEBUG: print("MNRB_EDITR:: --initProject:: found Only One MNRB Project, proceed opening Project Directly")
+                self.project_path = os.path.join(self.mnrb_path, projects[0])
+                self.display_overlay = False
+            else:
+                if CLASS_DEBUG: print("MNRB_EDITR:: --initProject:: Multiple or No Projcets found, Display Overlay")
+                self.display_overlay = True
+        else:
+            if CLASS_DEBUG: 
+                print("MNRB_EDITOR:: --initProject:: No MNRB Directory Found. ")
+                os.mkdir(self.mnrb_path)
+                print("MNRB_EDITOR:: --initProject:: Create MNRB Directory at path and Display Overlay")
+                self.display_overlay = True
 
     def initUI(self):
 
         self.setWindowTitle("mnrb Editor")
         self.setGeometry(200, 200, 1200, 700)
 
-        self.onNewProject()
-        #self.setupProjectOverlay()
-        
+        if self.display_overlay:
+            self.setupProjectOverlay()
+        else:
+            self.onOpenProject()
+
         self.createEditorActions()
         self.setupMenuBar()
         self.setupStatusBar()
@@ -64,13 +108,18 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.outer_Layout = QtWidgets.QHBoxLayout()
         self.innerLayout = QtWidgets.QVBoxLayout()
+        self.innerLayout.addStretch()
+
+        self.project_name_lineEdit = QtWidgets.QLineEdit()
 
         self.overlayNewActionButton = QtWidgets.QPushButton("New Project")
-        self.overlayNewActionButton.clicked.connect(self.onNewProject)
+        self.overlayNewActionButton.clicked.connect(lambda: self.onNewProject(self.project_name_lineEdit.text()))
 
+        self.innerLayout.addWidget(self.project_name_lineEdit)
         self.innerLayout.addWidget(self.overlayNewActionButton)
         self.innerLayout.setContentsMargins(60, 20, 60, 20)
 
+        self.innerLayout.addStretch()
         self.outer_Layout.addStretch(1)
         self.outer_Layout.addLayout(self.innerLayout)
         self.outer_Layout.addStretch(1)
@@ -78,9 +127,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.overlay_Widget.setLayout(self.outer_Layout)
         self.setCentralWidget(self.overlay_Widget)
 
+
     def createEditorActions(self):
-        self.actionNew = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='Create New Project', triggered=self.onNewProject)
+        self.actionNew = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='Create New Project', triggered=self.onNewProjectFromMenuBar)
         self.actionOpen = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='Open a Project', triggered=self.onOpenProject)
+        self.actionSave = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='Save Project', triggered=self.onSaveProject)
+        self.actionSaveAs = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+S', statusTip='Save Project As', triggered=self.onSaveProjectAs)
 
     def setupMenuBar(self):
         menuBar = self.menuBar()
@@ -95,16 +147,74 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.statusBar().showMessage('')
         self.statusMousePosition = QtWidgets.QLabel('')
 
-    def onNewProject(self,):
+    def onNewProjectFromMenuBar(self):
+        new_project_name_messageBox = QtWidgets.QMessageBox()
 
-        self.tabs = QtWidgets.QTabWidget()
-        self.setCentralWidget(self.tabs)
+        new_project_name_messageBox.setWindowTitle("Please give your new MNRB Project a Title!")
 
-        self.setupNodeEditorTab()
-        self.setupControlEditorTab()
+        title_lineEdit = QtWidgets.QLineEdit()
+        title_lineEdit.setPlaceholderText("Enter Title Here:")
+
+        layout = new_project_name_messageBox.layout()
+        layout.addWidget(title_lineEdit, layout.rowCount(), 0, 1, layout.columnCount())
+
+        result = new_project_name_messageBox.exec_()
+
+        if  result == QtWidgets.QMessageBox.Ok:
+            self.onNewProject(title_lineEdit.text())
+            
+    def onNewProject(self, name):
+        if self.validateProjectName(name):
+
+            #create Project
+            self.project_path = os.path.join(self.mnrb_path, name)
+
+            os.mkdir(self.project_path)
+
+            #creating The Projcet Hirarchy
+            os.mkdir(self._mnrb_base_editor_path)
+
+            self.tabs = QtWidgets.QTabWidget()
+            self.setCentralWidget(self.tabs)
+
+            self.setupNodeEditorTab()
+            self.setupControlEditorTab()
+        else:
+            warningBox = QtWidgets.QMessageBox()
+            warningBox.setWindowTitle("The Name is Invalid")
+            warningBox.setText("The name is either none, already taken or contains illigal symbols \n Please Change the name of your Project!")
+            warningBox.setIcon(QtWidgets.QMessageBox.Critical)
+
+            warningBox.exec_()      
 
     def onOpenProject(self):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject:: Start opening a Project")
+
+    def onSaveProject(self):
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
+
+    def onSaveProjectAs(self):
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
+
+    def loadProjectSettings(self):
+        with open(self.project_settings_path, "r") as file:
+            project_settings_raw = file.read()
+            project_settings_json = json.loads(project_settings_raw)
+        return project_settings_json
+
+    def getNodeEditorWidget(self):
+        return self.tabs.widget(0)
+
+    def validateProjectName(self, name):
+
+        mnrb_projects = os.listdir(self.mnrb_path)
+        if name == "": 
+            return False
+        elif name in mnrb_projects :
+            return False
+        else:
+            return True
+      
 
     def validateWorkingDirectory(self, directory):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -validateWorkingDirectory:: Full Directory Path: ", directory)

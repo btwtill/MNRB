@@ -8,7 +8,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory import NodeEditorScene
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 
 CLASS_DEBUG = False
-SERIALIZE_DEBUG = True
+SERIALIZE_DEBUG = False
 
 class NodeEditorScene(Serializable):
     def __init__(self):

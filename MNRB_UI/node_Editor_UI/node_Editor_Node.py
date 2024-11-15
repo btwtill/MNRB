@@ -10,7 +10,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ig
 
 CLASS_DEBUG = False
 EVENT_DEBUG = False
-SERIALIZE_DEBUG = True
+SERIALIZE_DEBUG = False
 
 class NodeEditorNode(Serializable):
     def __init__(self, scene, title="No Title", inputs=[], outputs=[]) -> None:

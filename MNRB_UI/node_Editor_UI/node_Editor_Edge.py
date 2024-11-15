@@ -4,7 +4,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 
 CLASS_DEBUG = False
 REMOVE_DEBUG = False
-SERIALIZE_DEBUG = True
+SERIALIZE_DEBUG = False
 
 EDGE_TYPE_DIRECT = 1
 EDGE_TYPE_BEZIER = 2
