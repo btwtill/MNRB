@@ -15,15 +15,13 @@ class NodeEditorEdge(Serializable):
         super().__init__()
 
         self.scene = scene
+        self._start_socket = None
+        self._end_socket = None
+
         self.start_socket = start_socket
         self.end_socket = end_socket
 
-        if self.start_socket is not None:
-            self.start_socket.addEdge(self)
-        if self.end_socket is not None:
-            self.end_socket.addEdge(self)
-
-        self.edge_type = edge_type
+        self._edge_type = edge_type
 
         self.grEdge = NodeEditor_QGraphicEdge(self)
         self.scene.addEdge(self)
@@ -31,12 +29,37 @@ class NodeEditorEdge(Serializable):
 
         if start_socket is not None:
             self.updatePositions()
+        
+    @property
+    def start_socket(self): return self._start_socket
+    @start_socket.setter
+    def start_socket(self, value):
+        if self._start_socket is not None:
+            self._start_socket
+        self._start_socket = value
+        if self.start_socket is not None:
+            self.start_socket.addEdge(self)
+    
+    @property
+    def end_socket(self): return self._end_socket
+    @end_socket.setter
+    def end_socket(self, value):
+        if self._end_socket is not None:
+            self._end_socket
+        self._end_socket = value
+        if self.end_socket is not None:
+            self.end_socket.addEdge(self)
 
     @property
     def edge_type(self): return self._edge_type
     @edge_type.setter
     def edge_type(self, value):
         self._edge_type = value
+
+        self.grEdge.createEdgePathCalculator()
+
+        if self.start_socket is not None:
+            self.updatePositions()
 
     def updatePositions(self):
 
@@ -99,6 +122,16 @@ class NodeEditorEdge(Serializable):
         return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
-        return False
+
+        if restore_id: self.id = data['id']
+        self.start_socket = hashmap[data['start_socket']]
+        self.end_socket = hashmap[data['end_socket']]
+        self.edge_type = data['edge_type']
+
+        self.updatePositions()
+
+        if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Serialized Edge:: ", self, " with Data:: ", data)
+
+        return True
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

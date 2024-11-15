@@ -105,51 +105,26 @@ class NodeEditorScene(Serializable):
 
         return serialized_data
 
+    def clearScene(self):
+        while len(self.nodes) > 0:
+            self.nodes[0].remove()
+
     def deserialize(self, data, hashmap={}, restore_id = True):
 
         hashmap = {}
 
         if restore_id: self.id = data['id']
 
-        all_current_nodes_in_scene = self.nodes.copy()
+        self.clearScene()
 
         for node_data in data['nodes']:
-            found = False
-            for node in all_current_nodes_in_scene:
-                if node.id == node_data['id']:
-                    found = node
-                    break
-            if not found:
-                new_node = NodeEditorNode(self)
-                new_node.deserialize(node_data, hashmap)
-            else:
-                found.deserialize(node_data, hashmap)
-                index_to_remove = findIndexByAttribute(all_current_nodes_in_scene, found.id)
-                del all_current_nodes_in_scene[index_to_remove]
-        
-        while all_current_nodes_in_scene != []:
-            node = all_current_nodes_in_scene.pop()
-            node.remove()
-
-        all_current_edges_in_scene = self.edges.copy()
+            new_node = NodeEditorNode(self)
+            new_node.deserialize(node_data, hashmap, restore_id)
 
         for edge_data in data['edges']:
-            found = False
-            for edge in all_current_edges_in_scene:
-                if edge.id == edge_data['id']:
-                    found  = edge
-                    break
-            if not found:
-                new_edge = NodeEditorEdge(self)
-                new_edge.deserialize(edge_data, hashmap)
-            else:
-                found.deserialize(edge_data, hashmap)
-                index_to_remove = findIndexByAttribute(all_current_edges_in_scene, found.id)
-                del all_current_edges_in_scene[index_to_remove]
+            new_edge = NodeEditorEdge(self)
+            new_edge.deserialize(edge_data, hashmap, restore_id)
 
-        while all_current_edges_in_scene != []:
-            edge = all_current_edges_in_scene.pop()
-            edge.remove()
 
         if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Data:: ", data)
         return True

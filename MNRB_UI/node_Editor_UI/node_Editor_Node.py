@@ -72,7 +72,7 @@ class NodeEditorNode(Serializable):
                                        socket_type = input[1], 
                                        socket_value = input[0],
                                        accept_multi_edges=True, 
-                                       index_on_drawn_node_Side=on_drawn_side_counter, 
+                                       index_on_drawn_node_side=on_drawn_side_counter, 
                                        is_input = True)
             
             index_counter += 1
@@ -87,7 +87,7 @@ class NodeEditorNode(Serializable):
                                         socket_type = output[1], 
                                         socket_value = output[0],
                                         accept_multi_edges =True, 
-                                        index_on_drawn_node_Side = on_drawn_side_counter, 
+                                        index_on_drawn_node_side = on_drawn_side_counter, 
                                         is_input = False)
 
             index_counter += 1
@@ -173,6 +173,47 @@ class NodeEditorNode(Serializable):
 
         self.title = data['title']
 
-        return False
+        self.setPosition(data['position_x'], data['position_y'])
+
+        data['inputs'].sort(key=lambda socket: socket['index_on_drawn_node_side'] + socket['position'] * 10000)
+        data['outputs'].sort(key=lambda socket: socket['index_on_drawn_node_side'] + socket['position'] * 10000)
+
+        for input in data['inputs']:
+            self.inputs.append(input)
+
+        for output in data['outputs'] :
+            self.outputs.append(output)
+
+        self.grNode.wrapGrNodeToSockets()
+
+        for index, socket_data in enumerate(data['inputs']):
+            new_socket = NodeEditor_Socket(
+                                                                    node=self, index=socket_data['index'], 
+                                                                    index_on_drawn_node_side = socket_data['index_on_drawn_node_side'],
+                                                                    socket_type = socket_data['socket_type'],
+                                                                    socket_value = socket_data['socket_value'], 
+                                                                    position = socket_data['position'],
+                                                                    accept_multi_edges = socket_data['accept_multi_edges'],
+                                                                    is_input = socket_data['is_input']
+                                                                )
+            new_socket.deserialize(socket_data, hashmap, restore_id)
+            self.inputs[index] = new_socket
+        
+        for index, socket_data in enumerate(data['outputs']):
+            new_socket = NodeEditor_Socket(
+                                                                    node=self, index=socket_data['index'], 
+                                                                    index_on_drawn_node_side = socket_data['index_on_drawn_node_side'],
+                                                                    socket_type = socket_data['socket_type'],
+                                                                    socket_value = socket_data['socket_value'], 
+                                                                    position = socket_data['position'],
+                                                                    accept_multi_edges = socket_data['accept_multi_edges'],
+                                                                    is_input = socket_data['is_input']
+                                                                )
+            new_socket.deserialize(socket_data, hashmap, restore_id)
+            self.outputs[index] = new_socket
+
+        if SERIALIZE_DEBUG: print("NODE: --deserialize:: Serialized Node:: ", self, " with Data:: ", data)
+
+        return True
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

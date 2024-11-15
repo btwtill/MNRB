@@ -13,7 +13,7 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         self.edge_path_calculator = self.determin_edge_path_class()(self)
 
         self.source_position = [0, 0]
-        self.destination_position = [150, 200]
+        self.destination_position = [0, 0]
 
         self.initGraphicElements()
 
@@ -43,6 +43,10 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
             return  NodeEditor_QGraphicEdgePathBezier
         if self.edge.edge_type == EDGE_TYPE_DIRECT:
             return NodeEditor_QGaphicEdgePathDirect
+
+    def createEdgePathCalculator(self):
+        self.edge_path_calculator = self.determin_edge_path_class()(self)
+        return self.edge_path_calculator
 
     def calculatePath(self):
         return self.edge_path_calculator.calculatePath()

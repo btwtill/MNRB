@@ -10,7 +10,7 @@ REMOVE_DEBUG = False
 SERIALIZE_DEBUG = True
 
 class NodeEditor_Socket(Serializable):
-    def __init__(self, node, index=0, position=LEFT, socket_type=0, socket_value ="undefined", accept_multi_edges=True, index_on_drawn_node_Side = 1, is_input = True ):
+    def __init__(self, node, index=0, position=LEFT, socket_type=0, socket_value ="undefined", accept_multi_edges=True, index_on_drawn_node_side = 1, is_input = True ):
         super().__init__()
 
         self.node = node
@@ -19,7 +19,7 @@ class NodeEditor_Socket(Serializable):
         self.socket_type = socket_type
         self.socket_value = socket_value
         self.accept_multi_edges = accept_multi_edges
-        self.index_on_drawn_node_Side = index_on_drawn_node_Side
+        self.index_on_drawn_node_side = index_on_drawn_node_side
         self.is_input = is_input
         self.is_output = not is_input
 
@@ -85,13 +85,15 @@ class NodeEditor_Socket(Serializable):
         return len(self.edges) > 0
     
     def serialize(self):
+
         serialized_data = OrderedDict([
             ('id', self.id),
             ('index', self.index),
+            ('index_on_drawn_node_side', self.index_on_drawn_node_side),
             ('position', self.position),
             ('socket_type', self.socket_type),
             ('socket_value', self.socket_value),
-            ('accepts_multi_edges', self.accept_multi_edges),
+            ('accept_multi_edges', self.accept_multi_edges),
             ('is_input', self.is_input)
         ])
 
@@ -100,6 +102,12 @@ class NodeEditor_Socket(Serializable):
         return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
-        return False
+
+        if restore_id: self.id = data['id']
+        hashmap[data['id']] = self
+
+        if SERIALIZE_DEBUG: print("SOCKET: --serialize:: Deserialize Socket:: ", self, " with Data ", data)
+
+        return True
     
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
