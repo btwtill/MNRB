@@ -103,6 +103,19 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.grScene.scene.saveSceneToFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
         elif event.key() == Qt.Key_L and event.modifiers() & Qt.CTRL:
             self.grScene.scene.loadSceneFromFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
+        elif event.key() == Qt.Key_Z and event.modifiers() & Qt.CTRL:
+            self.grScene.scene.history.undo()
+        elif event.key() == Qt.Key_Y and event.modifiers() & Qt.CTRL:
+            self.grScene.scene.history.redo()
+        elif event.key() == Qt.Key_1:
+            self.grScene.scene.history.storeHistory("Test State A")
+        elif event.key() == Qt.Key_2:
+            self.grScene.scene.history.storeHistory("Test State B")
+        elif event.key() == Qt.Key_3:
+            self.grScene.scene.history.storeHistory("Test State C")
+        elif event.key() == Qt.Key_4:
+            print("NODEEDITOR_VIEW:: SCENEHISTORY:: Stack Length", len(self.grScene.scene.history.history_stack), "..... Current Step:: ", self.grScene.scene.history.history_current_step)
+            print("NODEEDITOR_VIEW:: SCENEHISTORY: History:: ", self.grScene.scene.history.history_stack)
         else:
             super().keyPressEvent(event)
         

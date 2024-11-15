@@ -4,6 +4,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # 
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory import NodeEditorSceneHistory #type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 
 CLASS_DEBUG = False
@@ -19,6 +20,8 @@ class NodeEditorScene(Serializable):
         self.edges = []
         
         self.initUI()
+
+        self.history = NodeEditorSceneHistory(self)
 
         if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
 

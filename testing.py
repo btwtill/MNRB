@@ -11,6 +11,7 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket as nodeEditorSocket
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge as nodeEditorEdge
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge as NodeEditorDragEdge
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline as NodeEditorCutline
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory as NodeEditorSceneHistory
 
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as nodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as nodeEditorGraphicsView
@@ -33,6 +34,7 @@ importlib.reload(nodeEditorSocket)
 importlib.reload(nodeEditorEdge)
 importlib.reload(NodeEditorDragEdge)
 importlib.reload(NodeEditorCutline)
+importlib.reload(NodeEditorSceneHistory)
 
 importlib.reload(nodeEditorGraphicsScene)
 importlib.reload(nodeEditorGraphicsView)
