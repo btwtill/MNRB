@@ -12,7 +12,7 @@ class NodeEditorSceneHistory():
 
         self.history_stack = []
         self.history_current_step = -1
-        self.history_limit = 8
+        self.history_limit = 16
 
     def undo(self):
         if UNDO_DEBUG: print("NODESCENEHISTORY:: --undo:: ")
