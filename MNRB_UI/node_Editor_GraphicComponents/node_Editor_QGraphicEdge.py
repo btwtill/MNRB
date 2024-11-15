@@ -3,7 +3,7 @@ from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QColor, QPen, QPainterPath #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath import  NodeEditor_QGaphicEdgePathDirect, NodeEditor_QGraphicEdgePathBezier #type: ignore
 
-INTERSECT_DEBUG = True
+INTERSECT_DEBUG = False
 
 class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
     def __init__(self, edge, parent = None):

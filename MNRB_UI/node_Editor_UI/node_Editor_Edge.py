@@ -1,8 +1,10 @@
+from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 
 CLASS_DEBUG = False
 REMOVE_DEBUG = False
+SERIALIZE_DEBUG = True
 
 EDGE_TYPE_DIRECT = 1
 EDGE_TYPE_BEZIER = 2
@@ -82,5 +84,17 @@ class NodeEditorEdge(Serializable):
         self.scene.grScene.removeItem(self.grEdge)
         self.scene.removeEdge(self)
         self.grEdge = None
+
+    def serialize(self):
+        serialized_data = OrderedDict([
+            ('id', self.id),
+        ])
+
+        if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Serialized Edge:: ", self, " to Data:: ", serialized_data)
+
+        return serialized_data
+    
+    def deserialize(self, data, hashmap = {}, restore_id = True):
+        return False
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

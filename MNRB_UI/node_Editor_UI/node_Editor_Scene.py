@@ -1,8 +1,11 @@
+import json
+from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 
 CLASS_DEBUG = False
+SERIALIZE_DEBUG = True
 
 class NodeEditorScene(Serializable):
     def __init__(self):
@@ -19,10 +22,10 @@ class NodeEditorScene(Serializable):
 
     def initUI(self):
     
-        self.grSceneWidth = 64000
-        self.grSceneHeight = 64000
+        self.grScene_width = 64000
+        self.grScene_height = 64000
 
-        self.grScene.setGrSceneSize(self.grSceneWidth, self.grSceneHeight)
+        self.grScene.setGrSceneSize(self.grScene_width, self.grScene_height)
 
     def addNode(self, node):
         self.nodes.append(node)
@@ -66,3 +69,40 @@ class NodeEditorScene(Serializable):
             for index, _edge in enumerate(self.edges):
                 print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge , " at Index:: ", index, " with ID: ", _edge.id)
 
+    def saveSceneToFile(self, filename):
+
+        with open(filename, "w") as file:
+            file.write(json.dumps(self.serialize(), indent=4))
+
+        if SERIALIZE_DEBUG: print("SCENE: --saveSceneToFile:: Successfully stored Scene ", self, " to File: ", filename)
+
+    def loadSceneFromFile(self, filename):
+
+        with open(filename, "r") as file:
+            raw_data = file.read()
+            data = json.loads(raw_data, encoding='utf-8')
+            self.deserialize(data)
+        if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
+
+    def serialize(self):
+        
+        nodes, edges = [] , []
+
+        for node in self.nodes : nodes.append(node.serialize())
+        for edge in self.edges : edges.append(edge.serialize())
+
+        serialized_data = OrderedDict([
+            ('id', self.id), 
+            ('grScene_width', self.grScene_width), 
+            ('grScene_height', self.grScene_height),
+            ('nodes', nodes),
+            ('edges', edges),
+            ])
+
+        if SERIALIZE_DEBUG: print("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
+
+        return serialized_data
+
+    def deserialize(self, data, hashmap={}, restore_id = True):
+        if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Data:: ", data)
+        return False

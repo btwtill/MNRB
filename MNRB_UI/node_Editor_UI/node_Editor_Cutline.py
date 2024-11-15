@@ -14,7 +14,7 @@ class NodeEditorCutLine(QtWidgets.QGraphicsItem):
 
         self.setZValue(2)
 
-        self.is_drawing_bounding_box = True
+        self.is_drawing_bounding_box = False
 
     def boundingRect(self):
         return self.shape().boundingRect()

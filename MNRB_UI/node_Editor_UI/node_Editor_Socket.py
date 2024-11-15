@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket # type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
@@ -6,6 +7,7 @@ LEFT = 1
 RIGHT = 2
 
 REMOVE_DEBUG = False
+SERIALIZE_DEBUG = True
 
 class NodeEditor_Socket(Serializable):
     def __init__(self, node, index=0, position=LEFT, socket_type=0, socket_value ="undefined", accept_multi_edges=True, index_on_drawn_node_Side = 1, is_input = True ):
@@ -81,5 +83,17 @@ class NodeEditor_Socket(Serializable):
     
     def hasEdge(self):
         return len(self.edges) > 0
+    
+    def serialize(self):
+        serialized_data = OrderedDict([
+            ('id', self.id)
+        ])
+
+        if SERIALIZE_DEBUG: print("SOCKET: --serialize:: Serialized Socket:: ", self, " to Data:: ", serialized_data)
+
+        return serialized_data
+    
+    def deserialize(self, data, hashmap = {}, restore_id = True):
+        return False
     
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

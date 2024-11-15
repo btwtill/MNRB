@@ -65,6 +65,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.is_content_visible = False if self.zoom <= self.zoom_content_visibility_threshold else True
 
+        self.last_mouse_position = None
+
         self.centerOn(0, 0)
 
     def mousePressEvent(self, event) -> None:
@@ -97,6 +99,10 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1], ["input", 1]], outputs=[["output",1], ["output", 1], ["output",1]])
         elif event.key() == Qt.Key_Delete:
             self.deleteSelected()
+        elif event.key() == Qt.Key_S and event.modifiers() & Qt.CTRL:
+            self.grScene.scene.saveSceneToFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
+        elif event.key() == Qt.Key_L and event.modifiers() & Qt.CTRL:
+            self.grScene.scene.loadSceneFromFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
         else:
             super().keyPressEvent(event)
         
@@ -224,7 +230,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
                 fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers())
                 super().mouseReleaseEvent(fake_mouse_event)
-                QtWidgets.QApplication.setOverrideCursor(Qt.CrossCursor)
                 return
 
         super().mousePressEvent(event)
@@ -271,9 +276,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: update Cutline")
             self.cutting_edge.update()
 
-            if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Resect Cursor")
-            QtWidgets.QApplication.setOverrideCursor(Qt.ArrowCursor)
-
             if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Reset Mode")
             self.mode = MODE_NOOP
             return
@@ -285,17 +287,17 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     
     def mouseMoveEvent(self, event):
 
-        event_mouse_position = self.mapToScene(event.pos())
+        scene_event_mouse_position = self.mapToScene(event.pos())
 
         if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: ", self.mode)
         if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: is EdgeDrag:: ", self.mode == MODE_EDGEDRAG)
         if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: MODE_EDGE_DRAG ", MODE_EDGEDRAG)
 
         if self.mode == MODE_EDGEDRAG:
-            self.dragging_edge.updateDestination(event_mouse_position.x(), event_mouse_position.y())
+            self.dragging_edge.updateDestination(scene_event_mouse_position.x(), scene_event_mouse_position.y())
         
         if self.mode == MODE_EDGE_CUT:
-            self.cutting_edge.line_points.append(event_mouse_position)
+            self.cutting_edge.line_points.append(scene_event_mouse_position)
             self.cutting_edge.update()
 
         super().mouseMoveEvent(event)

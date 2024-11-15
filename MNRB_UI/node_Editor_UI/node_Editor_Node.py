@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode # type: ignore
@@ -9,6 +10,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ig
 
 CLASS_DEBUG = False
 EVENT_DEBUG = False
+SERIALIZE_DEBUG = True
 
 class NodeEditorNode(Serializable):
     def __init__(self, scene, title="No Title", inputs=[], outputs=[]) -> None:
@@ -135,5 +137,17 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -remove:: Remove Node from the Scene")
         self.scene.removeNode(self)
         if CLASS_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
+
+    def serialize(self):
+        serialized_data = OrderedDict([
+            ('id', self.id)
+        ])
+
+        if SERIALIZE_DEBUG: print("NODE: --serialize:: Serialized Node:: ", self, " to Data:: ", serialized_data)
+
+        return serialized_data
+    
+    def deserialize(self, data, hashmap = {}, restore_id = True):
+        return False
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
