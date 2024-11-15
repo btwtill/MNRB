@@ -10,6 +10,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         self.node = node
 
+        self.was_moved = False
+
         self.initGraphicElements()
         self.initContent()
         self.initUI()
@@ -111,6 +113,15 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             for node in self.node.scene.nodes:
                 if node.grNode.isSelected():
                     node.updateConnectedEdges()
+
+            self.was_moved = True
+
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+        if self.was_moved:
+            self.was_moved = False
+            self.node.scene.history.storeHistory("Node Moved")
+            
 
     def setIsDrawingBoundingBox(self, value=True):
         self.is_drawing_bounding_box = value

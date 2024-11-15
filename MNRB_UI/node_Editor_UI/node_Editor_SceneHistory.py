@@ -54,7 +54,7 @@ class NodeEditorSceneHistory():
 
         if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: Deserializing History Snapshot")
         self.scene.deserialize(history_stamp['snapshot'])
-        
+
         if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: Restoring Selection from History Stamp")
         for edge in self.scene.edges: edge.grEdge.setSelected(False)
 
@@ -78,7 +78,7 @@ class NodeEditorSceneHistory():
     def createHistoryStamp(self, history_stamp_description):
         
         history_stamp = {
-            'desc': history_stamp_description,
+            'description': history_stamp_description,
             'snapshot' : self.scene.serialize(),
             'selection': self.captureCurrentSceneSelection()
         }

@@ -103,19 +103,14 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.grScene.scene.saveSceneToFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
         elif event.key() == Qt.Key_L and event.modifiers() & Qt.CTRL:
             self.grScene.scene.loadSceneFromFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
-        elif event.key() == Qt.Key_Z and event.modifiers() & Qt.CTRL:
+        elif event.key() == Qt.Key_Z and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
             self.grScene.scene.history.undo()
-        elif event.key() == Qt.Key_Y and event.modifiers() & Qt.CTRL:
+        elif event.key() == Qt.Key_Y and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
             self.grScene.scene.history.redo()
-        elif event.key() == Qt.Key_1:
-            self.grScene.scene.history.storeHistory("Test State A")
-        elif event.key() == Qt.Key_2:
-            self.grScene.scene.history.storeHistory("Test State B")
-        elif event.key() == Qt.Key_3:
-            self.grScene.scene.history.storeHistory("Test State C")
         elif event.key() == Qt.Key_4:
             print("NODEEDITOR_VIEW:: SCENEHISTORY:: Stack Length", len(self.grScene.scene.history.history_stack), "..... Current Step:: ", self.grScene.scene.history.history_current_step)
-            print("NODEEDITOR_VIEW:: SCENEHISTORY: History:: ", self.grScene.scene.history.history_stack)
+            for index, item in enumerate(self.grScene.scene.history.history_stack):
+                print("NODEEDITOR_VIEW:: SCENEHISTORY: History:: History Item:: ", index," Item Description:: " , item['description'])
         else:
             super().keyPressEvent(event)
         
@@ -357,6 +352,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 if edge.grEdge.intersectsWith(point1, point2):
                     edge.remove()
 
+        self.grScene.scene.history.storeHistory("Delete Cutted Edges")
+
     def deleteSelected(self):
         selected_items = self.grScene.selectedItems()
         selected_nodes = []
@@ -390,6 +387,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         for edge in selected_edges:
             if edge.edge in edge.edge.scene.edges:
                 edge.edge.remove()
+
+        self.grScene.scene.history.storeHistory("Deleted Selected")
 
     def getItemAtEvent(self, event):
         return self.itemAt(event.pos())

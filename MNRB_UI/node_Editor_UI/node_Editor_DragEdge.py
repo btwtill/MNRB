@@ -42,6 +42,8 @@ class NodeEditorDragEdge():
                 print("DRAGEDGE:: --endEdgeDrag:: Create New Edge from the Drag Edge Data:: ", new_edge)
                 print("DRAGEDGE:: --endEdgeDrag:: Connecting Socket", new_edge.start_socket,"<----> ", new_edge.end_socket)
             
+            self.grView.grScene.scene.history.storeHistory("Created New Edge by Dragging")
+            
             return True
 
         if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: Finished ending Dragging!")
