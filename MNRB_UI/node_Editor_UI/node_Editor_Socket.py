@@ -103,11 +103,15 @@ class NodeEditor_Socket(Serializable):
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
 
+        if SERIALIZE_DEBUG:
+            print("__________________")
+            print("SOCKET: --deserialize:: Starting to Deserialize Socket:: ", self, "with Data", data)
+            print("SOCKET: --deserialize:: Setting old id: ", self.id, "to new dataID: ", data['id'])
+            
         if restore_id: self.id = data['id']
         hashmap[data['id']] = self
 
-        if SERIALIZE_DEBUG: print("SOCKET: --serialize:: Deserialize Socket:: ", self, " with Data ", data)
-
+        if SERIALIZE_DEBUG: print("__________________SOCKET DESERIALIZED")
         return True
     
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

@@ -115,16 +115,57 @@ class NodeEditorScene(Serializable):
 
         if restore_id: self.id = data['id']
 
-        self.clearScene()
+        all_current_nodes_in_scene = self.nodes.copy()
+
+        if SERIALIZE_DEBUG:
+            print("_______________________________________________________________")
+            print("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
 
         for node_data in data['nodes']:
-            new_node = NodeEditorNode(self)
-            new_node.deserialize(node_data, hashmap, restore_id)
+            found = None
+            for node in all_current_nodes_in_scene:
+                if node.id == node_data['id']:
+                    if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Found Existing node", node, " with ID: ", node.id, " matching data ID: ", node_data['id'])
+                    found = node
+                    break
+            if not found:
+                if SERIALIZE_DEBUG: 
+                    print("SCENE: --deserialize:: Did not find existing node matching ID:: ", node_data['id'])
+                    print("SCENE: --deserialize:: Creating New Node:: ")
+                new_node = NodeEditorNode(self)
+                if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Done Creating New Node:: ", new_node)
+                if SERIALIZE_DEBUG: print("SCENE: --deserialize:: deserializing new Node:: ", new_node)
+                new_node.deserialize(node_data, hashmap, restore_id)
+            else:
+                if SERIALIZE_DEBUG: print("SCENE:: --deserialize:: Deserializing Existing Node:: ", found, ":: with Data:: ", node_data)
+                found.deserialize(node_data, hashmap, restore_id, exists = True)
+                index_to_remove = findIndexByAttribute(all_current_nodes_in_scene, found.id)
+                del all_current_nodes_in_scene[index_to_remove]
+
+        while all_current_nodes_in_scene != []:
+            node = all_current_nodes_in_scene.pop()
+            node.remove()
+
+        all_current_edges_in_scene = self.edges.copy()
 
         for edge_data in data['edges']:
-            new_edge = NodeEditorEdge(self)
-            new_edge.deserialize(edge_data, hashmap, restore_id)
+            found = None
+            for edge in all_current_edges_in_scene:
+                if edge.id == edge_data['id']:
+                    found = edge
+                    break
+            if not found:
+                new_edge = NodeEditorEdge(self)
+                new_edge.deserialize(edge_data, hashmap, restore_id)
+            else:
+                found.deserialize(edge_data, hashmap, restore_id)
+                index_to_remove = findIndexByAttribute(all_current_edges_in_scene, found.id)
+                del all_current_edges_in_scene[index_to_remove]
 
+        while all_current_edges_in_scene != []:
+            edge = all_current_edges_in_scene.pop()
+            edge.remove()
 
-        if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Data:: ", data)
+        if SERIALIZE_DEBUG: print("_______________________________________________________________SCENE DESERIALIZED")
+
         return True

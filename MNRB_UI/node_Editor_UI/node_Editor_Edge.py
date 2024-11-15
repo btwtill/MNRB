@@ -34,9 +34,12 @@ class NodeEditorEdge(Serializable):
     def start_socket(self): return self._start_socket
     @start_socket.setter
     def start_socket(self, value):
+
         if self._start_socket is not None:
-            self._start_socket
+            self._start_socket.removeEdge(self)
+
         self._start_socket = value
+
         if self.start_socket is not None:
             self.start_socket.addEdge(self)
     
@@ -44,9 +47,12 @@ class NodeEditorEdge(Serializable):
     def end_socket(self): return self._end_socket
     @end_socket.setter
     def end_socket(self, value):
+
         if self._end_socket is not None:
-            self._end_socket
+            self._end_socket.removeEdge(self)
+
         self._end_socket = value
+
         if self.end_socket is not None:
             self.end_socket.addEdge(self)
 
@@ -54,6 +60,7 @@ class NodeEditorEdge(Serializable):
     def edge_type(self): return self._edge_type
     @edge_type.setter
     def edge_type(self, value):
+
         self._edge_type = value
 
         self.grEdge.createEdgePathCalculator()
@@ -87,13 +94,13 @@ class NodeEditorEdge(Serializable):
 
     def removeFromSockets(self):
 
-        if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Start Removing Edge:: ", self, "fromSockets")
-        if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from Start Socket::", self.start_socket)
-        self.start_socket.removeEdge(self)
+        #if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Start Removing Edge:: ", self, "fromSockets")
+        #if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from Start Socket::", self.start_socket)
+        #self.start_socket.removeEdge(self)
         
-        if self.end_socket is not None:
-            if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from End Socket::", self.end_socket)
-            self.end_socket.removeEdge(self)
+        #if self.end_socket is not None:
+        #   if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from End Socket::", self.end_socket)
+        #  self.end_socket.removeEdge(self)
 
         if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Setting Start and End Socket of Edge:: ", self, " to None")
         self.start_socket = None
@@ -123,6 +130,16 @@ class NodeEditorEdge(Serializable):
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
 
+        if SERIALIZE_DEBUG: print("______________________________________")
+        if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Start Serialized Edge:: ", self, " with Data:: ", data)
+        if SERIALIZE_DEBUG: print("EDGE:: --serialize::  Hasmap for Edge:: ", hashmap)
+        if self.start_socket is not None and SERIALIZE_DEBUG:
+            print("EDGE:: --serialize:: previouse Start Socket id: ", self.start_socket.id, " beeing object:: ", self.start_socket)
+            print("EDGE:: --serialize:: Hasmap matched start socket Id: ", data['start_socket'], " and therefore object:: ", hashmap[data['start_socket']])
+        if self.end_socket is not None and SERIALIZE_DEBUG:
+            print("EDGE:: --serialize:: previouse End Socket id: ", self.end_socket.id, " beeing object:: ", self.end_socket)
+            print("EDGE:: --serialize:: Hasmap matched End socket Id: ", data['end_socket'], " and therefore object:: ", hashmap[data['end_socket']])
+
         if restore_id: self.id = data['id']
         self.start_socket = hashmap[data['start_socket']]
         self.end_socket = hashmap[data['end_socket']]
@@ -130,7 +147,7 @@ class NodeEditorEdge(Serializable):
 
         self.updatePositions()
 
-        if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Serialized Edge:: ", self, " with Data:: ", data)
+        if SERIALIZE_DEBUG: print("______________________________________EDGE DESERIALIZED")
 
         return True
 
