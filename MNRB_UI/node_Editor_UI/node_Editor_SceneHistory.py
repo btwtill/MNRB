@@ -8,6 +8,8 @@ class NodeEditorSceneHistory():
     def __init__(self, scene) -> None:
         self.scene = scene
 
+        self.undo_selection_has_changed = False
+
         self.history_stack = []
         self.history_current_step = -1
         self.history_limit = 8
@@ -46,6 +48,32 @@ class NodeEditorSceneHistory():
 
     def restoreHistoryStamp(self, history_stamp):
         if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: ", history_stamp)
+
+        self.undo_selection_has_changed = False
+        previouse_selection = self.captureCurrentSceneSelection()
+
+        if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: Deserializing History Snapshot")
+        self.scene.deserialize(history_stamp['snapshot'])
+        
+        if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: Restoring Selection from History Stamp")
+        for edge in self.scene.edges: edge.grEdge.setSelected(False)
+
+        for edge_id in history_stamp['selection']['edges']:
+            for edge in self.scene.edges:
+                if edge.id == edge_id:
+                    edge.grEdge.setSelected(True)
+                    break
+
+        for node in self.scene.nodes: node.grNode.setSelected(False)
+
+        for node_id in history_stamp['selection']['nodes']:
+            for node in self.scene.nodes:
+                if node.id == node_id:
+                    node.grNode.setSelected(True)
+                    break
+
+        current_selection = self.captureCurrentSceneSelection()
+
     
     def createHistoryStamp(self, history_stamp_description):
         
