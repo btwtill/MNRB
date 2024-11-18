@@ -66,11 +66,19 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         if self.display_overlay:
             self.setupProjectOverlay()
         else:
-            self.onOpenProject()
+            self.onOpenProject(self.project_path)
 
         self.createEditorActions()
         self.setupMenuBar()
         self.setupStatusBar()
+
+    def initTabs(self):
+
+        self.tabs = QtWidgets.QTabWidget()
+        self.setCentralWidget(self.tabs)
+
+        self.setupNodeEditorTab()
+        self.setupControlEditorTab()
 
     def setupNodeEditorTab(self):
 
@@ -111,12 +119,25 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.innerLayout.addStretch()
 
         self.project_name_lineEdit = QtWidgets.QLineEdit()
+        self.project_name_lineEdit.setPlaceholderText("Enter Project Name:")
 
         self.overlayNewActionButton = QtWidgets.QPushButton("New Project")
         self.overlayNewActionButton.clicked.connect(lambda: self.onNewProject(self.project_name_lineEdit.text()))
 
+        current_workspace_projects = os.listdir(self.mnrb_path)
+
+        self.current_workspace_projects_list = QtWidgets.QListWidget()
+
+        for item in current_workspace_projects:
+            new_poject_list_item = QtWidgets.QListWidgetItem()
+            new_poject_list_item.setText(item + " - " + os.path.join(self.mnrb_path, item))
+            self.current_workspace_projects_list.addItem(new_poject_list_item)
+
+        self.current_workspace_projects_list.itemDoubleClicked.connect(self.onPathItemDoubleClicked)
+
         self.innerLayout.addWidget(self.project_name_lineEdit)
         self.innerLayout.addWidget(self.overlayNewActionButton)
+        self.innerLayout.addWidget(self.current_workspace_projects_list)
         self.innerLayout.setContentsMargins(60, 20, 60, 20)
 
         self.innerLayout.addStretch()
@@ -174,11 +195,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             #creating The Projcet Hirarchy
             os.mkdir(self._mnrb_base_editor_path)
 
-            self.tabs = QtWidgets.QTabWidget()
-            self.setCentralWidget(self.tabs)
-
-            self.setupNodeEditorTab()
-            self.setupControlEditorTab()
+            self.initTabs()
         else:
             warningBox = QtWidgets.QMessageBox()
             warningBox.setWindowTitle("The Name is Invalid")
@@ -187,14 +204,20 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
             warningBox.exec_()      
 
-    def onOpenProject(self):
-        if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject:: Start opening a Project")
+    def onOpenProject(self, path=None):
+        if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject:: Start opening a Project from path:: ", path)
+
+        self.initTabs()
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
 
     def onSaveProjectAs(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
+
+    def onPathItemDoubleClicked(self, item):
+        path_items = item.text().split(" - ")
+        self.onOpenProject(path_items[1])
 
     def loadProjectSettings(self):
         with open(self.project_settings_path, "r") as file:
