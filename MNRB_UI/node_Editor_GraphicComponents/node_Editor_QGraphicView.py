@@ -97,20 +97,20 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.centerOn(0, 0)
         elif event.key() == Qt.Key_N:
             newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1], ["input", 1]], outputs=[["output",1], ["output", 1], ["output",1]])
-        elif event.key() == Qt.Key_Delete:
-            self.deleteSelected()
-        elif event.key() == Qt.Key_S and event.modifiers() & Qt.CTRL:
-            self.grScene.scene.saveSceneToFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
-        elif event.key() == Qt.Key_L and event.modifiers() & Qt.CTRL:
-            self.grScene.scene.loadSceneFromFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
-        elif event.key() == Qt.Key_Z and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
-            self.grScene.scene.history.undo()
-        elif event.key() == Qt.Key_Y and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
-            self.grScene.scene.history.redo()
-        elif event.key() == Qt.Key_4:
-            print("NODEEDITOR_VIEW:: SCENEHISTORY:: Stack Length", len(self.grScene.scene.history.history_stack), "..... Current Step:: ", self.grScene.scene.history.history_current_step)
-            for index, item in enumerate(self.grScene.scene.history.history_stack):
-                print("NODEEDITOR_VIEW:: SCENEHISTORY: History:: History Item:: ", index," Item Description:: " , item['description'])
+        # elif event.key() == Qt.Key_Delete:
+        #     self.deleteSelected()
+        # elif event.key() == Qt.Key_S and event.modifiers() & Qt.CTRL:
+        #     self.grScene.scene.saveSceneToFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
+        # elif event.key() == Qt.Key_L and event.modifiers() & Qt.CTRL:
+        #     self.grScene.scene.loadSceneFromFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
+        # elif event.key() == Qt.Key_Z and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
+        #     self.grScene.scene.history.undo()
+        # elif event.key() == Qt.Key_Y and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
+        #     self.grScene.scene.history.redo()
+        # elif event.key() == Qt.Key_4:
+        #     print("NODEEDITOR_VIEW:: SCENEHISTORY:: Stack Length", len(self.grScene.scene.history.history_stack), "..... Current Step:: ", self.grScene.scene.history.history_current_step)
+        #     for index, item in enumerate(self.grScene.scene.history.history_stack):
+        #         print("NODEEDITOR_VIEW:: SCENEHISTORY: History:: History Item:: ", index," Item Description:: " , item['description'])
         else:
             super().keyPressEvent(event)
         
