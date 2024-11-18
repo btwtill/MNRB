@@ -68,3 +68,9 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def onDelete(self):
         self.central_widget.view.deleteSelected()
+    
+    def onUndo(self):
+        self.central_widget.scene.history.undo()
+
+    def onRedo(self):
+        self.central_widget.scene.history.redo()

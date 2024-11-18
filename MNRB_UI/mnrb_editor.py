@@ -316,9 +316,15 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         
     def onEditUndo(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onUndo:: Undo last operation!")
+        try: 
+            self.getNodeEditorTab().onUndo()
+        except Exception as e: print(e)
     
     def onEditRedo(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onRedo:: Redo last operation!")
+        try: 
+            self.getNodeEditorTab().onRedo()
+        except Exception as e: print(e)
 
     def onEditDelete(self):
         self.getNodeEditorTab().onDelete()
@@ -342,6 +348,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def getNodeEditorWidget(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0].centralWidget()
+
+    def getCurrentTabWidget(self):
+        return self.tabs.currentWidget()
 
     def validateProjectName(self, name):
 
