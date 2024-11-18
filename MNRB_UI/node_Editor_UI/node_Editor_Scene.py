@@ -65,7 +65,6 @@ class NodeEditorScene(Serializable):
             print("NODE_EDITOR_SCENE:: -removeNode:: Index of edge to be Removed:: ", findIndexByAttribute(self.edges, edge.id))
 
         index_edge_remove = findIndexByAttribute(self.edges, edge.id)
-        #self.edges.remove(edge)
         del self.edges[index_edge_remove]
 
         if CLASS_DEBUG:
@@ -92,6 +91,8 @@ class NodeEditorScene(Serializable):
     def clearScene(self):
         while len(self.nodes) > 0:
             self.nodes[0].remove()
+        
+        self.grScene.scene.history.storeHistory("Cleared Scene")
 
     def serialize(self):
         

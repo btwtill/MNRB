@@ -150,19 +150,24 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setCentralWidget(self.overlay_Widget)
 
     def createEditorActions(self):
-        self.actionNewProject = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='Create New Project', triggered=self.onNewProjectFromMenuBar)
-        self.actionOpenProject = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='Open a Project', triggered=self.onOpenProjectFromMenuBar)
-        self.actionSaveProjcet = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='Save Project', triggered=self.onSaveProject)
-        self.actionSaveProjcetAs = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='Save Project As', triggered=self.onSaveProjectAs)
-        self.actionExit = QtWidgets.QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='Exit Tool', triggered=self.close)
+        self.actionNewProject = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='create new project', triggered=self.onNewProjectFromMenuBar)
+        self.actionOpenProject = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='open a project', triggered=self.onOpenProjectFromMenuBar)
+        self.actionSaveProjcet = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='save project', triggered=self.onSaveProject)
+        self.actionSaveProjcetAs = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
+        self.actionExit = QtWidgets.QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='exit tool', triggered=self.close)
 
-        self.actionLoadTemplate = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='LoadRigTemplate', triggered=self.onLoadNodeEditorFile)
-        self.actionSaveTemplateAs = QtWidgets.QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='Save RigTemplate As', triggered=self.onSaveNodeEditorTemplateAs)
-        self.actionClear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+C', statusTip='Save RigTemplate As', triggered=self.onClearNodeEditor)
+        self.actionLoadTemplate = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
+        self.actionSaveTemplateAs = QtWidgets.QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='save template as', triggered=self.onSaveNodeEditorTemplateAs)
+        self.actionClear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shit+C', statusTip='save template as', triggered=self.onClearNodeEditor)
 
         self.actionUndo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
         self.actionRedo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
-        self.actionDelete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='Delete currently Selected', triggered=self.onEditDelete)
+        self.actionDelete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='delete currently Selected', triggered=self.onEditDelete)
+
+        self.actionEditCopy = QtWidgets.QAction('&Copy', self, shortcut='Ctrl + C', statusTip='copy current selection', triggered=self.onEditCopy)
+        self.actionEditCut = QtWidgets.QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
+        self.actionEditPast = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
+    
 
     def setupMenuBar(self):
         menu_bar = self.menuBar()
@@ -220,10 +225,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         result = new_project_name_messageBox.exec_()
 
         if result == QtWidgets.QMessageBox.Cancel:
-            print("Rejected")
+            pass
         elif  result == QtWidgets.QMessageBox.Ok:
-            print(result)
-            print("reached")
             self.onNewProject(title_lineEdit.text())
         
     def onNewProject(self, name):
@@ -324,6 +327,15 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onEditDelete(self):
         self.getNodeEditorTab().onDelete()
+
+    def onEditCopy(self):
+        self.getNodeEditorTab().onEditCopy()
+
+    def onEditCut(self):
+        self.getNodeEditorTab().onEditCut()
+
+    def onEditPaste(self):
+        self.getNodeEditorTab().onEditPaste()
 
     def onSceneMousePositionChange(self, x, y):
         self.statusMousePosition.setText("Scene Mouse Position: [%d %d]" % (x, y))

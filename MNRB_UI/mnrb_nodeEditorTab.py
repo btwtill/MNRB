@@ -54,8 +54,10 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
             if len(graph) >= 1:
                 self.central_widget.scene.loadSceneFromFile(os.path.join(path, graph))
+                #add History Stamp
         elif os.path.isfile(path):
             self.central_widget.scene.loadSceneFromFile(path)
+            #add History Stamp
     
     def clearScene(self):
         self.central_widget.scene.clearScene()
@@ -74,3 +76,12 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def onRedo(self):
         self.central_widget.scene.history.redo()
+
+    def onEditCopy(self):
+        pass
+
+    def onEditCut(self):
+        pass
+
+    def onEditPaste(self):
+        pass
