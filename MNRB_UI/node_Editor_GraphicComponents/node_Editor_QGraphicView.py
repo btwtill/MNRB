@@ -297,6 +297,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.cutting_edge.line_points.append(scene_event_mouse_position)
             self.cutting_edge.update()
 
+        self.last_mouse_position = scene_event_mouse_position
+
         self.scene_mouse_position_changed.emit(int(scene_event_mouse_position.x()), int(scene_event_mouse_position.y()))
         super().mouseMoveEvent(event)
 

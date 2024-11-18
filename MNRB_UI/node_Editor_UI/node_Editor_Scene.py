@@ -75,6 +75,16 @@ class NodeEditorScene(Serializable):
             for index, _edge in enumerate(self.edges):
                 print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge , " at Index:: ", index, " with ID: ", _edge.id)
 
+    def doDeselectItems(self, silent = False):
+        for item in self.getSelectedItems():
+            item.setSelected(False)
+
+    def getSelectedItems(self):
+        return self.grScene.selectedItems()
+
+    def getView(self):
+        return self.grScene.views()[0]
+
     def saveSceneToFile(self, filename):
 
         with open(filename, "w") as file:

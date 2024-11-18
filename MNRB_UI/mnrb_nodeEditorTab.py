@@ -101,4 +101,4 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             print("Json does not contain any nodes!!")
             return
 
-        self.central_widget.scene.clipboard.deserializeFromClipboardToScene()
+        self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)

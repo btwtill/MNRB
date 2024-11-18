@@ -21,7 +21,7 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
         self.layout.setSpacing(5)
         self.setLayout(self.layout)
 
-        if self.node.scene.grScene.views()[0].zoom <= self.node.scene.grScene.views()[0].zoom_content_visibility_threshold:
+        if self.node.scene.getView().zoom <= self.node.scene.getView().zoom_content_visibility_threshold:
             self.hide()
 
     def addSocketLabel(self, value, alignment, position):
