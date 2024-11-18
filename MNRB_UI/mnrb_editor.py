@@ -249,7 +249,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             warningBox.setText("The name is either none, already taken or contains illigal symbols \n Please Change the name of your Project!")
             warningBox.setIcon(QtWidgets.QMessageBox.Critical)
 
-            warningBox.exec_()      
+            warningBox.exec_()
 
     def onOpenProjectFromMenuBar(self):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject::  Start Opening project from Menu Bar",)
@@ -263,12 +263,16 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def onOpenProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Opening Project from Path:: ", self.project_path)
         self.initTabs()
-        self.getNodeEditorTab().onOpenFile(self._mnrb_base_editor_path)
+        self.statusBar().showMessage(' Opened project from ' + self.project_path, 5000)
+        try:
+            self.getNodeEditorTab().onOpenFile(self._mnrb_base_editor_path)
+        except Exception as e: print(e)
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
         if self.project_path is not None:
             self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
+            self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
         else:
             self.onSaveProjectAs()
 
@@ -279,6 +283,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             directory_path = directory_name.toString().split("file:///")[1]
             if os.path.isdir(directory_path):
                 self.project_path = directory_path
+
+                self.statusBar().showMessage(' Saved Project As to ' + self.project_path, 5000)
                 self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
 
     def onLoadNodeEditorFile(self):
@@ -288,6 +294,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             return
         if os.path.isfile(file_name):
             self.getNodeEditorTab().onOpenFile(file_name)
+            self.statusBar().showMessage(' Successfully loaded Template from ' + file_name, 5000)
         
     def onSaveNodeEditorTemplateAs(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveNodeEditorTemplateAs:: Save Node Editor File/Template As")
@@ -297,6 +304,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             return
         else:
             self.getNodeEditorTab().onSaveFile(file_name)
+            self.statusBar().showMessage(' Successfully saved Template to ' + file_name, 5000)
 
     def onClearNodeEditor(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onClearNodeEditor:: Clearing Node Editor Space")
@@ -314,7 +322,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onPathItemDoubleClicked(self, item):
         path_items = item.text().split(" - ")
-        self.onOpenProject(path_items[1])
+        self.project_path = path_items[1]
+        self.onOpenProject()
 
     def loadProjectSettings(self):
         with open(self.project_settings_path, "r") as file:
