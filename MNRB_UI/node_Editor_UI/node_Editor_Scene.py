@@ -6,6 +6,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: i
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory import NodeEditorSceneHistory #type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneClipboard #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
@@ -22,6 +23,7 @@ class NodeEditorScene(Serializable):
         self.initUI()
 
         self.history = NodeEditorSceneHistory(self)
+        self.clipboard = NodeEditorSceneClipboard()
 
         if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
 
