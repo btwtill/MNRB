@@ -1,6 +1,6 @@
 import math
 from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import Qt, QEvent # type: ignore
+from PySide2.QtCore import Qt, QEvent, Signal # type: ignore
 from PySide2.QtGui import QPainter, QMouseEvent, QPen, QColor # type:ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
@@ -24,6 +24,9 @@ MODE_EDGE_CUT = 3
 EDGE_DRAG_START_THRESHOLD = 20
 
 class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
+
+    scene_mouse_position_changed = Signal(int, int)
+
     def __init__(self, grScene, parent=None):
         super().__init__(parent)
 
@@ -97,20 +100,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.centerOn(0, 0)
         elif event.key() == Qt.Key_N:
             newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1], ["input", 1]], outputs=[["output",1], ["output", 1], ["output",1]])
-        # elif event.key() == Qt.Key_Delete:
-        #     self.deleteSelected()
-        # elif event.key() == Qt.Key_S and event.modifiers() & Qt.CTRL:
-        #     self.grScene.scene.saveSceneToFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
-        # elif event.key() == Qt.Key_L and event.modifiers() & Qt.CTRL:
-        #     self.grScene.scene.loadSceneFromFile("C:/Users/tillp/OneDrive/Dokumente/maya/scripts/MNRB/graph.json")
-        # elif event.key() == Qt.Key_Z and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
-        #     self.grScene.scene.history.undo()
-        # elif event.key() == Qt.Key_Y and event.modifiers() & Qt.CTRL and not event.modifiers() & Qt.SHIFT:
-        #     self.grScene.scene.history.redo()
-        # elif event.key() == Qt.Key_4:
-        #     print("NODEEDITOR_VIEW:: SCENEHISTORY:: Stack Length", len(self.grScene.scene.history.history_stack), "..... Current Step:: ", self.grScene.scene.history.history_current_step)
-        #     for index, item in enumerate(self.grScene.scene.history.history_stack):
-        #         print("NODEEDITOR_VIEW:: SCENEHISTORY: History:: History Item:: ", index," Item Description:: " , item['description'])
         else:
             super().keyPressEvent(event)
         
@@ -308,6 +297,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.cutting_edge.line_points.append(scene_event_mouse_position)
             self.cutting_edge.update()
 
+        self.scene_mouse_position_changed.emit(int(scene_event_mouse_position.x()), int(scene_event_mouse_position.y()))
         super().mouseMoveEvent(event)
 
     def wheelEvent(self, event):

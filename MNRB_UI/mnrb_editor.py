@@ -77,8 +77,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.createEditorActions()
         self.setupMenuBar()
-        self.setupStatusBar()
-
+        
     def initTabs(self):
 
         self.tabs = QtWidgets.QTabWidget()
@@ -86,6 +85,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.setupNodeEditorTab()
         self.setupControlEditorTab()
+        self.setupStatusBar()
 
     def setupNodeEditorTab(self):
 
@@ -209,6 +209,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.statusBar().showMessage('')
         self.statusMousePosition = QtWidgets.QLabel('')
+        self.statusBar().addPermanentWidget(self.statusMousePosition)
+        node_editor_tab= self.getNodeEditorTab()
+        node_editor_tab.central_widget.view.scene_mouse_position_changed.connect(self.onSceneMousePositionChange) 
 
     def onNewProjectFromMenuBar(self):
         new_project_name_messageBox = QtWidgets.QMessageBox()
@@ -319,6 +322,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onEditDelete(self):
         self.getNodeEditorTab().onDelete()
+
+    def onSceneMousePositionChange(self, x, y):
+        self.statusMousePosition.setText("Scene Mouse Position: [%d %d]" % (x, y))
 
     def onPathItemDoubleClicked(self, item):
         path_items = item.text().split(" - ")
