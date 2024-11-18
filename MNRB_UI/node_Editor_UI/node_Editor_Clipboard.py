@@ -39,6 +39,7 @@ class NodeEditorSceneClipboard():
         if delete:
             for node in selected_nodes:
                 self.scene.getView().deleteSelected()
+                self.scene.history.storeHistory("Cut Elements from Scene")
         
         if SERIALIZE_DEBUG: 
             print("NODE_EDITOR_CLIPBOARD:: ClipboardContent:: ")
