@@ -23,7 +23,7 @@ class NodeEditorScene(Serializable):
         self.initUI()
 
         self.history = NodeEditorSceneHistory(self)
-        self.clipboard = NodeEditorSceneClipboard()
+        self.clipboard = NodeEditorSceneClipboard(self)
 
         if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
 

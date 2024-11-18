@@ -164,9 +164,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.actionRedo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
         self.actionDelete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='delete currently Selected', triggered=self.onEditDelete)
 
-        self.actionEditCopy = QtWidgets.QAction('&Copy', self, shortcut='Ctrl + C', statusTip='copy current selection', triggered=self.onEditCopy)
+        self.actionEditCopy = QtWidgets.QAction('&Copy', self, shortcut='Ctrl+C', statusTip='copy current selection', triggered=self.onEditCopy)
         self.actionEditCut = QtWidgets.QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
-        self.actionEditPast = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
+        self.actionEditPaste = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
     
 
     def setupMenuBar(self):
@@ -201,6 +201,10 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.edit_menu.addAction(self.actionRedo)
         self.edit_menu.addSeparator()
         self.edit_menu.addAction(self.actionDelete)
+        self.edit_menu.addSeparator()
+        self.edit_menu.addAction(self.actionEditCopy)
+        self.edit_menu.addAction(self.actionEditCut)
+        self.edit_menu.addAction(self.actionEditPaste)
         
     def setupStatusBar(self):
         self.statusBar().showMessage('')

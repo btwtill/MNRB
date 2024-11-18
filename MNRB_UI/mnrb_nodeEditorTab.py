@@ -1,4 +1,5 @@
 import os
+import json
 from PySide2 import QtWidgets, QtCore # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 
@@ -78,10 +79,26 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         self.central_widget.scene.history.redo()
 
     def onEditCopy(self):
-        pass
+        data = self.central_widget.scene.clipboard.serializeSceneToClipboard()
+        str_data = json.dumps(data, indent=4)
+        QtWidgets.QApplication.instance().clipboard().setText(str_data)
 
     def onEditCut(self):
-        pass
+        data = self.central_widget.scene.clipboard.serializeSceneToClipboard(delete = True)
+        str_data = json.dumps(data, indent=4)
+        QtWidgets.QApplication.instance().clipboard().setText(str_data)
 
     def onEditPaste(self):
-        pass
+        raw_data = QtWidgets.QApplication.instance().clipboard().text()
+
+        try:    
+            data = json.loads(raw_data)
+        except ValueError as e:
+            print("Pasting of invalid Json Data!", e)
+            return
+            
+        if 'nodes' not in data: 
+            print("Json does not contain any nodes!!")
+            return
+
+        self.central_widget.scene.clipboard.deserializeFromClipboardToScene()
