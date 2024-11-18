@@ -1,3 +1,4 @@
+import os
 from PySide2 import QtWidgets, QtCore # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 
@@ -10,10 +11,10 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def initUI(self):
         # Central widget for secondary main window
 
-        central_widget = NodeEditorWidget()
+        self.central_widget = NodeEditorWidget()
 
         # Set the central widget for the secondary main window
-        self.setCentralWidget(central_widget)
+        self.setCentralWidget(self.central_widget)
 
         # Add dock widgets to the secondary main window
         self.add_dock_widgets()
@@ -47,4 +48,23 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         # Add the right dock widget to the secondary main window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, right_dock)
 
+    def onOpenFile(self, path):
+        if os.path.isdir(path):
+            graph = os.listdir(path)[0]
 
+            if len(graph) >= 1:
+                self.central_widget.scene.loadSceneFromFile(os.path.join(path, graph))
+        elif os.path.isfile(path):
+            self.central_widget.scene.loadSceneFromFile(path)
+    
+    def clearScene(self):
+        self.central_widget.scene.clearScene()
+
+    def onSaveFile(self, file_name):
+        self.central_widget.scene.saveSceneToFile(file_name)
+
+    def onNewFile(self, path):
+        pass
+
+    def onDelete(self):
+        self.central_widget.view.deleteSelected()

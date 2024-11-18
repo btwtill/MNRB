@@ -89,6 +89,10 @@ class NodeEditorScene(Serializable):
             self.deserialize(data)
         if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
 
+    def clearScene(self):
+        while len(self.nodes) > 0:
+            self.nodes[0].remove()
+
     def serialize(self):
         
         nodes, edges = [] , []
@@ -107,10 +111,6 @@ class NodeEditorScene(Serializable):
         if SERIALIZE_DEBUG: print("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
 
         return serialized_data
-
-    def clearScene(self):
-        while len(self.nodes) > 0:
-            self.nodes[0].remove()
 
     def deserialize(self, data, hashmap={}, restore_id = True):
 

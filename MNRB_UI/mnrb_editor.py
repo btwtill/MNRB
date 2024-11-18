@@ -21,6 +21,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.mnrb_path = os.path.join(self.working_directory, self.project_settings['ProjectSubPath'], "MNRB")
 
         self._project_path = None
+        self._project_name = None
         self._mnrb_base_editor_path = None
 
         self.display_overlay = True
@@ -33,8 +34,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     @project_path.setter
     def project_path(self, path):
         self._project_path = path
+        self.project_name = os.path.basename(self._project_path)
         self._mnrb_base_editor_path = os.path.join(self._project_path, "mnrb_editor")
 
+    @property
+    def project_name(self): return self._project_name
+    @project_name.setter
+    def project_name(self, value):
+        self._project_name = value
 
     def initProject(self):
 
@@ -66,7 +73,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         if self.display_overlay:
             self.setupProjectOverlay()
         else:
-            self.onOpenProject(self.project_path)
+            self.onOpenProject()
 
         self.createEditorActions()
         self.setupMenuBar()
@@ -151,18 +158,18 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def createEditorActions(self):
         self.actionNewProject = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='Create New Project', triggered=self.onNewProjectFromMenuBar)
-        self.actionOpenProject = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='Open a Project', triggered=self.onOpenProject)
+        self.actionOpenProject = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='Open a Project', triggered=self.onOpenProjectFromMenuBar)
         self.actionSaveProjcet = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='Save Project', triggered=self.onSaveProject)
         self.actionSaveProjcetAs = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='Save Project As', triggered=self.onSaveProjectAs)
         self.actionExit = QtWidgets.QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='Exit Tool', triggered=self.close)
 
-        self.actionLoadTemplate = QtWidgets.QAction('&Load', self, shortcut='Ctrl+L', statusTip='LoadRigTemplate', triggered=self.onLoadNodeEditorFile)
-        self.actionSaveTemplate = QtWidgets.QAction('Save&Template', self, shortcut='Ctrl+Alt+S', statusTip='Save Rig Template', triggered=self.onSaveNodeEditorTemplate)
-        self.actionSaveTemplateAs = QtWidgets.QAction('Save&TemplateAs', self, shortcut='Ctrl+Shift+Alt+S', statusTip='Save RigTemplate As', triggered=self.onSaveNodeEditorTemplateAs)
+        self.actionLoadTemplate = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='LoadRigTemplate', triggered=self.onLoadNodeEditorFile)
+        self.actionSaveTemplateAs = QtWidgets.QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='Save RigTemplate As', triggered=self.onSaveNodeEditorTemplateAs)
         self.actionClear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+C', statusTip='Save RigTemplate As', triggered=self.onClearNodeEditor)
 
-        self.actionUndo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onUndo)
-        self.actionRedo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onRedo)
+        self.actionUndo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
+        self.actionRedo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
+        self.actionDelete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='Delete currently Selected', triggered=self.onEditDelete)
 
     def setupMenuBar(self):
 
@@ -187,7 +194,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.node_editor_menu = menu_bar.addMenu('&NodeEditor')
 
         self.node_editor_menu.addAction(self.actionLoadTemplate)
-        self.node_editor_menu.addAction(self.actionSaveTemplate)
         self.node_editor_menu.addAction(self.actionSaveTemplateAs)
         self.node_editor_menu.addAction(self.actionClear)
 
@@ -197,7 +203,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.edit_menu.addAction(self.actionUndo)
         self.edit_menu.addAction(self.actionRedo)
         self.edit_menu.addSeparator()
-
+        self.edit_menu.addAction(self.actionDelete)
+        
     def setupStatusBar(self):
 
         self.statusBar().showMessage('')
@@ -230,7 +237,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
             #create Project
             self.project_path = os.path.join(self.mnrb_path, name)
-
             os.mkdir(self.project_path)
 
             #creating The Projcet Hirarchy
@@ -245,38 +251,66 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
             warningBox.exec_()      
 
-    def onOpenProject(self, path=None):
-        if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject:: Start opening a Project from path:: ", path)
+    def onOpenProjectFromMenuBar(self):
+        if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject::  Start Opening project from Menu Bar",)
+        directory_name = QtWidgets.QFileDialog.getExistingDirectoryUrl(self, "Open graph from file")
+        if directory_name != '':
+            directory_path = directory_name.toString().split("file:///")[1]
+            if os.path.isdir(directory_path):
+                self.project_path = directory_path
+                self.onOpenProject()
 
+    def onOpenProject(self):
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Opening Project from Path:: ", self.project_path)
         self.initTabs()
+        self.getNodeEditorTab().onOpenFile(self._mnrb_base_editor_path)
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
+        if self.project_path is not None:
+            self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
+        else:
+            self.onSaveProjectAs()
 
     def onSaveProjectAs(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveAsProject:: Start Saving As Project")
+        directory_name = QtWidgets.QFileDialog.getExistingDirectoryUrl(self, "Save Project To Location")
+        if directory_name != '':
+            directory_path = directory_name.toString().split("file:///")[1]
+            if os.path.isdir(directory_path):
+                self.project_path = directory_path
+                self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
 
     def onLoadNodeEditorFile(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onLoadNodeEditorFile:: Load Node Editor File/Template")
-
-    def onSaveNodeEditorTemplate(self):
-        if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveNodeEditorTemplate:: Save Node Editor File/Template")
-
+        file_name, filter = QtWidgets.QFileDialog.getOpenFileName(self, "Open graph from file")
+        if file_name == '':
+            return
+        if os.path.isfile(file_name):
+            self.getNodeEditorTab().onOpenFile(file_name)
+        
     def onSaveNodeEditorTemplateAs(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveNodeEditorTemplateAs:: Save Node Editor File/Template As")
+        file_name, filter = QtWidgets.QFileDialog.getSaveFileName(self, "Save Template to File")
+
+        if file_name == '':
+            return
+        else:
+            self.getNodeEditorTab().onSaveFile(file_name)
 
     def onClearNodeEditor(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onClearNodeEditor:: Clearing Node Editor Space")
 
-        node_editor_widget = self.getNodeEditorWidget()
-        node_editor = node_editor_widget.findChildren(QtWidgets.QMainWindow)[0].centralWidget()
-        node_editor.scene.clearScene()
-
-    def onUndo(self):
+        self.getNodeEditorTab().clearScene()
+        
+    def onEditUndo(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onUndo:: Undo last operation!")
     
-    def onRedo(self):
+    def onEditRedo(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onRedo:: Redo last operation!")
+
+    def onEditDelete(self):
+        self.getNodeEditorTab().onDelete()
 
     def onPathItemDoubleClicked(self, item):
         path_items = item.text().split(" - ")
@@ -288,8 +322,11 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             project_settings_json = json.loads(project_settings_raw)
         return project_settings_json
 
+    def getNodeEditorTab(self):
+        return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
+
     def getNodeEditorWidget(self):
-        return self.tabs.widget(0)
+        return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0].centralWidget()
 
     def validateProjectName(self, name):
 
