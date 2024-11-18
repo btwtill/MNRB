@@ -44,7 +44,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self._project_name = value
 
     def initProject(self):
-
         #Check if in the Current Working Directory + The Defined Subfolder for the ProjectDirectory is an MNRB Folder and how many Projects are in it
         if os.path.isdir(self.mnrb_path):
             if CLASS_DEBUG: print("MNRB_EDITOR:: --initProject:: MNRB Directory found in current working Directory!")
@@ -66,7 +65,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 self.display_overlay = True
 
     def initUI(self):
-
         self.setWindowTitle("mnrb Editor")
         self.setGeometry(200, 200, 1200, 700)
 
@@ -79,7 +77,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupMenuBar()
         
     def initTabs(self):
-
         self.tabs = QtWidgets.QTabWidget()
         self.setCentralWidget(self.tabs)
 
@@ -88,7 +85,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupStatusBar()
 
     def setupNodeEditorTab(self):
-
         #Set Up the NodeEditor Tab Object
         self.nodeEditorTabWindow = mnrb_NodeEditorTab()
 
@@ -103,7 +99,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.tabs.addTab(first_tab_container, "MNRB")
 
     def setupControlEditorTab(self):
-        
         # Second tab PlaceHolder Widget
         second_tab_widget = QtWidgets.QWidget()
         second_tab_layout = QtWidgets.QHBoxLayout(second_tab_widget)
@@ -118,7 +113,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.tabs.addTab(second_tab_widget, "Tab 2")
 
     def setupProjectOverlay(self):
-
         self.overlay_Widget = QtWidgets.QWidget()
 
         self.outer_Layout = QtWidgets.QHBoxLayout()
@@ -155,7 +149,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.overlay_Widget.setLayout(self.outer_Layout)
         self.setCentralWidget(self.overlay_Widget)
 
-
     def createEditorActions(self):
         self.actionNewProject = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='Create New Project', triggered=self.onNewProjectFromMenuBar)
         self.actionOpenProject = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='Open a Project', triggered=self.onOpenProjectFromMenuBar)
@@ -172,15 +165,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.actionDelete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='Delete currently Selected', triggered=self.onEditDelete)
 
     def setupMenuBar(self):
-
         menu_bar = self.menuBar()
         self.setupProjectMenu(menu_bar)
         self.setupNodeEditorMenu(menu_bar)
         self.setupEditMenu(menu_bar)
 
     def setupProjectMenu(self, menu_bar):
-         
         self.project_menu = menu_bar.addMenu('&Project')
+
         self.project_menu.addAction(self.actionNewProject)
         self.project_menu.addSeparator()
         self.project_menu.addAction(self.actionOpenProject)
@@ -206,7 +198,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.edit_menu.addAction(self.actionDelete)
         
     def setupStatusBar(self):
-
         self.statusBar().showMessage('')
         self.statusMousePosition = QtWidgets.QLabel('')
         self.statusBar().addPermanentWidget(self.statusMousePosition)
@@ -256,6 +247,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onOpenProjectFromMenuBar(self):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject::  Start Opening project from Menu Bar",)
+
         directory_name = QtWidgets.QFileDialog.getExistingDirectoryUrl(self, "Open graph from file")
         if directory_name != '':
             directory_path = directory_name.toString().split("file:///")[1]
@@ -265,6 +257,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onOpenProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Opening Project from Path:: ", self.project_path)
+
         self.initTabs()
         self.statusBar().showMessage(' Opened project from ' + self.project_path, 5000)
         try:
@@ -273,6 +266,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
+
         if self.project_path is not None:
             self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
@@ -281,6 +275,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onSaveProjectAs(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveAsProject:: Start Saving As Project")
+
         directory_name = QtWidgets.QFileDialog.getExistingDirectoryUrl(self, "Save Project To Location")
         if directory_name != '':
             directory_path = directory_name.toString().split("file:///")[1]
@@ -292,6 +287,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onLoadNodeEditorFile(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onLoadNodeEditorFile:: Load Node Editor File/Template")
+
         file_name, filter = QtWidgets.QFileDialog.getOpenFileName(self, "Open graph from file")
         if file_name == '':
             return
@@ -353,7 +349,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         return self.tabs.currentWidget()
 
     def validateProjectName(self, name):
-
         mnrb_projects = os.listdir(self.mnrb_path)
         if name == "": 
             return False
