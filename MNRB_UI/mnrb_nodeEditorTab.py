@@ -51,11 +51,14 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def onOpenFile(self, path):
         if os.path.isdir(path):
-            graph = os.listdir(path)[0]
+            graph_items = os.listdir(path)
 
-            if len(graph) >= 1:
-                self.central_widget.scene.loadSceneFromFile(os.path.join(path, graph))
+            if len(graph_items) >= 1:
+                self.central_widget.scene.loadSceneFromFile(os.path.join(path, graph_items[0]))
                 #add History Stamp
+            else:
+                self.onNewFile()
+                
         elif os.path.isfile(path):
             self.central_widget.scene.loadSceneFromFile(path)
             #add History Stamp
@@ -66,8 +69,8 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def onSaveFile(self, file_name):
         self.central_widget.scene.saveSceneToFile(file_name)
 
-    def onNewFile(self, path):
-        pass
+    def onNewFile(self):
+        self.central_widget.scene.clearScene()
 
     def onDelete(self):
         self.central_widget.view.deleteSelected()

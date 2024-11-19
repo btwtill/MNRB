@@ -105,6 +105,8 @@ class NodeEditorScene(Serializable):
 
         with open(filename, "w") as file:
             file.write(json.dumps(self.serialize(), indent=4))
+        
+        self.has_been_modified = False
 
         if SERIALIZE_DEBUG: print("SCENE: --saveSceneToFile:: Successfully stored Scene ", self, " to File: ", filename)
 

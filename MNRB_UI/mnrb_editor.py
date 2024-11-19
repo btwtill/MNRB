@@ -2,7 +2,7 @@ import os
 import json
 import maya.cmds as cmds # type: ignore
 from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import QFile #type:  ignore 
+from PySide2.QtCore import Qt, QFile #type:  ignore 
 from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 
@@ -28,6 +28,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.initProject()
         self.initUI()
+        self.initTabs()
 
     @property
     def project_path(self): return self._project_path
@@ -35,6 +36,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def project_path(self, path):
         self._project_path = path
         self.project_name = os.path.basename(self._project_path)
+        
         self._mnrb_base_editor_path = os.path.join(self._project_path, "mnrb_editor")
 
     @property
@@ -42,6 +44,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     @project_name.setter
     def project_name(self, value):
         self._project_name = value
+        self.setTitleText()
 
     def initProject(self):
         #Check if in the Current Working Directory + The Defined Subfolder for the ProjectDirectory is an MNRB Folder and how many Projects are in it
@@ -65,24 +68,23 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 self.display_overlay = True
 
     def initUI(self):
-        self.setWindowTitle("mnrb Editor")
         self.setGeometry(200, 200, 1200, 700)
-
-        if self.display_overlay:
-            self.setupProjectOverlay()
-        else:
-            self.onOpenProject()
 
         self.createEditorActions()
         self.setupMenuBar()
         
     def initTabs(self):
         self.tabs = QtWidgets.QTabWidget()
-        self.setCentralWidget(self.tabs)
 
         self.setupNodeEditorTab()
         self.setupControlEditorTab()
         self.setupStatusBar()
+
+        if self.display_overlay:
+            self.setupProjectOverlay()
+        else:
+            self.onOpenProject()
+            
 
     def setupNodeEditorTab(self):
         #Set Up the NodeEditor Tab Object
@@ -148,7 +150,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.overlay_Widget.setLayout(self.outer_Layout)
         self.setCentralWidget(self.overlay_Widget)
-
+        
     def createEditorActions(self):
         self.actionNewProject = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='create new project', triggered=self.onNewProjectFromMenuBar)
         self.actionOpenProject = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='open a project', triggered=self.onOpenProjectFromMenuBar)
@@ -168,7 +170,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.actionEditCut = QtWidgets.QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
         self.actionEditPaste = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
     
-
     def setupMenuBar(self):
         menu_bar = self.menuBar()
         self.setupProjectMenu(menu_bar)
@@ -244,7 +245,13 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 #creating The Projcet Hirarchy
                 os.mkdir(self._mnrb_base_editor_path)
 
-                self.initTabs()
+                if self.display_overlay:
+                    self.setCentralWidget(self.tabs)
+
+                self.display_overlay = False
+
+                self.getNodeEditorTab().onNewFile()
+
             else:
                 warningBox = QtWidgets.QMessageBox()
                 warningBox.setWindowTitle("The Name is Invalid")
@@ -266,11 +273,18 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def onOpenProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Opening Project from Path:: ", self.project_path)
 
-        self.initTabs()
+        if self.display_overlay:
+            self.setCentralWidget(self.tabs)
+
+        self.display_overlay = False
         self.statusBar().showMessage(' Opened project from ' + self.project_path, 5000)
+
         try:
             self.getNodeEditorTab().onOpenFile(self._mnrb_base_editor_path)
-        except Exception as e: print(e)
+        except Exception as e: 
+            print("MNRB_EDITOR:: dipslay Overlay:: ", self.display_overlay)
+            print("MNRB_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
+            print("MNRB_EDITOR:: ", e)
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
@@ -389,11 +403,29 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
 
+    def getMainWindowWidgetsFromTab(self, tab_index):
+        return self.tabs.widget(tab_index).findChildren(QtWidgets.QMainWindow)
+
     def getNodeEditorWidget(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0].centralWidget()
 
     def getCurrentTabWidget(self):
         return self.tabs.currentWidget()
+
+    def setTitleText(self):
+        title = "MNRB Ediotr - "
+        if self.project_name is not None:
+            title += self.project_name
+        else:
+            self.setWindowTitle("MNRB Editor - Undefined")
+
+        try:
+            if self.isModified():
+                title += "*"
+        except:
+            pass
+
+        self.setWindowTitle(title)
 
     def validateProjectName(self, name):
         mnrb_projects = os.listdir(self.mnrb_path)
