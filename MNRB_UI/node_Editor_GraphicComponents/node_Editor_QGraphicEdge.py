@@ -67,6 +67,12 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
     def setDestinationSocketPosition(self, x, y):
         self.destination_position = [x, y]
 
+    def boundingRect(self):
+        return self.shape().boundingRect()
+    
+    def shape(self):
+        return self.calculatePath()
+
     def paint(self, painter, options, widget=None):
         #get path from the path calculator
         self.setPath(self.calculatePath())

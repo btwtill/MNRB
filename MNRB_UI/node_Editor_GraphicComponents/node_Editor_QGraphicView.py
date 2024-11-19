@@ -70,8 +70,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.last_mouse_position = None
 
-        self.centerOn(0, 0)
-
     def mousePressEvent(self, event) -> None:
         #decide what button has been pressed and execute the according action
         if event.button() == Qt.MiddleButton:
