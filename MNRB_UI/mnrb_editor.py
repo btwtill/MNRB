@@ -83,6 +83,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         if self.display_overlay:
             self.setupProjectOverlay()
         else:
+            self.display_overlay = True
             self.onOpenProject()
             
 
