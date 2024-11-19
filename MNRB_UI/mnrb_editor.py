@@ -234,23 +234,24 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.onNewProject(title_lineEdit.text())
         
     def onNewProject(self, name):
-        if self.validateProjectName(name):
+        if self.projectNeedsSaving():
+            if self.validateProjectName(name):
 
-            #create Project
-            self.project_path = os.path.join(self.mnrb_path, name)
-            os.mkdir(self.project_path)
+                #create Project
+                self.project_path = os.path.join(self.mnrb_path, name)
+                os.mkdir(self.project_path)
 
-            #creating The Projcet Hirarchy
-            os.mkdir(self._mnrb_base_editor_path)
+                #creating The Projcet Hirarchy
+                os.mkdir(self._mnrb_base_editor_path)
 
-            self.initTabs()
-        else:
-            warningBox = QtWidgets.QMessageBox()
-            warningBox.setWindowTitle("The Name is Invalid")
-            warningBox.setText("The name is either none, already taken or contains illigal symbols \n Please Change the name of your Project!")
-            warningBox.setIcon(QtWidgets.QMessageBox.Critical)
+                self.initTabs()
+            else:
+                warningBox = QtWidgets.QMessageBox()
+                warningBox.setWindowTitle("The Name is Invalid")
+                warningBox.setText("The name is either none, already taken or contains illigal symbols \n Please Change the name of your Project!")
+                warningBox.setIcon(QtWidgets.QMessageBox.Critical)
 
-            warningBox.exec_()
+                warningBox.exec_()
 
     def onOpenProjectFromMenuBar(self):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject::  Start Opening project from Menu Bar",)
@@ -277,8 +278,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         if self.project_path is not None:
             self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
+            return True
         else:
-            self.onSaveProjectAs()
+            return self.onSaveProjectAs()
 
     def onSaveProjectAs(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveAsProject:: Start Saving As Project")
@@ -291,6 +293,11 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
                 self.statusBar().showMessage(' Saved Project As to ' + self.project_path, 5000)
                 self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
+                return True
+            else: 
+                return False
+        else: 
+            return False
 
     def onLoadNodeEditorFile(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onLoadNodeEditorFile:: Load Node Editor File/Template")
@@ -349,6 +356,30 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_path = path_items[1]
         self.onOpenProject()
 
+    def closeEvent(self, event):
+
+        if self.projectNeedsSaving():
+            event.accept()
+        else:
+            event.ignore()
+
+    def isModified(self):
+        return self.getNodeEditorTab().isModified()
+
+    def projectNeedsSaving(self):
+
+        if not self.isModified():
+            return True
+        else:
+            result = QtWidgets.QMessageBox.warning(self, "Scene is not Saved!", "Document was modified. \n Do you want to Save Changed?", 
+                                                   QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+            
+            if result == QtWidgets.QMessageBox.Save:
+                return self.onSaveProject()
+            elif result == QtWidgets.QMessageBox.Cancel:
+                return False
+            else: return True
+                 
     def loadProjectSettings(self):
         with open(self.project_settings_path, "r") as file:
             project_settings_raw = file.read()

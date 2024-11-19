@@ -22,6 +22,8 @@ class NodeEditorScene(Serializable):
         
         self.initUI()
 
+        self.has_been_modified = True
+
         self.history = NodeEditorSceneHistory(self)
         self.clipboard = NodeEditorSceneClipboard(self)
 
