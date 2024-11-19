@@ -93,15 +93,6 @@ class NodeEditorEdge(Serializable):
         self.grEdge.update()
 
     def removeFromSockets(self):
-
-        #if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Start Removing Edge:: ", self, "fromSockets")
-        #if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from Start Socket::", self.start_socket)
-        #self.start_socket.removeEdge(self)
-        
-        #if self.end_socket is not None:
-        #   if REMOVE_DEBUG: print("EDGE:: --removeFromSockets::  Removing from End Socket::", self.end_socket)
-        #  self.end_socket.removeEdge(self)
-
         if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Setting Start and End Socket of Edge:: ", self, " to None")
         self.start_socket = None
         self.end_socket = None

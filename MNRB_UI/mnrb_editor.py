@@ -80,6 +80,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupControlEditorTab()
         self.setupStatusBar()
 
+        self.getNodeEditorTab().central_widget.scene.addHasBeenModifiedListenerCallback(self.setTitleText)
+
         if self.display_overlay:
             self.setupProjectOverlay()
         else:
@@ -293,6 +295,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         if self.project_path is not None:
             self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
+            self.setTitleText()
             return True
         else:
             return self.onSaveProjectAs()
@@ -307,6 +310,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 self.project_path = directory_path
 
                 self.statusBar().showMessage(' Saved Project As to ' + self.project_path, 5000)
+                self.setTitleText()
+
                 self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
                 return True
             else: 
@@ -414,17 +419,18 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         return self.tabs.currentWidget()
 
     def setTitleText(self):
+        print("MNRB_EDITOR:: --setTitleText ")
+
         title = "MNRB Ediotr - "
+
         if self.project_name is not None:
             title += self.project_name
         else:
             self.setWindowTitle("MNRB Editor - Undefined")
 
-        try:
+        if not self.display_overlay:
             if self.isModified():
                 title += "*"
-        except:
-            pass
 
         self.setWindowTitle(title)
 

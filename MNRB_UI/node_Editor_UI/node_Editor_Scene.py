@@ -35,6 +35,7 @@ class NodeEditorScene(Serializable):
     @has_been_modified.setter
     def has_been_modified(self, value):
         if not self._has_been_modified and value:
+            self._has_been_modified = value
 
             for callback in self._has_been_modified_listeners: callback()
 

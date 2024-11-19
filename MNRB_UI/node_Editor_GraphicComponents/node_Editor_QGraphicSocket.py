@@ -49,7 +49,10 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
         
         painter.setPen(self._pen)
         painter.setBrush(self._brush)
-        painter.drawEllipse(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius)
+        if not self.socket.accept_multi_edges:
+            painter.drawEllipse(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius)
+        else:
+            painter.drawRect(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius)
 
         if self.is_drawing_bounding_box:
             painter.setPen(QPen(Qt.red, 1, Qt.DashLine))

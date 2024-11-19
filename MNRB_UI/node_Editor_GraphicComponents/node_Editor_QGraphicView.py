@@ -98,7 +98,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if event.key() == Qt.Key_F:
             self.centerOn(0, 0)
         elif event.key() == Qt.Key_N:
-            newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1], ["input", 1]], outputs=[["output",1], ["output", 1], ["output",1]])
+            newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1, True], ["input", 1, False]], outputs=[["output",1, True], ["output", 1, True], ["output",1, True]])
         else:
             super().keyPressEvent(event)
         
