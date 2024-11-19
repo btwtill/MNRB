@@ -99,12 +99,13 @@ class NodeEditorScene(Serializable):
             data = json.loads(raw_data)
             self.deserialize(data)
         if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
+        self.history.storeHistory("Loaded From File.")
 
     def clearScene(self):
         while len(self.nodes) > 0:
             self.nodes[0].remove()
         
-        self.grScene.scene.history.storeHistory("Cleared Scene")
+        self.history.storeHistory("Cleared Scene")
 
     def serialize(self):
         
