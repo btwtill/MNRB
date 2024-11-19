@@ -158,7 +158,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.actionLoadTemplate = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
         self.actionSaveTemplateAs = QtWidgets.QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='save template as', triggered=self.onSaveNodeEditorTemplateAs)
-        self.actionClear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shit+C', statusTip='save template as', triggered=self.onClearNodeEditor)
+        self.actionClear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shift+C', statusTip='save template as', triggered=self.onClearNodeEditor)
 
         self.actionUndo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
         self.actionRedo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)

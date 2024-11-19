@@ -67,8 +67,9 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
     def setDestinationSocketPosition(self, x, y):
         self.destination_position = [x, y]
 
-    def boundingRect(self):
-        return self.shape().boundingRect()
+    #causing access viloation in some cases
+    # def boundingRect(self):
+    #     return self.shape().boundingRect()
     
     def shape(self):
         return self.calculatePath()
