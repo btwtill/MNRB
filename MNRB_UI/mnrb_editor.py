@@ -210,7 +210,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_menu.addAction(self.actionOpenProject)
         self.project_menu.addSeparator()
         self.project_menu.addAction(self.actionSaveProjcet)
-        self.project_menu.addAction(self.actionSaveProjcetAs)
+        #self.project_menu.addAction(self.actionSaveProjcetAs)
         self.project_menu.addSeparator()
         self.project_menu.addAction(self.actionExit)
 
@@ -394,14 +394,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def onSceneMousePositionChange(self, x, y):
         self.statusMousePosition.setText("Scene Mouse Position: [%d %d]" % (x, y))
 
+    def onPathItemPressed(self, item):
+        self.overlayOpenActionButton.setEnabled(True)
+
     def onPathItemDoubleClicked(self, item):
         path_items = item.text().split(" - ")
         self.project_path = path_items[1]
         self.onOpenProject()
 
-    def onPathItemPressed(self, item):
-        self.overlayOpenActionButton.setEnabled(True)
-    
     def onOverlayOpenProject(self):
         current_path_items = self.current_workspace_projects_list.currentItem().text().split(" - ")
         self.project_path = current_path_items[1]
