@@ -9,7 +9,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import 
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
 
-EVENT_DEBUG = False
+EVENT_DEBUG = True
 CLASS_DEBUG = False
 SCENE_DEBUG = True
 MOVE_DEBUG = False
@@ -43,6 +43,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
     def initViewStates(self):
         self.mode = MODE_NOOP
+        self.is_dragging_rubber_band_rectangle = False
 
     def initUI(self) -> None:
         #Set Render Attributes
@@ -226,6 +227,10 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers())
                 super().mouseReleaseEvent(fake_mouse_event)
                 return
+            
+            else:
+                if EVENT_DEBUG: print("NODEEDITORVIEW:: --leftMouseButtonRelease:: Rubber Band Dragging On")
+                self.is_dragging_rubber_band_rectangle = True
 
         super().mousePressEvent(event)
 
@@ -274,6 +279,10 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Reset Mode")
             self.mode = MODE_NOOP
             return
+
+        if self.is_dragging_rubber_band_rectangle:
+            if EVENT_DEBUG: print("NODEEDITORVIEW:: --leftMouseButtonRelease:: Rubber Band Dragging Off")
+            self.is_dragging_rubber_band_rectangle = False
 
         return super().mouseReleaseEvent(event)
     
