@@ -120,7 +120,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         super().mouseReleaseEvent(event)
         if self.was_moved:
             self.was_moved = False
-            self.node.scene.history.storeHistory("Node Moved")
+            self.node.scene.history.storeHistory("Node Moved", set_modified = True)
             
 
     def setIsDrawingBoundingBox(self, value=True):

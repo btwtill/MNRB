@@ -351,7 +351,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 if edge.grEdge.intersectsWith(point1, point2):
                     edge.remove()
 
-        self.grScene.scene.history.storeHistory("Delete Cutted Edges")
+        self.grScene.scene.history.storeHistory("Delete Cutted Edges", set_modified = True)
 
     def deleteSelected(self):
         selected_items = self.grScene.selectedItems()
@@ -387,7 +387,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             if edge.edge in edge.edge.scene.edges:
                 edge.edge.remove()
 
-        self.grScene.scene.history.storeHistory("Deleted Selected")
+        self.grScene.scene.history.storeHistory("Deleted Selected", set_modified = True)
 
     def getItemAtEvent(self, event):
         return self.itemAt(event.pos())

@@ -39,7 +39,7 @@ class NodeEditorSceneClipboard():
         if delete:
             for node in selected_nodes:
                 self.scene.getView().deleteSelected()
-                self.scene.history.storeHistory("Cut Elements from Scene")
+                self.scene.history.storeHistory("Cut Elements from Scene", set_modified = True)
         
         if SERIALIZE_DEBUG: 
             print("NODE_EDITOR_CLIPBOARD:: ClipboardContent:: ")
@@ -93,7 +93,7 @@ class NodeEditorSceneClipboard():
                 new_edge = NodeEditorEdge(self.scene)
                 new_edge.deserialize(edge_data, hashmap, restore_id=False)
         
-        self.scene.history.storeHistory("Pasted Elements to Scene")
+        self.scene.history.storeHistory("Pasted Elements to Scene", set_modified = True)
 
 
 

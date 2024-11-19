@@ -22,12 +22,23 @@ class NodeEditorScene(Serializable):
         
         self.initUI()
 
-        self.has_been_modified = True
+        self._has_been_modified = False
+        self._has_been_modified_listeners = []
 
         self.history = NodeEditorSceneHistory(self)
         self.clipboard = NodeEditorSceneClipboard(self)
 
         if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
+
+    @property
+    def has_been_modified(self): return self._has_been_modified
+    @has_been_modified.setter
+    def has_been_modified(self, value):
+        if not self._has_been_modified and value:
+
+            for callback in self._has_been_modified_listeners: callback()
+
+        self._has_been_modified = value
 
     def initUI(self):
     
@@ -42,6 +53,9 @@ class NodeEditorScene(Serializable):
     def addEdge(self, edge):
         self.edges.append(edge)
     
+    def addHasBeenModifiedListenerCallback(self, callback):
+        self._has_been_modified_listeners.append(callback)
+
     def removeNode(self, node):
         if CLASS_DEBUG: 
             print("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ")
@@ -101,13 +115,13 @@ class NodeEditorScene(Serializable):
             data = json.loads(raw_data)
             self.deserialize(data)
         if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
-        self.history.storeHistory("Loaded From File.")
+        self.history.storeHistory("Loaded From File.", set_modified = False)
 
     def clearScene(self):
         while len(self.nodes) > 0:
             self.nodes[0].remove()
         
-        self.history.storeHistory("Cleared Scene")
+        self.history.storeHistory("Cleared Scene", set_modifed = True)
 
     def serialize(self):
         

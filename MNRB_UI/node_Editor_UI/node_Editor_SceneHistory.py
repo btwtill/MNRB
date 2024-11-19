@@ -30,8 +30,11 @@ class NodeEditorSceneHistory():
         if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistory:: Restoring ..... Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
         self.restoreHistoryStamp(self.history_stack[self.history_current_step])
 
-    def storeHistory(self, history_stamp_description):
+    def storeHistory(self, history_stamp_description, set_modified = False):
         if STORE_DEBUG: print("NODESCENEHISTORY:: --storeHistory:: Storing ..... ", history_stamp_description, "Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
+
+        if set_modified:
+            self.scene.has_been_modified = True
 
         if self.history_current_step +1 < len(self.history_stack):
             self.history_stack = self.history_stack[0:self.history_current_step + 1]
