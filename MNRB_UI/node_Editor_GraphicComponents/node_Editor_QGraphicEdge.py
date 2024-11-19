@@ -24,7 +24,7 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         self.setZValue(-1)
 
         #path edge colors
-        self._default_color = QColor("#001000")
+        self._default_color = QColor("#000000")
         self._selected_color = QColor("#FFFFA637")
 
         #path edge pens
