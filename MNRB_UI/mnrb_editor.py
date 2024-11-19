@@ -130,7 +130,13 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.overlayNewActionButton = QtWidgets.QPushButton("New Project")
         self.overlayNewActionButton.clicked.connect(lambda: self.onNewProject(self.project_name_lineEdit.text()))
 
+        self.overlayOpenActionButton = QtWidgets.QPushButton("Open Project")
+        self.overlayOpenActionButton.clicked.connect(self.onOverlayOpenProject)
+        self.overlayOpenActionButton.setEnabled(False)
+
         current_workspace_projects = os.listdir(self.mnrb_path)
+
+        self.current_projects_list_label = QtWidgets.QLabel("Projects found in current workdirectory: ")
 
         self.current_workspace_projects_list = QtWidgets.QListWidget()
 
@@ -140,10 +146,27 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.current_workspace_projects_list.addItem(new_poject_list_item)
 
         self.current_workspace_projects_list.itemDoubleClicked.connect(self.onPathItemDoubleClicked)
+        self.current_workspace_projects_list.itemPressed.connect(self.onPathItemPressed)
 
+        self.overlayOpenFromDirectoryActionButton = QtWidgets.QPushButton("Open From...")
+        self.overlayOpenFromDirectoryActionButton.clicked.connect(self.onOpenProjectFromMenuBar)
+
+        overlay_title = QtWidgets.QLabel("MNRB - Editor")
+        overlay_title.setAlignment(Qt.AlignCenter)
+        overlay_title.setStyleSheet("font-size: 24px; font-weight: bold;")
+
+        initial_spacer = QtWidgets.QWidget()
+        initial_spacer.setFixedHeight(50)
+
+        self.innerLayout.addWidget(initial_spacer)
+        self.innerLayout.addWidget(overlay_title)
+        self.innerLayout.addWidget(initial_spacer)
         self.innerLayout.addWidget(self.project_name_lineEdit)
         self.innerLayout.addWidget(self.overlayNewActionButton)
+        self.innerLayout.addWidget(self.overlayOpenActionButton)
+        self.innerLayout.addWidget(self.current_projects_list_label)
         self.innerLayout.addWidget(self.current_workspace_projects_list)
+        self.innerLayout.addWidget(self.overlayOpenFromDirectoryActionButton)
         self.innerLayout.setContentsMargins(60, 20, 60, 20)
 
         self.innerLayout.addStretch()
@@ -376,8 +399,15 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_path = path_items[1]
         self.onOpenProject()
 
-    def closeEvent(self, event):
+    def onPathItemPressed(self, item):
+        self.overlayOpenActionButton.setEnabled(True)
+    
+    def onOverlayOpenProject(self):
+        current_path_items = self.current_workspace_projects_list.currentItem().text().split(" - ")
+        self.project_path = current_path_items[1]
+        self.onOpenProject()
 
+    def closeEvent(self, event):
         if self.projectNeedsSaving():
             event.accept()
         else:
@@ -387,7 +417,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         return self.getNodeEditorTab().isModified()
 
     def projectNeedsSaving(self):
-
         if not self.isModified():
             return True
         else:
@@ -419,7 +448,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         return self.tabs.currentWidget()
 
     def setTitleText(self):
-        print("MNRB_EDITOR:: --setTitleText ")
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --setTitleText ")
 
         title = "MNRB Ediotr - "
 
