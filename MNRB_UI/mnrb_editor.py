@@ -178,74 +178,85 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setCentralWidget(self.overlay_Widget)
         
     def createEditorActions(self):
-        self.actionNewProject = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='create new project', triggered=self.onNewProjectFromMenuBar)
-        self.actionOpenProject = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='open a project', triggered=self.onOpenProjectFromMenuBar)
-        self.actionSaveProjcet = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='save project', triggered=self.onSaveProject)
-        self.actionSaveProjcetAs = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
-        self.actionExit = QtWidgets.QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='exit tool', triggered=self.close)
+        self.action_new_project = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='create new project', triggered=self.onNewProjectFromMenuBar)
+        self.action_open_project = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='open a project', triggered=self.onOpenProjectFromMenuBar)
+        self.action_save_project = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='save project', triggered=self.onSaveProject)
+        self.action_save_project_as = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
+        self.action_exit = QtWidgets.QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='exit tool', triggered=self.close)
 
-        self.actionLoadTemplate = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
+        self.action_load_template = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
         self.actionSaveTemplateAs = QtWidgets.QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='save template as', triggered=self.onSaveNodeEditorTemplateAs)
-        self.actionClear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shift+C', statusTip='save template as', triggered=self.onClearNodeEditor)
+        self.action_clear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shift+C', statusTip='save template as', triggered=self.onClearNodeEditor)
 
-        self.actionUndo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
-        self.actionRedo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
-        self.actionDelete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='delete currently Selected', triggered=self.onEditDelete)
+        self.action_undo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
+        self.action_redo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
+        self.action_delete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='delete currently Selected', triggered=self.onEditDelete)
 
-        self.actionEditCopy = QtWidgets.QAction('&Copy', self, shortcut='Ctrl+C', statusTip='copy current selection', triggered=self.onEditCopy)
-        self.actionEditCut = QtWidgets.QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
-        self.actionEditPaste = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
+        self.action_edit_copy = QtWidgets.QAction('&Copy', self, shortcut='Ctrl+C', statusTip='copy current selection', triggered=self.onEditCopy)
+        self.action_edit_cut = QtWidgets.QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
+        self.action_edit_paste = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
+
+        self.action_about = QtWidgets.QAction('&About', self, shortcut = '', statusTip='information about MNRB', triggered=self.onAbout)
     
     def setupMenuBar(self):
         menu_bar = self.menuBar()
         self.setupProjectMenu(menu_bar)
         self.setupEditMenu(menu_bar)
         self.setupNodeEditorMenu(menu_bar)
+        self.setupAboutMenu(menu_bar)
         
     def setupProjectMenu(self, menu_bar):
         self.project_menu = menu_bar.addMenu('&Project')
 
-        self.project_menu.addAction(self.actionNewProject)
+        self.project_menu.addAction(self.action_new_project)
         self.project_menu.addSeparator()
-        self.project_menu.addAction(self.actionOpenProject)
+        self.project_menu.addAction(self.action_open_project)
         self.project_menu.addSeparator()
-        self.project_menu.addAction(self.actionSaveProjcet)
-        #self.project_menu.addAction(self.actionSaveProjcetAs)
+        self.project_menu.addAction(self.action_save_project)
+        #self.project_menu.addAction(self.action_save_project_as)
         self.project_menu.addSeparator()
-        self.project_menu.addAction(self.actionExit)
+        self.project_menu.addAction(self.action_exit)
 
     def setupEditMenu(self, menu_bar):
         self.edit_menu = menu_bar.addMenu('&Edit')
 
-        self.edit_menu.addAction(self.actionUndo)
-        self.edit_menu.addAction(self.actionRedo)
+        self.edit_menu.addAction(self.action_undo)
+        self.edit_menu.addAction(self.action_redo)
         self.edit_menu.addSeparator()
-        self.edit_menu.addAction(self.actionDelete)
+        self.edit_menu.addAction(self.action_delete)
         self.edit_menu.addSeparator()
-        self.edit_menu.addAction(self.actionEditCopy)
-        self.edit_menu.addAction(self.actionEditCut)
-        self.edit_menu.addAction(self.actionEditPaste)
+        self.edit_menu.addAction(self.action_edit_copy)
+        self.edit_menu.addAction(self.action_edit_cut)
+        self.edit_menu.addAction(self.action_edit_paste)
+
+        self.edit_menu.aboutToShow.connect(self.updateEditMenu)
 
     def setupNodeEditorMenu(self, menu_bar):
         self.node_editor_menu = menu_bar.addMenu('&MNRB')
 
-        self.node_editor_menu.addAction(self.actionLoadTemplate)
+        self.node_editor_menu.addAction(self.action_load_template)
         self.node_editor_menu.addAction(self.actionSaveTemplateAs)
-        self.node_editor_menu.addAction(self.actionClear)
-        
+        self.node_editor_menu.addAction(self.action_clear)
+
         self.node_editor_menu.addSeparator()
 
-        nodes_list_dock_visibility = self.node_editor_menu.addAction("Nodes List")
-        nodes_list_dock_visibility.setCheckable(True)
-        nodes_list_dock_visibility.setChecked(True)
-        nodes_list_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().left_dock))
+        self.action_nodes_list_dock_visibility = self.node_editor_menu.addAction("Nodes List")
+        self.action_nodes_list_dock_visibility.setCheckable(True)
+        self.action_nodes_list_dock_visibility.setChecked(True)
+        self.action_nodes_list_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().left_dock))
 
-        nodes_properties_visibility = self.node_editor_menu.addAction("Node Properties")
-        nodes_properties_visibility.setCheckable(True)
-        nodes_properties_visibility.setChecked(True)
-        nodes_properties_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().right_dock))
-        
-        
+        self.action_nodes_properties_dock_visibility = self.node_editor_menu.addAction("Node Properties")
+        self.action_nodes_properties_dock_visibility.setCheckable(True)
+        self.action_nodes_properties_dock_visibility.setChecked(True)
+        self.action_nodes_properties_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().right_dock))
+
+        self.node_editor_menu.aboutToShow.connect(self.updateNodeEditorMenu)
+    
+    def setupAboutMenu(self, menu_bar):
+        self.about_menu = menu_bar.addMenu('&About')
+
+        self.about_menu.addAction(self.action_about)
+
     def setupStatusBar(self):
         self.statusBar().showMessage('')
         self.statusMousePosition = QtWidgets.QLabel('')
@@ -420,6 +431,15 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_path = current_path_items[1]
         self.onOpenProject()
 
+    def onAbout(self):
+        about_menu_messageBox = QtWidgets.QMessageBox()
+        about_menu_messageBox.setWindowTitle("MNRB Information")
+        about_menu_messageBox.setText("<PlaceHolder for description and documentation Link \n plus personal website link>")
+
+        about_menu_messageBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+
+        about_menu_messageBox.exec()
+
     def closeEvent(self, event):
         if self.projectNeedsSaving():
             event.accept()
@@ -454,6 +474,18 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         else:
             widget.show()
 
+    def updateNodeEditorMenu(self):
+        if self.display_overlay or self.tabs.currentIndex() != 0:
+            self.setNodeEditorMenuActions(False)
+        else:
+            self.setNodeEditorMenuActions(True)
+
+    def updateEditMenu(self):
+        if not self.display_overlay:
+            self.setEditMenuActions(True)
+        else:
+            self.setEditMenuActions(False)
+
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
 
@@ -465,6 +497,21 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def getCurrentTabWidget(self):
         return self.tabs.currentWidget()
+
+    def setNodeEditorMenuActions(self, state):
+        self.action_load_template.setEnabled(state)
+        self.actionSaveTemplateAs.setEnabled(state)
+        self.action_clear.setEnabled(state)
+        self.action_nodes_properties_dock_visibility.setEnabled(state)
+        self.action_nodes_list_dock_visibility.setEnabled(state)
+
+    def setEditMenuActions(self, state):
+        self.action_edit_copy.setEnabled(state)
+        self.action_edit_cut.setEnabled(state)
+        self.action_edit_paste.setEnabled(state)
+        self.action_delete.setEnabled(state)
+        self.action_undo.setEnabled(state)
+        self.action_redo.setEnabled(state)
 
     def setTitleText(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --setTitleText ")
