@@ -27,9 +27,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.display_overlay = True
 
         self.initProject()
-        self.initUI()
         self.initTabs()
-
+        self.initUI()
+       
     @property
     def project_path(self): return self._project_path
     @project_path.setter
@@ -199,9 +199,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def setupMenuBar(self):
         menu_bar = self.menuBar()
         self.setupProjectMenu(menu_bar)
-        self.setupNodeEditorMenu(menu_bar)
         self.setupEditMenu(menu_bar)
-
+        self.setupNodeEditorMenu(menu_bar)
+        
     def setupProjectMenu(self, menu_bar):
         self.project_menu = menu_bar.addMenu('&Project')
 
@@ -214,13 +214,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_menu.addSeparator()
         self.project_menu.addAction(self.actionExit)
 
-    def setupNodeEditorMenu(self, menu_bar):
-        self.node_editor_menu = menu_bar.addMenu('&NodeEditor')
-
-        self.node_editor_menu.addAction(self.actionLoadTemplate)
-        self.node_editor_menu.addAction(self.actionSaveTemplateAs)
-        self.node_editor_menu.addAction(self.actionClear)
-
     def setupEditMenu(self, menu_bar):
         self.edit_menu = menu_bar.addMenu('&Edit')
 
@@ -232,6 +225,26 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.edit_menu.addAction(self.actionEditCopy)
         self.edit_menu.addAction(self.actionEditCut)
         self.edit_menu.addAction(self.actionEditPaste)
+
+    def setupNodeEditorMenu(self, menu_bar):
+        self.node_editor_menu = menu_bar.addMenu('&MNRB')
+
+        self.node_editor_menu.addAction(self.actionLoadTemplate)
+        self.node_editor_menu.addAction(self.actionSaveTemplateAs)
+        self.node_editor_menu.addAction(self.actionClear)
+        
+        self.node_editor_menu.addSeparator()
+
+        nodes_list_dock_visibility = self.node_editor_menu.addAction("Nodes List")
+        nodes_list_dock_visibility.setCheckable(True)
+        nodes_list_dock_visibility.setChecked(True)
+        nodes_list_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().left_dock))
+
+        nodes_properties_visibility = self.node_editor_menu.addAction("Node Properties")
+        nodes_properties_visibility.setCheckable(True)
+        nodes_properties_visibility.setChecked(True)
+        nodes_properties_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().right_dock))
+        
         
     def setupStatusBar(self):
         self.statusBar().showMessage('')
@@ -434,6 +447,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             project_settings_raw = file.read()
             project_settings_json = json.loads(project_settings_raw)
         return project_settings_json
+
+    def toggleWidgetVisibiltiy(self, widget):
+        if widget.isVisible():
+            widget.hide()
+        else:
+            widget.show()
 
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]

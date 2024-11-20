@@ -26,25 +26,25 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         self.node_list_widget = NodeEditorDragNodeList()
 
         # Left dock widget
-        left_dock = QtWidgets.QDockWidget("Node List", self)
-        left_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
-        left_dock.setWidget(self.node_list_widget)
+        self.left_dock = QtWidgets.QDockWidget("Node List", self)
+        self.left_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+        self.left_dock.setWidget(self.node_list_widget)
 
         # Add the left dock widget to the secondary main window
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, left_dock)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.left_dock)
 
         # Right dock widget
-        right_dock = QtWidgets.QDockWidget("Right Dock", self)
-        right_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+        self.right_dock = QtWidgets.QDockWidget("Node Properties", self)
+        self.right_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
         right_dock_contents = QtWidgets.QWidget()
         right_dock_layout = QtWidgets.QVBoxLayout(right_dock_contents)
         right_dock_label = QtWidgets.QLabel("This is the right dock widget.")
         right_dock_layout.addWidget(right_dock_label)
         right_dock_contents.setLayout(right_dock_layout)
-        right_dock.setWidget(right_dock_contents)
+        self.right_dock.setWidget(right_dock_contents)
         
         # Add the right dock widget to the secondary main window
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, right_dock)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.right_dock)
 
     def onOpenFile(self, path):
         if os.path.isdir(path):

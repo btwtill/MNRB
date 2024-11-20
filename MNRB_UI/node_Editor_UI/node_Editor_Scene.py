@@ -124,7 +124,7 @@ class NodeEditorScene(Serializable):
         while len(self.nodes) > 0:
             self.nodes[0].remove()
         
-        self.history.storeHistory("Cleared Scene", set_modifed = True)
+        self.history.storeHistory("Cleared Scene", set_modified = True)
 
     def serialize(self):
         
