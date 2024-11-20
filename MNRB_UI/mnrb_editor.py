@@ -88,7 +88,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.display_overlay = True
             self.onOpenProject()
             
-
     def setupNodeEditorTab(self):
         #Set Up the NodeEditor Tab Object
         self.nodeEditorTabWindow = mnrb_NodeEditorTab()
@@ -118,6 +117,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.tabs.addTab(second_tab_widget, "Tab 2")
 
     def setupProjectOverlay(self):
+        #create and fill the widget that is displayed when there are multiple projects or no project found in the workdirectory
         self.overlay_Widget = QtWidgets.QWidget()
 
         self.outer_Layout = QtWidgets.QHBoxLayout()
@@ -139,6 +139,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.current_projects_list_label = QtWidgets.QLabel("Projects found in current workdirectory: ")
 
         self.current_workspace_projects_list = QtWidgets.QListWidget()
+        self.current_workspace_projects_list.setFixedWidth(400)
 
         for item in current_workspace_projects:
             new_poject_list_item = QtWidgets.QListWidgetItem()
@@ -153,7 +154,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         overlay_title = QtWidgets.QLabel("MNRB - Editor")
         overlay_title.setAlignment(Qt.AlignCenter)
-        overlay_title.setStyleSheet("font-size: 24px; font-weight: bold;")
+        overlay_title.setStyleSheet("font-size: 36px; font-weight: bold;")
 
         initial_spacer = QtWidgets.QWidget()
         initial_spacer.setFixedHeight(50)
