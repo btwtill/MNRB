@@ -2,6 +2,7 @@ import os
 import json
 from PySide2 import QtWidgets, QtCore # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
@@ -11,7 +12,6 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def initUI(self):
         # Central widget for secondary main window
-
         self.central_widget = NodeEditorWidget()
 
         # Set the central widget for the secondary main window
@@ -23,15 +23,12 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def add_dock_widgets(self):
         """Add left and right dock widgets to the secondary main window."""
 
+        self.node_list_widget = NodeEditorDragNodeList()
+
         # Left dock widget
-        left_dock = QtWidgets.QDockWidget("Left Dock", self)
+        left_dock = QtWidgets.QDockWidget("Node List", self)
         left_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
-        left_dock_contents = QtWidgets.QWidget()
-        left_dock_layout = QtWidgets.QVBoxLayout(left_dock_contents)
-        left_dock_label = QtWidgets.QLabel("This is the left dock widget.")
-        left_dock_layout.addWidget(left_dock_label)
-        left_dock_contents.setLayout(left_dock_layout)
-        left_dock.setWidget(left_dock_contents)
+        left_dock.setWidget(self.node_list_widget)
 
         # Add the left dock widget to the secondary main window
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, left_dock)
