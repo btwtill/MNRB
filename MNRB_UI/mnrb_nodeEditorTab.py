@@ -3,6 +3,7 @@ import json
 from PySide2 import QtWidgets, QtCore # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
+from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
@@ -46,22 +47,31 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         # Add the right dock widget to the secondary main window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.right_dock)
 
+    def clearScene(self):
+        self.central_widget.scene.clearScene()
+
     def onOpenFile(self, path):
         if os.path.isdir(path):
             graph_items = os.listdir(path)
 
             if len(graph_items) >= 1:
-                self.central_widget.scene.loadSceneFromFile(os.path.join(path, graph_items[0]))
-                #add History Stamp
+                
+                self.loadFile(os.path.join(path, graph_items[0]))
             else:
                 self.onNewFile()
                 
         elif os.path.isfile(path):
+            self.loadFile(path)
+
+    def loadFile(self, path):
+        try:
             self.central_widget.scene.loadSceneFromFile(path)
-            #add History Stamp
-    
-    def clearScene(self):
-        self.central_widget.scene.clearScene()
+            self.central_widget.scene.history.clear()
+            self.central_widget.scene.history.storeHistory("Inital History Stamp")
+        except Exception as e:
+            print(e)
+            QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path)
+
 
     def onSaveFile(self, file_name):
         self.central_widget.scene.saveSceneToFile(file_name)

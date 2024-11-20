@@ -341,11 +341,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
-
         if self.project_path is not None:
-            self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
-            self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
-            self.setTitleText()
+
+            if self.validateProjectDirectory():
+                self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
+                self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
+                self.setTitleText()
             return True
         else:
             return self.onSaveProjectAs()
@@ -553,7 +554,10 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             return False
         else:
             return True
-      
+    
+    def validateProjectDirectory(self):
+        return True
+
     def validateWorkingDirectory(self, directory):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -validateWorkingDirectory:: Full Directory Path: ", directory)
         if CLASS_DEBUG : print("MNRB_EDITOR:: -validateWorkingDirectory:: WorkingDirectoryName: ", os.path.basename(os.path.dirname(directory)))
