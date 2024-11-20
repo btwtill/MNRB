@@ -1,4 +1,5 @@
 import json
+import os
 from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
@@ -7,6 +8,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: i
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory import NodeEditorSceneHistory #type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneClipboard #type: ignore
+from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
@@ -114,9 +116,15 @@ class NodeEditorScene(Serializable):
     def loadSceneFromFile(self, filename):
 
         with open(filename, "r") as file:
-            raw_data = file.read()
-            data = json.loads(raw_data)
-            self.deserialize(data)
+            try:
+                raw_data = file.read()
+                data = json.loads(raw_data)
+                self.deserialize(data)
+            except json.JSONDecodeError:
+                raise InvalidFile("%s is not a Valid Json File" % os.path.basename(filename))
+            except Exception as e:
+                print("SCENE:: --loadSceneFromFile:: Excepting while trying to load a file to the scene:: ", e)
+            
         if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
         self.history.storeHistory("Loaded From File.", set_modified = False)
 

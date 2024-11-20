@@ -218,6 +218,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_menu.addSeparator()
         self.project_menu.addAction(self.action_exit)
 
+        self.project_menu.aboutToShow.connect(self.updateProjectMenu)
+
     def setupEditMenu(self, menu_bar):
         self.edit_menu = menu_bar.addMenu('&Edit')
 
@@ -243,12 +245,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.action_nodes_list_dock_visibility = self.node_editor_menu.addAction("Nodes List")
         self.action_nodes_list_dock_visibility.setCheckable(True)
-        self.action_nodes_list_dock_visibility.setChecked(True)
+        self.action_nodes_list_dock_visibility.setChecked(self.getNodeEditorTab().left_dock.isVisible())
         self.action_nodes_list_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().left_dock))
 
         self.action_nodes_properties_dock_visibility = self.node_editor_menu.addAction("Node Properties")
         self.action_nodes_properties_dock_visibility.setCheckable(True)
-        self.action_nodes_properties_dock_visibility.setChecked(True)
+        self.action_nodes_properties_dock_visibility.setChecked(self.getNodeEditorTab().right_dock.isVisible())
         self.action_nodes_properties_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().right_dock))
 
         self.node_editor_menu.aboutToShow.connect(self.updateNodeEditorMenu)
@@ -475,6 +477,10 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         else:
             widget.show()
 
+    def toggleActionCheckbox(self, action):
+        is_checked = action.isChecked()
+        action.setChecked(not is_checked)
+
     def updateNodeEditorMenu(self):
         if self.display_overlay or self.tabs.currentIndex() != 0:
             self.setNodeEditorMenuActions(False)
@@ -486,6 +492,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.setEditMenuActions(True)
         else:
             self.setEditMenuActions(False)
+
+    def updateProjectMenu(self):
+        if not self.display_overlay:
+            self.setProjectMenuActions(True)
+        else:
+            self.setProjectMenuActions(False)
 
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
@@ -514,10 +526,13 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.action_undo.setEnabled(state)
         self.action_redo.setEnabled(state)
 
+    def setProjectMenuActions(self, state):
+        self.action_save_project.setEnabled(state)
+
     def setTitleText(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --setTitleText ")
 
-        title = "MNRB Ediotr - "
+        title = "MNRB Editor - "
 
         if self.project_name is not None:
             title += self.project_name

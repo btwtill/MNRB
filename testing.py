@@ -1,4 +1,5 @@
 import importlib
+import importlib.readers
 import MNRB.MNRB_UI.mnrb_editor as mnrb_editor
 import MNRB.MNRB_UI.mnrb_ui_utils as utils
 import MNRB.MNRB_UI.mnrb_nodeEditorTab as nodeEditorTab
@@ -23,6 +24,7 @@ import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket as 
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath as nodeEditorGraphicEdgePath
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge as nodeEditorGraphicEdge
 
+import MNRB_UI.node_Editor_Exceptions.node_Editor_FileException as nodeEditorInvalidFile
 
 importlib.reload(mnrb_editor)
 importlib.reload(utils)
@@ -48,6 +50,7 @@ importlib.reload(nodeEditorGraphicSocket)
 importlib.reload(nodeEditorGraphicEdgePath)
 importlib.reload(nodeEditorGraphicEdge)
 
+importlib.reload(nodeEditorInvalidFile)
 
 newEditor = mnrb_editor.mnrb_Editor()
 
