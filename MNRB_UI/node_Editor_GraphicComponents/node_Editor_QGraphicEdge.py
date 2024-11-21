@@ -77,7 +77,6 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
             self.edge.scene.reset_last_selected_states()
             self._last_selected_state = self.isSelected()
             self.onSelected()
-            self.edge.scene._last_selected_items = self.edge.scene.getSelectedItems()
 
     def setSourceSocketPosition(self, x, y):
         self.source_position = [x, y]

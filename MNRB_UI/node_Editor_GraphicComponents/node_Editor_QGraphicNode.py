@@ -135,7 +135,6 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             self.node.scene.reset_last_selected_states()
             self._last_selected_state = self.isSelected()
             self.onSelected()
-            self.node.scene._last_selected_items = self.node.scene.getSelectedItems()
             if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Last Scene Selection after --onSelected()", self.node.scene._last_selected_items)
             if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Items Selected In Scene after --onSelected():: ", self.node.scene.getSelectedItems())
             

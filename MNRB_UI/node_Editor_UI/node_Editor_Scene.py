@@ -111,9 +111,24 @@ class NodeEditorScene(Serializable):
 
     def onItemSelected(self):
         if SELECTION_DEBUG: print("SCENE:: --onItemSelected:: Executing On Selection Callbacks ")
+        current_selected_items = self.getSelectedItems()
+        if current_selected_items != self._last_selected_items:
+            self._last_selected_items = current_selected_items
+            self.history.storeHistory("Selection Changed")
+            for callback in self._item_selected_listeners: callback()
 
     def onItemsDeselected(self):
         if SELECTION_DEBUG: print("SCENE:: --onItemDeselect:: Executing On Deselection Selection Callbacks")
+    
+        current_selected_items = self.getSelectedItems()
+        if self._last_selected_items == current_selected_items:
+            return
+        self.reset_last_selected_states()
+        
+        if current_selected_items == []:
+            self._last_selected_items = []
+            self.history.storeHistory("Deselect Everything")
+            for callback in self._items_deselected_listeners: callback()
 
     def doDeselectItems(self, silent = False):
         for item in self.getSelectedItems():
