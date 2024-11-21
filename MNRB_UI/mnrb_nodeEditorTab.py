@@ -68,9 +68,9 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             self.central_widget.scene.loadSceneFromFile(path)
             self.central_widget.scene.history.clear()
             self.central_widget.scene.history.storeHistory("Inital History Stamp")
+            self.central_widget.centerView()
         except Exception as e:
             QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path, " Error:: ", e)
-
 
     def onSaveFile(self, file_name):
         self.central_widget.scene.saveSceneToFile(file_name)

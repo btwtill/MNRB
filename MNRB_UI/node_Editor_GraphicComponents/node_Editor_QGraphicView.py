@@ -1,6 +1,6 @@
 import math
 from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import Qt, QEvent, Signal # type: ignore
+from PySide2.QtCore import Qt, QEvent, Signal, QPoint, QRect, QRectF, QPointF # type: ignore
 from PySide2.QtGui import QPainter, QMouseEvent, QPen, QColor # type:ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
@@ -96,7 +96,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
     def keyPressEvent(self, event) -> None:
         #center view
         if event.key() == Qt.Key_F:
-            self.centerOn(0, 0)
+            self.centerView()
         elif event.key() == Qt.Key_N:
             newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1, True], ["input", 1, False]], outputs=[["output",1, True], ["output", 1, True], ["output",1, True]])
         else:
@@ -388,6 +388,25 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 edge.edge.remove()
 
         self.grScene.scene.history.storeHistory("Deleted Selected", set_modified = True)
+
+    def centerView(self):
+        selected_items = self.grScene.selectedItems()
+        if len(selected_items) == 0:
+            self.centerOn(0, 0) 
+        elif len(selected_items) > 1:
+            combined_bounding_rectangle = QRectF()
+
+            for item in selected_items:
+                if hasattr(item, "node"):
+                    combined_bounding_rectangle = combined_bounding_rectangle.united(item.mapToScene(item.boundingRect()).boundingRect())
+
+            self.centerOn(combined_bounding_rectangle.center())
+        else:
+            print("node:: ", selected_items[0])
+            print("nodeWidth:: ", selected_items[0].width)
+            print("nodeHeight:: ", selected_items[0].height)
+            view_position = QPointF(selected_items[0].pos().x() + (selected_items[0].width / 2), selected_items[0].pos().y() + (selected_items[0].height / 2))
+            self.centerOn(view_position)
 
     def getItemAtEvent(self, event):
         return self.itemAt(event.pos())
