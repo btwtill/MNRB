@@ -3,6 +3,7 @@ from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QColor, QPen, QPainterPath #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath import  NodeEditor_QGaphicEdgePathDirect, NodeEditor_QGraphicEdgePathBezier #type: ignore
 
+SELECTION_DEBUG = True
 INTERSECT_DEBUG = False
 
 class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
@@ -12,17 +13,21 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         self.edge = edge
         self.edge_path_calculator = self.determin_edge_path_class()(self)
 
+        self._last_selected_state = False
+
         self.source_position = [0, 0]
         self.destination_position = [0, 0]
 
+        self.initUI()
         self.initGraphicElements()
 
-    def initGraphicElements(self):
+    def initUI(self):
         #set QItem Flags
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.is_drawing_bounding_box = False
         self.setZValue(-1)
 
+    def initGraphicElements(self):
         #path edge colors
         self._default_color = QColor("#000000")
         self._selected_color = QColor("#FFFFA637")
@@ -60,6 +65,17 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         if INTERSECT_DEBUG: print("GRAPHICEDGE:: --intersectsWith:: Intersection With Edge:: ", result)
     
         return result
+
+    def onSelected(self):
+        if SELECTION_DEBUG: print("GRAPHICEDGE:: --onSelected:: ")
+
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+
+        if self._last_selected_state != self.isSelected():
+            self.edge.scene.reset_last_selected_states()
+            self._last_selected_state = self.isSelected()
+            self.onSelected()
 
     def setSourceSocketPosition(self, x, y):
         self.source_position = [x, y]

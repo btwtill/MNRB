@@ -2,6 +2,7 @@ from PySide2 import QtWidgets # type:ignore
 from PySide2.QtCore import Qt, QRectF # type: ignore
 from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
 
+SELECTION_DEBUG = True
 EVENT_DEBUG = False
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
@@ -10,7 +11,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         self.node = node
 
-        self.was_moved = False
+        self._was_moved = False
+        self._last_selected_state = False
 
         self.initGraphicElements()
         self.initContent()
@@ -114,15 +116,19 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
                 if node.grNode.isSelected():
                     node.updateConnectedEdges()
 
-            self.was_moved = True
+            self._was_moved = True
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
-        if self.was_moved:
-            self.was_moved = False
+        if self._was_moved:
+            self._was_moved = False
             self.node.scene.history.storeHistory("Node Moved", set_modified = True)
-            
 
+        if self._last_selected_state != self.isSelected():
+            self.node.scene.reset_last_selected_states()
+            self._last_selected_state = self.isSelected()
+            self.onSelected()
+            
     def setIsDrawingBoundingBox(self, value=True):
         self.is_drawing_bounding_box = value
 
@@ -130,6 +136,9 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         full_socket_height = self.socket_padding + self.socket_radius
         full_node_length = (len(self.node.inputs) * full_socket_height) + (len(self.node.outputs) * full_socket_height) + self.title_height + self.socket_padding
         self.height = full_node_length
+
+    def onSelected(self):
+        if SELECTION_DEBUG: print("GRAPHICNODE:: --onSelected:: ")
 
     def boundingRect(self):
         return QRectF(

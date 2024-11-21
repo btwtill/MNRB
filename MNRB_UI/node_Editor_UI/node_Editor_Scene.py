@@ -98,6 +98,12 @@ class NodeEditorScene(Serializable):
         for item in self.getSelectedItems():
             item.setSelected(False)
 
+    def reset_last_selected_states(self):
+        for node in self.nodes:
+            node.grNode._last_selected_state = False
+        for edge in self.edges:
+            edge.grEdge._las_selected_state = False
+
     def isModified(self):
         return self.has_been_modified
 
