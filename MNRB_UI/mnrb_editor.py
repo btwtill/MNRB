@@ -82,8 +82,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
-        self.getNodeEditorTab().central_widget.scene.connectItemSelectedListenerCallback(self.updateEditMenu)
-        self.getNodeEditorTab().central_widget.scene.connectItemsDeselectedListenerCallback(self.updateEditMenu)
+        self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
 
         if self.display_overlay:
             self.setupProjectOverlay()

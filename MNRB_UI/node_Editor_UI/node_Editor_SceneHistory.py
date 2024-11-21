@@ -1,8 +1,8 @@
 
-UNDO_DEBUG = False
-REDU_DEBUG = False
-RESTORE_DEBUG = False
-STORE_DEBUG = False
+UNDO_DEBUG = True
+REDU_DEBUG = True
+RESTORE_DEBUG = True
+STORE_DEBUG = True
 
 class NodeEditorSceneHistory():
     def __init__(self, scene) -> None:
@@ -10,19 +10,33 @@ class NodeEditorSceneHistory():
 
         self.undo_selection_has_changed = False
 
+        self._history_modified_listeners = []
+        self._history_stored_listeners = []
+        self._history_restored_listeners = []
+
         self.clear()
-        
         self.history_limit = 16
 
     def clear(self):
         self.history_stack = []
         self.history_current_step = -1
 
+    def connectHistoryModifiedListenersCallback(self, callback):
+        self._history_modified_listeners.append(callback)
+
+    def connectHistoryStoredListenersCallback(self, callback):
+        self._history_stored_listeners.append(callback)
+    
+    def connectHistoryRestoredListenersCallback(self, callback):
+        self._history_restored_listeners.append(callback)
+
     def canUndo(self):
         return self.history_current_step > 0
 
     def canRedo(self):
-        return self.history_current_step + 1 < len(self.history_stack)
+        print(self.history_current_step)
+        print(len(self.history_stack))
+        return self.history_current_step +1 < len(self.history_stack)
 
     def undo(self):
         if UNDO_DEBUG: print("NODESCENEHISTORY:: --undo:: ")
@@ -39,6 +53,9 @@ class NodeEditorSceneHistory():
     def restoreHistory(self):
         if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistory:: Restoring ..... Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
         self.restoreHistoryStamp(self.history_stack[self.history_current_step])
+
+        for callback in self._history_restored_listeners: callback()
+        for callback in self._history_modified_listeners: callback()
 
     def storeHistory(self, history_stamp_description, set_modified = False):
         if STORE_DEBUG: print("NODESCENEHISTORY:: --storeHistory:: Storing ..... ", history_stamp_description, "Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
@@ -58,6 +75,9 @@ class NodeEditorSceneHistory():
         self.history_current_step += 1
 
         if STORE_DEBUG: print("NODESCENEHISTORY:: --storeHistory:: setting step:: ", self.history_current_step)
+
+        for callback in self._history_stored_listeners: callback()
+        for callback in self._history_modified_listeners: callback()
 
     def restoreHistoryStamp(self, history_stamp):
         if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: ", history_stamp)
@@ -91,8 +111,6 @@ class NodeEditorSceneHistory():
         if (current_selection['nodes'] != previouse_selection['nodes'] or
                 current_selection['edges'] != previouse_selection['edges']):
                 self.undoSelectionHasChanged = True
-                self.scene.grScene.itemSelected.emit()
-
     
     def createHistoryStamp(self, history_stamp_description):
         
