@@ -47,4 +47,4 @@ class NodeEditorWidget(QtWidgets.QWidget):
         return self.getSelectedItems() != []
     
     def getSelectedItems(self):
-        return self.scene.grScene.selectedItems()
+        return self.scene.getSelectedItems()

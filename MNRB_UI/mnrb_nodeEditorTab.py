@@ -129,4 +129,4 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)
     
     def isModified(self):
-        return self.central_widget.scene.has_been_modified
+        return self.central_widget.scene.isModified()

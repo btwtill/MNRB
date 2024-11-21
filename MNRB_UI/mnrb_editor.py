@@ -457,14 +457,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         about_menu_messageBox.exec()
 
+    def isModified(self):
+        return self.getNodeEditorTab().isModified()
+
     def closeEvent(self, event):
         if self.projectNeedsSaving():
             event.accept()
         else:
             event.ignore()
-
-    def isModified(self):
-        return self.getNodeEditorTab().isModified()
 
     def projectNeedsSaving(self):
         if not self.isModified():
@@ -502,7 +502,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def updateEditMenu(self):
         if not self.display_overlay:
-                #self.setEditMenuActions(True)
                 self.action_edit_paste.setEnabled(True)
                 self.action_edit_cut.setEnabled(self.getCurrentTabWidget().canCut())
                 self.action_edit_copy.setEnabled(self.getCurrentTabWidget().canCopy())
@@ -528,7 +527,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0].centralWidget()
 
     def getCurrentTabWidget(self):
-
         widgets_in_tab_widget = self.tabs.currentWidget().children()
         if CLASS_DEBUG: print("MNRB_EDITOR:: --getCurrentTabWidget:: Widgets in Tab Widget:: ", widgets_in_tab_widget)
         tab_widget = None

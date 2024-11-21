@@ -98,6 +98,9 @@ class NodeEditorScene(Serializable):
         for item in self.getSelectedItems():
             item.setSelected(False)
 
+    def isModified(self):
+        return self.has_been_modified
+
     def getSelectedItems(self):
         return self.grScene.selectedItems()
 
