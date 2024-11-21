@@ -8,6 +8,7 @@ from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import Invali
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
         super().__init__()
+        self.is_tab_widget = True
 
         self.initUI()
 
@@ -49,6 +50,21 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def clearScene(self):
         self.central_widget.scene.clearScene()
+
+    def canCut(self):
+        return self.central_widget.sceneHasSelectedItems()
+
+    def canCopy(self):
+        return self.central_widget.sceneHasSelectedItems()
+
+    def canUndo(self):
+        return self.central_widget.scene.history.canUndo()
+
+    def canRedo(self):
+        return self.central_widget.scene.history.canRedo()
+
+    def canDelete(self):
+        return self.central_widget.sceneHasSelectedItems()
 
     def onOpenFile(self, path):
         if os.path.isdir(path):

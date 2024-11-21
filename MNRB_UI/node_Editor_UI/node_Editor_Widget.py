@@ -43,5 +43,8 @@ class NodeEditorWidget(QtWidgets.QWidget):
     def centerView(self):
         self.view.centerView()
 
-        
-
+    def sceneHasSelectedItems(self):
+        return self.getSelectedItems() != []
+    
+    def getSelectedItems(self):
+        return self.scene.grScene.selectedItems()

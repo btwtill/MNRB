@@ -108,6 +108,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         second_tab_widget = QtWidgets.QWidget()
         second_tab_layout = QtWidgets.QHBoxLayout(second_tab_widget)
 
+        second_tab_widget.is_tab_widget = True
+
         # Add widgets or controls in the box layout
         label1 = QtWidgets.QLabel("Box 1")
         label2 = QtWidgets.QLabel("Box 2")
@@ -470,7 +472,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         else:
             result = QtWidgets.QMessageBox.warning(self, "Scene is not Saved!", "Document was modified. \n Do you want to Save Changed?", 
                                                    QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
-            
             if result == QtWidgets.QMessageBox.Save:
                 return self.onSaveProject()
             elif result == QtWidgets.QMessageBox.Cancel:
@@ -501,7 +502,13 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def updateEditMenu(self):
         if not self.display_overlay:
-            self.setEditMenuActions(True)
+                #self.setEditMenuActions(True)
+                self.action_edit_paste.setEnabled(True)
+                self.action_edit_cut.setEnabled(self.getCurrentTabWidget().canCut())
+                self.action_edit_copy.setEnabled(self.getCurrentTabWidget().canCopy())
+                self.action_delete.setEnabled(self.getCurrentTabWidget().canDelete())
+                self.action_undo.setEnabled(self.getCurrentTabWidget().canUndo())
+                self.action_redo.setEnabled(self.getCurrentTabWidget().canRedo())
         else:
             self.setEditMenuActions(False)
 
@@ -521,7 +528,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0].centralWidget()
 
     def getCurrentTabWidget(self):
-        return self.tabs.currentWidget()
+
+        widgets_in_tab_widget = self.tabs.currentWidget().children()
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --getCurrentTabWidget:: Widgets in Tab Widget:: ", widgets_in_tab_widget)
+        tab_widget = None
+        for widget in widgets_in_tab_widget:
+            if hasattr(widget, "is_tab_widget"):
+                tab_widget = widget
+        return tab_widget
 
     def setNodeEditorMenuActions(self, state):
         self.action_load_template.setEnabled(state)

@@ -18,15 +18,21 @@ class NodeEditorSceneHistory():
         self.history_stack = []
         self.history_current_step = -1
 
+    def canUndo(self):
+        return self.history_current_step > 0
+
+    def canRedo(self):
+        return self.history_current_step + 1 < len(self.history_stack)
+
     def undo(self):
         if UNDO_DEBUG: print("NODESCENEHISTORY:: --undo:: ")
-        if self.history_current_step > 0:
+        if self.canUndo():
             self.history_current_step -= 1
             self.restoreHistory()
         
     def redo(self):
         if REDU_DEBUG: print("NODESCENEHISTORY:: --redo:: ")
-        if self.history_current_step + 1 < len(self.history_stack):
+        if self.canRedo():
             self.history_current_step += 1
             self.restoreHistory()
 
