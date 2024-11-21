@@ -68,6 +68,7 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
 
     def onSelected(self):
         if SELECTION_DEBUG: print("GRAPHICEDGE:: --onSelected:: ")
+        self.edge.scene.grScene.itemSelected.emit()
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
@@ -76,6 +77,7 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
             self.edge.scene.reset_last_selected_states()
             self._last_selected_state = self.isSelected()
             self.onSelected()
+            self.edge.scene._last_selected_items = self.edge.scene.getSelectedItems()
 
     def setSourceSocketPosition(self, x, y):
         self.source_position = [x, y]

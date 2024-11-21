@@ -124,10 +124,20 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             self._was_moved = False
             self.node.scene.history.storeHistory("Node Moved", set_modified = True)
 
-        if self._last_selected_state != self.isSelected():
+            self.node.scene.reset_last_selected_states()
+            self.doSelect()
+            self.node.scene._last_selected_items = self.node.scene.getSelectedItems()
+
+        if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Last Scene Selection:: ", self.node.scene._last_selected_items)
+        if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Current Selected Items:: ", self.node.scene.getSelectedItems())
+
+        if self._last_selected_state != self.isSelected() or self.node.scene._last_selected_items != self.node.scene.getSelectedItems():
             self.node.scene.reset_last_selected_states()
             self._last_selected_state = self.isSelected()
             self.onSelected()
+            self.node.scene._last_selected_items = self.node.scene.getSelectedItems()
+            if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Last Scene Selection after --onSelected()", self.node.scene._last_selected_items)
+            if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Items Selected In Scene after --onSelected():: ", self.node.scene.getSelectedItems())
             
     def setIsDrawingBoundingBox(self, value=True):
         self.is_drawing_bounding_box = value
@@ -139,6 +149,12 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     def onSelected(self):
         if SELECTION_DEBUG: print("GRAPHICNODE:: --onSelected:: ")
+        self.node.scene.grScene.itemSelected.emit()
+
+    def doSelect(self, new_selection_state = True):
+        self.setSelected(new_selection_state)
+        self._last_selected_state = new_selection_state
+        if new_selection_state: self.onSelected()
 
     def boundingRect(self):
         return QRectF(

@@ -12,6 +12,7 @@ from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import Invali
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
+SELECTION_DEBUG = True
 
 class NodeEditorScene(Serializable):
     def __init__(self):
@@ -24,11 +25,19 @@ class NodeEditorScene(Serializable):
         
         self.initUI()
 
+        self._last_selected_items = []
+
         self._has_been_modified = False
         self._has_been_modified_listeners = []
 
+        self._item_selected_listeners = []
+        self._items_deselected_listeners = []
+
         self.history = NodeEditorSceneHistory(self)
         self.clipboard = NodeEditorSceneClipboard(self)
+
+        self.grScene.itemSelected.connect(self.onItemSelected)
+        self.grScene.itemsDeselected.connect(self.onItemsDeselected)
 
         if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
 
@@ -56,8 +65,14 @@ class NodeEditorScene(Serializable):
     def addEdge(self, edge):
         self.edges.append(edge)
     
-    def addHasBeenModifiedListenerCallback(self, callback):
+    def connectHasBeenModifiedListenerCallback(self, callback):
         self._has_been_modified_listeners.append(callback)
+
+    def connectItemSelectedListenerCallback(self, callback):
+        self._item_selected_listeners.append(callback)
+    
+    def connectItemsDeselectedListenerCallback(self, callback):
+        self._items_deselected_listeners.append(callback)
 
     def removeNode(self, node):
         if CLASS_DEBUG: 
@@ -93,6 +108,12 @@ class NodeEditorScene(Serializable):
             print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t Amount", len(self.edges))
             for index, _edge in enumerate(self.edges):
                 print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge , " at Index:: ", index, " with ID: ", _edge.id)
+
+    def onItemSelected(self):
+        if SELECTION_DEBUG: print("SCENE:: --onItemSelected:: Executing On Selection Callbacks ")
+
+    def onItemsDeselected(self):
+        if SELECTION_DEBUG: print("SCENE:: --onItemDeselect:: Executing On Deselection Selection Callbacks")
 
     def doDeselectItems(self, silent = False):
         for item in self.getSelectedItems():

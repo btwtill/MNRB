@@ -284,6 +284,21 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             if EVENT_DEBUG: print("NODEEDITORVIEW:: --leftMouseButtonRelease:: Rubber Band Dragging Off")
             self.is_dragging_rubber_band_rectangle = False
 
+            current_selected_items = self.grScene.selectedItems()
+            if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Last Stored Selection:: ", self.grScene.scene._last_selected_items)
+            if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Currently Selected Items:: ", current_selected_items)
+            if current_selected_items != self.grScene.scene._last_selected_items:
+                if current_selected_items == []:
+                    self.grScene.itemsDeselected.emit()
+                else:
+                    self.grScene.itemSelected.emit()
+                if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Setting Scene Last Selected Items from:: ", self.grScene.scene._last_selected_items, " to:: ", current_selected_items)
+                self.grScene.scene._last_selected_items = current_selected_items
+            return 
+        
+        if item_on_release is None:
+            self.grScene.itemsDeselected.emit()
+
         return super().mouseReleaseEvent(event)
     
     def rightMouseButtonRelease(self, event):
