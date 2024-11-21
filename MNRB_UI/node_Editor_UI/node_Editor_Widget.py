@@ -45,6 +45,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         self.view.centerView()
 
     def sceneHasSelectedItems(self):
+        print(self.getSelectedItems())
         return self.getSelectedItems() != []
     
     def getSelectedItems(self):

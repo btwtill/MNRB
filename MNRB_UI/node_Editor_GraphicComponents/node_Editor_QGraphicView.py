@@ -9,9 +9,9 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import 
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
 
-EVENT_DEBUG = True
+EVENT_DEBUG = False
 CLASS_DEBUG = False
-SCENE_DEBUG = True
+SCENE_DEBUG = False
 MOVE_DEBUG = False
 WHEEL_DEBUG = False
 REMOVE_DEBUG = False

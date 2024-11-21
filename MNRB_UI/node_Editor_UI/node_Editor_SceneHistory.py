@@ -84,8 +84,14 @@ class NodeEditorSceneHistory():
                 if node.id == node_id:
                     node.grNode.setSelected(True)
                     break
-
+                
         current_selection = self.captureCurrentSceneSelection()
+        self.scene._last_selectedItems = self.scene.getSelectedItems()
+
+        if (current_selection['nodes'] != previouse_selection['nodes'] or
+                current_selection['edges'] != previouse_selection['edges']):
+                self.undoSelectionHasChanged = True
+                self.scene.grScene.itemSelected.emit()
 
     
     def createHistoryStamp(self, history_stamp_description):

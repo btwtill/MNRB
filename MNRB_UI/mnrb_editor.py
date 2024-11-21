@@ -82,6 +82,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
+        self.getNodeEditorTab().central_widget.scene.connectItemSelectedListenerCallback(self.updateEditMenu)
+        self.getNodeEditorTab().central_widget.scene.connectItemsDeselectedListenerCallback(self.updateEditMenu)
 
         if self.display_overlay:
             self.setupProjectOverlay()
@@ -501,13 +503,16 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.setNodeEditorMenuActions(True)
 
     def updateEditMenu(self):
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --updateEditMenu:: Updating the edit menu functions!")
+
         if not self.display_overlay:
+                current_tab = self.getCurrentTabWidget()
                 self.action_edit_paste.setEnabled(True)
-                self.action_edit_cut.setEnabled(self.getCurrentTabWidget().canCut())
-                self.action_edit_copy.setEnabled(self.getCurrentTabWidget().canCopy())
-                self.action_delete.setEnabled(self.getCurrentTabWidget().canDelete())
-                self.action_undo.setEnabled(self.getCurrentTabWidget().canUndo())
-                self.action_redo.setEnabled(self.getCurrentTabWidget().canRedo())
+                self.action_edit_cut.setEnabled(current_tab.canCut())
+                self.action_edit_copy.setEnabled(current_tab.canCopy())
+                self.action_delete.setEnabled(current_tab.canDelete())
+                self.action_undo.setEnabled(current_tab.canUndo())
+                self.action_redo.setEnabled(current_tab.canRedo())
         else:
             self.setEditMenuActions(False)
 
@@ -528,7 +533,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def getCurrentTabWidget(self):
         widgets_in_tab_widget = self.tabs.currentWidget().children()
-        if CLASS_DEBUG: print("MNRB_EDITOR:: --getCurrentTabWidget:: Widgets in Tab Widget:: ", widgets_in_tab_widget)
+        #if CLASS_DEBUG: print("MNRB_EDITOR:: --getCurrentTabWidget:: Widgets in Tab Widget:: ", widgets_in_tab_widget)
         tab_widget = None
         for widget in widgets_in_tab_widget:
             if hasattr(widget, "is_tab_widget"):
