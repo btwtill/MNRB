@@ -322,8 +322,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             directory_path = directory_name.toString().split("file:///")[1]
             if os.path.isdir(directory_path):
                 if self.validateProjectDirectory(directory_path):
-                    self.project_path = directory_path
-                    self.onOpenProject()
+                    if self.projectNeedsSaving():
+                        self.project_path = directory_path
+                        self.onOpenProject()
             else:
                 QtWidgets.QMessageBox.warning(self, "Choosen path: ", self.project_path, " is not a valid Directory")
         else:
