@@ -15,9 +15,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
         self.property_widget = property_widget
 
         self.initUI()
-
+        self.initCallbacks()
         #debug use only remove later
-        self.addTestContent()
+        #self.addTestContent()
 
     def initUI(self):
 
@@ -29,6 +29,10 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.view = NodeEditor_QGraphicView(self.scene.grScene, self)
         self.layout.addWidget(self.view)
+
+    def initCallbacks(self):
+        self.scene.connectItemSelectedListenerCallback(self.updatePropertyWindow)
+        self.scene.connectItemsDeselectedListenerCallback(self.updatePropertyWindow)
 
     def addTestContent(self):
         content_node_01 = NodeEditorNode(self.scene, title = "Node 01", inputs = [["input 01", 0, False]], outputs=[["output 01", 3, False]] )
@@ -45,8 +49,10 @@ class NodeEditorWidget(QtWidgets.QWidget):
         self.view.centerView()
 
     def sceneHasSelectedItems(self):
-        print(self.getSelectedItems())
         return self.getSelectedItems() != []
     
     def getSelectedItems(self):
         return self.scene.getSelectedItems()
+
+    def updatePropertyWindow(self):
+        if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Updating Property Window!!")

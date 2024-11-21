@@ -6,8 +6,6 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent impo
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 
-
-
 CLASS_DEBUG = False
 EVENT_DEBUG = False
 SERIALIZE_DEBUG = False

@@ -34,8 +34,6 @@ class NodeEditorSceneHistory():
         return self.history_current_step > 0
 
     def canRedo(self):
-        print(self.history_current_step)
-        print(len(self.history_stack))
         return self.history_current_step +1 < len(self.history_stack)
 
     def undo(self):
