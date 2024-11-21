@@ -8,10 +8,11 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_DIRECT, EDGE_
 CLASS_DEBUG = False
 
 class NodeEditorWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, property_widget = None, parent=None):
         super().__init__(parent)
-
         if CLASS_DEBUG : print("NODE_EDITOR_WIDGET:: -__init__:: Initialized Node Editor Widget")
+
+        self.property_widget = property_widget
 
         self.initUI()
 

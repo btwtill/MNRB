@@ -13,14 +13,15 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         self.initUI()
 
     def initUI(self):
+    
+        # Add dock widgets to the secondary main window
+        self.add_dock_widgets()
+
         # Central widget for secondary main window
-        self.central_widget = NodeEditorWidget()
+        self.central_widget = NodeEditorWidget(self.right_dock)
 
         # Set the central widget for the secondary main window
         self.setCentralWidget(self.central_widget)
-
-        # Add dock widgets to the secondary main window
-        self.add_dock_widgets()
 
     def add_dock_widgets(self):
         """Add left and right dock widgets to the secondary main window."""
