@@ -15,14 +15,15 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_settings_path = os.path.join(os.path.dirname(__file__), "project_settings.json")
         self.project_settings = self.loadProjectSettings()
 
-        self.working_directory = cmds.workspace(query=True, directory=True)
+        self.working_directory = cmds.workspace(query=True, rootDirectory=True)
         self.is_active_project = self.validateWorkingDirectory(self.working_directory)
 
         self.mnrb_path = os.path.join(self.working_directory, self.project_settings['ProjectSubPath'], "MNRB")
 
         self._project_path = None
         self._project_name = None
-        self._mnrb_base_editor_path = None
+        self.mnrb_base_editor_path_name = "mnrb_editor"
+        self.mnrb_base_editor_path = None
 
         self.display_overlay = True
 
@@ -37,7 +38,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self._project_path = path
         self.project_name = os.path.basename(self._project_path)
         
-        self._mnrb_base_editor_path = os.path.join(self._project_path, "mnrb_editor")
+        self.mnrb_base_editor_path = os.path.join(self._project_path, self.mnrb_base_editor_path_name)
 
     @property
     def project_name(self): return self._project_name
@@ -182,7 +183,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.action_new_project = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='create new project', triggered=self.onNewProjectFromMenuBar)
         self.action_open_project = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='open a project', triggered=self.onOpenProjectFromMenuBar)
         self.action_save_project = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='save project', triggered=self.onSaveProject)
-        self.action_save_project_as = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
+        #self.action_save_project_as = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
         self.action_exit = QtWidgets.QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='exit tool', triggered=self.close)
 
         self.action_load_template = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
@@ -296,7 +297,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 os.mkdir(self.project_path)
 
                 #creating The Projcet Hirarchy
-                os.mkdir(self._mnrb_base_editor_path)
+                os.mkdir(self.mnrb_base_editor_path)
 
                 if self.display_overlay:
                     self.setCentralWidget(self.tabs)
@@ -314,39 +315,44 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 warningBox.exec_()
 
     def onOpenProjectFromMenuBar(self):
-        if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProject::  Start Opening project from Menu Bar",)
+        if CLASS_DEBUG : print("MNRB_EDITOR:: -onOpenProjectFromMenuBar::  Start Opening project from Menu Bar",)
 
         directory_name = QtWidgets.QFileDialog.getExistingDirectoryUrl(self, "Open graph from file")
         if directory_name != '':
             directory_path = directory_name.toString().split("file:///")[1]
             if os.path.isdir(directory_path):
-                self.project_path = directory_path
-                self.onOpenProject()
+                if self.validateProjectDirectory(directory_path):
+                    self.project_path = directory_path
+                    self.onOpenProject()
+            else:
+                QtWidgets.QMessageBox.warning(self, "Choosen path: ", self.project_path, " is not a valid Directory")
+        else:
+            QtWidgets.QMessageBox.warning(self, "Choosen path: ", self.project_path, " cannot be Empty!")
 
     def onOpenProject(self):
-        if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Opening Project from Path:: ", self.project_path)
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --onOpenProject:: Opening Project from Path:: ", self.project_path)
 
         if self.display_overlay:
             self.setCentralWidget(self.tabs)
-
         self.display_overlay = False
-        self.statusBar().showMessage(' Opened project from ' + self.project_path, 5000)
 
-        try:
-            self.getNodeEditorTab().onOpenFile(self._mnrb_base_editor_path)
-        except Exception as e: 
+        if CLASS_DEBUG: 
             print("MNRB_EDITOR:: dipslay Overlay:: ", self.display_overlay)
             print("MNRB_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
-            print("MNRB_EDITOR:: ", e)
+
+        self.getNodeEditorTab().onOpenFile(self.mnrb_base_editor_path)
+            
+        self.statusBar().showMessage('Opened project from ' + self.project_path, 5000)
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")
+        if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Saving To: ", self.project_path)
+
         if self.project_path is not None:
 
-            if self.validateProjectDirectory():
-                self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
-                self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
-                self.setTitleText()
+            self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph"))
+            self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
+            self.setTitleText()
             return True
         else:
             return self.onSaveProjectAs()
@@ -360,10 +366,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             if os.path.isdir(directory_path):
                 self.project_path = directory_path
 
+                #create new Project Directory at ___Path
+                
+                #save all feature tabs to there new location
+                self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph"))
+
                 self.statusBar().showMessage(' Saved Project As to ' + self.project_path, 5000)
                 self.setTitleText()
 
-                self.getNodeEditorTab().onSaveFile(os.path.join(self._mnrb_base_editor_path, self.project_name + "_graph"))
                 return True
             else: 
                 return False
@@ -546,6 +556,23 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.setWindowTitle(title)
 
+    def validateProjectDirectory(self, path):
+        project_path_content = os.listdir(path)
+        feature_tab_directories = [self.mnrb_base_editor_path_name]
+
+        if CLASS_DEBUG:
+            print("MNRB_EDITOR:: -validateProjectDirectory:: Project Path", self.project_path)
+            print("MNRB_EDITOR:: -validateProjectDirectory:: Project Path Content", project_path_content)
+            print("MNRB_EDITOR:: -validateProjectDirectory:: feature_tab_directories: ", feature_tab_directories)
+
+
+        for feature_tab_directory in feature_tab_directories:
+            if feature_tab_directory not in project_path_content:
+                QtWidgets.QMessageBox.warning(self, "Could not Validate the project Structure of the choosen path: ", self.project_path)
+                return False
+            
+        return True
+    
     def validateProjectName(self, name):
         mnrb_projects = os.listdir(self.mnrb_path)
         if name == "": 
@@ -554,9 +581,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             return False
         else:
             return True
-    
-    def validateProjectDirectory(self):
-        return True
 
     def validateWorkingDirectory(self, directory):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -validateWorkingDirectory:: Full Directory Path: ", directory)

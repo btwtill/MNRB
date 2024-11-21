@@ -54,8 +54,8 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         if os.path.isdir(path):
             graph_items = os.listdir(path)
 
+            #check if there is a graph in the current project directory if not create a new one
             if len(graph_items) >= 1:
-                
                 self.loadFile(os.path.join(path, graph_items[0]))
             else:
                 self.onNewFile()
@@ -69,8 +69,7 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             self.central_widget.scene.history.clear()
             self.central_widget.scene.history.storeHistory("Inital History Stamp")
         except Exception as e:
-            print(e)
-            QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path)
+            QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path, " Error:: ", e)
 
 
     def onSaveFile(self, file_name):
