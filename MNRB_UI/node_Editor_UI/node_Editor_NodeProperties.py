@@ -5,4 +5,4 @@ class NodeEditorNodeProperties(NodeEditorPropertiesWidget):
         super().__init__(parent)
 
         self.node = node
-        self.title = "Node Properties"
+        self.title = self.node.title

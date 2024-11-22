@@ -22,9 +22,9 @@ class NodeEditorNode(Serializable):
         self.inputs = inputs
         self.outputs = outputs
 
-        self.properties = NodeEditorNodeProperties(self)
         self.content = NodeEditor_QGraphicContent(self)
         self.grNode = NodeEditor_QGraphicNode(self)
+        self.properties = NodeEditorNodeProperties(self)
 
         self.initSocketSettings()
         self.initSockets(inputs, outputs)
@@ -46,6 +46,7 @@ class NodeEditorNode(Serializable):
     def title(self, value):
         self._title = value
         self.grNode.title = self._title
+        self.properties.title = self._title
 
     def initSocketSettings(self):
         self.input_socket_position = LEFT
