@@ -31,11 +31,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         super().__init__(parent)
 
         self.grScene = grScene
-        print(self.windowType())
-        
-        print(self.acceptDrops())
+
         self.setAcceptDrops(True)
-        print(self.acceptDrops())
 
         self.initViewItems()
         self.initViewStates()

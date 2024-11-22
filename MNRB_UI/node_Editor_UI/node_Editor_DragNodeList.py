@@ -1,8 +1,8 @@
 import os
 from PySide2 import QtWidgets #type: ignore
-from PySide2.QtCore import QSize, Qt #type: ignore
-from PySide2.QtGui import QPixmap, QIcon #type: ignore
-from MNRB.MNRB_UI.node_Editor_conf import OPERATION_BASECOMPONENT, OPERATION_TESTCOMPONENT #type: ignore
+from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
+from PySide2.QtGui import QPixmap, QIcon, QDrag #type: ignore
+from MNRB.MNRB_UI.node_Editor_conf import OPERATION_BASECOMPONENT, OPERATION_TESTCOMPONENT, NODELIST_MIMETYPE#type: ignore
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
@@ -30,7 +30,7 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def addDragListItem(self, name, icon=None, operation_code=0):
         item = QtWidgets.QListWidgetItem(name, self)
 
-        icon_pixmap = QPixmap(icon if icon is not None else ".")
+        icon_pixmap = QPixmap(icon if icon is not None else os.path.join(ICONPATH, "default.png"))
         item.setIcon(QIcon(icon_pixmap))
         item.setSizeHint(QSize(32,32))
 
@@ -45,8 +45,26 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         try:
             item = self.currentItem()
             operation_code = item.data(Qt.ItemDataRole.UserRole + 1)
-            if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: Item:: OperationCode:: ", operation_code, " Class:: ", item )
 
+            if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: Item:: OperationCode:: ", operation_code, " Class:: ", item)
+
+            icon_pixmap = QPixmap(item.data(Qt.ItemDataRole.UserRole))
+
+            item_data = QByteArray()
+            data_stream = QDataStream(item_data, QIODevice.WriteOnly)
+            data_stream << icon_pixmap
+            data_stream.writeInt32(operation_code)
+            data_stream.writeQString(item.text())
+
+            mime_data = QMimeData()
+            mime_data.setData(NODELIST_MIMETYPE, item_data)
+
+            drag = QDrag(self)
+            drag.setMimeData(mime_data)
+            drag.setHotSpot(QPoint(icon_pixmap.width() / 2, icon_pixmap.height() / 2))
+            drag.setPixmap(icon_pixmap)
+
+            drag.exec_(Qt.MoveAction)
 
         except Exception as e:
             print(e)

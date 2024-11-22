@@ -4,6 +4,7 @@ from PySide2 import QtWidgets, QtCore # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
+from MNRB.MNRB_UI.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 
 DRAGDROP_DEBUG = True
 
@@ -145,6 +146,11 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def onDragEnter(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: Passport please, you are entering view Area!:: ", event)
+        if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: mimedata:: ", event.mimeData().hasFormat(NODELIST_MIMETYPE))
+        if event.mimeData().hasFormat(NODELIST_MIMETYPE):
+            event.acceptProposedAction()
+        else:
+            print("NODEEDITORTAB:: --onDragEnter:: Drag Enter Denied!")
 
     def isModified(self):
         return self.central_widget.scene.isModified()

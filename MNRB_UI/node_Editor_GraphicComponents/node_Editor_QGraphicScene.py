@@ -38,6 +38,10 @@ class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
     def setGrSceneSize(self, width, height):
         self.setSceneRect(-width // 2, -height // 2, width, height)
 
+    #Has to be overriden otherwise draggin wont work
+    def dragMoveEvent(self, event):
+        pass
+
     def drawBackground(self, painter, rect):
         super().drawBackground(painter, rect)
 
