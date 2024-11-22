@@ -8,7 +8,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: i
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory import NodeEditorSceneHistory #type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneClipboard #type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Properties import NodeEditorProperties #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSceneProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 
 CLASS_DEBUG = False
@@ -21,9 +21,9 @@ class NodeEditorScene(Serializable):
         
         self.grScene = NodeEditor_QGraphicScene(self)
         
-        self.properties = NodeEditorProperties()
-        self.properties.setTitle("Scene-Properties")
-        
+        self.properties = NodeEditorSceneProperties(self)
+        self.properties.title = "Scene Properties"
+
         self.nodes = []
         self.edges = []
         
