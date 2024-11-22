@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_EdgeProperties import NodeEditorEdgeProperties #type: ignore
 
 CLASS_DEBUG = False
 REMOVE_DEBUG = False
@@ -23,6 +24,7 @@ class NodeEditorEdge(Serializable):
 
         self._edge_type = edge_type
 
+        self.properties = NodeEditorEdgeProperties(self)
         self.grEdge = NodeEditor_QGraphicEdge(self)
         self.scene.addEdge(self)
         self.scene.grScene.addItem(self.grEdge)

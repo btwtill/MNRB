@@ -1,5 +1,8 @@
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
 
 class NodeEditorNodeProperties(NodeEditorPropertiesWidget):
-    def __init__(self, parent = None):
+    def __init__(self, node, parent = None):
         super().__init__(parent)
+
+        self.node = node
+        self.title = "Node Properties"

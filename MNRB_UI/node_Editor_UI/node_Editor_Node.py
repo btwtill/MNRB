@@ -5,6 +5,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import 
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent import NodeEditor_QGraphicContent # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 
 CLASS_DEBUG = False
 EVENT_DEBUG = False
@@ -15,12 +16,13 @@ class NodeEditorNode(Serializable):
         super().__init__()
 
         self.scene = scene
-
+        
         self._title = title
         
         self.inputs = inputs
         self.outputs = outputs
 
+        self.properties = NodeEditorNodeProperties(self)
         self.content = NodeEditor_QGraphicContent(self)
         self.grNode = NodeEditor_QGraphicNode(self)
 

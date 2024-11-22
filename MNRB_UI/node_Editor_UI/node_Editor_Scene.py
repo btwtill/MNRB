@@ -22,7 +22,6 @@ class NodeEditorScene(Serializable):
         self.grScene = NodeEditor_QGraphicScene(self)
         
         self.properties = NodeEditorSceneProperties(self)
-        self.properties.title = "Scene Properties"
 
         self.nodes = []
         self.edges = []

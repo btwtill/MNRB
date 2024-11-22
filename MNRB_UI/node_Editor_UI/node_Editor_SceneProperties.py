@@ -8,6 +8,8 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         super().__init__(parent)
 
         self.scene = scene
+        self.title = "Scene Properties"
+        
         self.initActions()
 
     def initUI(self):
