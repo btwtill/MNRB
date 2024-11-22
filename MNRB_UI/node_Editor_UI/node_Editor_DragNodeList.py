@@ -2,8 +2,11 @@ import os
 from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import QSize, Qt #type: ignore
 from PySide2.QtGui import QPixmap, QIcon #type: ignore
+from MNRB.MNRB_UI.node_Editor_conf import OPERATION_BASECOMPONENT, OPERATION_TESTCOMPONENT #type: ignore
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
+
+DRAGDROP_DEBUG = True
 
 class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def __init__(self, parent = None):
@@ -21,8 +24,8 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         self.addDragListItems()
         
     def addDragListItems(self):
-        self.addDragListItem("BaseComponent", os.path.join(ICONPATH, "base_component.png"))
-        self.addDragListItem("TestNode")
+        self.addDragListItem("BaseComponent", os.path.join(ICONPATH, "base_component.png"), OPERATION_BASECOMPONENT)
+        self.addDragListItem("TestNode", operation_code=OPERATION_TESTCOMPONENT)
 
     def addDragListItem(self, name, icon=None, operation_code=0):
         item = QtWidgets.QListWidgetItem(name, self)
@@ -35,3 +38,15 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
         item.setData(Qt.ItemDataRole.UserRole, icon_pixmap)
         item.setData(Qt.ItemDataRole.UserRole + 1, operation_code)
+
+    def startDrag(self, *args, **kwargs):
+        if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: ")
+
+        try:
+            item = self.currentItem()
+            operation_code = item.data(Qt.ItemDataRole.UserRole + 1)
+            if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: Item:: OperationCode:: ", operation_code, " Class:: ", item )
+
+
+        except Exception as e:
+            print(e)

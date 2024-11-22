@@ -31,6 +31,11 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         super().__init__(parent)
 
         self.grScene = grScene
+        print(self.windowType())
+        
+        print(self.acceptDrops())
+        self.setAcceptDrops(True)
+        print(self.acceptDrops())
 
         self.initViewItems()
         self.initViewStates()
@@ -56,6 +61,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)
+
+        self._drag_enter_listeners = []
+        self._drop_listeners = []
 
         self.setScene(self.grScene)
 
@@ -355,6 +363,18 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                     node.content.show()
             self.is_content_visible = True
     
+    def dragEnterEvent(self, event):
+        for callback in self._drag_enter_listeners: callback(event)
+
+    def dropEvent(self, event):
+        for callback in self._drop_listeners: callback(event)
+
+    def connectViewDragEnterListenerCallback(self, callback):
+        self._drag_enter_listeners.append(callback)
+    
+    def connectViewDropListenerCallback(self, callback):
+        self._drop_listeners.append(callback)
+
     def cutIntersectingEdges(self):
         
         for index in range(len(self.cutting_edge.line_points ) -1):

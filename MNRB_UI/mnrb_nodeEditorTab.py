@@ -5,6 +5,8 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # ty
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 
+DRAGDROP_DEBUG = True
+
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
         super().__init__()
@@ -22,6 +24,9 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
         # Set the central widget for the secondary main window
         self.setCentralWidget(self.central_widget)
+
+        self.central_widget.scene.connectViewDragEnterListenerCallback(self.onDragEnter)
+        self.central_widget.scene.connectViewDropListenerCallback(self.onDrop)
 
     def add_dock_widgets(self):
         """Add left and right dock widgets to the secondary main window."""
@@ -71,6 +76,16 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def canDelete(self):
         return self.central_widget.sceneHasSelectedItems()
 
+    def loadFile(self, path):
+        try:
+            self.central_widget.scene.loadSceneFromFile(path)
+            #self.central_widget.scene.history.clear()
+            #self.central_widget.scene.history.storeHistory("Inital History Stamp")
+            #self.central_widget.centerView()
+        except Exception as e:
+            print(e)
+            QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path)
+
     def onOpenFile(self, path):
         if os.path.isdir(path):
             graph_items = os.listdir(path)
@@ -84,15 +99,6 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         elif os.path.isfile(path):
             self.loadFile(path)
 
-    def loadFile(self, path):
-        try:
-            self.central_widget.scene.loadSceneFromFile(path)
-            #self.central_widget.scene.history.clear()
-            #self.central_widget.scene.history.storeHistory("Inital History Stamp")
-            #self.central_widget.centerView()
-        except Exception as e:
-            print(e)
-            QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path)
 
     def onSaveFile(self, file_name):
         self.central_widget.scene.saveSceneToFile(file_name)
@@ -134,5 +140,11 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
         self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)
     
+    def onDrop(self, event):
+        if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
+
+    def onDragEnter(self, event):
+        if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: Passport please, you are entering view Area!:: ", event)
+
     def isModified(self):
         return self.central_widget.scene.isModified()

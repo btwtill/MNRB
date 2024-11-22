@@ -77,6 +77,12 @@ class NodeEditorScene(Serializable):
     def connectItemsDeselectedListenerCallback(self, callback):
         self._items_deselected_listeners.append(callback)
 
+    def connectViewDragEnterListenerCallback(self, callback):
+        self.getView().connectViewDragEnterListenerCallback(callback)
+    
+    def connectViewDropListenerCallback(self, callback):
+        self.getView().connectViewDropListenerCallback(callback)
+
     def removeNode(self, node):
         if CLASS_DEBUG: 
             print("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ")
