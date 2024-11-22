@@ -82,13 +82,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
-        #self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
-
+        
         if self.display_overlay:
             self.setupProjectOverlay()
         else:
             self.display_overlay = True
             self.onOpenProject()
+
+        self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
             
     def setupNodeEditorTab(self):
         #Set Up the NodeEditor Tab Object

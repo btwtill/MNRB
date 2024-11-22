@@ -7,11 +7,9 @@ EVENT_DEBUG = True
 
 class NodeEditorPropertiesWidget(Serializable, QWidget):
     def __init__(self, parent=None) -> None:
-
         Serializable.__init__(self)
-
         QWidget.__init__(self)
-       
+        
         self._title = "undefined"
 
         self.initUI()
@@ -24,7 +22,7 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
 
     def initUI(self):
         self.layout = QVBoxLayout()
-        self.id_label = QLabel(str(self.id))
+        self.id_label = QLabel("ID: " + str(self.id))
         self.layout.addWidget(self.id_label)
         self.layout.addStretch()
         self.setLayout(self.layout)
