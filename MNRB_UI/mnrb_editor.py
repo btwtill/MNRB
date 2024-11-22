@@ -250,13 +250,11 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.action_nodes_list_dock_visibility = self.node_editor_menu.addAction("Nodes List")
         self.action_nodes_list_dock_visibility.setCheckable(True)
-        self.action_nodes_list_dock_visibility.setChecked(self.getNodeEditorTab().left_dock.isVisible())
-        self.action_nodes_list_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().left_dock))
-
+        self.action_nodes_list_dock_visibility.triggered.connect(self.onNodeListDockWidget)
+        
         self.action_nodes_properties_dock_visibility = self.node_editor_menu.addAction("Node Properties")
         self.action_nodes_properties_dock_visibility.setCheckable(True)
-        self.action_nodes_properties_dock_visibility.setChecked(self.getNodeEditorTab().right_dock.isVisible())
-        self.action_nodes_properties_dock_visibility.triggered.connect(lambda: self.toggleWidgetVisibiltiy(self.getNodeEditorTab().right_dock))
+        self.action_nodes_properties_dock_visibility.triggered.connect(self.onPropertiesDockWidget)
 
         self.node_editor_menu.aboutToShow.connect(self.updateNodeEditorMenu)
     
@@ -486,11 +484,17 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             project_settings_json = json.loads(project_settings_raw)
         return project_settings_json
 
-    def toggleWidgetVisibiltiy(self, widget):
-        if widget.isVisible():
-            widget.hide()
+    def onPropertiesDockWidget(self):
+        if self.getNodeEditorTab().right_dock.isVisible():
+            self.getNodeEditorTab().right_dock.hide()
         else:
-            widget.show()
+            self.getNodeEditorTab().right_dock.show()
+    
+    def onNodeListDockWidget(self):
+        if self.getNodeEditorTab().left_dock.isVisible():
+            self.getNodeEditorTab().left_dock.hide()
+        else:
+            self.getNodeEditorTab().left_dock.show()
 
     def toggleActionCheckbox(self, action):
         is_checked = action.isChecked()
@@ -501,6 +505,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.setNodeEditorMenuActions(False)
         else:
             self.setNodeEditorMenuActions(True)
+
+        self.action_nodes_list_dock_visibility.setChecked(self.getNodeEditorTab().left_dock.isVisible())
+        self.action_nodes_properties_dock_visibility.setChecked(self.getNodeEditorTab().right_dock.isVisible())
 
     def updateEditMenu(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --updateEditMenu:: Updating the edit menu functions!")
