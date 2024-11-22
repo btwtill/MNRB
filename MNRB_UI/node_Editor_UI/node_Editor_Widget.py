@@ -5,7 +5,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: i
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge#type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_DIRECT, EDGE_TYPE_BEZIER #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 
 class NodeEditorWidget(QtWidgets.QWidget):
     def __init__(self, property_widget = None, parent=None):
@@ -29,6 +29,8 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.view = NodeEditor_QGraphicView(self.scene.grScene, self)
         self.layout.addWidget(self.view)
+
+        self.updatePropertyWindow()
 
     def initCallbacks(self):
         self.scene.connectItemSelectedListenerCallback(self.updatePropertyWindow)
@@ -56,3 +58,16 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
     def updatePropertyWindow(self):
         if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Updating Property Window!!")
+        selected_items = self.getSelectedItems()
+
+        if selected_items == []:
+            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Selected Items:: ", selected_items)
+            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to:: ", self.scene.properties)
+            
+            self.property_widget.setWidget(self.scene.properties)
+            self.property_widget.setWindowTitle(self.scene.properties.title)
+        else:
+            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to None.")
+            
+            self.property_widget.setWidget(None)
+            self.property_widget.setWindowTitle(self.property_widget.title)

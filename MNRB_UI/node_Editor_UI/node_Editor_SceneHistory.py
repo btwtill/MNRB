@@ -1,8 +1,8 @@
 
-UNDO_DEBUG = True
-REDU_DEBUG = True
-RESTORE_DEBUG = True
-STORE_DEBUG = True
+UNDO_DEBUG = False
+REDU_DEBUG = False
+RESTORE_DEBUG = False
+STORE_DEBUG = False
 
 class NodeEditorSceneHistory():
     def __init__(self, scene) -> None:

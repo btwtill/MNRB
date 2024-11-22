@@ -14,6 +14,7 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline as NodeEditorCutline
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory as NodeEditorSceneHistory
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard as NodeEditorSceneClipboard
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList as NodeEditorDragNodeList
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Properties as NodeEditorProperties
 
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as nodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as nodeEditorGraphicsView
@@ -40,6 +41,7 @@ importlib.reload(NodeEditorCutline)
 importlib.reload(NodeEditorSceneHistory)
 importlib.reload(NodeEditorSceneClipboard)
 importlib.reload(NodeEditorDragNodeList)
+importlib.reload(NodeEditorProperties)
 
 importlib.reload(nodeEditorGraphicsScene)
 importlib.reload(nodeEditorGraphicsView)

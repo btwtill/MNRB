@@ -10,6 +10,8 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         self.setIconSize(QSize(32, 32))
         self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         self.setDragEnabled(True)
+        self.setBaseSize(QSize(150, 600))
+        self.setMaximumWidth(200)
 
         self.addDragListItems()
         

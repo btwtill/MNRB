@@ -37,7 +37,10 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.left_dock)
 
         # Right dock widget
-        self.right_dock = QtWidgets.QDockWidget("Node Properties", self)
+        self.right_dock_title = "Node Properties"
+        self.right_dock = QtWidgets.QDockWidget(self.right_dock_title, self)
+        self.right_dock.title = self.right_dock_title
+        
         self.right_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
         right_dock_contents = QtWidgets.QWidget()
         right_dock_layout = QtWidgets.QVBoxLayout(right_dock_contents)
@@ -45,7 +48,8 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         right_dock_layout.addWidget(right_dock_label)
         right_dock_contents.setLayout(right_dock_layout)
         self.right_dock.setWidget(right_dock_contents)
-        
+        self.right_dock.setMinimumWidth(250)
+
         # Add the right dock widget to the secondary main window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.right_dock)
 
