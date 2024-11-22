@@ -1,13 +1,17 @@
-from PySide2 import QtWidgets #type: ignore
+from collections import OrderedDict
+from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel #type: ignore
 from PySide2.QtCore import QSize  #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 EVENT_DEBUG = True
 
-class NodeEditorPropertiesWidget(QtWidgets.QWidget, Serializable):
+class NodeEditorPropertiesWidget(Serializable, QWidget):
     def __init__(self, parent=None) -> None:
-        super().__init__(parent)
 
+        Serializable.__init__(self)
+
+        QWidget.__init__(self)
+       
         self._title = "undefined"
 
         self.initUI()
@@ -19,12 +23,24 @@ class NodeEditorPropertiesWidget(QtWidgets.QWidget, Serializable):
         self._title = value
 
     def initUI(self):
-        self.layout = QtWidgets.QVBoxLayout()
+        self.layout = QVBoxLayout()
+        self.id_label = QLabel(str(self.id))
+        self.layout.addWidget(self.id_label)
         self.layout.addStretch()
         self.setLayout(self.layout)
 
     def serialize(self):
-        return True
+
+        serialized_data = OrderedDict([
+            ('id', self.id)
+        ])
+
+        return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
-        return False
+
+        if restore_id: self.id =  data['id']
+
+        return True
+    
+

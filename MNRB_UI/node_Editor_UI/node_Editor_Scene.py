@@ -189,12 +189,15 @@ class NodeEditorScene(Serializable):
         for node in self.nodes : nodes.append(node.serialize())
         for edge in self.edges : edges.append(edge.serialize())
 
+        properties = self.properties.serialize()
+
         serialized_data = OrderedDict([
             ('id', self.id), 
             ('grScene_width', self.grScene_width), 
             ('grScene_height', self.grScene_height),
             ('nodes', nodes),
             ('edges', edges),
+            ('properties', properties)
             ])
 
         if SERIALIZE_DEBUG: print("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
@@ -212,6 +215,8 @@ class NodeEditorScene(Serializable):
         if SERIALIZE_DEBUG:
             print("_______________________________________________________________")
             print("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
+
+        self.properties.deserialize(data['properties'], hashmap, restore_id)
 
         for node_data in data['nodes']:
             found = None

@@ -154,13 +154,16 @@ class NodeEditorNode(Serializable):
         for socket in self.inputs: inputs.append(socket.serialize())
         for socket in self.outputs: outputs.append(socket.serialize())
 
+        properties = self.properties.serialize()
+
         serialized_data = OrderedDict([
             ('id', self.id),
             ('title', self.title),
             ("position_x", self.grNode.scenePos().x()),
             ("position_y", self.grNode.scenePos().y()),
             ('inputs', inputs),
-            ('outputs', outputs)
+            ('outputs', outputs),
+            ('properties', properties)
         ])
 
         if SERIALIZE_DEBUG: print("NODE: --serialize:: Serialized Node:: ", self, " to Data:: ", serialized_data)
@@ -242,6 +245,8 @@ class NodeEditorNode(Serializable):
                         break
                 if SERIALIZE_DEBUG: print("NODE: --deserialize:: Deserializing Found Socket:: ", found)
                 found.deserialize(socket_data, hashmap, restore_id)
+        
+        self.properties.deserialize(data['properties'], hashmap, restore_id)
 
         if SERIALIZE_DEBUG: print("______________________________________ NODE DESERIALIZED")
 

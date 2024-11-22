@@ -110,11 +110,15 @@ class NodeEditorEdge(Serializable):
         self.grEdge = None
 
     def serialize(self):
+
+        properties = self.properties.serialize()
+
         serialized_data = OrderedDict([
             ('id', self.id),
             ('edge_type', self.edge_type),
             ('start_socket', self.start_socket.id),
-            ('end_socket', self.end_socket.id)
+            ('end_socket', self.end_socket.id),
+            ('properties', properties)
         ])
 
         if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Serialized Edge:: ", self, " to Data:: ", serialized_data)
@@ -137,6 +141,8 @@ class NodeEditorEdge(Serializable):
         self.start_socket = hashmap[data['start_socket']]
         self.end_socket = hashmap[data['end_socket']]
         self.edge_type = data['edge_type']
+
+        self.properties.deserialize(data['properties'], hashmap, restore_id)
 
         self.updatePositions()
 

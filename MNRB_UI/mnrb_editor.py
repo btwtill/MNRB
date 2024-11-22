@@ -82,7 +82,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
-        self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
+        #self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
 
         if self.display_overlay:
             self.setupProjectOverlay()
@@ -354,7 +354,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         if self.project_path is not None:
 
-            self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph"))
+            self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph.json"))
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
             return True
@@ -506,7 +506,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         if not self.display_overlay:
                 current_tab = self.getCurrentTabWidget()
-                self.action_edit_paste.setEnabled(True)
+
+                try:
+                    self.action_edit_paste.setEnabled(True)
+                except Exception as e:
+                    print(e)
+
                 self.action_edit_cut.setEnabled(current_tab.canCut())
                 self.action_edit_copy.setEnabled(current_tab.canCopy())
                 self.action_delete.setEnabled(current_tab.canDelete())
