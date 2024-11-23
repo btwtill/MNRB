@@ -12,6 +12,12 @@ EVENT_DEBUG = False
 SERIALIZE_DEBUG = False
 
 class NodeEditorNode(Serializable):
+
+    Graphics_Node_Class = NodeEditor_QGraphicNode
+    Node_Content_Class = NodeEditor_QGraphicContent
+    Node_Properties_Class = NodeEditorNodeProperties
+    Socket_Class = NodeEditor_Socket
+
     def __init__(self, scene, title="No Title", inputs=[], outputs=[]) -> None:
         super().__init__()
 
@@ -50,15 +56,18 @@ class NodeEditorNode(Serializable):
         self.properties.title = self._title
 
     def initInnerClasses(self):
-        self.content = NodeEditor_QGraphicContent(self)
-        self.grNode = NodeEditor_QGraphicNode(self)
-        self.properties = NodeEditorNodeProperties(self)
+        content_class = self.getNodeContentClass()
+        graphic_node_class = self.getGraphicNodeClass()
+        properties_class = self.getNodePropertiesClass()
+        if content_class is not None: self.content = content_class(self)
+        if graphic_node_class is not None: self.grNode = graphic_node_class(self)
+        if properties_class is not None: self.properties = properties_class(self)
 
     def initSocketSettings(self):
         self.input_socket_position = LEFT
         self.output_socket_position = RIGHT
 
-    def initSockets(self, inputs, outputs, reset=True):
+    def initSockets(self, inputs, outputs):
         inputSockets = []
         outputSockets = []
 
@@ -72,7 +81,7 @@ class NodeEditorNode(Serializable):
         on_drawn_side_counter = 0
         for input in inputs:
             if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing Input Sockets!")
-            socket = NodeEditor_Socket(self, index=index_counter, 
+            socket = self.__class__.Socket_Class(self, index=index_counter, 
                                        position=1, 
                                        socket_type = input[1], 
                                        socket_value = input[0],
@@ -87,7 +96,7 @@ class NodeEditorNode(Serializable):
         on_drawn_side_counter = 0
         for output in outputs:
             if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing output Sockets!")
-            socket = NodeEditor_Socket(self, index=index_counter, 
+            socket = self.__class__.Socket_Class(self, index=index_counter, 
                                         position=2,
                                         socket_type = output[1], 
                                         socket_value = output[0],
@@ -150,6 +159,18 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -remove:: Remove Node from the Scene")
         self.scene.removeNode(self)
         if CLASS_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
+
+    def getNodeContentClass(self):
+        return self.__class__.Node_Content_Class
+
+    def getNodeSocketClass(self):
+        pass
+
+    def getGraphicNodeClass(self):
+        return self.__class__.Graphics_Node_Class
+
+    def getNodePropertiesClass(self):
+        return self.__class__.Node_Properties_Class
 
     def serialize(self):
 
