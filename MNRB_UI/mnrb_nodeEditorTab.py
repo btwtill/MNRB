@@ -6,6 +6,7 @@ from PySide2.QtGui  import QPixmap #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 
 DRAGDROP_DEBUG = True
@@ -155,6 +156,14 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
             if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Got Data:: OperationCode:: ", operation_code, " and Name:: ", text)
 
+            mouse_position = event.pos()
+            scene_position = self.central_widget.scene.getView().mapToScene(mouse_position)
+            
+            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Event ScenePosition:: ", scene_position)
+
+            new_node = NodeEditorNode(self.central_widget.scene, text, inputs = [], outputs = [["base_def", 1, True], ["base_ctrl", 2, True]])
+            new_node.setPosition(scene_position.x(), scene_position.y())
+            
             event.setDropAction(Qt.MoveAction)
             event.accept()
         else:
