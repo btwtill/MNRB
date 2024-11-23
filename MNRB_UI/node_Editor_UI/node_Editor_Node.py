@@ -7,9 +7,9 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #ty
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 
-CLASS_DEBUG = False
-EVENT_DEBUG = False
-SERIALIZE_DEBUG = False
+CLASS_DEBUG = True
+EVENT_DEBUG = True
+SERIALIZE_DEBUG = True
 
 class NodeEditorNode(Serializable):
 
@@ -28,9 +28,9 @@ class NodeEditorNode(Serializable):
         self.inputs = inputs
         self.outputs = outputs
 
-        self.content = None
-        self.grNode = None
-        self.properties = None
+        # self.content = None
+        # self.grNode = None
+        # self.properties = None
 
         self.initInnerClasses()
         self.initSocketSettings()
@@ -38,11 +38,20 @@ class NodeEditorNode(Serializable):
 
         self.scene.addNode(self)
 
-        if CLASS_DEBUG: print("NODEEDITORNODE:: -__init__:: self.scene", self.scene)
-        if CLASS_DEBUG: print("NODEEDITORNODE:: -__init__:: self.scene.grScene", self.scene.grScene)
-        if CLASS_DEBUG: print("NODEEDITORNODE:: -__init__:: self.grNode", self.grNode)
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: self.scene", self.scene)
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: self.scene.grScene", self.scene.grScene)
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: self.grNode", self.grNode)
 
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: grScene Items before adding:: ")
+        if CLASS_DEBUG: 
+            for item in self.scene.grScene.items():
+                print("NODEEDITORNODE:: --__init__:: \t\t", item)
         self.scene.grScene.addItem(self.grNode)
+
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: grScene Items after adding:: ")
+        if CLASS_DEBUG: 
+            for item in self.scene.grScene.items():
+                print("NODEEDITORNODE:: --__init__:: \t\t", item)
 
     @property
     def position(self): return self.grNode.pos()
@@ -59,6 +68,11 @@ class NodeEditorNode(Serializable):
         content_class = self.getNodeContentClass()
         graphic_node_class = self.getGraphicNodeClass()
         properties_class = self.getNodePropertiesClass()
+
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --initInnerClasses:: content Class::", content_class)
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --initInnerClasses:: graphicsNode Class::", graphic_node_class)
+        if CLASS_DEBUG: print("NODEEDITORNODE:: --initInnerClasses:: properties_Class:: ", properties_class)
+
         if content_class is not None: self.content = content_class(self)
         if graphic_node_class is not None: self.grNode = graphic_node_class(self)
         if properties_class is not None: self.properties = properties_class(self)

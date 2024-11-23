@@ -11,10 +11,10 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #t
 
 EVENT_DEBUG = False
 CLASS_DEBUG = False
-SCENE_DEBUG = False
+SCENE_DEBUG = True
 MOVE_DEBUG = False
 WHEEL_DEBUG = False
-REMOVE_DEBUG = False
+REMOVE_DEBUG = True
 EDGE_CUT_DEBUG = False
 
 MODE_NOOP = 1
@@ -178,7 +178,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicNodes")
             item_counter = 0
             for item in self.grScene.items():
-                if isinstance(item, NodeEditor_QGraphicNode):
+                if hasattr(item, 'node'):
                     print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Node:: \t", item)
                     item_counter += 1
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicNodes")
@@ -189,15 +189,15 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                     print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Edge:: \t", item)
                     item_counter += 1
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicEdges")
+            for item in self.grScene.items():
+                print("GRAPHICSVIEW:: --middleMouseButtonPress:: ", item)
             
     def leftMouseButtonPress(self, event):
 
         item_on_click = self.getItemAtEvent(event)
         self.last_mouse_button_press_position = self.mapToScene(event.pos())
 
-        if (isinstance(item_on_click, QtWidgets.QGraphicsTextItem) or 
-            isinstance(item_on_click, QtWidgets.QGraphicsProxyWidget) or 
-            isinstance(item_on_click, NodeEditor_QGraphicNode) or 
+        if (hasattr(item_on_click, 'node') or 
             isinstance(item_on_click, NodeEditor_QGraphicEdge) or
             item_on_click is None):
             
@@ -246,9 +246,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         item_on_release = self.getItemAtEvent(event)
 
-        if (isinstance(item_on_release, QtWidgets.QGraphicsTextItem) or 
-            isinstance(item_on_release, QtWidgets.QGraphicsProxyWidget) or 
-            isinstance(item_on_release, NodeEditor_QGraphicNode) or 
+        if (hasattr(item_on_release, 'node') or 
             isinstance(item_on_release, NodeEditor_QGraphicEdge) or 
             item_on_release is None):
 
@@ -393,9 +391,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         for item in selected_items:
             if isinstance(item, NodeEditor_QGraphicEdge):
                 selected_edges.append(item)
-            elif (isinstance(item, QtWidgets.QGraphicsTextItem) or 
-                isinstance(item, QtWidgets.QGraphicsProxyWidget) or 
-                isinstance(item, NodeEditor_QGraphicNode)):
+            elif hasattr(item, 'node'):
                 selected_nodes.append(item)
 
         if REMOVE_DEBUG: 
