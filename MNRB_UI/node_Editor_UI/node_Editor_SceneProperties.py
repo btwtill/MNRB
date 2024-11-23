@@ -1,7 +1,7 @@
 from PySide2 import QtWidgets #type: ignore 
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
 
-EVENT_DEBUG = True
+EVENT_DEBUG = False
 
 class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def __init__(self, scene, parent=None) -> None:

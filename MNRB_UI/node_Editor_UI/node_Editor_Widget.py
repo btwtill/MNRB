@@ -7,7 +7,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_DIRECT, EDGE_TYPE_BEZIER #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NodeEditorWidget(QtWidgets.QWidget):
     def __init__(self, property_widget = None, parent=None):

@@ -7,9 +7,9 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #ty
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 
-CLASS_DEBUG = True
-EVENT_DEBUG = True
-SERIALIZE_DEBUG = True
+CLASS_DEBUG = False
+EVENT_DEBUG = False
+SERIALIZE_DEBUG = False
 
 class NodeEditorNode(Serializable):
 
@@ -28,9 +28,9 @@ class NodeEditorNode(Serializable):
         self.inputs = inputs
         self.outputs = outputs
 
-        # self.content = None
-        # self.grNode = None
-        # self.properties = None
+        self.content = None
+        self.grNode = None
+        self.properties = None
 
         self.initInnerClasses()
         self.initSocketSettings()

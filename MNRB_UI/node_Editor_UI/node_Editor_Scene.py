@@ -13,7 +13,7 @@ from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import Invali
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
-SELECTION_DEBUG = True
+SELECTION_DEBUG = False
 
 class NodeEditorScene(Serializable):
     def __init__(self):
