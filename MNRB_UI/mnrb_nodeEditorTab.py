@@ -1,6 +1,8 @@
 import os
 import json
-from PySide2 import QtWidgets, QtCore # type: ignore
+from PySide2 import QtWidgets # type: ignore
+from PySide2.QtCore import QIODevice, QDataStream, Qt #type: ignore
+from PySide2.QtGui  import QPixmap #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
@@ -36,18 +38,18 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
         # Left dock widget
         self.left_dock = QtWidgets.QDockWidget("Node List", self)
-        self.left_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+        self.left_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.left_dock.setWidget(self.node_list_widget)
 
         # Add the left dock widget to the secondary main window
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.left_dock)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.left_dock)
 
         # Right dock widget
         self.right_dock_title = "Node Properties"
         self.right_dock = QtWidgets.QDockWidget(self.right_dock_title, self)
         self.right_dock.title = self.right_dock_title
 
-        self.right_dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+        self.right_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         right_dock_contents = QtWidgets.QWidget()
         right_dock_layout = QtWidgets.QVBoxLayout(right_dock_contents)
         right_dock_label = QtWidgets.QLabel("This is the right dock widget.")
@@ -57,7 +59,7 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         self.right_dock.setMinimumWidth(250)
 
         # Add the right dock widget to the secondary main window
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.right_dock)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.right_dock)
 
     def clearScene(self):
         self.central_widget.scene.clearScene()
@@ -143,6 +145,21 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     
     def onDrop(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
+        if event.mimeData().hasFormat(NODELIST_MIMETYPE):
+            event_data = event.mimeData().data(NODELIST_MIMETYPE)
+            data_stream = QDataStream(event_data, QIODevice.ReadOnly)
+            pixmap = QPixmap()
+            data_stream >> pixmap
+            operation_code = data_stream.readInt32()
+            text = data_stream.readQString()
+
+            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Got Data:: OperationCode:: ", operation_code, " and Name:: ", text)
+
+            event.setDropAction(Qt.MoveAction)
+            event.accept()
+        else:
+            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Not Requested Format:: ", NODELIST_MIMETYPE, " ignoring event")
+            event.ignore()
 
     def onDragEnter(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: Passport please, you are entering view Area!:: ", event)
