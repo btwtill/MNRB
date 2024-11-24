@@ -1,3 +1,5 @@
+from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException import InvalidNodeRegistration #type: ignore
+
 NODELIST_MIMETYPE = "application/x-item"
 
 OPERATION_BASECOMPONENT = 0
