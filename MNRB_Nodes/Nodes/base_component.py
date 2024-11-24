@@ -5,7 +5,6 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node, MNRB_NodeProperties #type:
 
 class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
     def initUI(self):
-        super().initUI()
         self.main_geometry_label_layout = QHBoxLayout()
         self.main_geometry_name_box = QLineEdit()
         self.main_geometry_name_box.setPlaceholderText("Define you main Rig Geometry: ")

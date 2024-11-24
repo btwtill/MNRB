@@ -9,8 +9,6 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
         self.scene = scene
         self.title = "Scene Properties"
-
-        self.initActions()
         
     def initActions(self):
         self.action_layout = QtWidgets.QHBoxLayout()
