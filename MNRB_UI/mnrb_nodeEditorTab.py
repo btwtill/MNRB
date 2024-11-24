@@ -163,7 +163,7 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             
             if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Event ScenePosition:: ", scene_position)
 
-            new_node = getClassFromOperationCode(operation_code)(self.central_widget.scene, inputs = [["base_def", 1, True]], outputs = [["base_def", 1, True], ["base_ctrl", 2, True]])
+            new_node = getClassFromOperationCode(operation_code)(self.central_widget.scene)
             new_node.setPosition(scene_position.x(), scene_position.y())
 
             event.setDropAction(Qt.MoveAction)

@@ -25,4 +25,4 @@ def getClassFromOperationCode(operation_code):
     if operation_code not in MNRB_NODES: raise OperationCodeNotRegistered("Operation Code '%s' is not registered" % operation_code)
     return MNRB_NODES[operation_code]
 
-from MNRB_Nodes.Nodes import *
+from MNRB.MNRB_Nodes.Nodes import * #type: ignore

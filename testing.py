@@ -33,7 +33,7 @@ import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath a
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge as NodeEditorGraphicEdge
 
 import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException as NodeEditorInvalidFile
-import MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException
+import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException
 
 importlib.reload(mnrb_editor)
 importlib.reload(utils)
