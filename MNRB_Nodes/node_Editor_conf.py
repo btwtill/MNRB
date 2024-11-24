@@ -1,4 +1,4 @@
-from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException import InvalidNodeRegistration #type: ignore
+from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException import InvalidNodeRegistration, OperationCodeNotRegistered #type: ignore
 
 NODELIST_MIMETYPE = "application/x-item"
 
@@ -20,3 +20,9 @@ def registerNode(operation_code):
         registerNodesInMNRBNodes(operation_code, original_class)
         return original_class
     return decorator
+
+def getClassFromOperationCode(operation_code):
+    if operation_code not in MNRB_NODES: raise OperationCodeNotRegistered("Operation Code '%s' is not registered" % operation_code)
+    return MNRB_NODES[operation_code]
+
+from MNRB_Nodes.Nodes import *
