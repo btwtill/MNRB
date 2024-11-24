@@ -7,7 +7,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_DIRECT, EDGE_TYPE_BEZIER #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 
 class NodeEditorWidget(QtWidgets.QWidget):
     def __init__(self, property_widget = None, parent=None):
@@ -69,9 +69,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
             self.property_widget.setWidget(self.scene.properties)
             self.property_widget.setWindowTitle(self.scene.properties.title)
         else:
-            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to None.")
             active_widget = selected_items[0]
-            if isinstance(active_widget, NodeEditor_QGraphicNode):
+            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to First in Selection:: ", active_widget)
+            if hasattr(active_widget, 'node'):
                 self.property_widget.setWidget(active_widget.node.properties)
                 self.property_widget.setWindowTitle(active_widget.node.properties.title)
             elif isinstance(active_widget, NodeEditor_QGraphicEdge):
