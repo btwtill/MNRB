@@ -11,3 +11,6 @@ class MNRB_Node_BaseComponent(MNRB_Node):
     operation_title = "Base"
 
     Node_Properties_Class = MNRB_Node_BaseComponent_Properties
+
+    def __init__(self, scene):
+        super().__init__(scene, inputs = [], outputs=[["base_ctrl", 1, True]])

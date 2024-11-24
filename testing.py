@@ -22,6 +22,8 @@ import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf
 import MNRB.MNRB_Nodes.mnrb_node_base as MNRBNodeBase
 import MNRB.MNRB_Nodes.Nodes as MNRBNodes
 
+import MNRB.MNRB_Nodes.Nodes.base_component as MNRB_Base_Component_Node
+
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as NodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as NodeEditorGraphicsView
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode as NodeEditorGraphicsNode
@@ -55,6 +57,8 @@ importlib.reload(NodeEditorEdgeProperties)
 importlib.reload(NodeEditorConf)
 importlib.reload(MNRBNodeBase)
 importlib.reload(MNRBNodes)
+
+importlib.reload(MNRB_Base_Component_Node)
 
 importlib.reload(NodeEditorGraphicsScene)
 importlib.reload(NodeEditorGraphicsView)
