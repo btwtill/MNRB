@@ -18,8 +18,8 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget as NodeEditorPro
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties as NodeEditorNodeProperties
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties as NodeEditorSceneProperties
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_EdgeProperties as NodeEditorEdgeProperties
-import MNRB.MNRB_UI.node_Editor_conf as NodeEditorConf 
-import MNRB.MNRB_UI.MNRB_Nodes.mnrb_node_base as MNRBNodeBase
+import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf 
+import MNRB.MNRB_Nodes.mnrb_node_base as MNRBNodeBase
 
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as NodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as NodeEditorGraphicsView
