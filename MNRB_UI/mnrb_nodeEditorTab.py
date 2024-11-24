@@ -170,6 +170,8 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
             if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop: New Node:: ",new_node)
 
+            self.central_widget.scene.history.storeHistory("Created New Node")
+
             event.setDropAction(Qt.MoveAction)
             event.accept()
         else:
