@@ -21,9 +21,6 @@ class NodeEditorWidget(QtWidgets.QWidget):
         self.initCallbacks()
         self.scene.setNodeClassSelectorFunction(self.getNodeClassFromData)
 
-        #debug use only remove later
-        #self.addTestContent()
-
     def initUI(self):
 
         self.layout = QtWidgets.QVBoxLayout()
