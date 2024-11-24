@@ -10,8 +10,13 @@ MNRB_NODES = {
 
 }
 
-
 def registerNodesInMNRBNodes(operation_code, class_reference):
     if operation_code in MNRB_NODES:
         raise InvalidNodeRegistration("Duplicate Node Registration of '%s'. There is already %s" % (operation_code, MNRB_NODES[operation_code]))
     MNRB_NODES[operation_code] = class_reference
+
+def registerNode(operation_code):
+    def decorator(original_class):
+        registerNodesInMNRBNodes(operation_code, original_class)
+        return original_class
+    return decorator
