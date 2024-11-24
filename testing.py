@@ -1,14 +1,14 @@
 import importlib
 import MNRB.MNRB_UI.mnrb_editor as mnrb_editor
 import MNRB.MNRB_UI.mnrb_ui_utils as utils
-import MNRB.MNRB_UI.mnrb_nodeEditorTab as nodeEditorTab
+import MNRB.MNRB_UI.mnrb_nodeEditorTab as NodeEditorTab
 
-import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget as nodeEditorWidget
-import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable as nodeEditorSerializable
-import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene as nodeEditorScene
-import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node as nodeEditorNode
-import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket as nodeEditorSocket
-import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge as nodeEditorEdge
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget as NodeEditorWidget
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable as NodeEditorSerializable
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene as NodeEditorScene
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node as NodeEditorNode
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket as NodeEditorSocket
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge as NodeEditorEdge
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge as NodeEditorDragEdge
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline as NodeEditorCutline
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory as NodeEditorSceneHistory
@@ -21,26 +21,27 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_EdgeProperties as NodeEditorEdgeP
 import MNRB.MNRB_UI.node_Editor_conf as NodeEditorConf 
 import MNRB.MNRB_UI.MNRB_Nodes.mnrb_node_base as MNRBNodeBase
 
-import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as nodeEditorGraphicsScene
-import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as nodeEditorGraphicsView
-import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode as nodeEditorGraphicsNode
-import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent as nodeEditorGraphicContent
-import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket as nodeEditorGraphicSocket 
-import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath as nodeEditorGraphicEdgePath
-import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge as nodeEditorGraphicEdge
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as NodeEditorGraphicsScene
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as NodeEditorGraphicsView
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode as NodeEditorGraphicsNode
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicContent as NodeEditorGraphicContent
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket as NodeEditorGraphicSocket 
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath as NodeEditorGraphicEdgePath
+import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge as NodeEditorGraphicEdge
 
-import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException as nodeEditorInvalidFile
+import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException as NodeEditorInvalidFile
+import MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException
 
 importlib.reload(mnrb_editor)
 importlib.reload(utils)
-importlib.reload(nodeEditorTab)
+importlib.reload(NodeEditorTab)
 
-importlib.reload(nodeEditorWidget)
-importlib.reload(nodeEditorSerializable)
-importlib.reload(nodeEditorScene)
-importlib.reload(nodeEditorNode)
-importlib.reload(nodeEditorSocket)
-importlib.reload(nodeEditorEdge)
+importlib.reload(NodeEditorWidget)
+importlib.reload(NodeEditorSerializable)
+importlib.reload(NodeEditorScene)
+importlib.reload(NodeEditorNode)
+importlib.reload(NodeEditorSocket)
+importlib.reload(NodeEditorEdge)
 importlib.reload(NodeEditorDragEdge)
 importlib.reload(NodeEditorCutline)
 importlib.reload(NodeEditorSceneHistory)
@@ -53,15 +54,16 @@ importlib.reload(NodeEditorEdgeProperties)
 importlib.reload(NodeEditorConf)
 importlib.reload(MNRBNodeBase)
 
-importlib.reload(nodeEditorGraphicsScene)
-importlib.reload(nodeEditorGraphicsView)
-importlib.reload(nodeEditorGraphicsNode)
-importlib.reload(nodeEditorGraphicContent)
-importlib.reload(nodeEditorGraphicSocket)
-importlib.reload(nodeEditorGraphicEdgePath)
-importlib.reload(nodeEditorGraphicEdge)
+importlib.reload(NodeEditorGraphicsScene)
+importlib.reload(NodeEditorGraphicsView)
+importlib.reload(NodeEditorGraphicsNode)
+importlib.reload(NodeEditorGraphicContent)
+importlib.reload(NodeEditorGraphicSocket)
+importlib.reload(NodeEditorGraphicEdgePath)
+importlib.reload(NodeEditorGraphicEdge)
 
-importlib.reload(nodeEditorInvalidFile)
+importlib.reload(NodeEditorInvalidFile)
+importlib.reload(NodeEditorRegistrationException)
 
 newEditor = mnrb_editor.mnrb_Editor()
 
