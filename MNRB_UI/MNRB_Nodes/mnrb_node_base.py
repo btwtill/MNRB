@@ -6,11 +6,12 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def initUI(self):
         self.component_name_edit = QLineEdit()
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
+        self.layout.addWidget(self.component_name_edit)
         self.layout.addStretch()
 
 class MNRB_Node(NodeEditorNode):
     operation_code = 0
-    operation_title = "Undefined"
+    operation_title = "MNRB_Node"
 
     Node_Properties_Class = MNRB_NodeProperties
 
