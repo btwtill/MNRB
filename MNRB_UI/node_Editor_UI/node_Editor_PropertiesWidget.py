@@ -11,8 +11,9 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
         QWidget.__init__(self)
         
         self._title = "undefined"
-        
-        
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+
         self.initUI()
 
     @property
@@ -22,13 +23,10 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
         self._title = value
 
     def initUI(self):
-        
-        self.layout = QVBoxLayout()
         self.id_label = QLabel("ID: " + str(self.id))
         self.layout.addWidget(self.id_label)
         self.layout.addStretch()
-        self.setLayout(self.layout)
-
+        
     def serialize(self):
 
         serialized_data = OrderedDict([
