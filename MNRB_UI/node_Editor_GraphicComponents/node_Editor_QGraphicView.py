@@ -8,10 +8,12 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket impor
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
+from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node #type: ignore
+from MNRB.MNRB_Nodes.Nodes.base_component import MNRB_Node_BaseComponent #type: ignore
 
 EVENT_DEBUG = False
 CLASS_DEBUG = False
-SCENE_DEBUG = False
+SCENE_DEBUG = True
 MOVE_DEBUG = False
 WHEEL_DEBUG = False
 REMOVE_DEBUG = False
@@ -102,8 +104,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         #center view
         if event.key() == Qt.Key_F:
             self.centerView()
-        elif event.key() == Qt.Key_N:
-            newNode = NodeEditorNode(self.grScene.scene, title="TestNode", inputs = [["input",1, True], ["input", 1, False]], outputs=[["output",1, True], ["output", 1, True], ["output",1, True]])
         else:
             super().keyPressEvent(event)
         
@@ -178,7 +178,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicNodes")
             item_counter = 0
             for item in self.grScene.items():
-                if hasattr(item, 'node'):
+                if  issubclass(type(item), NodeEditor_QGraphicNode) or isinstance(item, NodeEditor_QGraphicNode):
                     print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Node:: \t", item)
                     item_counter += 1
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicNodes")
@@ -189,8 +189,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                     print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Edge:: \t", item)
                     item_counter += 1
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicEdges")
-            for item in self.grScene.items():
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: ", item)
             
     def leftMouseButtonPress(self, event):
 

@@ -9,7 +9,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNod
 
 CLASS_DEBUG = False
 EVENT_DEBUG = False
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 
 class NodeEditorNode(Serializable):
 
@@ -190,8 +190,13 @@ class NodeEditorNode(Serializable):
 
         inputs, outputs = [], []
 
-        for socket in self.inputs: inputs.append(socket.serialize())
-        for socket in self.outputs: outputs.append(socket.serialize())
+        if SERIALIZE_DEBUG: print("%s:: SERIALIZE:: Inputs:: " % self.__class__.__name__, self.inputs)
+        if SERIALIZE_DEBUG: print("%s:: SERIALIZE:: Outputs:: " % self.__class__.__name__, self.outputs)
+
+        if self.inputs != []:
+            for socket in self.inputs: inputs.append(socket.serialize())
+        if self.outputs != []:
+            for socket in self.outputs: outputs.append(socket.serialize())
 
         properties = self.properties.serialize()
 
@@ -227,31 +232,12 @@ class NodeEditorNode(Serializable):
         data['outputs'].sort(key=lambda socket: socket['index_on_drawn_node_side'] + socket['position'] * 10000)
 
         if not exists:
-            if SERIALIZE_DEBUG: print("NODE: --deserialize:: Serialized Node:: Adding Input Data to input and output Socket Lists")
-            for input in data['inputs']:
-                self.inputs.append(input)
-
-            for output in data['outputs']:
-                self.outputs.append(output)
-            if SERIALIZE_DEBUG: print("NODE: --deserialize:: Serialized Node:: Wrapping GrNode around the Fake sockets.")
             self.grNode.wrapGrNodeToSockets()
 
         for index, socket_data in enumerate(data['inputs']):
             if not exists:
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: Creating new Input Socket Since there was no node found previously in the scene.")
-                new_socket = NodeEditor_Socket(
-                                                                        node=self, index=socket_data['index'], 
-                                                                        index_on_drawn_node_side = socket_data['index_on_drawn_node_side'],
-                                                                        socket_type = socket_data['socket_type'],
-                                                                        socket_value = socket_data['socket_value'], 
-                                                                        position = socket_data['position'],
-                                                                        accept_multi_edges = socket_data['accept_multi_edges'],
-                                                                        is_input = socket_data['is_input']
-                                                                    )
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: Created New Input Socket:: ", new_socket, " now Deserializing::")
-                new_socket.deserialize(socket_data, hashmap, restore_id)
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: Adding new created Node to the Input Sockets")
-                self.inputs[index] = new_socket
+                if SERIALIZE_DEBUG: print("NODE: --deserialize:: About to deserialize Input:: ", self.inputs[index])
+                self.inputs[index].deserialize(socket_data, hashmap, restore_id)
             else:
                 for socket in self.inputs:
                     if socket.id  == socket_data['id']:
@@ -263,19 +249,8 @@ class NodeEditorNode(Serializable):
         
         for index, socket_data in enumerate(data['outputs']):
             if not exists:
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: Creating new Output Socket Since there was no node found previously in the scene.")
-                new_socket = NodeEditor_Socket(
-                                                                        node=self, index=socket_data['index'], 
-                                                                        index_on_drawn_node_side = socket_data['index_on_drawn_node_side'],
-                                                                        socket_type = socket_data['socket_type'],
-                                                                        socket_value = socket_data['socket_value'], 
-                                                                        position = socket_data['position'],
-                                                                        accept_multi_edges = socket_data['accept_multi_edges'],
-                                                                        is_input = socket_data['is_input']
-                                                                    )
-                new_socket.deserialize(socket_data, hashmap, restore_id)
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: Adding new created Node to the Output Sockets")
-                self.outputs[index] = new_socket
+                if SERIALIZE_DEBUG: print("NODE: --deserialize:: About to deserialize outputs socket:: ", self.outputs[index])
+                self.outputs[index].deserialize(socket_data, hashmap, restore_id)
             else:
                 for socket in self.outputs:
                     if socket.id == socket_data['id']:
@@ -291,4 +266,4 @@ class NodeEditorNode(Serializable):
 
         return True
 
-    def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (self.__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

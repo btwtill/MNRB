@@ -18,3 +18,14 @@ class MNRB_Node(NodeEditorNode):
 
     def __init__(self, scene, inputs=[], outputs=[]):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
+        self.value = None
+
+    def serialize(self):
+        result_data = super().serialize()
+        result_data['operation_code'] = self.__class__.operation_code
+        return result_data
+    
+    def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
+        result = super().deserialize(data, hashmap, restore_id, exists)
+
+        return True

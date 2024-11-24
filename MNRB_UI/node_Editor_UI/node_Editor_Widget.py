@@ -6,6 +6,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge#type: ig
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_DIRECT, EDGE_TYPE_BEZIER #type: ignore
+from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
 
 CLASS_DEBUG = True
 
@@ -18,6 +19,8 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.initUI()
         self.initCallbacks()
+        self.scene.setNodeClassSelectorFunction(self.getNodeClassFromData)
+
         #debug use only remove later
         #self.addTestContent()
 
@@ -38,17 +41,6 @@ class NodeEditorWidget(QtWidgets.QWidget):
         self.scene.connectItemSelectedListenerCallback(self.updatePropertyWindow)
         self.scene.connectItemsDeselectedListenerCallback(self.updatePropertyWindow)
 
-    def addTestContent(self):
-        content_node_01 = NodeEditorNode(self.scene, title = "Node 01", inputs = [["input 01", 0, False]], outputs=[["output 01", 3, False]] )
-        content_node_02 = NodeEditorNode(self.scene, title = "Node 02", inputs = [["arm_def",0, True],["arm_ctrl",0, False]], outputs=[["arm_def",1, True],["arm_ctrl",1, True]] )
-
-        content_node_01.setPosition(-120, 20)
-        content_node_02.setPosition(140, -20)
-
-        content_edge_01 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[0], edge_type = EDGE_TYPE_BEZIER)
-
-        content_edge_02 = NodeEditorEdge(self.scene, content_node_01.outputs[0], content_node_02.inputs[1], edge_type = EDGE_TYPE_BEZIER)
-
     def centerView(self):
         self.view.centerView()
 
@@ -57,6 +49,10 @@ class NodeEditorWidget(QtWidgets.QWidget):
     
     def getSelectedItems(self):
         return self.scene.getSelectedItems()
+
+    def getNodeClassFromData(self, data):
+        if 'operation_code' not in data: return NodeEditorNode
+        return getClassFromOperationCode(data['operation_code'])
 
     def updatePropertyWindow(self):
         if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Updating Property Window!!")

@@ -9,6 +9,7 @@ from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, OPERAT
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
 DRAGDROP_DEBUG = True
+CLASS_DEBUG = True
 
 class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def __init__(self, parent = None):
@@ -26,14 +27,14 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         self.addDragListItems()
         
     def addDragListItems(self):
+
+        if CLASS_DEBUG: print("DRAGNODELIST:: --addDragListItems:: Registered Items::", MNRB_NODES)
+
         keys = list(MNRB_NODES.keys())
         for key in keys:
             node = getClassFromOperationCode(key)
 
             self.addDragListItem(node.operation_title, node.icon, node.operation_code)
-
-        # self.addDragListItem("BaseComponent", os.path.join(ICONPATH, "base_component.png"), OPERATIONCODE_BASECOMPONENT)
-        # self.addDragListItem("TestNode", operation_code=OPERATIONCODE_TESTCOMPONENT)
 
     def addDragListItem(self, name, icon=None, operation_code=0):
         item = QtWidgets.QListWidgetItem(name, self)

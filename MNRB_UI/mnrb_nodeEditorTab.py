@@ -163,8 +163,12 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             
             if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Event ScenePosition:: ", scene_position)
 
+            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop: Class about to be dropped into the scene:: ", getClassFromOperationCode(operation_code))
+
             new_node = getClassFromOperationCode(operation_code)(self.central_widget.scene)
             new_node.setPosition(scene_position.x(), scene_position.y())
+
+            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop: New Node:: ",new_node)
 
             event.setDropAction(Qt.MoveAction)
             event.accept()
@@ -178,7 +182,7 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         if event.mimeData().hasFormat(NODELIST_MIMETYPE):
             event.acceptProposedAction()
         else:
-            print("NODEEDITORTAB:: --onDragEnter:: Drag Enter Denied!")
+            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: Drag Enter Denied!")
 
     def isModified(self):
         return self.central_widget.scene.isModified()

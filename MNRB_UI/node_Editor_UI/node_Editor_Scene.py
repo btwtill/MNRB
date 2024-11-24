@@ -12,7 +12,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSc
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 
 CLASS_DEBUG = False
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 SELECTION_DEBUG = False
 
 class NodeEditorScene(Serializable):
@@ -35,6 +35,8 @@ class NodeEditorScene(Serializable):
 
         self._item_selected_listeners = []
         self._items_deselected_listeners = []
+
+        self.nodeClassSelectorFunction = None
 
         self.history = NodeEditorSceneHistory(self)
         self.clipboard = NodeEditorSceneClipboard(self)
@@ -158,6 +160,15 @@ class NodeEditorScene(Serializable):
     def getView(self):
         return self.grScene.views()[0]
 
+    def setNodeClassSelectorFunction(self, selector_function):
+        self.nodeClassSelectorFunction = selector_function
+
+    def getNodeClassFromData(self, node_data):
+        return self.nodeClassSelectorFunction(node_data)
+
+    def getEdgeClass(self):
+        return NodeEditorEdge
+
     def saveSceneToFile(self, filename):
 
         with open(filename, "w") as file:
@@ -235,7 +246,7 @@ class NodeEditorScene(Serializable):
                 if SERIALIZE_DEBUG: 
                     print("SCENE: --deserialize:: Did not find existing node matching ID:: ", node_data['id'])
                     print("SCENE: --deserialize:: Creating New Node:: ")
-                new_node = NodeEditorNode(self)
+                new_node = self.getNodeClassFromData(node_data)(self)
                 if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Done Creating New Node:: ", new_node)
                 if SERIALIZE_DEBUG: print("SCENE: --deserialize:: deserializing new Node:: ", new_node)
                 new_node.deserialize(node_data, hashmap, restore_id)
@@ -258,7 +269,7 @@ class NodeEditorScene(Serializable):
                     found = edge
                     break
             if not found:
-                new_edge = NodeEditorEdge(self)
+                new_edge = self.getEdgeClass()(self)
                 new_edge.deserialize(edge_data, hashmap, restore_id)
             else:
                 found.deserialize(edge_data, hashmap, restore_id)

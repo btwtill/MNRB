@@ -3,7 +3,7 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: ignore
 
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 DESERIALIZE_DEBUG = False
 
 class NodeEditorSceneClipboard():
@@ -24,7 +24,7 @@ class NodeEditorSceneClipboard():
 
         for item in self.scene.grScene.selectedItems():
             if hasattr(item, 'node'):
-                print("NODE_EDITOR_CLIPBOARD:: I am a Node:: ", item)
+                if SERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: I am a Node:: ", item)
                 selected_nodes.append(item.node.serialize())
                 for socket in (item.node.inputs + item.node.outputs):
                     selected_sockets[socket.id] = socket
@@ -70,7 +70,7 @@ class NodeEditorSceneClipboard():
         for node_data in data["nodes"]:
 
             #create the node
-            new_node = NodeEditorNode(self.scene)
+            new_node = self.scene.getNodeClassFromData(node_data)(self.scene)
             new_node.deserialize(node_data, hashmap, restore_id = False)
 
             #position the node
