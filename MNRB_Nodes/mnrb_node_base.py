@@ -12,6 +12,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 class MNRB_Node(NodeEditorNode):
     operation_code = 0
     operation_title = "MNRB_Node"
+    icon = None
 
     Node_Properties_Class = MNRB_NodeProperties
 

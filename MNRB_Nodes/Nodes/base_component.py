@@ -22,6 +22,7 @@ class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
 class MNRB_Node_BaseComponent(MNRB_Node):
     operation_code = OPERATIONCODE_BASECOMPONENT
     operation_title = "Base"
+    icon = "base_component.png"
 
     Node_Properties_Class = MNRB_Node_BaseComponent_Properties
 

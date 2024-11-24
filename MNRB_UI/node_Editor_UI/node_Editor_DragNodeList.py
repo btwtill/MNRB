@@ -2,7 +2,9 @@ import os
 from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
 from PySide2.QtGui import QPixmap, QIcon, QDrag #type: ignore
-from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, OPERATIONCODE_TESTCOMPONENT, NODELIST_MIMETYPE#type: ignore
+from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, OPERATIONCODE_TESTCOMPONENT, NODELIST_MIMETYPE, MNRB_NODES, getClassFromOperationCode#type: ignore
+
+
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
@@ -24,13 +26,20 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         self.addDragListItems()
         
     def addDragListItems(self):
-        self.addDragListItem("BaseComponent", os.path.join(ICONPATH, "base_component.png"), OPERATIONCODE_BASECOMPONENT)
-        self.addDragListItem("TestNode", operation_code=OPERATIONCODE_TESTCOMPONENT)
+        keys = list(MNRB_NODES.keys())
+        for key in keys:
+            node = getClassFromOperationCode(key)
+
+            self.addDragListItem(node.operation_title, node.icon, node.operation_code)
+
+        # self.addDragListItem("BaseComponent", os.path.join(ICONPATH, "base_component.png"), OPERATIONCODE_BASECOMPONENT)
+        # self.addDragListItem("TestNode", operation_code=OPERATIONCODE_TESTCOMPONENT)
 
     def addDragListItem(self, name, icon=None, operation_code=0):
         item = QtWidgets.QListWidgetItem(name, self)
 
-        icon_pixmap = QPixmap(icon if icon is not None else os.path.join(ICONPATH, "default.png"))
+        icon_path = os.path.join(ICONPATH, icon)
+        icon_pixmap = QPixmap(icon_path if icon != "" else os.path.join(ICONPATH, "default.png"))
         item.setIcon(QIcon(icon_pixmap))
         item.setSizeHint(QSize(32,32))
 
