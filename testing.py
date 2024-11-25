@@ -1,4 +1,10 @@
 import importlib
+import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf 
+import MNRB.MNRB_Nodes.Nodes.__init__ as Init
+import MNRB.MNRB_Nodes.Nodes.base_component as MNRB_Base_Component_Node
+
+import MNRB.MNRB_cmds_wrapper as MayaCommands
+
 import MNRB.MNRB_UI.mnrb_editor as mnrb_editor
 import MNRB.MNRB_UI.mnrb_ui_utils as utils
 import MNRB.MNRB_UI.mnrb_nodeEditorTab as NodeEditorTab
@@ -18,11 +24,8 @@ import MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget as NodeEditorPro
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties as NodeEditorNodeProperties
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties as NodeEditorSceneProperties
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_EdgeProperties as NodeEditorEdgeProperties
-import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf 
-import MNRB.MNRB_Nodes.mnrb_node_base as MNRBNodeBase
-import MNRB.MNRB_Nodes.Nodes as MNRBNodes
 
-import MNRB.MNRB_Nodes.Nodes.base_component as MNRB_Base_Component_Node
+import MNRB.MNRB_Nodes.mnrb_node_base as MNRBNodeBase
 
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene as NodeEditorGraphicsScene
 import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView as NodeEditorGraphicsView
@@ -34,6 +37,13 @@ import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge as No
 
 import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException as NodeEditorInvalidFile
 import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException
+
+importlib.reload(NodeEditorConf)
+importlib.reload(Init)
+importlib.reload(MNRBNodeBase)
+importlib.reload(MNRB_Base_Component_Node)
+
+importlib.reload(MayaCommands)
 
 importlib.reload(mnrb_editor)
 importlib.reload(utils)
@@ -54,11 +64,8 @@ importlib.reload(NodeEditorPropertiesWidget)
 importlib.reload(NodeEditorNodeProperties)
 importlib.reload(NodeEditorSceneProperties)
 importlib.reload(NodeEditorEdgeProperties)
-importlib.reload(NodeEditorConf)
-importlib.reload(MNRBNodeBase)
-importlib.reload(MNRBNodes)
 
-importlib.reload(MNRB_Base_Component_Node)
+
 
 importlib.reload(NodeEditorGraphicsScene)
 importlib.reload(NodeEditorGraphicsView)

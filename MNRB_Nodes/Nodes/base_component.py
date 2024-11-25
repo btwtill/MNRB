@@ -27,7 +27,7 @@ class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
-        
+
         self.main_geometry_name_box.setText(data['main_geo_name'])
 
         return True

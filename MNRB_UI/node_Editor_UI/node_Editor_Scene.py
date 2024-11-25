@@ -169,6 +169,9 @@ class NodeEditorScene(Serializable):
     def getEdgeClass(self):
         return NodeEditorEdge
 
+    def setModified(self, state):
+        self.has_been_modified = state
+
     def saveSceneToFile(self, filename):
 
         with open(filename, "w") as file:
