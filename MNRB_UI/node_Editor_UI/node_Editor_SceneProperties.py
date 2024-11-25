@@ -20,20 +20,26 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         
     def initUI(self):
         #Rig Name
-        self.rig_name_label = QtWidgets.QLabel("Define the overall name for your Rig!")
-        self.rig_name_label.setAlignment(Qt.AlignHCenter)
-        self.layout.addWidget(self.rig_name_label)
+        rig_name_label = QtWidgets.QLabel("Define the overall name for your Rig!")
+        rig_name_label.setAlignment(Qt.AlignHCenter)
+        self.layout.addWidget(rig_name_label)
 
         self.rig_name_line_edit = QtWidgets.QLineEdit()
         self.rig_name_line_edit.setPlaceholderText("No Name Defined:")
+        self.rig_name_line_edit.setAlignment(Qt.AlignCenter)
         self.rig_name_line_edit.textChanged.connect(lambda: self.updateRigName(self.rig_name_line_edit.text()))
         self.rig_name_line_edit.textChanged.connect(self.setSceneModified)
         self.layout.addWidget(self.rig_name_line_edit)
 
         #Main Rig Geometry
+        main_rig_geometry_label = QtWidgets.QLabel("Define the main geometry for your Rig!")
+        main_rig_geometry_label.setAlignment(Qt.AlignHCenter)
+        self.layout.addWidget(main_rig_geometry_label)
+
         self.main_rig_geometry_layout = QtWidgets.QHBoxLayout()
         self.main_rig_geometry_line_edit = QtWidgets.QLineEdit()
         self.main_rig_geometry_line_edit.setPlaceholderText("No Geometry Defined:")
+        self.main_rig_geometry_line_edit.setAlignment(Qt.AlignCenter)
         self.main_rig_geometry_line_edit.setReadOnly(True)
         self.main_rig_geometry_line_edit.textChanged.connect(lambda: self.updateRigMainGeometry(self.main_rig_geometry_line_edit.text()))
         self.main_rig_geometry_line_edit.textChanged.connect(self.setSceneModified)
@@ -41,6 +47,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.main_rig_geometry_setter_button = QtWidgets.QPushButton("Set")
         self.main_rig_geometry_setter_button.clicked.connect(self.setRigMainGeometry)
         self.main_rig_geometry_clear_button = QtWidgets.QPushButton("Clear")
+        self.main_rig_geometry_clear_button.clicked.connect(self.clearRigMainGeometry)
 
         self.main_rig_geometry_layout.addWidget(self.main_rig_geometry_line_edit)
         self.main_rig_geometry_layout.addWidget(self.main_rig_geometry_setter_button)
@@ -88,6 +95,9 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
     def setRigMainGeometry(self):
         self.main_rig_geometry_line_edit.setText(MC.getFirstInViewPortSelection())
+
+    def clearRigMainGeometry(self):
+        self.main_rig_geometry_line_edit.setText("")
 
     def setSceneModified(self):
         if not self.is_silent:

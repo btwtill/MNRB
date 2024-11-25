@@ -4,31 +4,13 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node, MNRB_NodeProperties #type:
 
 
 class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
-    def initUI(self):
-        self.main_geometry_label_layout = QHBoxLayout()
-        self.main_geometry_name_box = QLineEdit()
-        self.main_geometry_name_box.setPlaceholderText("Define you main Rig Geometry: ")
-
-        self.main_geometry_assign_button = QPushButton("Set")
-        self.main_gemotry_remove_button = QPushButton("Remove")
-
-        self.main_geometry_label_layout.addWidget(self.main_geometry_name_box)
-        self.main_geometry_label_layout.addWidget(self.main_geometry_assign_button)
-        self.main_geometry_label_layout.addWidget(self.main_gemotry_remove_button)
-
-        self.layout.addLayout(self.main_geometry_label_layout)
-
+        
     def serialize(self):
         result_data = super().serialize()
-        result_data['main_geo_name'] = self.main_geometry_name_box.text()
-
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
-
-        self.main_geometry_name_box.setText(data['main_geo_name'])
-
         return True
 
 @registerNode(OPERATIONCODE_BASECOMPONENT)

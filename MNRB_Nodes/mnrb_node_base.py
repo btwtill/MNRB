@@ -1,11 +1,21 @@
 from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton #type: ignore
+from PySide2.QtCore import Qt #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 
 class MNRB_NodeProperties(NodeEditorNodeProperties):
+    def __init__(self, node):
+        super().__init__(node)
+
+        self.component_name = "Undefined"
+        self.is_silent = True
+
     def initUI(self):
         self.component_name_edit = QLineEdit()
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
+        self.component_name_edit.setAlignment(Qt.AlignCenter)
+        self.component_name_edit.textChanged.connect(lambda: self.updateComponentName(self.component_name_edit.text()))
+        self.component_name_edit.textChanged.connect(self.setSceneModified)
         self.layout.addWidget(self.component_name_edit)
         self.layout.addStretch()
 
@@ -33,6 +43,13 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.setLayout(self.layout)
 
+    def updateComponentName(self, name):
+        self.component_name = name
+
+    def setSceneModified(self):
+        if not self.is_silent:
+            self.node.scene.setModified(True)
+
     def onBuildGuides(self):
         print("BaseNodeProperties:_ --onBuildGuides ", self.node)
         self.node.guideBuild()
@@ -48,6 +65,18 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def onConnectComponents(self):
         print("BaseNodeProperties:: --onConnectComponent: ", self.node)
         self.node.connectComponent()
+
+    def serialize(self):
+        result_data = super().serialize()
+        result_data['component_name'] = self.component_name
+        return result_data
+    
+    def deserialize(self, data, hashmap = {}, restore_id=True):
+        result = super().deserialize(data, hashmap, restore_id)
+        self.component_name_edit.setText(data['component_name'])
+        self.is_silent = False
+
+        return True
 
 class MNRB_Node(NodeEditorNode):
     operation_code = 0

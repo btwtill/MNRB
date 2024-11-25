@@ -4,4 +4,5 @@ class MC:
      
     @staticmethod
     def getFirstInViewPortSelection():
-        return cmds.ls(sl=True)[0]
+        result_selection = cmds.ls(sl=True)
+        return result_selection[0] if result_selection != [] else None
