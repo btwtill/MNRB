@@ -18,6 +18,20 @@ class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
 
         self.layout.addLayout(self.main_geometry_label_layout)
 
+
+    def serialize(self):
+        result_data = super().serialize()
+        result_data['main_geo_name'] = self.main_geometry_name_box.text()
+
+        return result_data
+    
+    def deserialize(self, data, hashmap = {}, restore_id=True):
+        result = super().deserialize(data, hashmap, restore_id)
+        
+        self.main_geometry_name_box.setText(data['main_geo_name'])
+
+        return True
+
 @registerNode(OPERATIONCODE_BASECOMPONENT)
 class MNRB_Node_BaseComponent(MNRB_Node):
     operation_code = OPERATIONCODE_BASECOMPONENT

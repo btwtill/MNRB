@@ -8,6 +8,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
         self.layout.addWidget(self.component_name_edit)
         self.layout.addStretch()
+    
 
 class MNRB_Node(NodeEditorNode):
     operation_code = 0
