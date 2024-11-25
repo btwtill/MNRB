@@ -30,6 +30,10 @@ class MNRB_Node_BaseComponent(MNRB_Node):
     def guideBuild(self):
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self)
 
+        #check for Guide Hirarchy
+
+        #check for existing component Guides
+
         base_component_guide = guide(name = self.properties.component_name + GUIDE_SUFFIX)
         base_component_guide.draw()
 
