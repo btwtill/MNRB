@@ -307,6 +307,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 self.display_overlay = False
 
                 self.getNodeEditorTab().onNewFile()
+                self.getNodeEditorTab().centerNodeEditorView()
 
             else:
                 warningBox = QtWidgets.QMessageBox()
@@ -344,7 +345,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             print("MNRB_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
 
         self.getNodeEditorTab().onOpenFile(self.mnrb_base_editor_path)
-            
+        self.getNodeEditorTab().centerNodeEditorView()
         self.statusBar().showMessage('Opened project from ' + self.project_path, 5000)
 
     def onSaveProject(self):

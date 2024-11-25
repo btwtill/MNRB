@@ -11,6 +11,12 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.is_silent = True
 
     def initUI(self):
+        #component Name Label
+        component_name_label = QLabel("Set Component Name:")
+        component_name_label.setAlignment(Qt.AlignHCenter)
+        self.layout.addWidget(component_name_label)
+
+        #component Name
         self.component_name_edit = QLineEdit()
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
         self.component_name_edit.setAlignment(Qt.AlignCenter)

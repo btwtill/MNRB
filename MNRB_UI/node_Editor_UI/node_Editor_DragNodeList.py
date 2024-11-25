@@ -8,8 +8,8 @@ from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, OPERAT
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
-DRAGDROP_DEBUG = True
-CLASS_DEBUG = True
+DRAGDROP_DEBUG = False
+CLASS_DEBUG = False
 
 class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def __init__(self, parent = None):

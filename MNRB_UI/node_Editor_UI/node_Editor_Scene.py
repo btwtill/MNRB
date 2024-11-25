@@ -12,7 +12,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSc
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 
 CLASS_DEBUG = False
-SERIALIZE_DEBUG = True
+SERIALIZE_DEBUG = False
 SELECTION_DEBUG = False
 
 class NodeEditorScene(Serializable):

@@ -11,7 +11,7 @@ from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
 
-DRAGDROP_DEBUG = True
+DRAGDROP_DEBUG = False
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
@@ -67,6 +67,9 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def clearScene(self):
         self.central_widget.scene.clearScene()
 
+    def centerNodeEditorView(self):
+        self.central_widget.centerView()
+
     def canCut(self):
         return self.central_widget.sceneHasSelectedItems()
 
@@ -87,7 +90,6 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             self.central_widget.scene.loadSceneFromFile(path)
             self.central_widget.scene.history.clear()
             self.central_widget.scene.history.storeHistory("Inital History Stamp")
-            self.central_widget.centerView()
         except Exception as e:
             print(e)
             QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path)
