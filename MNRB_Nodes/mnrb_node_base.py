@@ -94,6 +94,10 @@ class MNRB_Node(NodeEditorNode):
     def __init__(self, scene, inputs=[], outputs=[]):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
         self.value = None
+        
+        self.guides = []
+        self.controls = []
+        self.deforms = []
 
     def guideBuild(self):
         raise NotImplementedError

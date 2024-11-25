@@ -38,6 +38,10 @@ import MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge as No
 import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException as NodeEditorInvalidFile
 import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException
 
+import MNRB.global_variables as GlobalVar
+
+import MNRB.MNRB_Guides.guide as MNRBGuide
+
 importlib.reload(NodeEditorConf)
 importlib.reload(Init)
 importlib.reload(MNRBNodeBase)
@@ -65,8 +69,6 @@ importlib.reload(NodeEditorNodeProperties)
 importlib.reload(NodeEditorSceneProperties)
 importlib.reload(NodeEditorEdgeProperties)
 
-
-
 importlib.reload(NodeEditorGraphicsScene)
 importlib.reload(NodeEditorGraphicsView)
 importlib.reload(NodeEditorGraphicsNode)
@@ -77,6 +79,10 @@ importlib.reload(NodeEditorGraphicEdge)
 
 importlib.reload(NodeEditorInvalidFile)
 importlib.reload(NodeEditorRegistrationException)
+
+importlib.reload(GlobalVar)
+
+importlib.reload(MNRBGuide)
 
 newEditor = mnrb_editor.mnrb_Editor()
 

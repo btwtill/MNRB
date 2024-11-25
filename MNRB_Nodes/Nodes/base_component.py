@@ -1,7 +1,10 @@
 from PySide2.QtWidgets import QHBoxLayout, QLineEdit, QPushButton #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, registerNode #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node, MNRB_NodeProperties #type: ignore
+from MNRB.MNRB_Guides.guide import guide #type: ignore
+from MNRB.global_variables import GUIDE_SUFFIX #type: ignore
 
+GUIDE_DEBUG = True
 
 class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
         
@@ -25,7 +28,10 @@ class MNRB_Node_BaseComponent(MNRB_Node):
         super().__init__(scene, inputs = [], outputs=[["base_ctrl", 1, True]])
 
     def guideBuild(self):
-        print("%s:: Building Guides:: " % self)
+        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self)
+
+        base_component_guide = guide(name = self.properties.component_name + GUIDE_SUFFIX)
+        base_component_guide.draw()
 
     def staticBuild(self):
         print("%s:: Building Static:: " % self)
