@@ -14,6 +14,7 @@ from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import Invali
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
 SELECTION_DEBUG = False
+BUILD_DEBUG = True
 
 class NodeEditorScene(Serializable):
     def __init__(self):
@@ -157,6 +158,13 @@ class NodeEditorScene(Serializable):
     def getSelectedItems(self):
         return self.grScene.selectedItems()
 
+    def getSelectedNodes(self):
+        nodes = []
+        for item in self.getSelectedItems():
+            if hasattr(item, 'node'):
+                nodes.append(item)
+        return nodes
+
     def getView(self):
         return self.grScene.views()[0]
 
@@ -171,6 +179,22 @@ class NodeEditorScene(Serializable):
 
     def setModified(self, state):
         self.has_been_modified = state
+
+    def buildSceneGuides(self):
+        for node in self.nodes:
+            node.guideBuild()
+
+    def buildSceneStatic(self):
+        for node in self.nodes:
+            node.staticBuild()
+
+    def buildSceneComponents(self):
+        for node in self.nodes:
+            node.componentBuild()
+
+    def connectSceneComponents(self):
+        for node in self.nodes:
+            node.connectComponent()
 
     def saveSceneToFile(self, filename):
 

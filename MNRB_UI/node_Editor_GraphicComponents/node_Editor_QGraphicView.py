@@ -428,9 +428,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
             self.centerOn(combined_bounding_rectangle.center())
         else:
-            print("node:: ", selected_items[0])
-            print("nodeWidth:: ", selected_items[0].width)
-            print("nodeHeight:: ", selected_items[0].height)
+            if CLASS_DEBUG: print("node:: ", selected_items[0])
+            if CLASS_DEBUG: print("nodeWidth:: ", selected_items[0].width)
+            if CLASS_DEBUG: print("nodeHeight:: ", selected_items[0].height)
             view_position = QPointF(selected_items[0].pos().x() + (selected_items[0].width / 2), selected_items[0].pos().y() + (selected_items[0].height / 2))
             self.centerOn(view_position)
 

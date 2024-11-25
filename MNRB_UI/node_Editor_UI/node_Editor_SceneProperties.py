@@ -105,15 +105,19 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
     def onBuildGuides(self):
         if EVENT_DEBUG: print("PROPERTIES:: --onBuildGuides:: Building Guides!")
+        self.scene.buildSceneGuides()
 
     def onBuildStatic(self):
         if EVENT_DEBUG: print("PROPERTIES:: --onBuildStatic:: Building Static")
+        self.scene.buildSceneStatic()
 
     def onBuildComponent(self):
         if EVENT_DEBUG: print("PROPERTIES:: --onBuildComponent:: Building Component ")
+        self.scene.buildSceneComponents()
 
     def onConnectComponents(self):
         if EVENT_DEBUG: print("PROPERTIES:: --onConnectComponents:: Connecting Components")
+        self.scene.connectSceneComponents()
 
     def serialize(self):
         result_data = super().serialize()
