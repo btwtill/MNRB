@@ -11,9 +11,12 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
         self.scene = scene
 
+        self.is_silent = True
+
         self.title = "Scene Properties"
         self.rig_name = "Undefined"
         self.rig_main_geometry = None
+
         
     def initUI(self):
         #Rig Name
@@ -24,7 +27,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.rig_name_line_edit = QtWidgets.QLineEdit()
         self.rig_name_line_edit.setPlaceholderText("No Name Defined:")
         self.rig_name_line_edit.textChanged.connect(lambda: self.updateRigName(self.rig_name_line_edit.text()))
-        self.rig_name_line_edit.textChanged.connect(lambda: self.scene.setModified(True))
+        self.rig_name_line_edit.textChanged.connect(self.setSceneModified)
         self.layout.addWidget(self.rig_name_line_edit)
 
         #Main Rig Geometry
@@ -33,7 +36,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.main_rig_geometry_line_edit.setPlaceholderText("No Geometry Defined:")
         self.main_rig_geometry_line_edit.setReadOnly(True)
         self.main_rig_geometry_line_edit.textChanged.connect(lambda: self.updateRigMainGeometry(self.main_rig_geometry_line_edit.text()))
-        self.main_rig_geometry_line_edit.textChanged.connect(lambda: self.scene.setModified(True))
+        self.main_rig_geometry_line_edit.textChanged.connect(self.setSceneModified)
 
         self.main_rig_geometry_setter_button = QtWidgets.QPushButton("Set")
         self.main_rig_geometry_setter_button.clicked.connect(self.setRigMainGeometry)
@@ -86,6 +89,10 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def setRigMainGeometry(self):
         self.main_rig_geometry_line_edit.setText(MC.getFirstInViewPortSelection())
 
+    def setSceneModified(self):
+        if not self.is_silent:
+            self.scene.setModified(True)
+
     def onBuildGuides(self):
         if EVENT_DEBUG: print("PROPERTIES:: --onBuildGuides:: Building Guides!")
 
@@ -109,3 +116,6 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
         self.rig_name_line_edit.setText(data['rig_name'])
         self.main_rig_geometry_line_edit.setText(data['rig_main_geometry'])
+
+        self.is_silent = False
+        return True

@@ -18,7 +18,6 @@ class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
 
         self.layout.addLayout(self.main_geometry_label_layout)
 
-
     def serialize(self):
         result_data = super().serialize()
         result_data['main_geo_name'] = self.main_geometry_name_box.text()
@@ -42,3 +41,15 @@ class MNRB_Node_BaseComponent(MNRB_Node):
 
     def __init__(self, scene):
         super().__init__(scene, inputs = [], outputs=[["base_ctrl", 1, True]])
+
+    def guideBuild(self):
+        print("%s:: Building Guides:: " % self)
+
+    def staticBuild(self):
+        print("%s:: Building Static:: " % self)
+    
+    def componentBuild(self):
+        print("%s:: Building Component:: " % self)
+    
+    def connectComponent(self):
+        print("%s:: Connecting Component:: " % self)
