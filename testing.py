@@ -3,7 +3,7 @@ import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf
 import MNRB.MNRB_Nodes.Nodes.__init__ as Init
 
 import MNRB.MNRB_Nodes.Nodes.base_component as MNRB_Base_Component_Node
-import MNRB_Scene.scene_hirarchy as MNRB_Scene_Hirarchy
+import MNRB.MNRB_Scene.scene_hirarchy as MNRB_Scene_Hirarchy
 import MNRB.MNRB_cmds_wrapper.cmds_wrapper as MayaCommands
 
 import MNRB.MNRB_UI.mnrb_editor as mnrb_editor

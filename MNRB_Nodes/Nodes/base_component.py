@@ -3,6 +3,7 @@ from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, regist
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node, MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.global_variables import GUIDE_SUFFIX #type: ignore
+from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 GUIDE_DEBUG = True
 
@@ -30,9 +31,14 @@ class MNRB_Node_BaseComponent(MNRB_Node):
     def guideBuild(self):
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self)
 
-        #check for Guide Hirarchy
-        
+        guide_hirarchy = super().guideBuild()
+
+        component_guide_hirarchy = self.properties.component_name + GUIDE_SUFFIX
+
         #check for existing component Guides
+        if MC.objectExists(component_guide_hirarchy):
+            #remove hirarchy
+            MC.removeObject(component_guide_hirarchy)
 
         base_component_guide = guide(name = self.properties.component_name + GUIDE_SUFFIX)
         base_component_guide.draw()

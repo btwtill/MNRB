@@ -22,3 +22,9 @@ class MNRB_Scene_Hirarchy():
     
     def isRigHirarchy(self):
         return MC.objectExists(self.rig_hirarchy)
+    
+    def getGuideHirarchyName(self):
+        return self.guide_hirarchy
+    
+    def getRigHirarchyName(self):
+        return self.rig_hirarchy
