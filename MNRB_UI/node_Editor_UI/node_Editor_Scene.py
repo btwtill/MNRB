@@ -10,6 +10,7 @@ from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneClipboard #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSceneProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
+from MNRB.MNRB_Scene.scene_hirarchy import MNRB_Scene_Hirarchy #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
@@ -23,6 +24,8 @@ class NodeEditorScene(Serializable):
         self.grScene = NodeEditor_QGraphicScene(self)
         
         self.properties = NodeEditorSceneProperties(self)
+
+        self.rig_hirarchy = MNRB_Scene_Hirarchy(self)
 
         self.nodes = []
         self.edges = []
@@ -176,6 +179,9 @@ class NodeEditorScene(Serializable):
 
     def getEdgeClass(self):
         return NodeEditorEdge
+
+    def getSceneRigName(self):
+        return self.properties.getRigName()
 
     def setModified(self, state):
         self.has_been_modified = state

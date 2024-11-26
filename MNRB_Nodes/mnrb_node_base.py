@@ -100,7 +100,11 @@ class MNRB_Node(NodeEditorNode):
         self.deforms = []
 
     def guideBuild(self):
-        raise NotImplementedError
+        if self.scene.rig_hirarchy.isGuideHirarchy():
+            return True
+        else:
+            self.scene.rig_hirarchy.createGuideHirarchy()
+            return False
 
     def staticBuild(self):
         raise NotImplementedError
