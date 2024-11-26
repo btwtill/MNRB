@@ -10,7 +10,7 @@ from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneClipboard #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSceneProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
-from MNRB.MNRB_Scene.scene_hirarchy import MNRB_Scene_Hirarchy #type: ignore
+from MNRB.MNRB_Scene.scene_hierarchy import MNRB_Scene_Hierarchy #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
@@ -22,10 +22,8 @@ class NodeEditorScene(Serializable):
         super().__init__()
         
         self.grScene = NodeEditor_QGraphicScene(self)
-        
         self.properties = NodeEditorSceneProperties(self)
-
-        self.rig_hirarchy = MNRB_Scene_Hirarchy(self)
+        self.scene_rig_hierarchy = MNRB_Scene_Hierarchy(self)
 
         self.nodes = []
         self.edges = []
@@ -240,6 +238,7 @@ class NodeEditorScene(Serializable):
         for edge in self.edges : edges.append(edge.serialize())
 
         properties = self.properties.serialize()
+        scene_rig_hierarchy = self.scene_rig_hierarchy.serialize()
 
         serialized_data = OrderedDict([
             ('id', self.id), 
@@ -247,7 +246,8 @@ class NodeEditorScene(Serializable):
             ('grScene_height', self.grScene_height),
             ('nodes', nodes),
             ('edges', edges),
-            ('properties', properties)
+            ('properties', properties),
+            ('scene_rig_hierarchy', scene_rig_hierarchy)
             ])
 
         if SERIALIZE_DEBUG: print("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
@@ -267,6 +267,7 @@ class NodeEditorScene(Serializable):
             print("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
 
         self.properties.deserialize(data['properties'], hashmap, restore_id)
+        self.scene_rig_hierarchy.deserialize(data['scene_rig_hierarchy'], hashmap, restore_id)
 
         for node_data in data['nodes']:
             found = None
@@ -314,5 +315,5 @@ class NodeEditorScene(Serializable):
             edge.remove()
 
         if SERIALIZE_DEBUG: print("_______________________________________________________________SCENE DESERIALIZED")
-
+        
         return True

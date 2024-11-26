@@ -35,11 +35,6 @@ class MNRB_Node_BaseComponent(MNRB_Node):
 
         component_guide_hirarchy = self.properties.component_name + GUIDE_SUFFIX
 
-        #check for existing component Guides
-        if MC.objectExists(component_guide_hirarchy):
-            #remove hirarchy
-            MC.removeObject(component_guide_hirarchy)
-
         base_component_guide = guide(name = self.properties.component_name + GUIDE_SUFFIX)
         base_component_guide.draw()
 

@@ -2,6 +2,10 @@ from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPush
 from PySide2.QtCore import Qt #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
+from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX #type: ignore
+from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+
+CLASS_DEBUG = True
 
 class MNRB_NodeProperties(NodeEditorNodeProperties):
     def __init__(self, node):
@@ -9,6 +13,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.component_name = "Undefined"
         self.is_silent = True
+        
 
     def initUI(self):
         #component Name Label
@@ -94,17 +99,32 @@ class MNRB_Node(NodeEditorNode):
     def __init__(self, scene, inputs=[], outputs=[]):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
         self.value = None
-        
+
+        self.component_hierarchy = None
         self.guides = []
+
         self.controls = []
         self.deforms = []
 
     def guideBuild(self) -> str:
-        if self.scene.rig_hirarchy.isGuideHirarchy():
-            return self.scene.rig_hirarchy.getGuideHirarchyName()
+        if not self.scene.scene_rig_hierarchy.isGuideHierarchy():
+            self.scene.scene_rig_hierarchy.createGuideHierarchy()
+            current_guide_hierarchy = self.scene.scene_rig_hierarchy.getGuideHierarchyName()
+            if CLASS_DEBUG: print("%s:: --guideBuild:: " % self.__class__.__name__, current_guide_hierarchy)
         else:
-            self.scene.rig_hirarchy.createGuideHirarchy()
-            return self.scene.rig_hirarchy.getGuideHirarchyName()
+            current_guide_hierarchy = self.scene.scene_rig_hierarchy.getGuideHierarchyName()
+
+        if self.component_hierarchy is not None:
+            if MC.objectExists(self.component_hierarchy):
+                MC.deleteObjectWithHierarchy(self.component_hierarchy)
+
+        current_component_guide_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+        current_component_guide_hierarchy = MC.createTransform(current_component_guide_hierarchy_name)
+        if CLASS_DEBUG: print("%s:: --guideBuild:: Object to be parented: " % self.__class__.__name__, "Child:: ",current_component_guide_hierarchy, " Parent:: ", current_guide_hierarchy)
+        MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
+        self.component_hierarchy = current_component_guide_hierarchy
+            
+        return current_guide_hierarchy
 
     def staticBuild(self):
         raise NotImplementedError
@@ -118,8 +138,10 @@ class MNRB_Node(NodeEditorNode):
     def serialize(self):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code
+        result_data['component_hierarchy'] = self.component_hierarchy
         return result_data
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
         result = super().deserialize(data, hashmap, restore_id, exists)
+        self.component_hierarchy = data['component_hierarchy']
         return True

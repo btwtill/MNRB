@@ -7,6 +7,14 @@ class MC:
         return cmds.objExists(object)
 
     @staticmethod
+    def deleteObjectWithHierarchy(object):
+        cmds.delete(object, hierarchy = "below")
+
+    @staticmethod
+    def parentObject(child, parent):
+        cmds.parent(child, parent)
+
+    @staticmethod
     def createTransform(name) -> str:
         return cmds.createNode("transform", name = name, skipSelect=True)
 
