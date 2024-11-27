@@ -14,7 +14,6 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name = "Undefined"
         self.is_silent = True
         
-
     def initUI(self):
         #component Name Label
         component_name_label = QLabel("Set Component Name:")
@@ -62,19 +61,19 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
             self.node.scene.setModified(True)
 
     def onBuildGuides(self):
-        print("BaseNodeProperties:_ --onBuildGuides ", self.node)
+        if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildGuides ", self.node)
         self.node.guideBuild()
 
     def onBuildStatic(self):
-        print("BaseNodeProperties:_ --onBuildStatic ", self.node)
+        if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildStatic ", self.node)
         self.node.staticBuild()
 
     def onBuildComponent(self):
-        print("BaseNodeProperties:: --onBuildComponent: ", self.node)
+        if CLASS_DEBUG:  print("BaseNodeProperties:: --onBuildComponent: ", self.node)
         self.node.componentBuild()
 
     def onConnectComponents(self):
-        print("BaseNodeProperties:: --onConnectComponent: ", self.node)
+        if CLASS_DEBUG: print("BaseNodeProperties:: --onConnectComponent: ", self.node)
         self.node.connectComponent()
 
     def serialize(self):
@@ -98,7 +97,6 @@ class MNRB_Node(NodeEditorNode):
 
     def __init__(self, scene, inputs=[], outputs=[]):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
-        self.value = None
 
         self.component_hierarchy = None
         self.guides = []
