@@ -12,3 +12,7 @@ class guide():
     def draw(self):
         guide_shape = MC.createSpaceLocator(self.position, self.name, self.color)
         self.name = guide_shape
+
+    def resize(self, size):
+        #MC.setLocatorScale((size, size, size))
+        pass

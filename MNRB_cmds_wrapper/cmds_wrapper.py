@@ -72,3 +72,8 @@ class MC:
         MC.clearSelection()
         MC.setObjectDisplayColor(new_space_locator, color)
         return new_space_locator[0]
+    
+    #joint specific methods
+    @staticmethod
+    def setJointRadius(joint, radius) -> None:
+        cmds.setAttr(f"{joint}.radius", radius)

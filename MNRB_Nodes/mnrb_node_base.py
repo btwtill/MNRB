@@ -1,5 +1,6 @@
-from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox #type: ignore
+from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider #type: ignore
 from PySide2.QtCore import Qt #type: ignore
+from PySide2.QtGui import QDoubleValidator #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX #type: ignore
@@ -15,6 +16,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name = "Undefined"
         self.is_disabled = False
         self.is_silent = True
+
+        self.guide_size = 1
 
         self.updateActionButtons()
 
@@ -34,10 +37,37 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         #add disable check
         self.disabled_checkbox = QCheckBox("Disable Component")
         self.disabled_checkbox.stateChanged.connect(self.setHasBeenModified)
-        #self.disabled_checkbox.stateChanged.connect(self.updateDisabledState)
         self.layout.addWidget(self.disabled_checkbox)
-        self.layout.addStretch()
+        
+        #Guide Size Adjustment
+        guide_slider_label_layout = QHBoxLayout()
+        guide_size_slider_label = QLabel("Guide Size:")
+        guide_size_slider_label.setAlignment(Qt.AlignCenter)
+        guide_slider_label_layout.addWidget(guide_size_slider_label)
 
+        self.guide_slider_size_edit = QLineEdit()
+        guide_slider_size_double_validator = QDoubleValidator(0.0, 100.0, 2)
+        guide_slider_size_double_validator.setNotation(QDoubleValidator.StandardNotation)
+        self.guide_slider_size_edit.setValidator(guide_slider_size_double_validator)
+        self.guide_slider_size_edit.setText(str(1))
+        self.guide_slider_size_edit.textChanged.connect(self.onGuideSizeEditChange)
+
+        guide_slider_label_layout.addWidget(guide_size_slider_label)
+        guide_slider_label_layout.addWidget(self.guide_slider_size_edit)
+
+        self.layout.addLayout(guide_slider_label_layout)
+
+        self.guide_size_slider = QSlider(Qt.Horizontal)
+        self.guide_size_slider.setMinimum(0.0001)
+        self.guide_size_slider.setMaximum(100)
+        self.guide_size_slider.setValue(1)
+        self.guide_size_slider.setTickPosition(QSlider.TicksBelow)
+        self.guide_size_slider.setTickInterval(0)
+        self.guide_size_slider.valueChanged.connect(self.onGuideSliderChange)
+
+        self.layout.addWidget(self.guide_size_slider)
+
+        self.layout.addStretch()
         self.connectHasBeenModifiedCallback(self.updateDisabledState)
         self.connectHasBeenModifiedCallback(self.updateComponentName)
         self.connectHasBeenModifiedCallback(self.setSceneModified)
@@ -92,8 +122,30 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         else:
             return False
 
+    def onGuideSizeEditChange(self):
+        self.updateGuideSlider()
+        self.updateGuideSize()
+
+    def onGuideSliderChange(self):
+        self.updateGuideSliderSizeEdit()
+        self.updateGuideSize()
+
+    def updateGuideSize(self):
+        #update the guide size valule
+        self.guide_size = float(self.guide_slider_size_edit.text())
+        #call the nodes guide resize funcion
+        self.node.setComponentDeformRadius(self.guide_size)
+        #set properties to be modified
+        self.setHasBeenModified()
+
     def updateDisabledState(self):
         self.is_disabled = self.disabled_checkbox.isChecked()
+
+    def updateGuideSlider(self):
+        self.guide_size_slider.setValue(float(self.guide_slider_size_edit.text()))
+
+    def updateGuideSliderSizeEdit(self):
+        self.guide_slider_size_edit.setText(str(self.guide_size_slider.value()))
 
     def updateActionButtons(self):
         self.build_guides_action_button.setEnabled(self.is_valid)
@@ -132,16 +184,18 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         result_data = super().serialize()
         result_data['component_name'] = self.component_name
         result_data['is_disabled'] = self.is_disabled
+        result_data['guide_size'] = self.guide_size
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
         self.component_name_edit.setText(data['component_name'])
         self.disabled_checkbox.setChecked(data['is_disabled'])
-        self.is_silent = False
-        
-        self.setHasBeenModified(True)
+        self.guide_slider_size_edit.setText(str(data['guide_size']))
 
+        self.is_silent = False
+
+        self.validateProperties()
         return True
 
 class MNRB_Node(NodeEditorNode):
@@ -193,14 +247,24 @@ class MNRB_Node(NodeEditorNode):
 
     def updateComponentHierarchyName(self):
         if self.guide_component_hierarchy is not None:
-            try:
+            if MC.objectExists(self.guide_component_hierarchy):
                 new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
                 new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
                 if new_name != self.guide_component_hierarchy:
                     self.guide_component_hierarchy = new_name
-            except Exception as e:
-                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: " % self.__class__.__name__, e)
+            else:
+                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
 
+    def setComponentGuideSize(self, size):
+        for guide in self.guides:
+            if MC.objectExists(guide.name):
+                pass
+
+    def setComponentDeformRadius(self, size):
+        for deform in self.deforms:
+            if MC.objectExists(deform):
+                MC.setJointRadius(deform, size)
+            
     def remove(self):
         super().remove()
         if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
