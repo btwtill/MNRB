@@ -4,6 +4,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorP
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 EVENT_DEBUG = False
+VALIDATION_DEBUG = True
 
 class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def __init__(self, scene, parent=None) -> None:
@@ -15,9 +16,9 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
         self.title = "Scene Properties"
         self.rig_name = "Undefined"
-        self.rig_main_geometry = None
-
         
+        self.updateActionButtons(self.is_valid)
+
     def initUI(self):
         #Rig Name
         rig_name_label = QtWidgets.QLabel("Define the overall name for your Rig!")
@@ -27,35 +28,11 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.rig_name_line_edit = QtWidgets.QLineEdit()
         self.rig_name_line_edit.setPlaceholderText("No Name Defined:")
         self.rig_name_line_edit.setAlignment(Qt.AlignCenter)
-        self.rig_name_line_edit.textChanged.connect(lambda: self.updateRigName(self.rig_name_line_edit.text()))
-        self.rig_name_line_edit.textChanged.connect(self.setSceneModified)
+        self.rig_name_line_edit.textChanged.connect(self.setHasBeenModified)
         self.layout.addWidget(self.rig_name_line_edit)
 
-        #Main Rig Geometry
-        main_rig_geometry_label = QtWidgets.QLabel("Define the main geometry for your Rig!")
-        main_rig_geometry_label.setAlignment(Qt.AlignHCenter)
-        self.layout.addWidget(main_rig_geometry_label)
-
-        self.main_rig_geometry_layout = QtWidgets.QHBoxLayout()
-        self.main_rig_geometry_line_edit = QtWidgets.QLineEdit()
-        self.main_rig_geometry_line_edit.setPlaceholderText("No Geometry Defined:")
-        self.main_rig_geometry_line_edit.setAlignment(Qt.AlignCenter)
-        self.main_rig_geometry_line_edit.setReadOnly(True)
-        self.main_rig_geometry_line_edit.textChanged.connect(lambda: self.updateRigMainGeometry(self.main_rig_geometry_line_edit.text()))
-        self.main_rig_geometry_line_edit.textChanged.connect(self.setSceneModified)
-
-        self.main_rig_geometry_setter_button = QtWidgets.QPushButton("Set")
-        self.main_rig_geometry_setter_button.clicked.connect(self.setRigMainGeometry)
-        self.main_rig_geometry_clear_button = QtWidgets.QPushButton("Clear")
-        self.main_rig_geometry_clear_button.clicked.connect(self.clearRigMainGeometry)
-
-        self.main_rig_geometry_layout.addWidget(self.main_rig_geometry_line_edit)
-        self.main_rig_geometry_layout.addWidget(self.main_rig_geometry_setter_button)
-        self.main_rig_geometry_layout.addWidget(self.main_rig_geometry_clear_button)
-
-        self.layout.addLayout(self.main_rig_geometry_layout)
-
-        #define additional Rig Geometry
+        self.connectHasBeenModifiedCallback(self.updateRigName)
+        self.connectHasBeenModifiedCallback(self.setSceneModified)
 
     def initActions(self):
         self.action_layout = QtWidgets.QHBoxLayout()
@@ -81,23 +58,41 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
         self.setLayout(self.layout)
 
-    def updateRigName(self, text):
-        self.rig_name = text
-    
-    def updateRigMainGeometry(self, text):
-        self.rig_main_geometry = text
+        self.connectHasBeenModifiedCallback(self.validateProperties)
+        self.connectIsValidCallback(self.updateActionButtons)
+
+    def validateProperties(self):
+        if not self.validRigName():
+            self.is_valid = False
+            return False
+        
+        if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Nodes to be checked:: ", self.scene.nodes)
+        for node in self.scene.nodes:
+            if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties:: ", node.properties.is_valid)
+            if not node.properties.is_valid:
+                self.is_valid = False
+                return False
+
+        self.is_valid = True
+        return True
+
+    def validRigName(self):
+        if self.rig_name_line_edit.text() != "":
+            return True
+        else:
+            return False
+
+    def updateActionButtons(self, state):
+        self.build_guides_action_button.setEnabled(state)
+        self.build_static_action_button.setEnabled(state)
+        self.build_component_action_button.setEnabled(state)
+        self.connect_component_action_button.setEnabled(state)
+
+    def updateRigName(self):
+        self.rig_name = self.rig_name_line_edit.text()
 
     def getRigName(self):
         return self.rig_name
-
-    def getRigMainGeometry(self):
-        return self.rig_main_geometry
-
-    def setRigMainGeometry(self):
-        self.main_rig_geometry_line_edit.setText(MC.getFirstInViewPortSelection())
-
-    def clearRigMainGeometry(self):
-        self.main_rig_geometry_line_edit.setText("")
 
     def setSceneModified(self):
         if not self.is_silent:
@@ -122,14 +117,12 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def serialize(self):
         result_data = super().serialize()
         result_data['rig_name'] = self.rig_name
-        result_data['rig_main_geometry'] = self.rig_main_geometry
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
         result = super().deserialize(data, hashmap, restore_id)
 
         self.rig_name_line_edit.setText(data['rig_name'])
-        self.main_rig_geometry_line_edit.setText(data['rig_main_geometry'])
 
         self.is_silent = False
         return True

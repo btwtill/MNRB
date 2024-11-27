@@ -14,6 +14,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name = "Undefined"
         self.is_silent = True
         
+        self.updateActionButtons(self.is_valid)
+
     def initUI(self):
         #component Name Label
         component_name_label = QLabel("Set Component Name:")
@@ -24,10 +26,12 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name_edit = QLineEdit()
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
         self.component_name_edit.setAlignment(Qt.AlignCenter)
-        self.component_name_edit.textChanged.connect(lambda: self.updateComponentName(self.component_name_edit.text()))
-        self.component_name_edit.textChanged.connect(self.setSceneModified)
+        self.component_name_edit.textChanged.connect(self.setHasBeenModified)
         self.layout.addWidget(self.component_name_edit)
         self.layout.addStretch()
+
+        self.connectHasBeenModifiedCallback(self.updateComponentName)
+        self.connectHasBeenModifiedCallback(self.setSceneModified)
 
     def initActions(self):
         self.action_layout = QHBoxLayout()
@@ -50,11 +54,32 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.action_layout.addWidget(self.connect_component_action_button)
 
         self.layout.addLayout(self.action_layout)
-
         self.setLayout(self.layout)
 
-    def updateComponentName(self, name):
-        self.component_name = name
+        self.connectHasBeenModifiedCallback(self.validateProperties)
+        self.connectIsValidCallback(self.updateActionButtons)
+
+    def validateProperties(self):
+        if not self.validComponentName():
+            self.is_valid = False
+            return False
+        self.is_valid = True
+        return True
+
+    def validComponentName(self):
+        if self.component_name_edit.text() != "" and self.component_name_edit.text() != "Undefined":
+            return True
+        else:
+            return False
+
+    def updateActionButtons(self, state):
+        self.build_guides_action_button.setEnabled(state)
+        self.build_static_action_button.setEnabled(state)
+        self.build_component_action_button.setEnabled(state)
+        self.connect_component_action_button.setEnabled(state)
+
+    def updateComponentName(self):
+        self.component_name = self.component_name_edit.text()
 
     def setSceneModified(self):
         if not self.is_silent:

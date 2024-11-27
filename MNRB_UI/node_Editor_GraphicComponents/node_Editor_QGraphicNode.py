@@ -224,8 +224,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         validation_icon_path = path_valid_icon.subtracted(subtraction_path)
 
-        painter.setPen(self._invalid_pen)
-        painter.setBrush(self._invalid_brush)
+        painter.setPen(self._valid_pen if self.node.properties.is_valid else self._invalid_pen)
+        painter.setBrush(self._valid_brush if self.node.properties.is_valid else self._invalid_brush)
         painter.drawPath(validation_icon_path.simplified())
 
         #paintBounding Rect

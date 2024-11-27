@@ -45,6 +45,7 @@ class NodeEditorScene(Serializable):
 
         self.grScene.itemSelected.connect(self.onItemSelected)
         self.grScene.itemsDeselected.connect(self.onItemsDeselected)
+        self.connectHasBeenModifiedListenerCallback(self.properties.validateProperties)
 
         if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
 
