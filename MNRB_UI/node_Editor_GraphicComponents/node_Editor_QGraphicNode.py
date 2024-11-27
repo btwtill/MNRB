@@ -1,5 +1,5 @@
 from PySide2 import QtWidgets # type:ignore
-from PySide2.QtCore import Qt, QRectF # type: ignore
+from PySide2.QtCore import Qt, QRectF, QPointF # type: ignore
 from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
 
 SELECTION_DEBUG = False
@@ -69,12 +69,22 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._title_color = Qt.white
         self._title_backgroundColor = QColor("#FF181818")
         self._content_color = QColor("#EF1F1F1F")
+        self._valid_color = QColor("#EE336600")
+        self._invalid_color = QColor("#EEc43721")
 
         self._default_pen = QPen(self._default_color)
         self._selected_pen = QPen(self._selected_color)
+        self._valid_pen = QPen(self._valid_color)
+        self._valid_pen.setJoinStyle(Qt.MiterJoin)
+        self._valid_pen.setMiterLimit(5)
+        self._invalid_pen = QPen(self._invalid_color)
+        self._invalid_pen.setJoinStyle(Qt.MiterJoin)
+        self._invalid_pen.setMiterLimit(5)
 
         self._title_background_brush = QBrush(self._title_backgroundColor)
         self._content_brush = QBrush(self._content_color)
+        self._valid_brush = QBrush(self._valid_color)
+        self._invalid_brush = QBrush(self._invalid_color)
 
         #initialize the node title
         self.title_item = QtWidgets.QGraphicsTextItem(self)
@@ -189,7 +199,35 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         painter.setPen(self._default_pen if not self.isSelected() else self._selected_pen)
         painter.setBrush(Qt.NoBrush)
         painter.drawPath(path_outline.simplified())
-        
+
+        path_valid_icon = QPainterPath()
+        path_valid_icon.setFillRule(Qt.WindingFill)
+        top_left = QPointF(self.width - self.title_height - 1.0, 0 + 1.0)
+        top_right = QPointF(self.width - 1.0, 0 + 1.0)
+        lower_left = QPointF(self.width - self.title_height - 1.0, self.title_height - 1.0)
+        lower_right = QPointF(self.width - 1.0, self.title_height - 1.0)
+        top_right_rounded_upper = QPointF(self.width - self._edge_roundness - 1.0 , 0 + 1.0)
+        top_right_rounded_lower = QPointF(self.width - 1.0, 0 + 1.0 + self._edge_roundness)
+
+        path_valid_icon.moveTo(top_left)
+        path_valid_icon.lineTo(top_right_rounded_upper)
+        path_valid_icon.quadTo(top_right, top_right_rounded_lower)
+        path_valid_icon.lineTo(lower_right)
+        path_valid_icon.lineTo(lower_left)
+        path_valid_icon.lineTo(top_left)
+
+        subtraction_path = QPainterPath()
+        subtraction_path.moveTo(top_left)
+        subtraction_path.lineTo(lower_right)
+        subtraction_path.lineTo(lower_left)
+        subtraction_path.lineTo(top_left)
+
+        validation_icon_path = path_valid_icon.subtracted(subtraction_path)
+
+        painter.setPen(self._invalid_pen)
+        painter.setBrush(self._invalid_brush)
+        painter.drawPath(validation_icon_path.simplified())
+
         #paintBounding Rect
         if self.is_drawing_bounding_box:
             painter.setPen(QPen(Qt.red, 1, Qt.DashLine))
