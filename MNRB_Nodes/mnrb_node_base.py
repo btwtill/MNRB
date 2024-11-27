@@ -13,7 +13,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.component_name = "Undefined"
         self.is_silent = True
-        
+
         self.updateActionButtons(self.is_valid)
 
     def initUI(self):
@@ -129,6 +129,8 @@ class MNRB_Node(NodeEditorNode):
         self.controls = []
         self.deforms = []
 
+        self.properties.connectHasBeenModifiedCallback(self.updateComponentHierarchyName)
+
     def guideBuild(self) -> str:
         if not self.scene.scene_rig_hierarchy.isGuideHierarchy():
             self.scene.scene_rig_hierarchy.createGuideHierarchy()
@@ -157,6 +159,16 @@ class MNRB_Node(NodeEditorNode):
     
     def connectComponent(self):
         raise NotImplementedError
+
+    def updateComponentHierarchyName(self):
+        if self.component_hierarchy is not None:
+            try:
+                new_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+                new_name = MC.renameObject(self.component_hierarchy, new_component_hierarchy_name)
+                if new_name != self.component_hierarchy:
+                    self.component_hierarchy = new_name
+            except Exception as e:
+                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: ", e)
 
     def serialize(self):
         result_data = super().serialize()

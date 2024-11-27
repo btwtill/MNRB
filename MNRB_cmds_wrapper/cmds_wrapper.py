@@ -11,6 +11,10 @@ class MC:
         cmds.delete(object, hierarchy = "below")
 
     @staticmethod
+    def renameObject(object, name) -> str:
+        return cmds.rename(object, name)
+
+    @staticmethod
     def parentObject(child, parent):
         cmds.parent(child, parent)
 
