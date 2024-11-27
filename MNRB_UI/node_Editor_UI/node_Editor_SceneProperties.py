@@ -68,11 +68,15 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
             return False
         
         if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Nodes to be checked:: ", self.scene.nodes)
+        
+        is_one_node_valid = False
         for node in self.scene.nodes:
             if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties:: ", node.properties.is_valid)
-            if not node.properties.is_valid:
-                self.is_valid = False
-                return False
+            if node.properties.is_valid:
+                is_one_node_valid = True
+        if not is_one_node_valid:
+            self.is_valid = False
+            return False
 
         self.is_valid = True
         return True

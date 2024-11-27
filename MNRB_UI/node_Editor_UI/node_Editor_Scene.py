@@ -192,19 +192,23 @@ class NodeEditorScene(Serializable):
 
     def buildSceneGuides(self):
         for node in self.nodes:
-            node.guideBuild()
+            if not node.properties.is_disabled:
+                node.guideBuild()
 
     def buildSceneStatic(self):
         for node in self.nodes:
-            node.staticBuild()
+            if not node.properties.is_disabled:
+                node.staticBuild()
 
     def buildSceneComponents(self):
         for node in self.nodes:
-            node.componentBuild()
+            if not node.properties.is_disabled:
+                node.componentBuild()
 
     def connectSceneComponents(self):
         for node in self.nodes:
-            node.connectComponent()
+            if not node.properties.is_disabled:
+                node.connectComponent()
 
     def saveSceneToFile(self, filename):
 

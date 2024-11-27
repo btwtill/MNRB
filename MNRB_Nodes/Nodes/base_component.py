@@ -29,14 +29,16 @@ class MNRB_Node_BaseComponent(MNRB_Node):
         super().__init__(scene, inputs = [], outputs=[["base_ctrl", 1, True]])
 
     def guideBuild(self):
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self)
+        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
 
-        guide_hirarchy = super().guideBuild()
+        super().guideBuild()
 
         base_component_guide = guide(self.properties.component_name + GUIDE_SUFFIX)
         base_component_guide.draw()
         MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
         self.guides.append(base_component_guide)
+    
+        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, "Component is not Enabled to Build Guides")
 
     def staticBuild(self):
         print("%s:: Building Static:: " % self)

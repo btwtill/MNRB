@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton #type: ignore
+from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox #type: ignore
 from PySide2.QtCore import Qt #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
@@ -6,12 +6,14 @@ from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 CLASS_DEBUG = True
+VALIDATE_DEBUG = True
 
 class MNRB_NodeProperties(NodeEditorNodeProperties):
     def __init__(self, node):
         super().__init__(node)
 
         self.component_name = "Undefined"
+        self.is_disabled = False
         self.is_silent = True
 
         self.updateActionButtons()
@@ -28,8 +30,15 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name_edit.setAlignment(Qt.AlignCenter)
         self.component_name_edit.textChanged.connect(self.setHasBeenModified)
         self.layout.addWidget(self.component_name_edit)
+
+        #add disable check
+        self.disabled_checkbox = QCheckBox("Disable Component")
+        self.disabled_checkbox.stateChanged.connect(self.setHasBeenModified)
+        #self.disabled_checkbox.stateChanged.connect(self.updateDisabledState)
+        self.layout.addWidget(self.disabled_checkbox)
         self.layout.addStretch()
 
+        self.connectHasBeenModifiedCallback(self.updateDisabledState)
         self.connectHasBeenModifiedCallback(self.updateComponentName)
         self.connectHasBeenModifiedCallback(self.setSceneModified)
 
@@ -60,9 +69,20 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.connectIsValidCallback(self.updateActionButtons)
 
     def validateProperties(self):
+        if VALIDATE_DEBUG: print("%s:: --validateProperties:: Start Validating properties!" % self.__class__.__name__)
+
         if not self.validComponentName():
             self.is_valid = False
             return False
+        
+        if VALIDATE_DEBUG: print("%s:: --validateProperties:: Valid Component Name: " % self.__class__.__name__, self.component_name)
+
+        if self.is_disabled:
+            self.is_valid = False
+            return False
+        
+        if VALIDATE_DEBUG: print("%s:: --validateProperties:: Component is Disabled:  "% self.__class__.__name__ , self.is_disabled)
+
         self.is_valid = True
         return True
 
@@ -71,6 +91,9 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
             return True
         else:
             return False
+
+    def updateDisabledState(self):
+        self.is_disabled = self.disabled_checkbox.isChecked()
 
     def updateActionButtons(self):
         self.build_guides_action_button.setEnabled(self.is_valid)
@@ -87,29 +110,37 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
     def onBuildGuides(self):
         if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildGuides ", self.node)
-        self.node.guideBuild()
+        if not self.is_disabled:
+            self.node.guideBuild()
 
     def onBuildStatic(self):
         if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildStatic ", self.node)
-        self.node.staticBuild()
+        if not self.is_disabled:
+            self.node.staticBuild()
 
     def onBuildComponent(self):
         if CLASS_DEBUG:  print("BaseNodeProperties:: --onBuildComponent: ", self.node)
-        self.node.componentBuild()
+        if not self.is_disabled:
+            self.node.componentBuild()
 
     def onConnectComponents(self):
         if CLASS_DEBUG: print("BaseNodeProperties:: --onConnectComponent: ", self.node)
-        self.node.connectComponent()
+        if not self.is_disabled:
+            self.node.connectComponent()
 
     def serialize(self):
         result_data = super().serialize()
         result_data['component_name'] = self.component_name
+        result_data['is_disabled'] = self.is_disabled
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
         self.component_name_edit.setText(data['component_name'])
+        self.disabled_checkbox.setChecked(data['is_disabled'])
         self.is_silent = False
+        
+        self.setHasBeenModified(True)
 
         return True
 
@@ -131,7 +162,7 @@ class MNRB_Node(NodeEditorNode):
 
         self.properties.connectHasBeenModifiedCallback(self.updateComponentHierarchyName)
 
-    def guideBuild(self) -> str:
+    def guideBuild(self) -> bool:
         if not self.scene.scene_rig_hierarchy.isGuideHierarchy():
             self.scene.scene_rig_hierarchy.createGuideHierarchy()
             current_guide_hierarchy = self.scene.scene_rig_hierarchy.getGuideHierarchyName()
@@ -148,8 +179,8 @@ class MNRB_Node(NodeEditorNode):
         if CLASS_DEBUG: print("%s:: --guideBuild:: Object to be parented: " % self.__class__.__name__, "Child:: ",current_component_guide_hierarchy, " Parent:: ", current_guide_hierarchy)
         MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
         self.guide_component_hierarchy = current_component_guide_hierarchy
-            
-        return current_guide_hierarchy
+
+        return True
 
     def staticBuild(self):
         raise NotImplementedError
