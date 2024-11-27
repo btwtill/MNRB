@@ -123,7 +123,7 @@ class MNRB_Node(NodeEditorNode):
     def __init__(self, scene, inputs=[], outputs=[]):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
-        self.component_hierarchy = None
+        self.guide_component_hierarchy = None
         self.guides = []
 
         self.controls = []
@@ -139,15 +139,15 @@ class MNRB_Node(NodeEditorNode):
         else:
             current_guide_hierarchy = self.scene.scene_rig_hierarchy.getGuideHierarchyName()
 
-        if self.component_hierarchy is not None:
-            if MC.objectExists(self.component_hierarchy):
-                MC.deleteObjectWithHierarchy(self.component_hierarchy)
+        if self.guide_component_hierarchy is not None:
+            if MC.objectExists(self.guide_component_hierarchy):
+                MC.deleteObjectWithHierarchy(self.guide_component_hierarchy)
 
         current_component_guide_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
         current_component_guide_hierarchy = MC.createTransform(current_component_guide_hierarchy_name)
         if CLASS_DEBUG: print("%s:: --guideBuild:: Object to be parented: " % self.__class__.__name__, "Child:: ",current_component_guide_hierarchy, " Parent:: ", current_guide_hierarchy)
         MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
-        self.component_hierarchy = current_component_guide_hierarchy
+        self.guide_component_hierarchy = current_component_guide_hierarchy
             
         return current_guide_hierarchy
 
@@ -161,22 +161,31 @@ class MNRB_Node(NodeEditorNode):
         raise NotImplementedError
 
     def updateComponentHierarchyName(self):
-        if self.component_hierarchy is not None:
+        if self.guide_component_hierarchy is not None:
             try:
-                new_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
-                new_name = MC.renameObject(self.component_hierarchy, new_component_hierarchy_name)
-                if new_name != self.component_hierarchy:
-                    self.component_hierarchy = new_name
+                new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+                new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
+                if new_name != self.guide_component_hierarchy:
+                    self.guide_component_hierarchy = new_name
             except Exception as e:
                 if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: " % self.__class__.__name__, e)
+
+    def remove(self):
+        super().remove()
+        if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
+        if self.guide_component_hierarchy is not None:
+            try:
+                MC.deleteObjectWithHierarchy(self.guide_component_hierarchy)
+            except Exception as e:
+                if CLASS_DEBUG: print("%s:: --remove:: ERROR:: " % self.__class__.__name__, e)
 
     def serialize(self):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code
-        result_data['component_hierarchy'] = self.component_hierarchy
+        result_data['guide_component_hierarchy'] = self.guide_component_hierarchy
         return result_data
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
         result = super().deserialize(data, hashmap, restore_id, exists)
-        self.component_hierarchy = data['component_hierarchy']
+        self.guide_component_hierarchy = data['guide_component_hierarchy']
         return True

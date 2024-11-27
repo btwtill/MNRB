@@ -407,6 +407,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         for node in selected_nodes:
             if node.node in node.node.scene.nodes:
+                if REMOVE_DEBUG: print("GRAPHICSVIEW:: --deleteSelected:: about to Remove Node")
                 node.node.remove()
 
         for edge in selected_edges:

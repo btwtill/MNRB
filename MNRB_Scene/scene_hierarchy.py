@@ -21,13 +21,12 @@ class MNRB_Scene_Hierarchy(Serializable):
 
     def createGuideHierarchy(self):
         self.guide_hierarchy = MC.createTransform(self.scene.getSceneRigName() + self.guide_suffix)
-        print(self.guide_hierarchy)
 
     def createRigHierarchy(self):
         self.rig_hierarchy = MC.createTransform(self.scene.getSceneRigName() + self.rig_suffix)
 
     def isGuideHierarchy(self) -> bool:
-        print("SCENE_RIG_HIERARCHY:: --isGuideHierarchy:: self.guide_hierarchy:: ", self.guide_hierarchy)
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isGuideHierarchy:: self.guide_hierarchy:: ", self.guide_hierarchy)
         return False if self.guide_hierarchy is None else MC.objectExists(self.guide_hierarchy)
     
     def isRigHierarchy(self) -> bool:

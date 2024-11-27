@@ -10,6 +10,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNod
 CLASS_DEBUG = False
 EVENT_DEBUG = False
 SERIALIZE_DEBUG = False
+REMOVE_DEBUG = False
 
 class NodeEditorNode(Serializable):
 
@@ -155,24 +156,25 @@ class NodeEditorNode(Serializable):
         return [x, y]
     
     def remove(self):
-        if CLASS_DEBUG: print("NODE:: -remove:: Start Removing Node:: ", self)
-        if CLASS_DEBUG: print("NODE:: -remove:: Removing all Edges from Sockets")
+        if REMOVE_DEBUG: print("%s:: --remove:: start Removing Node:: " % self.__class__.__name__, self)
+        if REMOVE_DEBUG: print("NODE:: -remove:: Start Removing Node:: ", self)
+        if REMOVE_DEBUG: print("NODE:: -remove:: Removing all Edges from Sockets")
         for socket in (self.inputs + self.outputs):
-            if CLASS_DEBUG: print("NODE:: -remove:: Start to Remove Edges from::", socket)
+            if REMOVE_DEBUG: print("NODE:: -remove:: Start to Remove Edges from::", socket)
             if socket.hasEdge():
-                if CLASS_DEBUG: 
+                if REMOVE_DEBUG: 
                     print("NODE:: -remove:: Edges to be Removed::")
                     for edge in socket.edges:
                         print("NODE:: -remove:: \t\t ", edge)
                 socket.removeAllEdges()
             else:
-                if CLASS_DEBUG: print("NODE:: -remove:: \t\t None")
+                if REMOVE_DEBUG: print("NODE:: -remove:: \t\t None")
 
-        if CLASS_DEBUG: print("NODE:: -remove:: Remove GrNode from the Scene")
+        if REMOVE_DEBUG: print("NODE:: -remove:: Remove GrNode from the Scene")
         self.scene.grScene.removeItem(self.grNode)
-        if CLASS_DEBUG: print("NODE:: -remove:: Remove Node from the Scene")
+        if REMOVE_DEBUG: print("NODE:: -remove:: Remove Node from the Scene")
         self.scene.removeNode(self)
-        if CLASS_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
+        if REMOVE_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
 
     def getNodeContentClass(self):
         return self.__class__.Node_Content_Class

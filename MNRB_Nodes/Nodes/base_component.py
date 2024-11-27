@@ -35,7 +35,7 @@ class MNRB_Node_BaseComponent(MNRB_Node):
 
         base_component_guide = guide(self.properties.component_name + GUIDE_SUFFIX)
         base_component_guide.draw()
-        MC.parentObject(base_component_guide.name, self.component_hierarchy)
+        MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
         self.guides.append(base_component_guide)
 
     def staticBuild(self):
