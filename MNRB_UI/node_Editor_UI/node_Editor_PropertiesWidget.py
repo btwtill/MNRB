@@ -4,6 +4,7 @@ from PySide2.QtCore import QSize  #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 EVENT_DEBUG = False
+CLASS_DEBUG = True
 
 class NodeEditorPropertiesWidget(Serializable, QWidget):
     def __init__(self, parent=None) -> None:
@@ -47,7 +48,8 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
     @is_valid.setter
     def is_valid(self, value):
         self._is_valid = value
-        for callback in self._is_valid_listeners: callback(self._is_valid)
+        if CLASS_DEBUG: print("%s:: isValid Property being set:: Calling all callbacks:: " % self.__class__.__name__, self._is_valid_listeners)
+        for callback in self._is_valid_listeners: callback()
 
     def initUI(self):
         self.id_label = QLabel("ID: " + str(self.id))

@@ -17,7 +17,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.title = "Scene Properties"
         self.rig_name = "Undefined"
         
-        self.updateActionButtons(self.is_valid)
+        self.updateActionButtons()
 
     def initUI(self):
         #Rig Name
@@ -62,6 +62,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.connectIsValidCallback(self.updateActionButtons)
 
     def validateProperties(self):
+        if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Start Validation")
         if not self.validRigName():
             self.is_valid = False
             return False
@@ -82,11 +83,11 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         else:
             return False
 
-    def updateActionButtons(self, state):
-        self.build_guides_action_button.setEnabled(state)
-        self.build_static_action_button.setEnabled(state)
-        self.build_component_action_button.setEnabled(state)
-        self.connect_component_action_button.setEnabled(state)
+    def updateActionButtons(self):
+        self.build_guides_action_button.setEnabled(self.is_valid)
+        self.build_static_action_button.setEnabled(self.is_valid)
+        self.build_component_action_button.setEnabled(self.is_valid)
+        self.connect_component_action_button.setEnabled(self.is_valid)
 
     def updateRigName(self):
         self.rig_name = self.rig_name_line_edit.text()

@@ -14,7 +14,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name = "Undefined"
         self.is_silent = True
 
-        self.updateActionButtons(self.is_valid)
+        self.updateActionButtons()
 
     def initUI(self):
         #component Name Label
@@ -72,11 +72,11 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         else:
             return False
 
-    def updateActionButtons(self, state):
-        self.build_guides_action_button.setEnabled(state)
-        self.build_static_action_button.setEnabled(state)
-        self.build_component_action_button.setEnabled(state)
-        self.connect_component_action_button.setEnabled(state)
+    def updateActionButtons(self):
+        self.build_guides_action_button.setEnabled(self.is_valid)
+        self.build_static_action_button.setEnabled(self.is_valid)
+        self.build_component_action_button.setEnabled(self.is_valid)
+        self.connect_component_action_button.setEnabled(self.is_valid)
 
     def updateComponentName(self):
         self.component_name = self.component_name_edit.text()
@@ -168,7 +168,7 @@ class MNRB_Node(NodeEditorNode):
                 if new_name != self.component_hierarchy:
                     self.component_hierarchy = new_name
             except Exception as e:
-                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: ", e)
+                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: " % self.__class__.__name__, e)
 
     def serialize(self):
         result_data = super().serialize()

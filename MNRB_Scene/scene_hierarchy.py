@@ -3,6 +3,8 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #t
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX, RIG_HIERARCHY_SUFFIX #type: ignore
 
+CLASS_DEBUG = True
+
 class MNRB_Scene_Hierarchy(Serializable):
     def __init__(self, scene, guide_suffix = GUIDE_HIERARCHY_SUFFIX, rig_suffix = RIG_HIERARCHY_SUFFIX) -> None:
         super().__init__()
@@ -14,6 +16,8 @@ class MNRB_Scene_Hierarchy(Serializable):
 
         self.guide_hierarchy = None
         self.rig_hierarchy = None
+
+        self.scene.properties.connectHasBeenModifiedCallback(self.updateGuideHierarchyName)
 
     def createGuideHierarchy(self):
         self.guide_hierarchy = MC.createTransform(self.scene.getSceneRigName() + self.guide_suffix)
@@ -35,6 +39,16 @@ class MNRB_Scene_Hierarchy(Serializable):
     def getRigHierarchyName(self):
         return self.rig_hierarchy
     
+    def updateGuideHierarchyName(self):
+        if self.guide_hierarchy is not None:
+            try:
+                current_guide_hierarchy = self.guide_hierarchy
+                new_name = MC.renameObject(current_guide_hierarchy, self.scene.getSceneRigName() + self.guide_suffix)
+                if new_name != self.guide_hierarchy:
+                    self.guide_hierarchy = new_name
+            except Exception as e:
+                if CLASS_DEBUG: print("SCENE_HIERARCHY:: --updateGuideHierarchyName:: ERROR:: ", e)
+
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id), 

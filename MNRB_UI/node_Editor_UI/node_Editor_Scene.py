@@ -14,7 +14,7 @@ from MNRB.MNRB_Scene.scene_hierarchy import MNRB_Scene_Hierarchy #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
-SELECTION_DEBUG = False
+SELECTION_DEBUG = True
 BUILD_DEBUG = True
 
 class NodeEditorScene(Serializable):
@@ -34,6 +34,7 @@ class NodeEditorScene(Serializable):
 
         self._has_been_modified = False
         self._has_been_modified_listeners = []
+        self._scene_changed_listeners = []
 
         self._item_selected_listeners = []
         self._items_deselected_listeners = []
@@ -45,7 +46,8 @@ class NodeEditorScene(Serializable):
 
         self.grScene.itemSelected.connect(self.onItemSelected)
         self.grScene.itemsDeselected.connect(self.onItemsDeselected)
-        self.connectHasBeenModifiedListenerCallback(self.properties.validateProperties)
+
+        self.history.connectHistoryModifiedListenersCallback(self.properties.validateProperties)
 
         if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
 
@@ -57,11 +59,11 @@ class NodeEditorScene(Serializable):
             self._has_been_modified = value
 
             for callback in self._has_been_modified_listeners: callback()
-
+    
         self._has_been_modified = value
+        for callback in self._scene_changed_listeners: callback()
 
     def initUI(self):
-    
         self.grScene_width = 64000
         self.grScene_height = 64000
 
@@ -87,6 +89,9 @@ class NodeEditorScene(Serializable):
     
     def connectViewDropListenerCallback(self, callback):
         self.getView().connectViewDropListenerCallback(callback)
+
+    def connectSceneChangedCallback(self, callback):
+        self._scene_changed_listeners.append(callback)
 
     def removeNode(self, node):
         if CLASS_DEBUG: 
