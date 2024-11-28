@@ -73,6 +73,13 @@ class MC:
         MC.setObjectDisplayColor(new_space_locator, color)
         return new_space_locator[0]
     
+    @staticmethod
+    def setLocatorLocalScale(locator, scale) -> None:
+        locator_shape = MC.getObjectShapeNode(locator)
+        cmds.setAttr(f"{locator_shape}.localScaleX", scale)
+        cmds.setAttr(f"{locator_shape}.localScaleY", scale)
+        cmds.setAttr(f"{locator_shape}.localScaleZ", scale)
+
     #joint specific methods
     @staticmethod
     def setJointRadius(joint, radius) -> None:

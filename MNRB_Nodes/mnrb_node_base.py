@@ -5,6 +5,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: i
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+from MNRB.MNRB_Guides.guide import guide #type: ignore
 
 CLASS_DEBUG = True
 VALIDATE_DEBUG = True
@@ -134,7 +135,9 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         #update the guide size valule
         self.guide_size = float(self.guide_slider_size_edit.text())
         #call the nodes guide resize funcion
-        self.node.setComponentDeformRadius(self.guide_size)
+        if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size)
+        if CLASS_DEBUG: print("%s:: --updateGuideSize:: of Node::  " % self.__class__.__name__, self.node)
+        self.node.setComponentGuideSize(self.guide_size)
         #set properties to be modified
         self.setHasBeenModified()
 
@@ -209,14 +212,16 @@ class MNRB_Node(NodeEditorNode):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
         self.guide_component_hierarchy = None
-        self.guides = []
 
+        self.guides = []
         self.controls = []
         self.deforms = []
 
         self.properties.connectHasBeenModifiedCallback(self.updateComponentHierarchyName)
 
     def guideBuild(self) -> bool:
+        self.guides = []
+
         if not self.scene.scene_rig_hierarchy.isGuideHierarchy():
             self.scene.scene_rig_hierarchy.createGuideHierarchy()
             current_guide_hierarchy = self.scene.scene_rig_hierarchy.getGuideHierarchyName()
@@ -257,8 +262,9 @@ class MNRB_Node(NodeEditorNode):
 
     def setComponentGuideSize(self, size):
         for guide in self.guides:
+            if CLASS_DEBUG: print("%s:: --setComponentGuideSize:: Setting Guide:: " % self.__class__.__name__, guide, " with object name: ", guide.name, " to Size:: ", size)
             if MC.objectExists(guide.name):
-                pass
+                guide.resize(size)
 
     def setComponentDeformRadius(self, size):
         for deform in self.deforms:
@@ -278,9 +284,20 @@ class MNRB_Node(NodeEditorNode):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code
         result_data['guide_component_hierarchy'] = self.guide_component_hierarchy
+
+        guides = []
+        for guide in self.guides: guides.append(guide.serialize())
+        result_data['guides'] = guides
+
         return result_data
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
         result = super().deserialize(data, hashmap, restore_id, exists)
         self.guide_component_hierarchy = data['guide_component_hierarchy']
+    
+        for guide_data in data['guides']:
+            new_guide = guide(guide_data['name'])
+            new_guide.deserialize(guide_data, hashmap, restore_id)
+            self.guides.append(new_guide)
+
         return True
