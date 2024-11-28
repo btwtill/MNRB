@@ -10,8 +10,8 @@ EVENT_DEBUG = False
 VALIDATION_DEBUG = True
 
 class ScenePropertyStateIcon(Enum):
-    valid = os.path.join(os.path.dirname(__file__), "..", "icons", "default.png")
-    invalid = os.path.join(os.path.dirname(__file__), "..", "icons", "base_component.png")
+    valid = os.path.join(os.path.dirname(__file__), "..", "icons", "valid.png")
+    invalid = os.path.join(os.path.dirname(__file__), "..", "icons", "invalid.png")
 
 class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def __init__(self, scene, parent=None) -> None:

@@ -19,8 +19,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.is_disabled = False
         self.is_silent = True
 
-        self.guide_size = 1
-        self.deform_size = 1
+        self.guide_size = 1.0
+        self.deform_size = 1.0
 
         self.updateActionButtons()
 

@@ -69,8 +69,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._title_color = Qt.white
         self._title_backgroundColor = QColor("#FF181818")
         self._content_color = QColor("#EF1F1F1F")
-        self._valid_color = QColor("#EE336600")
-        self._invalid_color = QColor("#EEc43721")
+        self._valid_color = QColor("#FF336600")
+        self._invalid_color = QColor("#FFc43721")
 
         self._default_pen = QPen(self._default_color)
         self._selected_pen = QPen(self._selected_color)
