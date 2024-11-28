@@ -376,7 +376,7 @@ class MNRB_Node(NodeEditorNode):
         self.guide_component_hierarchy = data['guide_component_hierarchy']
     
         for guide_data in data['guides']:
-            new_guide = guide(guide_data['name'])
+            new_guide = guide(self, guide_data['name'], deserialized=True)
             new_guide.deserialize(guide_data, hashmap, restore_id)
             self.guides.append(new_guide)
 

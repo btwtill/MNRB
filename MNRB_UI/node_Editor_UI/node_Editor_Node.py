@@ -9,7 +9,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNod
 
 CLASS_DEBUG = False
 EVENT_DEBUG = False
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 REMOVE_DEBUG = False
 
 class NodeEditorNode(Serializable):

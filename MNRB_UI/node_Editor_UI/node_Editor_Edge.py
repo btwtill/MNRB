@@ -5,7 +5,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_EdgeProperties import NodeEditorEdg
 
 CLASS_DEBUG = False
 REMOVE_DEBUG = False
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 
 EDGE_TYPE_DIRECT = 1
 EDGE_TYPE_BEZIER = 2

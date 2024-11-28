@@ -5,7 +5,7 @@ class LocatorGuideShape():
         self.guide = guide
 
     def draw(self):
-        guide_shape = MC.createSpaceLocator(self.guide.position, self.guide.name, self.guide.color)
+        guide_shape = MC.createSpaceLocator(self.guide.position, self.guide.name, self.guide.color.value)
         self.guide.name = guide_shape
 
     def resize(self, size):

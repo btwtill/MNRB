@@ -14,7 +14,7 @@ from MNRB.MNRB_Scene.scene_hierarchy import MNRB_Scene_Hierarchy #type: ignore
 from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
 
 CLASS_DEBUG = False
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 SELECTION_DEBUG = True
 BUILD_DEBUG = True
 
@@ -225,14 +225,14 @@ class NodeEditorScene(Serializable):
     def loadSceneFromFile(self, filename):
 
         with open(filename, "r") as file:
-            try:
+            # try:
                 raw_data = file.read()
                 data = json.loads(raw_data)
                 self.deserialize(data)
-            except json.JSONDecodeError:
-                raise InvalidFile("%s is not a Valid Json File" % os.path.basename(filename))
-            except Exception as e:
-                print("SCENE:: --loadSceneFromFile:: Excepting while trying to load a file to the scene:: ", e)
+            # except json.JSONDecodeError:
+            #     raise InvalidFile("%s is not a Valid Json File" % os.path.basename(filename))
+            # except Exception as e:
+            #     print("SCENE:: --loadSceneFromFile:: Excepting while trying to load a file to the scene:: ", e)
             
         if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
         self.history.storeHistory("Loaded From File.", set_modified = False)

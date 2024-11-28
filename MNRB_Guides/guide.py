@@ -5,26 +5,32 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #t
 from MNRB.MNRB_Guides.locator_guide_shape import LocatorGuideShape #type: ignore
 from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
+from MNRB.global_variables import GUIDE_SUFFIX #type: ignore
 
 class guideShapeType(Enum):
     locator = 1
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name, color = MNRBColor.yellow, position = (0, 0, 0), size = 1, guide_type = guideShapeType.locator) -> None:
+    def __init__(self, node, name, color = MNRBColor.yellow, position = (0, 0, 0), guide_type = guideShapeType.locator, deserialized = False) -> None:
         super().__init__()
 
         self.node = node
 
         self._guide_type = guide_type
 
-        self.name = name
+        self.name = self.node.properties.component_name + "_" + name + GUIDE_SUFFIX
         self._color = color
 
         self.position = position
-        self.size = size
+        self.size = self.node.properties.guide_size
 
         self.guide_shape = self.createGuideShape()
+
+        if not deserialized:
+            self.draw()
+
+        self.node.guides.append(self)
 
     @property
     def guide_type(self): return self._guide_type

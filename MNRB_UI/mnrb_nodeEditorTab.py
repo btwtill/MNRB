@@ -86,13 +86,13 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         return self.central_widget.sceneHasSelectedItems()
 
     def loadFile(self, path):
-        try:
+        # try:
             self.central_widget.scene.loadSceneFromFile(path)
             self.central_widget.scene.history.clear()
             self.central_widget.scene.history.storeHistory("Inital History Stamp")
-        except Exception as e:
-            print(e)
-            QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path)
+        # except Exception as e:
+        #     print(e)
+        #     QtWidgets.QMessageBox.warning(self, "Error Occured during the loading of the File at: ", path)
 
     def onOpenFile(self, path):
         if os.path.isdir(path):
