@@ -1,10 +1,17 @@
+import os
+from enum import Enum
 from PySide2 import QtWidgets #type: ignore 
-from PySide2.QtCore import Qt #type: ignore
+from PySide2.QtCore import Qt, QSize #type: ignore
+from PySide2.QtGui import QPixmap, QIcon #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 EVENT_DEBUG = False
 VALIDATION_DEBUG = True
+
+class ScenePropertyStateIcon(Enum):
+    valid = os.path.join(os.path.dirname(__file__), "..", "icons", "default.png")
+    invalid = os.path.join(os.path.dirname(__file__), "..", "icons", "base_component.png")
 
 class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def __init__(self, scene, parent=None) -> None:
@@ -56,6 +63,19 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
         self.layout.addLayout(self.action_layout)
 
+        status_bar_layout = QtWidgets.QHBoxLayout()
+
+        self.status_bar_icon_label = QtWidgets.QLabel()
+        self.setStatusBarIconLabel(ScenePropertyStateIcon.valid)
+        
+        status_bar_layout.addWidget(self.status_bar_icon_label)
+
+        self.status_bar = QtWidgets.QStatusBar()
+        self.status_bar.showMessage("Scene Messages:: Ready")
+
+        status_bar_layout.addWidget(self.status_bar)
+
+        self.layout.addLayout(status_bar_layout)
         self.setLayout(self.layout)
 
         self.connectHasBeenModifiedCallback(self.validateProperties)
@@ -65,6 +85,8 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Start Validation")
         if not self.validRigName():
             self.is_valid = False
+            self.status_bar.showMessage("Scene Status:: Invalid Component Name!!")
+            self.setStatusBarIconLabel(ScenePropertyStateIcon.invalid)
             return False
         
         if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Nodes to be checked:: ", self.scene.nodes)
@@ -76,9 +98,28 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
                 is_one_node_valid = True
         if not is_one_node_valid:
             self.is_valid = False
+            self.status_bar.showMessage("Scene Status:: No Component is Valid!!")
+            self.setStatusBarIconLabel(ScenePropertyStateIcon.invalid)
+            return False
+        
+        is_duplicate_component_name = False
+        encounters = set()
+        for node in self.scene.nodes:
+            component_name = node.properties.component_name
+            if component_name in encounters:
+                is_duplicate_component_name = True
+                break
+            encounters.add(component_name)
+
+        if is_duplicate_component_name:
+            self.is_valid =False
+            self.status_bar.showMessage("Scene Status:: Duplicate component names Found!!")
+            self.setStatusBarIconLabel(ScenePropertyStateIcon.invalid)
             return False
 
         self.is_valid = True
+        self.status_bar.showMessage("Scene Status:: Ready")
+        self.setStatusBarIconLabel(ScenePropertyStateIcon.valid)
         return True
 
     def validRigName(self):
@@ -102,6 +143,10 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def setSceneModified(self):
         if not self.is_silent:
             self.scene.setModified(True)
+
+    def setStatusBarIconLabel(self, icon_path):
+        pixmap = QPixmap(icon_path.value)
+        self.status_bar_icon_label.setPixmap(pixmap)
 
     def onBuildGuides(self):
         if EVENT_DEBUG: print("PROPERTIES:: --onBuildGuides:: Building Guides!")
