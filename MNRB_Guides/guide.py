@@ -12,14 +12,18 @@ class guideShapeType(Enum):
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name, color = MNRBColor.yellow, position = (0, 0, 0), guide_type = guideShapeType.locator, deserialized = False) -> None:
+    def __init__(self, node, name, color = MNRBColor.yellow, position = (0, 0, 0), deserialized = False) -> None:
         super().__init__()
 
         self.node = node
 
-        self._guide_type = guide_type
+        self._guide_type = guideShapeType.sphere
 
-        self.name = self.node.properties.component_name + "_" + name + GUIDE_SUFFIX
+        if not deserialized:
+            self.name = self.node.properties.component_name + "_" + name + GUIDE_SUFFIX
+        else:
+            self.name = name
+
         self._color = color
 
         self.position = position
@@ -30,7 +34,8 @@ class guide(Serializable):
         if not deserialized:
             self.draw()
 
-        self.node.guides.append(self)
+        if not deserialized:
+            self.node.guides.append(self)
 
     @property
     def guide_type(self): return self._guide_type

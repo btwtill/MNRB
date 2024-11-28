@@ -35,7 +35,7 @@ class MNRB_Node_BaseComponent(MNRB_Node):
 
         super().guideBuild()
 
-        base_component_guide = guide(self, name = "global", guide_type = guideShapeType.sphere)
+        base_component_guide = guide(self, name = "global")
 
         MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
         
