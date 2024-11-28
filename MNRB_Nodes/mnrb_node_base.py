@@ -1,3 +1,4 @@
+import math
 from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider #type: ignore
 from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QDoubleValidator #type: ignore
@@ -19,6 +20,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.is_silent = True
 
         self.guide_size = 1
+        self.deform_size = 1
 
         self.updateActionButtons()
 
@@ -47,10 +49,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         guide_slider_label_layout.addWidget(guide_size_slider_label)
 
         self.guide_slider_size_edit = QLineEdit()
-        guide_slider_size_double_validator = QDoubleValidator(0.0, 100.0, 2)
-        guide_slider_size_double_validator.setNotation(QDoubleValidator.StandardNotation)
-        self.guide_slider_size_edit.setValidator(guide_slider_size_double_validator)
-        self.guide_slider_size_edit.setText(str(1))
+        self.guide_slider_size_edit.setText(str(1.0))
         self.guide_slider_size_edit.textChanged.connect(self.onGuideSizeEditChange)
 
         guide_slider_label_layout.addWidget(guide_size_slider_label)
@@ -59,14 +58,39 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.layout.addLayout(guide_slider_label_layout)
 
         self.guide_size_slider = QSlider(Qt.Horizontal)
-        self.guide_size_slider.setMinimum(0.0001)
-        self.guide_size_slider.setMaximum(100)
-        self.guide_size_slider.setValue(1)
+        self.guide_size_slider.setMinimum(0)
+        self.guide_size_slider.setMaximum(10000)
+        self.guide_size_slider.setValue(100)
         self.guide_size_slider.setTickPosition(QSlider.TicksBelow)
-        self.guide_size_slider.setTickInterval(0)
+        self.guide_size_slider.setTickInterval(20)
         self.guide_size_slider.valueChanged.connect(self.onGuideSliderChange)
 
         self.layout.addWidget(self.guide_size_slider)
+
+        #deform Size Adjustment
+        deform_slider_label_layout = QHBoxLayout()
+        deform_size_slider_label = QLabel("Deform Size:")
+        deform_size_slider_label.setAlignment(Qt.AlignCenter)
+        deform_slider_label_layout.addWidget(deform_size_slider_label)
+
+        self.deform_slider_size_edit = QLineEdit()
+        self.deform_slider_size_edit.setText(str(1.0))
+        self.deform_slider_size_edit.textChanged.connect(self.onDeformSizeEditChange)
+
+        deform_slider_label_layout.addWidget(deform_size_slider_label)
+        deform_slider_label_layout.addWidget(self.deform_slider_size_edit)
+
+        self.layout.addLayout(deform_slider_label_layout)
+
+        self.deform_size_slider = QSlider(Qt.Horizontal)
+        self.deform_size_slider.setMinimum(0)
+        self.deform_size_slider.setMaximum(10000)
+        self.deform_size_slider.setValue(100)
+        self.deform_size_slider.setTickPosition(QSlider.TicksBelow)
+        self.deform_size_slider.setTickInterval(20)
+        self.deform_size_slider.valueChanged.connect(self.onDeformSliderChange)
+
+        self.layout.addWidget(self.deform_size_slider)
 
         self.layout.addStretch()
         self.connectHasBeenModifiedCallback(self.updateDisabledState)
@@ -141,14 +165,35 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         #set properties to be modified
         self.setHasBeenModified()
 
+    def onDeformSizeEditChange(self):
+        self.updateDeformSlider()
+        self.updateDeformSize()
+
+    def onDeformSliderChange(self):
+        self.updateDeformSliderEdit()
+        self.updateDeformSize()
+
+    def updateDeformSize(self):
+        self.deform_size = float(self.deform_slider_size_edit.text())
+        if CLASS_DEBUG: print("%s:: --updateDeformSize:: Setting Deform Size To: " % self.__class__.__name__, self.deform_size)
+        if CLASS_DEBUG: print("%s:: --updateDeformSize:: of Node::  " % self.__class__.__name__, self.node)
+        self.node.setComponentDeformRadius(self.deform_size)
+        self.setHasBeenModified()
+
     def updateDisabledState(self):
         self.is_disabled = self.disabled_checkbox.isChecked()
 
     def updateGuideSlider(self):
-        self.guide_size_slider.setValue(float(self.guide_slider_size_edit.text()))
+        self.guide_size_slider.setValue(self.formatSliderEditToSliderValue(self.guide_slider_size_edit.text()))
 
     def updateGuideSliderSizeEdit(self):
-        self.guide_slider_size_edit.setText(str(self.guide_size_slider.value()))
+        self.guide_slider_size_edit.setText(str(self.formatSliderValueToEditValue(self.guide_size_slider.value())))
+
+    def updateDeformSlider(self):
+        self.deform_size_slider.setValue(self.formatSliderEditToSliderValue(self.deform_slider_size_edit.text()))
+
+    def updateDeformSliderEdit(self):
+        self.deform_slider_size_edit.setText(str(self.formatSliderValueToEditValue(self.deform_size_slider.value())))
 
     def updateActionButtons(self):
         self.build_guides_action_button.setEnabled(self.is_valid)
@@ -162,6 +207,20 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def setSceneModified(self):
         if not self.is_silent:
             self.node.scene.setModified(True)
+
+    def formatSliderValueToEditValue(self, value):
+        if value != 0:
+            scaled_slider_value = round(value / 100, 2)
+        else:
+            scaled_slider_value = 0.01
+        if CLASS_DEBUG: print("%s:: --formatSliderValue:: new Slider Value:: " % self.__class__.__name__, scaled_slider_value)
+        return scaled_slider_value
+
+    def formatSliderEditToSliderValue(self, text):
+        slider_value_float = float(text)
+        scaled_value = int(slider_value_float * 100)
+        if CLASS_DEBUG: print("%s:: --formatSliderEditTextToFloat:: new Slider Value as int" % self.__class__.__name__, scaled_value)
+        return scaled_value
 
     def onBuildGuides(self):
         if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildGuides ", self.node)
@@ -188,6 +247,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         result_data['component_name'] = self.component_name
         result_data['is_disabled'] = self.is_disabled
         result_data['guide_size'] = self.guide_size
+        result_data['deform_size'] = self.deform_size
+
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
@@ -195,6 +256,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name_edit.setText(data['component_name'])
         self.disabled_checkbox.setChecked(data['is_disabled'])
         self.guide_slider_size_edit.setText(str(data['guide_size']))
+        self.deform_slider_size_edit.setText(str(data['deform_size']))
 
         self.is_silent = False
 
@@ -274,11 +336,12 @@ class MNRB_Node(NodeEditorNode):
     def remove(self):
         super().remove()
         if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
+        self.removeGuideHierarchyFromViewport()
+
+    def removeGuideHierarchyFromViewport(self):
         if self.guide_component_hierarchy is not None:
-            try:
+            if MC.objectExists(self.guide_component_hierarchy):
                 MC.deleteObjectWithHierarchy(self.guide_component_hierarchy)
-            except Exception as e:
-                if CLASS_DEBUG: print("%s:: --remove:: ERROR:: " % self.__class__.__name__, e)
 
     def serialize(self):
         result_data = super().serialize()
