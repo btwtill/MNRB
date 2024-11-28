@@ -7,6 +7,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNod
 from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
+from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 
 CLASS_DEBUG = True
 VALIDATE_DEBUG = True
@@ -267,19 +268,32 @@ class MNRB_Node(NodeEditorNode):
     operation_code = 0
     operation_title = "MNRB_Node"
     icon = None
-
     Node_Properties_Class = MNRB_NodeProperties
 
     def __init__(self, scene, inputs=[], outputs=[]):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
         self.guide_component_hierarchy = None
+        self.component_material = None
+
+        self._component_color = MNRBColor.yellow.value
 
         self.guides = []
         self.controls = []
         self.deforms = []
 
         self.properties.connectHasBeenModifiedCallback(self.updateComponentHierarchyName)
+
+    @property
+    def component_color(self): return self._component_color
+    @component_color.setter
+    def component_color(self, value):
+        if self._component_color != value:
+            self._component_color = value
+
+            self.setGuideColors()
+        
+        self._component_color = value
 
     def guideBuild(self) -> bool:
         self.guides = []
@@ -332,7 +346,11 @@ class MNRB_Node(NodeEditorNode):
         for deform in self.deforms:
             if MC.objectExists(deform):
                 MC.setJointRadius(deform, size)
-            
+    
+    def setGuideColors(self):
+        for guide in self.guides:
+            guide.color = self.component_color
+
     def remove(self):
         super().remove()
         if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)

@@ -3,6 +3,7 @@ import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf
 import MNRB.MNRB_Nodes.Nodes.__init__ as Init
 
 import MNRB.global_variables as GlobalVar
+import MNRB.MNRB_colors.colors as MNRBColors
 
 import MNRB.MNRB_Nodes.Nodes.base_component as MNRB_Base_Component_Node
 import MNRB.MNRB_Scene.scene_hierarchy as MNRB_Scene_Hierarchy
@@ -49,6 +50,7 @@ importlib.reload(NodeEditorConf)
 importlib.reload(Init)
 
 importlib.reload(GlobalVar)
+importlib.reload(MNRBColors)
 
 importlib.reload(MNRBNodeBase)
 importlib.reload(MNRB_Scene_Hierarchy)

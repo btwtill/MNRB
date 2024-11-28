@@ -4,6 +4,7 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node, MNRB_NodeProperties #type:
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.global_variables import GUIDE_SUFFIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+from MNRB.MNRB_Guides.guide import guideShapeType #type: ignore
 
 GUIDE_DEBUG = True
 
@@ -33,7 +34,7 @@ class MNRB_Node_BaseComponent(MNRB_Node):
 
         super().guideBuild()
 
-        base_component_guide = guide(self.properties.component_name + GUIDE_SUFFIX)
+        base_component_guide = guide(self, self.properties.component_name + GUIDE_SUFFIX)
         base_component_guide.draw()
         MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
         self.guides.append(base_component_guide)

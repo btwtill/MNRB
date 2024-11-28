@@ -10,13 +10,15 @@ class guideShapeType(Enum):
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, name, color = (1, 1, 0), position = (0, 0, 0), size = 1, guide_type = guideShapeType.locator) -> None:
+    def __init__(self, node, name, color = (1, 1, 0), position = (0, 0, 0), size = 1, guide_type = guideShapeType.locator) -> None:
         super().__init__()
+        
+        self.node = node
 
         self._guide_type = guide_type
 
         self.name = name
-        self.color = color
+        self._color = color
 
         self.position = position
         self.size = 1
@@ -31,11 +33,24 @@ class guide(Serializable):
 
         self.guide_shape = self.createGuideShape()
 
+    @property
+    def color(self): return self._color
+    @color.setter
+    def color(self, value):
+        if self._color != value:
+            self._color = value
+            self.setColor()
+
+        self._color = value
+
     def draw(self):
         self.guide_shape.draw()
 
     def resize(self, size):
         self.guide_shape.resize(size)
+
+    def setColor(self):
+        self.guide_shape.updateColor()
 
     def determinGuideShape(self):
         print("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)
