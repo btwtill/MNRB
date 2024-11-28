@@ -11,6 +11,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneCli
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSceneProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 from MNRB.MNRB_Scene.scene_hierarchy import MNRB_Scene_Hierarchy #type: ignore
+from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
@@ -24,6 +25,8 @@ class NodeEditorScene(Serializable):
         self.grScene = NodeEditor_QGraphicScene(self)
         self.properties = NodeEditorSceneProperties(self)
         self.scene_rig_hierarchy = MNRB_Scene_Hierarchy(self)
+
+        self.colors = MNRBSceneColors(self)
 
         self.nodes = []
         self.edges = []

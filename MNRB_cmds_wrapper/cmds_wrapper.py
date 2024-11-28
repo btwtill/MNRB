@@ -107,11 +107,15 @@ class MC:
         shape_node = MC.listSourceConnections(object, "create")[0]
         cmds.setAttr(f"{shape_node}.radius", size)
     
-    #shader methods
+    #lambert methods
     @staticmethod
     def createLambertMaterial(name) -> str:
         return cmds.shadingNode("lambert", asShader=True, name = name)
     
+    @staticmethod
+    def setLambertColor(node, color):
+        cmds.setAttr(f"{node}.color", color[0], color[1], color[2], type="double3")
+
     @staticmethod
     def createShaderSet(name) -> str:
         return cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name = name)

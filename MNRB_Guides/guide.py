@@ -4,13 +4,14 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_Guides.locator_guide_shape import LocatorGuideShape #type: ignore
 from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
+from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 
 class guideShapeType(Enum):
     locator = 1
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name, color = (1, 1, 0), position = (0, 0, 0), size = 1, guide_type = guideShapeType.locator) -> None:
+    def __init__(self, node, name, color = MNRBColor.yellow, position = (0, 0, 0), size = 1, guide_type = guideShapeType.locator) -> None:
         super().__init__()
 
         self.node = node
