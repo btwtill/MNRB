@@ -1,10 +1,15 @@
-
+from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 class NurbsShereGuideShape():
     def __init__(self, guide) -> None:
         self.guide = guide
 
-        self.material = None
+        self.guide_material = None
+        self.guide_shader = None
 
     def draw(self):
-        pass
+        guide_shape = MC.createNurbsSphere(self.guide.name)
+        self.guide.name = guide_shape
+
+    def resize(self, size):
+        MC.setNurbsSphereShapeRadius(self.guide.name, size)

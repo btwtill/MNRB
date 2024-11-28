@@ -274,7 +274,6 @@ class MNRB_Node(NodeEditorNode):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
         self.guide_component_hierarchy = None
-        self.component_material = None
 
         self._component_color = color
 

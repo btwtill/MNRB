@@ -11,6 +11,10 @@ class MC:
         cmds.delete(object, hierarchy = "below")
 
     @staticmethod
+    def deleteNode(node):
+        cmds.delete(node)
+
+    @staticmethod
     def renameObject(object, name) -> str:
         return cmds.rename(object, name)
 
@@ -80,7 +84,42 @@ class MC:
         cmds.setAttr(f"{locator_shape}.localScaleY", scale)
         cmds.setAttr(f"{locator_shape}.localScaleZ", scale)
 
+    @staticmethod
+    def listSourceConnections(node, attribute) -> list:
+        return cmds.listConnections(f"{node}.{attribute}", source = True)
+    
+    @staticmethod
+    def listDestinationConnections(node, attribute) -> list:
+        return cmds.listConnections(f"{node}.{attribute}", destination = True)
+
     #joint specific methods
     @staticmethod
     def setJointRadius(joint, radius) -> None:
         cmds.setAttr(f"{joint}.radius", radius)
+
+    #nurbs methods
+    @staticmethod
+    def createNurbsSphere(name) -> str:
+        return cmds.sphere(name = name)[0]
+    
+    @staticmethod
+    def setNurbsSphereShapeRadius(object, size) -> None:
+        shape_node = MC.listSourceConnections(object, "create")[0]
+        cmds.setAttr(f"{shape_node}.radius", size)
+    
+    #shader methods
+    @staticmethod
+    def createLambertMaterial(name) -> str:
+        return cmds.shadingNode("lambert", asShader=True, name = name)
+    
+    @staticmethod
+    def createShaderSet(name) -> str:
+        return cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name = name)
+
+    @staticmethod
+    def assignMaterialToShaderSet(material, shader_set):
+        cmds.connectAttr(f"{material}.outColor", f"{shader_set}.surfaceShader", force=True)
+
+    @staticmethod
+    def assignObjectToShaderSet(object, shader):
+        return cmds.sets(object, edit=True, forceElement=shader)

@@ -12,7 +12,7 @@ class guideShapeType(Enum):
 class guide(Serializable):
     def __init__(self, node, name, color = (1, 1, 0), position = (0, 0, 0), size = 1, guide_type = guideShapeType.locator) -> None:
         super().__init__()
-        
+
         self.node = node
 
         self._guide_type = guide_type
@@ -21,7 +21,7 @@ class guide(Serializable):
         self._color = color
 
         self.position = position
-        self.size = 1
+        self.size = size
 
         self.guide_shape = self.createGuideShape()
 
@@ -45,6 +45,7 @@ class guide(Serializable):
 
     def draw(self):
         self.guide_shape.draw()
+        self.guide_shape.resize(self.size)
 
     def resize(self, size):
         self.guide_shape.resize(size)
