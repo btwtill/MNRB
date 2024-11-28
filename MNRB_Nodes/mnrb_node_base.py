@@ -270,13 +270,13 @@ class MNRB_Node(NodeEditorNode):
     icon = None
     Node_Properties_Class = MNRB_NodeProperties
 
-    def __init__(self, scene, inputs=[], outputs=[]):
+    def __init__(self, scene, inputs=[], outputs=[], color = MNRBColor.yellow.value):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
         self.guide_component_hierarchy = None
         self.component_material = None
 
-        self._component_color = MNRBColor.yellow.value
+        self._component_color = color
 
         self.guides = []
         self.controls = []
