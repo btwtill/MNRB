@@ -64,6 +64,12 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         # Add the right dock widget to the secondary main window
         self.addDockWidget(Qt.RightDockWidgetArea, self.right_dock)
 
+    def setFocusToView(self):
+        self.central_widget.view.setFocus()
+
+    def translateView(self, x, y):
+        self.central_widget.view.translate(x, y)
+
     def clearScene(self):
         self.central_widget.scene.clearScene()
 

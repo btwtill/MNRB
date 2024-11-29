@@ -217,6 +217,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
     def updateComponentName(self):
         self.component_name = self.component_name_edit.text()
+        self.node.title = self.component_name
 
     def setSceneModified(self):
         if not self.is_silent:
