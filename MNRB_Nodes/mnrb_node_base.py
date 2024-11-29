@@ -139,6 +139,19 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         
         if VALIDATE_DEBUG: print("%s:: --validateProperties:: Component is Disabled:  "% self.__class__.__name__ , self.is_disabled)
 
+        is_duplicate_component_name = False
+        encounters = set()
+        for node in self.node.scene.nodes:
+            component_name = node.properties.component_name
+            if component_name in encounters:
+                is_duplicate_component_name = True
+                break
+            encounters.add(component_name)
+
+        if is_duplicate_component_name:
+            self.is_valid = False
+            return False
+
         self.is_valid = True
         return True
 
