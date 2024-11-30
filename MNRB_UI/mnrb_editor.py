@@ -5,6 +5,7 @@ from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt, QFile #type:  ignore 
 from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
+from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
 
 CLASS_DEBUG = True
 
@@ -198,6 +199,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.action_redo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
         self.action_delete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='delete currently Selected', triggered=self.onEditDelete)
 
+        self.action_edit_preferences = QtWidgets.QAction('&Preferences', self, statusTip='open Preferences', triggered=self.onOpenPreferences)
+
         self.action_edit_copy = QtWidgets.QAction('&Copy', self, shortcut='Ctrl+C', statusTip='copy current selection', triggered=self.onEditCopy)
         self.action_edit_cut = QtWidgets.QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
         self.action_edit_paste = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
@@ -236,6 +239,10 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.edit_menu.addAction(self.action_edit_copy)
         self.edit_menu.addAction(self.action_edit_cut)
         self.edit_menu.addAction(self.action_edit_paste)
+
+        self.edit_menu.addSeparator()
+
+        self.edit_menu.addAction(self.action_edit_preferences)
 
         self.edit_menu.aboutToShow.connect(self.updateEditMenu)
 
@@ -467,6 +474,10 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.getNodeEditorTab().left_dock.hide()
         else:
             self.getNodeEditorTab().left_dock.show()
+
+    def onOpenPreferences(self):
+        self.preference_widget = MNRBPreferences()
+        self.preference_widget.show()
 
     def isModified(self):
         return self.getNodeEditorTab().isModified()

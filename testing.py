@@ -46,6 +46,8 @@ import MNRB.MNRB_Guides.locator_guide_shape as MNRBLocatorGuide
 import MNRB.MNRB_Guides.nurbs_shpere_guide_shape as MNRBNurbsSphereGuide
 import MNRB.MNRB_Guides.guide as MNRBGuide
 
+import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences 
+
 importlib.reload(NodeEditorConf)
 importlib.reload(Init)
 
@@ -92,6 +94,8 @@ importlib.reload(NodeEditorRegistrationException)
 importlib.reload(MNRBLocatorGuide)
 importlib.reload(MNRBNurbsSphereGuide)
 importlib.reload(MNRBGuide)
+
+importlib.reload(MNRBPreferences)
 
 newEditor = mnrb_editor.mnrb_Editor()
 
