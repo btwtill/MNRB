@@ -117,6 +117,18 @@ class MC:
         cmds.setAttr(f"{node}.color", color[0], color[1], color[2], type="double3")
 
     @staticmethod
+    def setLambertTransparency(node, transparency: tuple):
+        cmds.setAttr(f"{node}.transparency", transparency[0], transparency[1], transparency[2], type="double3")
+
+    @staticmethod
+    def setLambertAmbientColor(node, color: tuple):
+        cmds.setAttr(f"{node}.ambientColor", color[0], color[1], color[2], type="double3")
+
+    @staticmethod
+    def setLambertIncandescence(node, incandescence: tuple):
+        cmds.setAttr(f"{node}.incandescence", incandescence[0], incandescence[1], incandescence[2], type="double3")
+
+    @staticmethod
     def createShaderSet(name) -> str:
         return cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name = name)
 

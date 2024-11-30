@@ -30,6 +30,9 @@ class MNRBSceneColors():
                 MC.createLambertMaterial(self.color_material_names[index])
                 #configure Material
                 MC.setLambertColor(self.color_material_names[index], color.value)
+                MC.setLambertTransparency(self.color_material_names[index], (0.2, 0.2, 0.2))
+                MC.setLambertAmbientColor(self.color_material_names[index], (1.0, 1.0, 1.0))
+                MC.setLambertIncandescence(self.color_material_names[index], (0.2, 0.2, 0.2))
                 is_connected = False
 
             if not MC.objectExists(self.color_shader_name[index]):
