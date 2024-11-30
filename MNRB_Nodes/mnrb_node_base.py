@@ -366,6 +366,12 @@ class MNRB_Node(NodeEditorNode):
             if MC.objectExists(self.guide_component_hierarchy):
                 if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
                 new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+                duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.scene_rig_hierarchy.getGuideHierarchyName(), new_guide_component_hierarchy_name)
+                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
+               
+                if duplicate_name != []:
+                    new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
+
                 if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
                 new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
                 if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
@@ -374,7 +380,7 @@ class MNRB_Node(NodeEditorNode):
                     self.guide_component_hierarchy = new_name
                 
                 for guide in self.guides:
-                    guide.updateName(self.properties.component_name)
+                    guide.updateName(self.properties.component_name, duplicate_name)
             else:
                 if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
 

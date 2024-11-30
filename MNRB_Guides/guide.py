@@ -21,11 +21,9 @@ class guide(Serializable):
 
         self._guide_type = guideShapeType.locator
 
-        if not deserialized:
-            self.name = self.node.properties.component_name + "_" + name + GUIDE_SUFFIX
-        else:
-            self.name = name
-
+        self.guide_name = name
+        self.name = self.node.properties.component_name + "_" + self.guide_name + GUIDE_SUFFIX
+        
         self._color = self.node.component_color
 
         self.position = position
@@ -82,18 +80,18 @@ class guide(Serializable):
 
     def updateName(self, name):
         if MC.objectExists(self.name):
-            if CLASS_DEBUG: print("%s:: --updateName:: Setting Guide name to:: " % self.__class__.__name__, name)
-            original_name_ending_list = self.name.split("_")
-            remaining_name = "_".join(original_name_ending_list[1:])
-            if CLASS_DEBUG: print("%s:: --updateName:: old Remaining Name:: " % self.__class__.__name__, remaining_name)
-            new_name = name + "_" + remaining_name
+            new_name =  name + "_" + self.guide_name + GUIDE_SUFFIX
+            duplicate_name = MC.findDuplicatesInNodeHiearchyByName(new_name)
+            if CLASS_DEBUG: print("%s:: --updateName:: Duplicate:: " % self.__class__.__name__, duplicate_name)
+            if duplicate_name != []:
+                new_name = new_name + str(duplicate_name[1])
             if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
 
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
-            ('name', self.name)
+            ('name', self.guide_name)
         ])
         return serialized_data
 

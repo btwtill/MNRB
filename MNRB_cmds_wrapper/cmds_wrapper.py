@@ -1,4 +1,5 @@
 import maya.cmds as cmds #type: ignore
+from collections import Counter
 
 class MC:
      
@@ -17,6 +18,22 @@ class MC:
     @staticmethod
     def renameObject(object, name) -> str:
         return cmds.rename(object, name)
+
+    @staticmethod
+    def findDuplicatesInNodeHiearchyByName(node, target_name) -> list:
+        result = []
+
+        all_nodes = cmds.listRelatives(node, allDescendents=True, fullPath=True)
+        base_names = [cmds.ls(node)[0] for node in all_nodes]
+        name_counts = Counter(base_names)
+        
+        target_count = name_counts.get(target_name, 0)
+
+        if target_count > 0:
+            result.append(target_name)
+            result.append(target_count)
+
+        return result
 
     @staticmethod
     def parentObject(child, parent):
