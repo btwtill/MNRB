@@ -418,8 +418,16 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
     def centerView(self):
         selected_items = self.grScene.selectedItems()
+        
         if len(selected_items) == 0:
-            self.centerOn(0, 0) 
+            if self.grScene.scene.nodes == []:
+                self.centerOn(0, 0) 
+            else:
+                combined_bounding_rectangle = QRectF()
+                for node in self.grScene.scene.nodes:
+                    combined_bounding_rectangle = combined_bounding_rectangle.united(node.grNode.mapToScene(node.grNode.boundingRect()).boundingRect())
+                self.centerOn(combined_bounding_rectangle.center())
+
         elif len(selected_items) > 1:
             combined_bounding_rectangle = QRectF()
 
