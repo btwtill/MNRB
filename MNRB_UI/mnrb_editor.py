@@ -307,8 +307,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 self.display_overlay = False
 
                 self.getNodeEditorTab().onNewFile()
-                self.getCurrentTabWidget().setFocusToView()
-                self.getNodeEditorTab().centerNodeEditorView()
 
             else:
                 warningBox = QtWidgets.QMessageBox()
@@ -346,9 +344,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             print("MNRB_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
 
         self.getNodeEditorTab().onOpenFile(self.mnrb_base_editor_path)
-        self.getCurrentTabWidget().setFocusToView()
-        self.getNodeEditorTab().centerNodeEditorView()
-        self.getNodeEditorTab().translateView(4000, 2000)
         self.statusBar().showMessage('Opened project from ' + self.project_path, 5000)
 
     def onSaveProject(self):
@@ -461,6 +456,18 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         about_menu_messageBox.exec()
 
+    def onPropertiesDockWidget(self):
+        if self.getNodeEditorTab().right_dock.isVisible():
+            self.getNodeEditorTab().right_dock.hide()
+        else:
+            self.getNodeEditorTab().right_dock.show()
+    
+    def onNodeListDockWidget(self):
+        if self.getNodeEditorTab().left_dock.isVisible():
+            self.getNodeEditorTab().left_dock.hide()
+        else:
+            self.getNodeEditorTab().left_dock.show()
+
     def isModified(self):
         return self.getNodeEditorTab().isModified()
 
@@ -487,18 +494,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             project_settings_raw = file.read()
             project_settings_json = json.loads(project_settings_raw)
         return project_settings_json
-
-    def onPropertiesDockWidget(self):
-        if self.getNodeEditorTab().right_dock.isVisible():
-            self.getNodeEditorTab().right_dock.hide()
-        else:
-            self.getNodeEditorTab().right_dock.show()
-    
-    def onNodeListDockWidget(self):
-        if self.getNodeEditorTab().left_dock.isVisible():
-            self.getNodeEditorTab().left_dock.hide()
-        else:
-            self.getNodeEditorTab().left_dock.show()
 
     def toggleActionCheckbox(self, action):
         is_checked = action.isChecked()
