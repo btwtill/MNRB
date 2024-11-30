@@ -19,7 +19,7 @@ class guide(Serializable):
 
         self.node = node
 
-        self._guide_type = guideShapeType.sphere
+        self._guide_type = guideShapeType.locator
 
         if not deserialized:
             self.name = self.node.properties.component_name + "_" + name + GUIDE_SUFFIX

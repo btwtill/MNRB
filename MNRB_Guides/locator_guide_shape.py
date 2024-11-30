@@ -12,4 +12,4 @@ class LocatorGuideShape():
         MC.setLocatorLocalScale(self.guide.name, size)
 
     def updateColor(self):
-        pass
+        MC.setObjectDisplayColor(self.guide.name, self.guide.color.value)
