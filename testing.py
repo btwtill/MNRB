@@ -7,6 +7,7 @@ import MNRB.MNRB_colors.colors as MNRBColors
 
 import MNRB.MNRB_Nodes.Nodes.base_component as MNRB_Base_Component_Node
 import MNRB.MNRB_Scene.scene_hierarchy as MNRB_Scene_Hierarchy
+import MNRB.MNRB_Scene.scene_object as MNRB_Scene_Object
 import MNRB.MNRB_cmds_wrapper.cmds_wrapper as MayaCommands
 
 import MNRB.MNRB_UI.mnrb_editor as mnrb_editor
@@ -56,6 +57,7 @@ importlib.reload(MNRBColors)
 
 importlib.reload(MNRBNodeBase)
 importlib.reload(MNRB_Scene_Hierarchy)
+importlib.reload(MNRB_Scene_Object)
 importlib.reload(MNRB_Base_Component_Node)
 
 importlib.reload(MayaCommands)
