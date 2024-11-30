@@ -9,9 +9,15 @@ NODEUSAGETYPEDEFORM = "deform"
 
 GUIDE_SUFFIX = "_guide"
 RIG_SUFFIX = "_rig"
+COMPONENT_SUFFIX = "_cmpnt"
 
 GUIDE_HIERARCHY_SUFFIX = "_guides_hrc"
 RIG_HIERARCHY_SUFFIX = "rig_hrc"
+
+RIG_HIERARCHY_COMPONENT_SUFFIX = "_components"
+RIG_HIERARCHY_SKELETON_SUFFIX = "_skeleton"
+RIG_HIERARCHY_GEOMETRY_SUFFIX = "_geometry"
+RIG_HIERARCHY_SHAPES_SUFFIX ="_shapes"
 
 GUIDE_MATERIAL_SUFFIX = "_lambert_MNRB_guide_material"
 GUIDE_SHADER_SUFFIX = "_lambert_MNRB_guide_shader_SG"
