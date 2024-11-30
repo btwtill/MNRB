@@ -39,8 +39,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name_edit = QLineEdit()
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
         self.component_name_edit.setAlignment(Qt.AlignCenter)
-        self.component_name_edit.textChanged.connect(self.setHasBeenModified)
         self.component_name_edit.textChanged.connect(self.updateComponentName)
+        self.component_name_edit.textChanged.connect(self.setHasBeenModified)
         component_name_layout.addWidget(self.component_name_edit)
         component_header_layout.addLayout(component_name_layout)
 
@@ -231,7 +231,9 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.connect_component_action_button.setEnabled(self.is_valid)
 
     def updateComponentName(self):
+        if CLASS_DEBUG: print("%s:: --updateComponentName:: " % self.__class__.__name__, self.component_name_edit.text())
         self.component_name = self.component_name_edit.text()
+        if CLASS_DEBUG: print("%s:: --updateComponentName:: " % self.__class__.__name__, self.component_name)
         self.node.title = self.component_name
 
     def updateComponentColor(self, index):
@@ -362,10 +364,17 @@ class MNRB_Node(NodeEditorNode):
     def updateComponentHierarchyName(self):
         if self.guide_component_hierarchy is not None:
             if MC.objectExists(self.guide_component_hierarchy):
+                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
                 new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
                 new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
+                if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
                 if new_name != self.guide_component_hierarchy:
+                    if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: old component Hirarchy is not the same as the new:: Setting new Component Hierarchy Name " % self.__class__.__name__)
                     self.guide_component_hierarchy = new_name
+                
+                for guide in self.guides:
+                    guide.updateName(self.properties.component_name)
             else:
                 if CLASS_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
 

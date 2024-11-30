@@ -80,6 +80,16 @@ class guide(Serializable):
         self.guide_shape = self.determinGuideShape()(self)
         return self.guide_shape
 
+    def updateName(self, name):
+        if MC.objectExists(self.name):
+            if CLASS_DEBUG: print("%s:: --updateName:: Setting Guide name to:: " % self.__class__.__name__, name)
+            original_name_ending_list = self.name.split("_")
+            remaining_name = "_".join(original_name_ending_list[1:])
+            if CLASS_DEBUG: print("%s:: --updateName:: old Remaining Name:: " % self.__class__.__name__, remaining_name)
+            new_name = name + "_" + remaining_name
+            if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
+            self.name = MC.renameObject(self.name, new_name)
+
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
