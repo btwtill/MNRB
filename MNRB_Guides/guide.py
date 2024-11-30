@@ -5,7 +5,8 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #t
 from MNRB.MNRB_Guides.locator_guide_shape import LocatorGuideShape #type: ignore
 from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
-from MNRB.global_variables import GUIDE_SUFFIX #type: ignore
+from MNRB.global_variables import GUIDE_SUFFIX, CENTERDECLARATION #type: ignore
+
 
 CLASS_DEBUG = True
 
@@ -14,12 +15,13 @@ class guideShapeType(Enum):
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name, position = (0, 0, 0), deserialized = False) -> None:
+    def __init__(self, node, name, position = (0, 0, 0), side = CENTERDECLARATION, deserialized = False) -> None:
         super().__init__()
 
         self.node = node
 
         self._guide_type = guideShapeType.locator
+        self.side = side
 
         self.guide_name = name
         self.name = self.node.properties.component_name + "_" + self.guide_name + GUIDE_SUFFIX
@@ -91,10 +93,12 @@ class guide(Serializable):
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
-            ('name', self.guide_name)
+            ('name', self.guide_name),
+            ('side', self.side)
         ])
         return serialized_data
 
     def deserialize(self, data, hashmap={}, restore_id=True):
         if restore_id: self.id = data['id']
+        self.side = data['side']
         return True
