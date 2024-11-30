@@ -1,5 +1,5 @@
 import math
-from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider #type: ignore
+from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider, QComboBox #type: ignore
 from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QDoubleValidator #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
@@ -8,6 +8,7 @@ from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
+from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
 
 CLASS_DEBUG = True
 VALIDATE_DEBUG = True
@@ -26,17 +27,30 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.updateActionButtons()
 
     def initUI(self):
+        component_header_layout = QHBoxLayout()
+        component_name_layout = QVBoxLayout()
+
         #component Name Label
         component_name_label = QLabel("Set Component Name:")
         component_name_label.setAlignment(Qt.AlignHCenter)
-        self.layout.addWidget(component_name_label)
+        component_name_layout.addWidget(component_name_label)
 
         #component Name
         self.component_name_edit = QLineEdit()
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
         self.component_name_edit.setAlignment(Qt.AlignCenter)
         self.component_name_edit.textChanged.connect(self.setHasBeenModified)
-        self.layout.addWidget(self.component_name_edit)
+        component_name_layout.addWidget(self.component_name_edit)
+        component_header_layout.addLayout(component_name_layout)
+
+        #component Color
+        self.component_color_dropdown = QComboBox()
+        for color in MNRBColor:
+            self.component_color_dropdown.addItem(color.name)
+        self.component_color_dropdown.currentIndexChanged.connect(self.updateComponentColor)
+        component_header_layout.addWidget(self.component_color_dropdown)
+
+        self.layout.addLayout(component_header_layout)
 
         #add disable check
         self.disabled_checkbox = QCheckBox("Disable Component")
@@ -219,6 +233,11 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name = self.component_name_edit.text()
         self.node.title = self.component_name
 
+    def updateComponentColor(self, index):
+        if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
+        if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index)))
+        self.node.component_color = MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index))
+
     def setSceneModified(self):
         if not self.is_silent:
             self.node.scene.setModified(True)
@@ -284,7 +303,7 @@ class MNRB_Node(NodeEditorNode):
     icon = None
     Node_Properties_Class = MNRB_NodeProperties
 
-    def __init__(self, scene, inputs=[], outputs=[], color = MNRBColor.yellow.value):
+    def __init__(self, scene, inputs=[], outputs=[], color = MNRBColor.yellow):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
         self.guide_component_hierarchy = None
@@ -303,7 +322,7 @@ class MNRB_Node(NodeEditorNode):
     def component_color(self, value):
         if self._component_color != value:
             self._component_color = value
-
+            if CLASS_DEBUG: print("%s:: --component_color:: Setting new Component Color:: " % self.__class__.__name__, value)
             self.setGuideColors()
         
         self._component_color = value
@@ -378,7 +397,7 @@ class MNRB_Node(NodeEditorNode):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code
         result_data['guide_component_hierarchy'] = self.guide_component_hierarchy
-
+        result_data['component_color'] = self.component_color.name
         guides = []
         for guide in self.guides: guides.append(guide.serialize())
         result_data['guides'] = guides
@@ -388,7 +407,9 @@ class MNRB_Node(NodeEditorNode):
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
         result = super().deserialize(data, hashmap, restore_id, exists)
         self.guide_component_hierarchy = data['guide_component_hierarchy']
-    
+        self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])
+        self.properties.component_color_dropdown.setCurrentText(data['component_color'])
+
         for guide_data in data['guides']:
             new_guide = guide(self, guide_data['name'], deserialized=True)
             new_guide.deserialize(guide_data, hashmap, restore_id)

@@ -49,3 +49,12 @@ class MNRBSceneColors():
         for node in (self.color_material_names + self.color_shader_name):
             if MC.objectExists(node):
                 MC.deleteNode(node)
+
+    @staticmethod
+    def mapColorNameToColor(color_name):
+        exception_color = MNRBColor.yellow
+        for color in MNRBColor:
+            if color_name == color.name:
+                return color
+        
+        return exception_color

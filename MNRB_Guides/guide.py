@@ -7,12 +7,14 @@ from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 from MNRB.global_variables import GUIDE_SUFFIX #type: ignore
 
+CLASS_DEBUG = True
+
 class guideShapeType(Enum):
     locator = 1
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name, color = MNRBColor.yellow, position = (0, 0, 0), deserialized = False) -> None:
+    def __init__(self, node, name, position = (0, 0, 0), deserialized = False) -> None:
         super().__init__()
 
         self.node = node
@@ -24,7 +26,7 @@ class guide(Serializable):
         else:
             self.name = name
 
-        self._color = color
+        self._color = self.node.component_color
 
         self.position = position
         self.size = self.node.properties.guide_size
@@ -51,6 +53,7 @@ class guide(Serializable):
     def color(self, value):
         if self._color != value:
             self._color = value
+            if CLASS_DEBUG: print("%s:: --component_color:: Setting new Guide Color:: " % self.__class__.__name__, self.color)
             self.setColor()
 
         self._color = value

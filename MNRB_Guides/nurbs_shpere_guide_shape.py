@@ -17,4 +17,5 @@ class NurbsShereGuideShape():
         MC.setNurbsSphereShapeRadius(self.guide.name, size)
 
     def updateColor(self):
-        pass
+        if MC.objectExists(self.guide.name):
+            MC.assignObjectToShaderSet(self.guide.name, self.guide.color.name + GUIDE_SHADER_SUFFIX)
