@@ -40,6 +40,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name_edit.setPlaceholderText("Enter Component Name: ")
         self.component_name_edit.setAlignment(Qt.AlignCenter)
         self.component_name_edit.textChanged.connect(self.setHasBeenModified)
+        self.component_name_edit.textChanged.connect(self.updateComponentName)
         component_name_layout.addWidget(self.component_name_edit)
         component_header_layout.addLayout(component_name_layout)
 
@@ -48,6 +49,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         for color in MNRBColor:
             self.component_color_dropdown.addItem(color.name)
         self.component_color_dropdown.currentIndexChanged.connect(self.updateComponentColor)
+        self.component_color_dropdown.currentIndexChanged.connect(self.setHasBeenModified)
         component_header_layout.addWidget(self.component_color_dropdown)
 
         self.layout.addLayout(component_header_layout)
@@ -109,7 +111,6 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.layout.addStretch()
         self.connectHasBeenModifiedCallback(self.updateDisabledState)
-        self.connectHasBeenModifiedCallback(self.updateComponentName)
         self.connectHasBeenModifiedCallback(self.setSceneModified)
 
     def initActions(self):
@@ -408,7 +409,10 @@ class MNRB_Node(NodeEditorNode):
         result = super().deserialize(data, hashmap, restore_id, exists)
         self.guide_component_hierarchy = data['guide_component_hierarchy']
         self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])
+
+        self.properties.is_silent = True
         self.properties.component_color_dropdown.setCurrentText(data['component_color'])
+        self.properties.is_silent = False
 
         for guide_data in data['guides']:
             new_guide = guide(self, guide_data['name'], deserialized=True)

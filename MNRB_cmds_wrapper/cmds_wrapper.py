@@ -100,7 +100,9 @@ class MC:
     #nurbs methods
     @staticmethod
     def createNurbsSphere(name) -> str:
-        return cmds.sphere(name = name)[0]
+        new_sphere = cmds.sphere(name = name)[0]
+        MC.clearSelection()
+        return new_sphere
     
     @staticmethod
     def setNurbsSphereShapeRadius(object, size) -> None:
