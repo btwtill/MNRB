@@ -236,6 +236,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name = self.component_name_edit.text()
         if CLASS_DEBUG: print("%s:: --updateComponentName:: " % self.__class__.__name__, self.component_name)
         self.node.title = self.component_name
+        self.node.updateGuideComponentHierarchyName()
 
     def updateComponentColor(self, index):
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
@@ -306,6 +307,8 @@ class MNRB_Node(NodeEditorNode):
     operation_title = "MNRB_Node"
     icon = None
     Node_Properties_Class = MNRB_NodeProperties
+    
+    guide_count = 0
 
     def __init__(self, scene, inputs=[], outputs=[], color = MNRBColor.yellow):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
@@ -319,8 +322,6 @@ class MNRB_Node(NodeEditorNode):
         self.deforms = []
 
         self.is_silent =  False
-
-        self.properties.connectHasBeenModifiedCallback(self.updateGuideComponentHierarchyName)
 
     @property
     def component_color(self): return self._component_color
