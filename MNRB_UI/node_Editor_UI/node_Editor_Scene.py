@@ -279,6 +279,7 @@ class NodeEditorScene(Serializable):
 
         self.properties.deserialize(data['properties'], hashmap, restore_id)
         self.scene_rig_hierarchy.createGuideHierarchy()
+        self.scene_rig_hierarchy.createRigHierarchy()
 
         for node_data in data['nodes']:
             found = None

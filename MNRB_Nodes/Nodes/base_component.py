@@ -41,6 +41,10 @@ class MNRB_Node_BaseComponent(MNRB_Node):
         
     def staticBuild(self):
         print("%s:: Building Static:: " % self)
+        if not super().staticBuild():
+            return False
+        
+        return True
     
     def componentBuild(self):
         print("%s:: Building Component:: " % self)

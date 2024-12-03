@@ -18,7 +18,7 @@ class HierarchyObject():
     def name(self, value):
         self._name = value
 
-    def create(self):
+    def draw(self):
         self.name = MC.createTransform(self.name)
         if self.parent is not None:
             MC.parentObject(self.name, self.parent)

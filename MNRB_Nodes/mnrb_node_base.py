@@ -318,6 +318,8 @@ class MNRB_Node(NodeEditorNode):
         self.controls = []
         self.deforms = []
 
+        self.is_silent =  False
+
         self.properties.connectHasBeenModifiedCallback(self.updateGuideComponentHierarchyName)
 
     @property
@@ -349,7 +351,15 @@ class MNRB_Node(NodeEditorNode):
         return True
 
     def staticBuild(self):
-        raise NotImplementedError
+        self.deforms = []
+
+        if self.scene.scene_rig_hierarchy.ensureRigHierarchy():
+            current_rig_hierarchy = self.scene.scene_rig_hierarchy.rig_hierarchy_object.name
+        else:
+            if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
+            return False
+        
+        return True
     
     def componentBuild(self):
         raise NotImplementedError
@@ -358,6 +368,9 @@ class MNRB_Node(NodeEditorNode):
         raise NotImplementedError
 
     def updateGuideComponentHierarchyName(self):
+        if self.is_silent:
+            return
+        
         if self.guide_component_hierarchy is not None:
             if MC.objectExists(self.guide_component_hierarchy):
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
@@ -421,9 +434,11 @@ class MNRB_Node(NodeEditorNode):
         self.guide_component_hierarchy = data['guide_component_hierarchy']
         self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])
 
+        self.is_silent = True
         self.properties.is_silent = True
         self.properties.component_color_dropdown.setCurrentText(data['component_color'])
         self.properties.is_silent = False
+        self.is_silent = False
 
         for guide_data in data['guides']:
             new_guide = guide(self, guide_data['name'], deserialized=True)

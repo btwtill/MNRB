@@ -39,6 +39,7 @@ class MNRB_Scene_Hierarchy():
     def connectCallbackToHierarchyHasChanged(self, callback):
         self._hierarchy_name_changed_listeners.append(callback)
 
+    #guide Hierarchy
     def createGuideHierarchy(self):
         if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --createGuideHierarchy:: self.guide_hierarchy_object:: ", self.guide_hierarchy_object)
         self.guide_hierarchy_object = HierarchyObject(self, suffix = self.guide_hierarchy_suffix)
@@ -57,7 +58,7 @@ class MNRB_Scene_Hierarchy():
             return True
         if self.isGuideHierarchyObject() and not self.isGuideHierarchyInViewport():
             if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureGuideHierarchy:: is Object:: ", self.isGuideHierarchyObject(), " is in ViewPort:: ", self.isGuideHierarchyInViewport())
-            self.guide_hierarchy_object.create()
+            self.guide_hierarchy_object.draw()
             return True
         if not self.isGuideHierarchyObject() and self.isGuideHierarchyInViewport():
             if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureGuideHierarchy:: is Object:: ", self.isGuideHierarchyObject(), " is in ViewPort:: ", self.isGuideHierarchyInViewport())
@@ -66,33 +67,46 @@ class MNRB_Scene_Hierarchy():
         if not self.isGuideHierarchyObject() and not self.isGuideHierarchyInViewport():
             if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureGuideHierarchy:: is Object:: ", self.isGuideHierarchyObject(), " is in ViewPort:: ", self.isGuideHierarchyInViewport())
             self.createGuideHierarchy()
-            self.guide_hierarchy_object.create()
+            self.guide_hierarchy_object.draw()
             return True
         return False
 
     def getGuideHierarchyName(self):
         return self.guide_hierarchy_object.name
 
+    #rig Hierarchy
     def createRigHierarchy(self):
-        self.rig_hierarchy_object = HierarchyObject(self, name = self.hierarchy_name, suffix = self.rig_hierarchy_suffix)
+        self.rig_hierarchy_object = HierarchyObject(self, suffix = self.rig_hierarchy_suffix)
 
-    def isRigHierarchy(self) -> bool:
-        if self.rig_hierarchy is None:
-            return False
-        if not MC.objectExists(self.rig_hierarchy):
-            return False
-        return True
+    def isRigHierarchyObject(self) -> bool:
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isRigHierarchyObject:: self.guide_hierarchy_object:: ", self.rig_hierarchy_object)
+        return False if self.rig_hierarchy_object is None else True
     
-    def ensureComponentHierarchy(self):
-        if self.components_hiearchy is not None:
-                if not MC.objectExists(self.components_hiearchy):
-                    self.components_hiearchy = MC.createTransform(self.scene.getSceneRigName() + RIG_HIERARCHY_COMPONENT_SUFFIX)
-                    return True
-                return False
-        return True
+    def isRigHierarchyInViewport(self) -> bool:
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isGuideHierarchyInViewport:: Guide Hierarchy is in Maya viewport:: ", MC.objectExists(self.hierarchy_name + self.rig_hierarchy_suffix))
+        return MC.objectExists(self.hierarchy_name + self.rig_hierarchy_suffix)
+
+    def ensureRigHierarchy(self):
+        if self.isRigHierarchyObject() and self.isRigHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureRigHierarchy:: is Object:: ", self.isRigHierarchyObject(), " is in ViewPort:: ", self.isRigHierarchyInViewport())
+            return True
+        if self.isRigHierarchyObject() and not self.isRigHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureRigHierarchy:: is Object:: ", self.isRigHierarchyObject(), " is in ViewPort:: ", self.isRigHierarchyInViewport())
+            self.rig_hierarchy_object.draw()
+            return True
+        if not self.isRigHierarchyObject() and self.isRigHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureRigHierarchy:: is Object:: ", self.isRigHierarchyObject(), " is in ViewPort:: ", self.isRigHierarchyInViewport())
+            self.createGuideHierarchy()
+            return True
+        if not self.isRigHierarchyObject() and not self.isRigHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureRigHierarchy:: is Object:: ", self.isRigHierarchyObject(), " is in ViewPort:: ", self.isRigHierarchyInViewport())
+            self.createRigHierarchy()
+            self.rig_hierarchy_object.draw()
+            return True
+        return False
 
     def getRigHierarchyName(self):
-        return self.rig_hierarchy.name
+        return self.rig_hierarchy_object.name
     
     def updateGuideHierarchyName(self):
         self.hierarchy_name = self.scene.getSceneRigName()

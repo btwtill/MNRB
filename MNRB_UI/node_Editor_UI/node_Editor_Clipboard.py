@@ -72,6 +72,7 @@ class NodeEditorSceneClipboard():
             #create the node
             new_node = self.scene.getNodeClassFromData(node_data)(self.scene)
 
+            #optimize recursively
             duplicate_title = False
             checked_nodes = set()
             for node in self.scene.nodes:
@@ -83,7 +84,7 @@ class NodeEditorSceneClipboard():
 
             if duplicate_title:
                 if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: found duplicate Title:: adding 1 to title:: ", node_data['title'])
-                node_data['properties']['component_name'] = node_data['properties']['component_name'] + "_"
+                node_data['properties']['component_name'] = node_data['properties']['component_name'] + "1"
 
             new_node.deserialize(node_data, hashmap, restore_id = False)
 
