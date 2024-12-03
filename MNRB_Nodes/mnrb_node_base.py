@@ -334,16 +334,11 @@ class MNRB_Node(NodeEditorNode):
     def guideBuild(self) -> bool:
         self.guides = []
 
-        if not self.scene.scene_rig_hierarchy.isGuideHierarchy():
-            self.scene.scene_rig_hierarchy.createGuideHierarchy()
-            current_guide_hierarchy = self.scene.scene_rig_hierarchy.getGuideHierarchyName()
-            if CLASS_DEBUG: print("%s:: --guideBuild:: " % self.__class__.__name__, current_guide_hierarchy)
+        if self.scene.scene_rig_hierarchy.ensureGuideHierarchy():
+            current_guide_hierarchy = self.scene.scene_rig_hierarchy.guide_hierarchy_object.name
         else:
-            current_guide_hierarchy = self.scene.scene_rig_hierarchy.getGuideHierarchyName()
-
-        if self.guide_component_hierarchy is not None:
-            if MC.objectExists(self.guide_component_hierarchy):
-                MC.deleteObjectWithHierarchy(self.guide_component_hierarchy)
+            if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
+            return False
 
         current_component_guide_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
         current_component_guide_hierarchy = MC.createTransform(current_component_guide_hierarchy_name)
@@ -381,7 +376,7 @@ class MNRB_Node(NodeEditorNode):
                     self.guide_component_hierarchy = new_name
                 
                 for guide in self.guides:
-                    guide.updateName(self.properties.component_name, duplicate_name)
+                    guide.updateName(self.properties.component_name)
             else:
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
 

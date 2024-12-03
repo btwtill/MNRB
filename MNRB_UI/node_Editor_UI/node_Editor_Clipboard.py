@@ -3,8 +3,8 @@ from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: ignore
 
-SERIALIZE_DEBUG = True
-DESERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = False
+DESERIALIZE_DEBUG = True
 
 class NodeEditorSceneClipboard():
     def __init__(self, scene) -> None:
@@ -71,6 +71,20 @@ class NodeEditorSceneClipboard():
 
             #create the node
             new_node = self.scene.getNodeClassFromData(node_data)(self.scene)
+
+            duplicate_title = False
+            checked_nodes = set()
+            for node in self.scene.nodes:
+                if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: checking for duplicate Node Title: Node Titles to check against:: ", checked_nodes, " Node Data Title:: ", node_data['title'])
+                if node_data['title'] in checked_nodes:
+                    duplicate_title = True
+                    break
+                checked_nodes.add(node.title)
+
+            if duplicate_title:
+                if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: found duplicate Title:: adding 1 to title:: ", node_data['title'])
+                node_data['properties']['component_name'] = node_data['properties']['component_name'] + "_"
+
             new_node.deserialize(node_data, hashmap, restore_id = False)
 
             #position the node

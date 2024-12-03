@@ -251,7 +251,6 @@ class NodeEditorScene(Serializable):
         for edge in self.edges : edges.append(edge.serialize())
 
         properties = self.properties.serialize()
-        scene_rig_hierarchy = self.scene_rig_hierarchy.serialize()
 
         serialized_data = OrderedDict([
             ('id', self.id), 
@@ -259,8 +258,7 @@ class NodeEditorScene(Serializable):
             ('grScene_height', self.grScene_height),
             ('nodes', nodes),
             ('edges', edges),
-            ('properties', properties),
-            ('scene_rig_hierarchy', scene_rig_hierarchy)
+            ('properties', properties)
             ])
 
         if SERIALIZE_DEBUG: print("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
@@ -280,7 +278,7 @@ class NodeEditorScene(Serializable):
             print("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
 
         self.properties.deserialize(data['properties'], hashmap, restore_id)
-        self.scene_rig_hierarchy.deserialize(data['scene_rig_hierarchy'], hashmap, restore_id)
+        self.scene_rig_hierarchy.createGuideHierarchy()
 
         for node_data in data['nodes']:
             found = None

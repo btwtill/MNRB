@@ -83,7 +83,7 @@ class guide(Serializable):
     def updateName(self, name):
         if MC.objectExists(self.name):
             new_name =  name + "_" + self.guide_name + GUIDE_SUFFIX
-            duplicate_name = MC.findDuplicatesInNodeHiearchyByName(new_name)
+            duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.scene_rig_hierarchy.getGuideHierarchyName(), new_name)
             if CLASS_DEBUG: print("%s:: --updateName:: Duplicate:: " % self.__class__.__name__, duplicate_name)
             if duplicate_name != []:
                 new_name = new_name + str(duplicate_name[1])

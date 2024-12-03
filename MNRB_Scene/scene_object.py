@@ -1,16 +1,16 @@
-from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
-class HierarchyObject(Serializable):
-    def __init__(self, parent = None, name = "Undefined", suffix = ""):
-        self.parent = parent
-        self.suffix = suffix
-        self.scene_name = name
-        self._name = self.scene_name + self.suffix
+class HierarchyObject():
+    def __init__(self, hierarchy, parent = None, suffix = ""):
+        self.hierarchy = hierarchy
 
-        if self.parent is not None and self.scene_name != "Undefined":
-            self.create()
+        self.parent = parent
+        self.rig_name = self.hierarchy.hierarchy_name
+        self.suffix = suffix
+        self._name = self.rig_name + self.suffix
+
+        self.hierarchy.connectCallbackToHierarchyHasChanged(self.updateName)
             
     @property
     def name(self): return self._name
@@ -20,35 +20,27 @@ class HierarchyObject(Serializable):
 
     def create(self):
         self.name = MC.createTransform(self.name)
-        MC.parentObject(self.name, self.parent.name)
+        if self.parent is not None:
+            MC.parentObject(self.name, self.parent)
 
     def remove(self):
         MC.deleteObjectWithHierarchy(self.name)
 
-    def is_HierarchyObject(self):
-        if self.name != "Undefined":
-            if not MC.objectExists(self.name):
-                self.create()
-                return True
-            return True
-        return False
-    
+    def exists(self):
+        return MC.objectExists(self.name)
+
     def updateName(self):
-        pass
-
-    def serialize(self):
-        serialized_data = OrderedDict([
-            ('id', self.id),
-            ('scene_name', self.scene_name),
-            ('suffix', self.suffix)
-        ])
-        return serialized_data
-    
-    def deserialize(self, data, hashmap = {}, restore_id=True):
-        if restore_id: self.id = id
-
-        self.scene_name = data['scene_name']
-        self.suffix = data['suffix']
-        self.name = self.scene_name + self.suffix
-
-        return True
+        try:
+            new_object_name = self.hierarchy.hierarchy_name + self.suffix
+            if self.parent is None:
+                duplicates = []
+            else:
+                duplicates = MC.findDuplicatesInNodeHiearchyByName(self.parent.name, new_object_name)
+            if duplicates != []:
+                new_object_name = new_object_name + str(duplicates[1])
+            
+            new_name = MC.renameObject(self.name, new_object_name)
+            if new_name != self.name:
+                self.name = new_name
+        except Exception as e:
+            print("SCENE_HIERARCHY:: --updateGuideHierarchyName:: ERROR:: ", e)

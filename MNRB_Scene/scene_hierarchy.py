@@ -6,83 +6,93 @@ from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX, RIG_HIERARCHY_SUFFIX, 
 
 CLASS_DEBUG = True
 
-class MNRB_Scene_Hierarchy(Serializable):
+class MNRB_Scene_Hierarchy():
     def __init__(self, scene) -> None:
         super().__init__()
 
         self.scene = scene
 
-        self.guide_hierarchy = None
-        self.rig_hierarchy_top_node = None
-        self.rig_hierarchy = []
+        self._hierarchy_name = self.scene.getSceneRigName()
+
+        self.guide_hierarchy_suffix = GUIDE_HIERARCHY_SUFFIX
+        self.rig_hierarchy_suffix = RIG_HIERARCHY_SUFFIX
+        self.components_hiearchy_suffix = RIG_HIERARCHY_COMPONENT_SUFFIX
+        self.skeleton_hiearchy_suffix = RIG_HIERARCHY_SKELETON_SUFFIX
+        self.geometry_hiearchy_suffix = RIG_HIERARCHY_GEOMETRY_SUFFIX
+        self.shapes_hiearchy_suffix = RIG_HIERARCHY_SHAPES_SUFFIX
+
+        self.guide_hierarchy_object = None
+        self.rig_hierarchy_object = None
+
+        self._hierarchy_name_changed_listeners = []
 
         self.scene.properties.connectHasBeenModifiedCallback(self.updateGuideHierarchyName)
 
+    @property
+    def hierarchy_name(self): return self._hierarchy_name
+    @hierarchy_name.setter
+    def hierarchy_name(self, value):
+        self._hierarchy_name = value
+
+        for callback in self._hierarchy_name_changed_listeners: callback()
+
+    def connectCallbackToHierarchyHasChanged(self, callback):
+        self._hierarchy_name_changed_listeners.append(callback)
+
     def createGuideHierarchy(self):
-        self.guide_hierarchy = HierarchyObject(self, name = self.scene.getSceneRigName(), suffix = GUIDE_HIERARCHY_SUFFIX)
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --createGuideHierarchy:: self.guide_hierarchy_object:: ", self.guide_hierarchy_object)
+        self.guide_hierarchy_object = HierarchyObject(self, suffix = self.guide_hierarchy_suffix)
+
+    def isGuideHierarchyObject(self) -> bool:
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isGuideHierarchy:: self.guide_hierarchy_object:: ", self.guide_hierarchy_object)
+        return False if self.guide_hierarchy_object is None else True
+
+    def isGuideHierarchyInViewport(self) -> bool:
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isGuideHierarchyInViewport:: Guide Hierarchy is in Maya viewport:: ", MC.objectExists(self.hierarchy_name + self.guide_hierarchy_suffix))
+        return MC.objectExists(self.hierarchy_name + self.guide_hierarchy_suffix)
+    
+    def ensureGuideHierarchy(self):
+        if self.isGuideHierarchyObject() and self.isGuideHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureGuideHierarchy:: is Object:: ", self.isGuideHierarchyObject(), " is in ViewPort:: ", self.isGuideHierarchyInViewport())
+            return True
+        if self.isGuideHierarchyObject() and not self.isGuideHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureGuideHierarchy:: is Object:: ", self.isGuideHierarchyObject(), " is in ViewPort:: ", self.isGuideHierarchyInViewport())
+            self.guide_hierarchy_object.create()
+            return True
+        if not self.isGuideHierarchyObject() and self.isGuideHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureGuideHierarchy:: is Object:: ", self.isGuideHierarchyObject(), " is in ViewPort:: ", self.isGuideHierarchyInViewport())
+            self.createGuideHierarchy()
+            return True
+        if not self.isGuideHierarchyObject() and not self.isGuideHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureGuideHierarchy:: is Object:: ", self.isGuideHierarchyObject(), " is in ViewPort:: ", self.isGuideHierarchyInViewport())
+            self.createGuideHierarchy()
+            self.guide_hierarchy_object.create()
+            return True
+        return False
+
+    def getGuideHierarchyName(self):
+        return self.guide_hierarchy_object.name
 
     def createRigHierarchy(self):
-        scene_rig_name = self.scene.getSceneRigName()
-        self.rig_hierarchy_top_node = HierarchyObject(self, scene_rig_name + RIG_HIERARCHY_SUFFIX)
-        self.rig_hierarchy.append(HierarchyObject(self.rig_hierarchy_top_node, scene_rig_name, suffix = RIG_HIERARCHY_COMPONENT_SUFFIX))
-        self.rig_hierarchy.append(HierarchyObject(self.rig_hierarchy_top_node, scene_rig_name, suffix = RIG_HIERARCHY_SKELETON_SUFFIX))
-        self.rig_hierarchy.append(HierarchyObject(self.rig_hierarchy_top_node, scene_rig_name, suffix = RIG_HIERARCHY_GEOMETRY_SUFFIX))
-        self.rig_hierarchy.append(HierarchyObject(self.rig_hierarchy_top_node, scene_rig_name, suffix = RIG_HIERARCHY_SHAPES_SUFFIX))
+        self.rig_hierarchy_object = HierarchyObject(self, name = self.hierarchy_name, suffix = self.rig_hierarchy_suffix)
 
-    def isGuideHierarchy(self) -> bool:
-        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isGuideHierarchy:: self.guide_hierarchy:: ", self.guide_hierarchy)
-        return False if self.guide_hierarchy is None else MC.objectExists(self.guide_hierarchy.name)
-    
     def isRigHierarchy(self) -> bool:
-        if self.rig_hierarchy_top_node.name is None:
+        if self.rig_hierarchy is None:
             return False
-        if not MC.objectExists(self.rig_hierarchy_top_node.name):
+        if not MC.objectExists(self.rig_hierarchy):
             return False
-        else:
-            for hierarchy_object in self.rig_hierarchy:
-                hierarchy_object.is_HierarchyObject()
-            return True
+        return True
     
-    def getGuideHierarchyName(self):
-        return self.guide_hierarchy.name
-    
+    def ensureComponentHierarchy(self):
+        if self.components_hiearchy is not None:
+                if not MC.objectExists(self.components_hiearchy):
+                    self.components_hiearchy = MC.createTransform(self.scene.getSceneRigName() + RIG_HIERARCHY_COMPONENT_SUFFIX)
+                    return True
+                return False
+        return True
+
     def getRigHierarchyName(self):
-        return self.rig_hierarchy_top_node.name
+        return self.rig_hierarchy.name
     
     def updateGuideHierarchyName(self):
-        if self.guide_hierarchy is not None:
-            try:
-                current_guide_hierarchy = self.guide_hierarchy
-                new_name = MC.renameObject(current_guide_hierarchy, self.scene.getSceneRigName() + GUIDE_HIERARCHY_SUFFIX)
-                if new_name != self.guide_hierarchy:
-                    self.guide_hierarchy = new_name
-            except Exception as e:
-                if CLASS_DEBUG: print("SCENE_HIERARCHY:: --updateGuideHierarchyName:: ERROR:: ", e)
-
-    def serialize(self):
-        rig_hierarchy = []
-        for hierarchy_object in self.rig_hierarchy: rig_hierarchy.append(hierarchy_object.serialize())
-        serialized_data = OrderedDict([
-            ('id', self.id), 
-            ('guide_hierarchy', self.guide_hierarchy),
-            ('rig_hierarchy_top_node', self.rig_hierarchy_top_node),
-            ('rig_hierarchy', rig_hierarchy)
-            ])
-        return serialized_data
-    
-    def deserialize(self, data, hashmap = {}, restore_id = True):
-        if restore_id: self.id = data['id']
-        
-        if data['guide_hierarchy'] is not None:
-            self.guide_hierarchy = HierarchyObject(self)
-            self.guide_hierarchy.deserialize(data['guide_hierarchy'], hashmap, restore_id)
-
-        if data['rig_hierarchy_top_node']:
-            self.rig_hierarchy_top_node = HierarchyObject(self)
-            self.rig_hierarchy_top_node.deserialize(data['rig_hierarchy_top_node'], hashmap, restore_id)
-
-        for hierarchy_data in data['rig_hierarchy']:
-            new_hierarchy_object = HierarchyObject(self.rig_hierarchy_top_node)
-            new_hierarchy_object.deserialize(hierarchy_data, hashmap, restore_id)
-
-        return True
+        self.hierarchy_name = self.scene.getSceneRigName()

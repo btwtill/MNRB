@@ -33,10 +33,10 @@ class MNRB_Node_BaseComponent(MNRB_Node):
     def guideBuild(self):
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
 
-        super().guideBuild()
+        if not super().guideBuild():
+            return False
 
         base_component_guide = guide(self, name = "global")
-
         MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
         
     def staticBuild(self):
