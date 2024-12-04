@@ -194,6 +194,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.action_load_template = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
         self.actionSaveTemplateAs = QtWidgets.QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='save template as', triggered=self.onSaveNodeEditorTemplateAs)
         self.action_clear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shift+C', statusTip='save template as', triggered=self.onClearNodeEditor)
+        self.action_align_on_x = QtWidgets.QAction('Align&X', self, shortcut = 'Alt+X', statusTip = 'align nodes vertivally', triggered=self.onNodeEditorAlignX)
+        self.action_align_on_y = QtWidgets.QAction('Align&Y', self, shortcut = 'Alt+Y', statusTip = 'align nodes horizontally', triggered=self.onNodeEditorAlignY)
 
         self.action_undo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
         self.action_redo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
@@ -262,6 +264,11 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.action_nodes_properties_dock_visibility = self.node_editor_menu.addAction("Node Properties")
         self.action_nodes_properties_dock_visibility.setCheckable(True)
         self.action_nodes_properties_dock_visibility.triggered.connect(self.onPropertiesDockWidget)
+
+        self.node_editor_menu.addSeparator()
+
+        self.node_editor_menu.addAction(self.action_align_on_x)
+        self.node_editor_menu.addAction(self.action_align_on_y)
 
         self.node_editor_menu.aboutToShow.connect(self.updateNodeEditorMenu)
     
@@ -438,6 +445,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def onEditPaste(self):
         self.getNodeEditorTab().onEditPaste()
 
+    def onNodeEditorAlignX(self):
+        self.getNodeEditorTab().onAlignNodesX()
+
+    def onNodeEditorAlignY(self):
+        self.getNodeEditorTab().onAlignNodesY()
+
     def onSceneMousePositionChange(self, x, y):
         self.statusMousePosition.setText("Scene Mouse Position: [%d %d]" % (x, y))
 
@@ -513,8 +526,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def updateNodeEditorMenu(self):
         if self.display_overlay or self.tabs.currentIndex() != 0:
             self.setNodeEditorMenuActions(False)
+            self.action_align_on_x.setEnabled(False)
+            self.action_align_on_y.setEnabled(False)
         else:
             self.setNodeEditorMenuActions(True)
+            self.action_align_on_x.setEnabled(self.getNodeEditorTab().hasSelectedItems())
+            self.action_align_on_y.setEnabled(self.getNodeEditorTab().hasSelectedItems())
 
         self.action_nodes_list_dock_visibility.setChecked(self.getNodeEditorTab().left_dock.isVisible())
         self.action_nodes_properties_dock_visibility.setChecked(self.getNodeEditorTab().right_dock.isVisible())

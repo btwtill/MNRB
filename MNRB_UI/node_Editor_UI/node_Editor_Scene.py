@@ -1,6 +1,7 @@
 import json
 import os
 from collections import OrderedDict
+from PySide2.QtCore import QRectF #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
@@ -95,6 +96,38 @@ class NodeEditorScene(Serializable):
 
     def connectSceneChangedCallback(self, callback):
         self._scene_changed_listeners.append(callback)
+
+    def alignSelectedNodesOnX(self):
+        selected_nodes = self.getSelectedNodes()
+
+        combined_bounding_rectangle = QRectF()
+        total_height = 0
+
+        for gr_node in selected_nodes:
+            combined_bounding_rectangle = combined_bounding_rectangle.united(gr_node.mapToScene(gr_node.boundingRect()).boundingRect())
+            total_height += gr_node.height + 20
+
+        x = combined_bounding_rectangle.left()
+        y = combined_bounding_rectangle.top()
+
+        for index, gr_node in enumerate(selected_nodes):
+            gr_node.node.setPosition(x, y + (total_height / len(selected_nodes)) * index)
+
+    def alignSelectedNodesOnY(self):
+        selected_nodes = self.getSelectedNodes()
+
+        combined_bounding_rectangle = QRectF()
+        total_width = 0
+
+        for gr_node in selected_nodes:
+            combined_bounding_rectangle = combined_bounding_rectangle.united(gr_node.mapToScene(gr_node.boundingRect()).boundingRect())
+            total_width += gr_node.width + 20
+
+        y = combined_bounding_rectangle.top()
+        x = combined_bounding_rectangle.left()
+
+        for index, gr_node in enumerate(selected_nodes):
+            gr_node.node.setPosition(x + (total_width / len(selected_nodes)) * index, y)
 
     def removeNode(self, node):
         if CLASS_DEBUG: 

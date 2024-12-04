@@ -134,6 +134,9 @@ class NodeEditorNode(Serializable):
             for edge in socket.edges:
                 edge.updatePositions()
 
+    def getPosition(self):
+        return self.grNode.pos()
+
     def setPosition(self, x, y):
         self.grNode.setPos(x, y)
 

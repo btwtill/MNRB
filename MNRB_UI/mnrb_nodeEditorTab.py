@@ -70,6 +70,9 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def centerNodeEditorView(self):
         self.central_widget.centerView()
 
+    def hasSelectedItems(self):
+        return self.central_widget.sceneHasSelectedItems()
+
     def canCut(self):
         return self.central_widget.sceneHasSelectedItems()
 
@@ -147,6 +150,12 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
         self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)
     
+    def onAlignNodesX(self):
+        self.central_widget.scene.alignSelectedNodesOnX()
+
+    def onAlignNodesY(self):
+        self.central_widget.scene.alignSelectedNodesOnY()
+
     def onDrop(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
         if event.mimeData().hasFormat(NODELIST_MIMETYPE):
