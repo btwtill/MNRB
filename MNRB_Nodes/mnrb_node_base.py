@@ -352,7 +352,9 @@ class MNRB_Node(NodeEditorNode):
         if MC.objectExists(current_component_guide_hierarchy_name):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Guide Hierarchy Already Exists: " % self.__class__.__name__)
             self.reconstruct_guides = True
+            self.guide_positions = []
             for guide in self.guides:
+                if CLASS_DEBUG: print("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
                 self.guide_positions.append(guide.getPosition())
             MC.deleteObjectWithHierarchy(current_component_guide_hierarchy_name)
         else: 
@@ -444,6 +446,9 @@ class MNRB_Node(NodeEditorNode):
     def reconstructGuides(self):
         if self.reconstruct_guides:
             if CLASS_DEBUG: print("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
+
+            for index, guide in enumerate(self.guides):
+                guide.setPosition(self.guide_positions[index])
 
     def setComponentGuideSize(self, size):
         for guide in self.guides:

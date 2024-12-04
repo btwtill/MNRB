@@ -179,3 +179,7 @@ class MC:
     @staticmethod
     def getObjectWorldPositionMatrix(object_name) -> list:
         return cmds.xform(object_name, query =True, matrix = True, worldSpace=True)
+    
+    @staticmethod
+    def setObjectWorldPositionMatrix(object_name, matrix):
+        cmds.xform(object_name, matrix=matrix, worldSpace=True)

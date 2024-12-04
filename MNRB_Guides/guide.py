@@ -71,6 +71,9 @@ class guide(Serializable):
     def setColor(self):
         self.guide_shape.updateColor()
 
+    def setPosition(self, matrix):
+        MC.setObjectWorldPositionMatrix(self.name, matrix)
+
     def determinGuideShape(self):
         print("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)
         if self.guide_type.value == guideShapeType.locator.value:
