@@ -28,6 +28,9 @@ class MNRB_Scene_Hierarchy():
 
         self.scene.properties.connectHasBeenModifiedCallback(self.updateGuideHierarchyName)
 
+        self.createGuideHierarchy()
+        self.createRigHierarchy()
+
     @property
     def hierarchy_name(self): return self._hierarchy_name
     @hierarchy_name.setter
