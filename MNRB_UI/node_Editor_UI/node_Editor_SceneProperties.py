@@ -173,6 +173,10 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         result = super().deserialize(data, hashmap, restore_id)
 
         self.rig_name_line_edit.setText(data['rig_name'])
-
+        self.setHasBeenModified()
         self.is_silent = False
+
+        self.updateRigName()
+        self.validateProperties()
+        
         return True

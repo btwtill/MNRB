@@ -4,7 +4,7 @@ from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QDoubleValidator #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
-from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX #type: ignore
+from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX, COMPONENT_ID_ATTRIBUTE_NAME #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
@@ -299,6 +299,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.is_silent = False
 
+        self.updateComponentName()
         self.validateProperties()
         return True
 
@@ -343,8 +344,12 @@ class MNRB_Node(NodeEditorNode):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
 
+        #what happens if there already is the component guide hierarchy build
+
         current_component_guide_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
         current_component_guide_hierarchy = MC.createTransform(current_component_guide_hierarchy_name)
+        self.addComponentIdLink(current_component_guide_hierarchy)
+
         if CLASS_DEBUG: print("%s:: --guideBuild:: Object to be parented: " % self.__class__.__name__, "Child:: ",current_component_guide_hierarchy, " Parent:: ", current_guide_hierarchy)
         MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
         self.guide_component_hierarchy = current_component_guide_hierarchy
@@ -368,6 +373,19 @@ class MNRB_Node(NodeEditorNode):
     def connectComponent(self):
         raise NotImplementedError
 
+    def addComponentIdLink(self, object):
+        MC.addStringAttribute(object, COMPONENT_ID_ATTRIBUTE_NAME, str(self.id), True)
+
+    def validateComponentIdLink(self, object):
+        component_id_attribute = MC.getAttribute(object, COMPONENT_ID_ATTRIBUTE_NAME)
+        if component_id_attribute is not None:
+            if int(component_id_attribute) == self.id:
+                return True
+            else:
+                return False
+        else:
+            return False
+
     def updateGuideComponentHierarchyName(self):
         if self.is_silent:
             return
@@ -383,14 +401,16 @@ class MNRB_Node(NodeEditorNode):
                     new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
 
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
-                new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
-                if new_name != self.guide_component_hierarchy:
-                    if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: old component Hirarchy is not the same as the new:: Setting new Component Hierarchy Name " % self.__class__.__name__)
-                    self.guide_component_hierarchy = new_name
-                
-                for guide in self.guides:
-                    guide.updateName(self.properties.component_name)
+                has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
+                if has_valid_component_id:
+                    new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
+                    if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
+                    if new_name != self.guide_component_hierarchy:
+                        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: old component Hirarchy is not the same as the new:: Setting new Component Hierarchy Name " % self.__class__.__name__)
+                        self.guide_component_hierarchy = new_name
+                    
+                    for guide in self.guides:
+                        guide.updateName(self.properties.component_name)
             else:
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
 

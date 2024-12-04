@@ -10,14 +10,18 @@ class MC:
     @staticmethod
     def deleteObjectWithHierarchy(object):
         cmds.delete(object, hierarchy = "below")
+        MC.clearSelection()
 
     @staticmethod
     def deleteNode(node):
         cmds.delete(node)
+        MC.clearSelection()
 
     @staticmethod
     def renameObject(object, name) -> str:
-        return cmds.rename(object, name)
+        new_name = cmds.rename(object, name)
+        MC.clearSelection()
+        return new_name
 
     @staticmethod
     def findDuplicatesInNodeHiearchyByName(node, target_name) -> list:
@@ -29,19 +33,23 @@ class MC:
         
         target_count = name_counts.get(target_name, 0)
 
-        if target_count > 0:
+        if target_count > 1:
             result.append(target_name)
             result.append(target_count)
 
+        MC.clearSelection()
         return result
 
     @staticmethod
     def parentObject(child, parent):
         cmds.parent(child, parent)
+        MC.clearSelection()
 
     @staticmethod
     def createTransform(name) -> str:
-        return cmds.createNode("transform", name = name, skipSelect=True)
+        new_transform = cmds.createNode("transform", name = name, skipSelect=True)
+        MC.clearSelection()
+        return new_transform
 
     @staticmethod
     def getFirstInViewPortSelection():
@@ -158,3 +166,12 @@ class MC:
     @staticmethod
     def assignObjectToShaderSet(object, shader):
         return cmds.sets(object, edit=True, forceElement=shader)
+    
+    @staticmethod
+    def addStringAttribute(node_name, target_attribute, value, is_hidden) -> None:
+        cmds.addAttr(node_name, dataType="string", longName = target_attribute, hidden = is_hidden)
+        cmds.setAttr(f"{node_name}.{target_attribute}", value, type="string")
+
+    @staticmethod
+    def getAttribute(node_name, attribute_name) -> any:
+        return cmds.getAttr(f"{node_name}.{attribute_name}")
