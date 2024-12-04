@@ -51,7 +51,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
             self.component_color_dropdown.addItem(color.name)
         self.component_color_dropdown.currentIndexChanged.connect(self.updateComponentColor)
         self.component_color_dropdown.currentIndexChanged.connect(self.setHasBeenModified)
-        component_header_layout.addWidget(self.component_color_dropdown)
+        component_header_layout.addWidget(self.component_color_dropdown, alignment=Qt.AlignBottom)
+
 
         self.layout.addLayout(component_header_layout)
 
