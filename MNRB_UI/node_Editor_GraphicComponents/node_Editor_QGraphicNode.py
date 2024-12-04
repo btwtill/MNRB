@@ -61,7 +61,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.title_height = 20
 
         #initialize the variables for the Graphical Elements
-        self._title_font = QFont("Helvetica", 8)
+        self._title_font = QFont("Verdana", 8)
         self._title_padding = 10
 
         self._default_color = QColor("#7F000000")
