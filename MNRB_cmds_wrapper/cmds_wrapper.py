@@ -33,7 +33,7 @@ class MC:
         
         target_count = name_counts.get(target_name, 0)
 
-        if target_count > 1:
+        if target_count > 0:
             result.append(target_name)
             result.append(target_count)
 

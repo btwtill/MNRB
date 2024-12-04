@@ -80,13 +80,20 @@ class guide(Serializable):
         self.guide_shape = self.determinGuideShape()(self)
         return self.guide_shape
 
-    def updateName(self, name):
+    def updateName(self, name, has_duplicate_name):
         if MC.objectExists(self.name):
+            if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
             new_name =  name + "_" + self.guide_name + GUIDE_SUFFIX
-            duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.scene_rig_hierarchy.getGuideHierarchyName(), new_name)
-            if CLASS_DEBUG: print("%s:: --updateName:: Duplicate:: " % self.__class__.__name__, duplicate_name)
-            if duplicate_name != []:
-                new_name = new_name + str(duplicate_name[1])
+            if CLASS_DEBUG: print("%s:: --updateName:: new Guide Name:: " % self.__class__.__name__, new_name)
+
+            if new_name == self.name:
+                return
+
+            if has_duplicate_name:
+                duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.scene_rig_hierarchy.getGuideHierarchyName(), new_name)
+                if CLASS_DEBUG: print("%s:: --updateName:: Duplicate:: " % self.__class__.__name__, duplicate_name)
+                if duplicate_name != []:
+                    new_name = new_name + str(duplicate_name[1])
             if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
 

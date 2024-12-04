@@ -392,25 +392,38 @@ class MNRB_Node(NodeEditorNode):
         
         if self.guide_component_hierarchy is not None:
             if MC.objectExists(self.guide_component_hierarchy):
+
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
+                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Old Component Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
+
+                has_duplicate_name = False
+
                 new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+
+                is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
+                if is_same_name:
+                    return
+                
                 duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.scene_rig_hierarchy.getGuideHierarchyName(), new_guide_component_hierarchy_name)
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
-               
+
+                has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
+
                 if duplicate_name != []:
+                    has_duplicate_name = True
+                    if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
                     new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
 
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
-                has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
+                
                 if has_valid_component_id:
                     new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
                     if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
-                    if new_name != self.guide_component_hierarchy:
-                        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: old component Hirarchy is not the same as the new:: Setting new Component Hierarchy Name " % self.__class__.__name__)
-                        self.guide_component_hierarchy = new_name
+                    self.guide_component_hierarchy = new_name
                     
+                    if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
                     for guide in self.guides:
-                        guide.updateName(self.properties.component_name)
+                        guide.updateName(self.properties.component_name, has_duplicate_name)
             else:
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
 

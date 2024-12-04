@@ -35,7 +35,7 @@ class HierarchyObject():
             if self.parent is None:
                 duplicates = []
             else:
-                duplicates = MC.findDuplicatesInNodeHiearchyByName(self.parent.name, new_object_name)
+                duplicates = MC.findDuplicatesInNodeHiearchyByName(self.parent.name, new_object_name, include_self = False)
             if duplicates != []:
                 new_object_name = new_object_name + str(duplicates[1])
             
