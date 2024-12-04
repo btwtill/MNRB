@@ -35,7 +35,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.rig_name_line_edit = QtWidgets.QLineEdit()
         self.rig_name_line_edit.setPlaceholderText("No Name Defined:")
         self.rig_name_line_edit.setAlignment(Qt.AlignCenter)
-        self.rig_name_line_edit.textChanged.connect(self.setHasBeenModified)
+        self.rig_name_line_edit.editingFinished.connect(self.setHasBeenModified)
         self.layout.addWidget(self.rig_name_line_edit)
 
         self.connectHasBeenModifiedCallback(self.updateRigName)
