@@ -21,7 +21,7 @@ class HierarchyObject():
     def draw(self):
         self.name = MC.createTransform(self.name)
         if self.parent is not None:
-            MC.parentObject(self.name, self.parent)
+            MC.parentObject(self.name, self.parent.name)
 
     def remove(self):
         MC.deleteObjectWithHierarchy(self.name)
@@ -32,15 +32,18 @@ class HierarchyObject():
     def updateName(self):
         try:
             new_object_name = self.hierarchy.hierarchy_name + self.suffix
+
+            if self.name == new_object_name:
+                return
+            
             if self.parent is None:
                 duplicates = []
             else:
-                duplicates = MC.findDuplicatesInNodeHiearchyByName(self.parent.name, new_object_name, include_self = False)
+                duplicates = MC.findDuplicatesInNodeHiearchyByName(self.parent.name, new_object_name)
             if duplicates != []:
                 new_object_name = new_object_name + str(duplicates[1])
             
             new_name = MC.renameObject(self.name, new_object_name)
-            if new_name != self.name:
-                self.name = new_name
+            self.name = new_name
         except Exception as e:
             print("SCENE_HIERARCHY:: --updateGuideHierarchyName:: ERROR:: ", e)

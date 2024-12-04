@@ -401,6 +401,8 @@ class MNRB_Node(NodeEditorNode):
     def staticBuild(self):
         if self.scene.scene_rig_hierarchy.ensureRigHierarchy():
             current_rig_hierarchy = self.scene.scene_rig_hierarchy.rig_hierarchy_object.name
+            if self.scene.scene_rig_hierarchy.ensureSkeletonHierarchy():
+                current_skeleton_hierarchy = self.scene.scene_rig_hierarchy.skeleton_hierarchy_object.name
         else:
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False

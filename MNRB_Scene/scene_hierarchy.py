@@ -23,7 +23,8 @@ class MNRB_Scene_Hierarchy():
 
         self.guide_hierarchy_object = None
         self.rig_hierarchy_object = None
-
+        self.skeleton_hierarchy_object = None
+        
         self._hierarchy_name_changed_listeners = []
 
         self.scene.properties.connectHasBeenModifiedCallback(self.updateGuideHierarchyName)
@@ -38,6 +39,9 @@ class MNRB_Scene_Hierarchy():
 
     def connectCallbackToHierarchyHasChanged(self, callback):
         self._hierarchy_name_changed_listeners.append(callback)
+
+    def updateGuideHierarchyName(self):
+        self.hierarchy_name = self.scene.getSceneRigName()
 
     #guide Hierarchy
     def createGuideHierarchy(self):
@@ -96,7 +100,7 @@ class MNRB_Scene_Hierarchy():
             return True
         if not self.isRigHierarchyObject() and self.isRigHierarchyInViewport():
             if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureRigHierarchy:: is Object:: ", self.isRigHierarchyObject(), " is in ViewPort:: ", self.isRigHierarchyInViewport())
-            self.createGuideHierarchy()
+            self.createRigHierarchy()
             return True
         if not self.isRigHierarchyObject() and not self.isRigHierarchyInViewport():
             if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureRigHierarchy:: is Object:: ", self.isRigHierarchyObject(), " is in ViewPort:: ", self.isRigHierarchyInViewport())
@@ -108,5 +112,36 @@ class MNRB_Scene_Hierarchy():
     def getRigHierarchyName(self):
         return self.rig_hierarchy_object.name
     
-    def updateGuideHierarchyName(self):
-        self.hierarchy_name = self.scene.getSceneRigName()
+    #skeleton hierarchy
+    def createSkeletonHierachy(self):
+        self.skeleton_hierarchy_object = HierarchyObject(self, parent = self.rig_hierarchy_object, suffix = self.skeleton_hiearchy_suffix)
+
+    def isSkeletonHierarchyObject(self) -> bool:
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isSkeletonHierarchyObject:: self.skeleton_hierarchy_object:: ", self.skeleton_hierarchy_object)
+        return False if self.skeleton_hierarchy_object is None else True
+    
+    def isSkeletonHierarchyInViewport(self) -> bool:
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isSkeletonHierarchyInViewport:: Skeleton Hierarchy is in Maya viewport:: ", MC.objectExists(self.hierarchy_name + self.skeleton_hiearchy_suffix))
+        return MC.objectExists(self.hierarchy_name + self.skeleton_hiearchy_suffix)
+    
+    def ensureSkeletonHierarchy(self):
+        if self.isSkeletonHierarchyObject() and self.isSkeletonHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureSkeletonHierarchy:: is Object:: ", self.isSkeletonHierarchyObject(), " is in ViewPort:: ", self.isSkeletonHierarchyInViewport())
+            return True
+        if self.isSkeletonHierarchyObject() and not self.isSkeletonHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureSkeletonHierarchy:: is Object:: ", self.isSkeletonHierarchyObject(), " is in ViewPort:: ", self.isSkeletonHierarchyInViewport())
+            self.skeleton_hierarchy_object.draw()
+            return True
+        if not self.isSkeletonHierarchyObject() and self.isSkeletonHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureSkeletonHierarchy:: is Object:: ", self.isSkeletonHierarchyObject(), " is in ViewPort:: ", self.isSkeletonHierarchyInViewport())
+            self.createSkeletonHierachy()
+            return True
+        if not self.isSkeletonHierarchyObject() and not self.isSkeletonHierarchyInViewport():
+            if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --ensureSkeletonHierarchy:: is Object:: ", self.isSkeletonHierarchyObject(), " is in ViewPort:: ", self.isSkeletonHierarchyInViewport())
+            self.createSkeletonHierachy()
+            self.skeleton_hierarchy_object.draw()
+            return True
+        return False
+
+    def getSkeletonHierarchyName(self):
+        return self.skeleton_hierarchy_object.name
