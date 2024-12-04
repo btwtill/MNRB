@@ -4,7 +4,7 @@ from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QDoubleValidator #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
-from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX, COMPONENT_ID_ATTRIBUTE_NAME #type: ignore
+from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX, COMPONENT_ID_ATTRIBUTE_NAME, IDENITY_MATRIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
@@ -355,7 +355,10 @@ class MNRB_Node(NodeEditorNode):
             self.guide_positions = []
             for guide in self.guides:
                 if CLASS_DEBUG: print("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
-                self.guide_positions.append(guide.getPosition())
+                if guide.exists():
+                    self.guide_positions.append(guide.getPosition())
+                else:
+                    self.guide_positions.append(IDENITY_MATRIX)
             MC.deleteObjectWithHierarchy(current_component_guide_hierarchy_name)
         else: 
             self.reconstruct_guides = False

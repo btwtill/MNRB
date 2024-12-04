@@ -20,7 +20,7 @@ class guide(Serializable):
 
         self.node = node
 
-        self._guide_type = guideShapeType.locator
+        self._guide_type = guideShapeType.sphere
         self.side = side
 
         self.guide_name = name
@@ -64,6 +64,9 @@ class guide(Serializable):
 
     def resize(self, size):
         self.guide_shape.resize(size)
+
+    def exists(self) -> bool:
+        return MC.objectExists(self.name)
 
     def getPosition(self):
         return MC.getObjectWorldPositionMatrix(self.name)
