@@ -24,7 +24,11 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     @title.setter
     def title(self, value):
-        self._title = value
+        print(len(value))
+        if len(value) > 11:
+            self._title = value[:9] + ".."
+        else:
+            self._title = value
         self.title_item.setPlainText(self.title)
 
     @property
