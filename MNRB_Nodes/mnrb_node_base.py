@@ -25,6 +25,11 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.guide_size = 1.0
         self.deform_size = 1.0
 
+        self.is_guide_slider_edit_silent = False
+        self.is_guide_slider_silent = False
+        self.is_deform_slider_edit_silent = False
+        self.is_deform_slider_silent = False
+
         self.updateActionButtons()
 
     def initUI(self):
@@ -69,7 +74,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.guide_slider_size_edit = QLineEdit()
         self.guide_slider_size_edit.setText(str(1.0))
-        self.guide_slider_size_edit.textChanged.connect(self.onGuideSizeEditChange)
+        self.guide_slider_size_edit.editingFinished.connect(self.onGuideSizeEditChange)
 
         guide_slider_label_layout.addWidget(guide_size_slider_label)
         guide_slider_label_layout.addWidget(self.guide_slider_size_edit)
@@ -82,7 +87,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.guide_size_slider.setValue(100)
         self.guide_size_slider.setTickPosition(QSlider.TicksBelow)
         self.guide_size_slider.setTickInterval(20)
-        self.guide_size_slider.valueChanged.connect(self.onGuideSliderChange)
+        self.guide_size_slider.sliderReleased.connect(self.onGuideSliderChange)
 
         self.layout.addWidget(self.guide_size_slider)
 
@@ -94,7 +99,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.deform_slider_size_edit = QLineEdit()
         self.deform_slider_size_edit.setText(str(1.0))
-        self.deform_slider_size_edit.textChanged.connect(self.onDeformSizeEditChange)
+        self.deform_slider_size_edit.editingFinished.connect(self.onDeformSizeEditChange)
 
         deform_slider_label_layout.addWidget(deform_size_slider_label)
         deform_slider_label_layout.addWidget(self.deform_slider_size_edit)
@@ -107,7 +112,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.deform_size_slider.setValue(100)
         self.deform_size_slider.setTickPosition(QSlider.TicksBelow)
         self.deform_size_slider.setTickInterval(20)
-        self.deform_size_slider.valueChanged.connect(self.onDeformSliderChange)
+        self.deform_size_slider.sliderReleased.connect(self.onDeformSliderChange)
 
         self.layout.addWidget(self.deform_size_slider)
 
@@ -179,12 +184,14 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
             return False
 
     def onGuideSizeEditChange(self):
-        self.updateGuideSlider()
-        self.updateGuideSize()
+        if not self.is_guide_slider_edit_silent:
+            self.updateGuideSlider()
+            self.updateGuideSize()
 
     def onGuideSliderChange(self):
-        self.updateGuideSliderSizeEdit()
-        self.updateGuideSize()
+        if not self.is_guide_slider_silent:
+            self.updateGuideSliderSizeEdit()
+            self.updateGuideSize()
 
     def updateGuideSize(self):
         #update the guide size valule
@@ -197,12 +204,14 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.setHasBeenModified()
 
     def onDeformSizeEditChange(self):
-        self.updateDeformSlider()
-        self.updateDeformSize()
+        if not self.is_deform_slider_edit_silent:
+            self.updateDeformSlider()
+            self.updateDeformSize()
 
     def onDeformSliderChange(self):
-        self.updateDeformSliderEdit()
-        self.updateDeformSize()
+        if not self.is_deform_slider_silent:
+            self.updateDeformSliderEdit()
+            self.updateDeformSize()
 
     def updateDeformSize(self):
         self.deform_size = float(self.deform_slider_size_edit.text())
@@ -215,16 +224,24 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.is_disabled = self.disabled_checkbox.isChecked()
 
     def updateGuideSlider(self):
+        self.is_guide_slider_silent = True
         self.guide_size_slider.setValue(self.formatSliderEditToSliderValue(self.guide_slider_size_edit.text()))
+        self.is_guide_slider_silent = False
 
-    def updateGuideSliderSizeEdit(self):
+    def updateGuideSliderSizeEdit(self):#
+        self.is_guide_slider_edit_silent = True
         self.guide_slider_size_edit.setText(str(self.formatSliderValueToEditValue(self.guide_size_slider.value())))
+        self.is_guide_slider_edit_silent = False
 
     def updateDeformSlider(self):
+        self.is_deform_slider_silent = True
         self.deform_size_slider.setValue(self.formatSliderEditToSliderValue(self.deform_slider_size_edit.text()))
+        self.is_deform_slider_silent = False
 
     def updateDeformSliderEdit(self):
+        self.is_deform_slider_edit_silent = True
         self.deform_slider_size_edit.setText(str(self.formatSliderValueToEditValue(self.deform_size_slider.value())))
+        self.is_deform_slider_edit_silent = False
 
     def updateActionButtons(self):
         self.build_guides_action_button.setEnabled(self.is_valid)
@@ -298,9 +315,11 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.guide_slider_size_edit.setText(str(data['guide_size']))
         self.deform_slider_size_edit.setText(str(data['deform_size']))
 
+        self.onGuideSizeEditChange()
         self.is_silent = False
 
         self.updateComponentName()
+        
         self.validateProperties()
         return True
 
@@ -325,6 +344,11 @@ class MNRB_Node(NodeEditorNode):
         self.controls = []
         self.deforms = []
 
+        self.is_guide_build = False
+        self.is_static_build = False
+        self.is_comonent_build = False
+        self.is_connected = False
+
         self.is_silent =  False
         self.reconstruct_guides = False
 
@@ -346,7 +370,6 @@ class MNRB_Node(NodeEditorNode):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
 
-        #what happens if there already is the component guide hierarchy build
         current_component_guide_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
 
         if MC.objectExists(current_component_guide_hierarchy_name):
@@ -376,14 +399,14 @@ class MNRB_Node(NodeEditorNode):
         return True
 
     def staticBuild(self):
-        self.deforms = []
-
         if self.scene.scene_rig_hierarchy.ensureRigHierarchy():
             current_rig_hierarchy = self.scene.scene_rig_hierarchy.rig_hierarchy_object.name
         else:
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
         
+        self.deforms = []
+
         return True
     
     def componentBuild(self):
