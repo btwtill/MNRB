@@ -320,10 +320,13 @@ class MNRB_Node(NodeEditorNode):
         self._component_color = color
 
         self.guides = []
+        self.guide_positions = []
+
         self.controls = []
         self.deforms = []
 
         self.is_silent =  False
+        self.reconstruct_guides = False
 
     @property
     def component_color(self): return self._component_color
@@ -337,8 +340,6 @@ class MNRB_Node(NodeEditorNode):
         self._component_color = value
 
     def guideBuild(self) -> bool:
-        self.guides = []
-
         if self.scene.scene_rig_hierarchy.ensureGuideHierarchy():
             current_guide_hierarchy = self.scene.scene_rig_hierarchy.guide_hierarchy_object.name
         else:
@@ -346,8 +347,20 @@ class MNRB_Node(NodeEditorNode):
             return False
 
         #what happens if there already is the component guide hierarchy build
-
         current_component_guide_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+
+        if MC.objectExists(current_component_guide_hierarchy_name):
+            if CLASS_DEBUG: print("%s:: --guideBuild:: Guide Hierarchy Already Exists: " % self.__class__.__name__)
+            self.reconstruct_guides = True
+            for guide in self.guides:
+                self.guide_positions.append(guide.getPosition())
+            MC.deleteObjectWithHierarchy(current_component_guide_hierarchy_name)
+        else: 
+            self.reconstruct_guides = False
+            self.guide_positions = []
+
+        self.guides = []
+
         current_component_guide_hierarchy = MC.createTransform(current_component_guide_hierarchy_name)
         self.addComponentIdLink(current_component_guide_hierarchy)
 
@@ -428,6 +441,10 @@ class MNRB_Node(NodeEditorNode):
             else:
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
 
+    def reconstructGuides(self):
+        if self.reconstruct_guides:
+            if CLASS_DEBUG: print("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
+
     def setComponentGuideSize(self, size):
         for guide in self.guides:
             if CLASS_DEBUG: print("%s:: --setComponentGuideSize:: Setting Guide:: " % self.__class__.__name__, guide, " with object name: ", guide.name, " to Size:: ", size)
@@ -440,6 +457,7 @@ class MNRB_Node(NodeEditorNode):
                 MC.setJointRadius(deform, size)
     
     def setGuideColors(self):
+        if CLASS_DEBUG: print("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)
         for guide in self.guides:
             guide.color = self.component_color
 

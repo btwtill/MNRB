@@ -175,3 +175,7 @@ class MC:
     @staticmethod
     def getAttribute(node_name, attribute_name) -> any:
         return cmds.getAttr(f"{node_name}.{attribute_name}")
+    
+    @staticmethod
+    def getObjectWorldPositionMatrix(object_name) -> list:
+        return cmds.xform(object_name, query =True, matrix = True, worldSpace=True)

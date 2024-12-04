@@ -38,6 +38,8 @@ class MNRB_Node_BaseComponent(MNRB_Node):
 
         base_component_guide = guide(self, name = "global")
         MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
+
+        self.reconstructGuides()
         
     def staticBuild(self):
         print("%s:: Building Static:: " % self)

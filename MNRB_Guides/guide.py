@@ -65,6 +65,9 @@ class guide(Serializable):
     def resize(self, size):
         self.guide_shape.resize(size)
 
+    def getPosition(self):
+        return MC.getObjectWorldPositionMatrix(self.name)
+
     def setColor(self):
         self.guide_shape.updateColor()
 
