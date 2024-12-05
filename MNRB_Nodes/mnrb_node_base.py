@@ -469,6 +469,7 @@ class MNRB_Node(NodeEditorNode):
         MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
         self.guide_component_hierarchy = current_component_guide_hierarchy
 
+        
         return True
 
     def staticBuild(self):
@@ -476,10 +477,14 @@ class MNRB_Node(NodeEditorNode):
             current_rig_hierarchy = self.scene.virtual_rig_hierarchy.rig_hierarchy_object.name
             if self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.ensureExistence():
                 current_skeleton_hierarchy = self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name
+                for deform in self.deforms:
+                    if MC.objectExists(deform):
+                        MC.deleteObject(deform)
         else:
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
         
+
         self.deforms = []
 
         return True
