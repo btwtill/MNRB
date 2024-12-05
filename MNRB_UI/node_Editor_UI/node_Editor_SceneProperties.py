@@ -107,7 +107,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         encounters = set()
         for node in self.scene.nodes:
             component_name = node.properties.component_name
-            if component_name in encounters:
+            if component_name in encounters or component_name == self.rig_name:
                 is_duplicate_component_name = True
                 break
             encounters.add(component_name)
