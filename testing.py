@@ -24,6 +24,9 @@ importlib.reload(MNRB_VirtualHierarchyObject)
 import MNRB.MNRB_Scene.virtual_hierarchy as MNRB_Virtual_Hierarchy
 importlib.reload(MNRB_Virtual_Hierarchy)
 
+import MNRB.MNRB_Nodes.mnrb_node_template as MNRBNodeTemplate
+importlib.reload(MNRBNodeTemplate)
+
 import MNRB.MNRB_Nodes.Nodes.base_component as MNRB_Base_Component_Node
 importlib.reload(MNRB_Base_Component_Node)
 

@@ -1,6 +1,7 @@
 from PySide2.QtWidgets import QHBoxLayout, QLineEdit, QPushButton #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, registerNode #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node, MNRB_NodeProperties #type: ignore
+from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.global_variables import GUIDE_SUFFIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
@@ -20,7 +21,7 @@ class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
         return True
 
 @registerNode(OPERATIONCODE_BASECOMPONENT)
-class MNRB_Node_BaseComponent(MNRB_Node):
+class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
     operation_code = OPERATIONCODE_BASECOMPONENT
     operation_title = "Base"
     icon = ""
