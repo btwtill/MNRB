@@ -3,6 +3,9 @@ import importlib
 import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf
 importlib.reload(NodeEditorConf)
 
+import MNRB.MNRB_naming.MNRB_names as MNRBNaming
+importlib.reload(MNRBNaming)
+
 import MNRB.MNRB_Nodes.Nodes.__init__ as Init
 importlib.reload(Init)
 
@@ -11,6 +14,9 @@ importlib.reload(GlobalVar)
 
 import MNRB.MNRB_colors.colors as MNRBColors
 importlib.reload(MNRBColors)
+
+import MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button as MNRBSideButton
+importlib.reload(MNRBSideButton)
 
 import MNRB.MNRB_Scene.virtual_hierarchy_object as MNRB_VirtualHierarchyObject
 importlib.reload(MNRB_VirtualHierarchyObject)

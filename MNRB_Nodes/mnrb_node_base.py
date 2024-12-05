@@ -9,6 +9,8 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringSidePrefixButton #type: ignore
 
 CLASS_DEBUG = True
 VALIDATE_DEBUG = True
@@ -58,8 +60,28 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_color_dropdown.currentIndexChanged.connect(self.setHasBeenModified)
         component_header_layout.addWidget(self.component_color_dropdown, alignment=Qt.AlignBottom)
 
-
         self.layout.addLayout(component_header_layout)
+
+        #Side Index  
+        side_prefix_layout = QHBoxLayout()
+        self.left_prefix_button = MirroringSidePrefixButton(MNRB_Names.left.side)
+        self.mid_prefix_button = MirroringSidePrefixButton(MNRB_Names.middle.side)
+        self.right_prefix_button = MirroringSidePrefixButton(MNRB_Names.right.side)
+
+        self.left_prefix_button.addButtonForDeselection(self.mid_prefix_button)
+        self.left_prefix_button.addButtonForDeselection(self.right_prefix_button)
+
+        self.right_prefix_button.addButtonForDeselection(self.mid_prefix_button)
+        self.right_prefix_button.addButtonForDeselection(self.left_prefix_button)
+
+        self.mid_prefix_button.addButtonForDeselection(self.right_prefix_button)
+        self.mid_prefix_button.addButtonForDeselection(self.left_prefix_button)
+
+        side_prefix_layout.addWidget(self.left_prefix_button)
+        side_prefix_layout.addWidget(self.mid_prefix_button)
+        side_prefix_layout.addWidget(self.right_prefix_button)
+
+        self.layout.addLayout(side_prefix_layout)
 
         #add disable check
         self.disabled_checkbox = QCheckBox("Disable Component")
@@ -193,16 +215,6 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
             self.updateGuideSliderSizeEdit()
             self.updateGuideSize()
 
-    def updateGuideSize(self):
-        #update the guide size valule
-        self.guide_size = float(self.guide_slider_size_edit.text())
-        #call the nodes guide resize funcion
-        if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size)
-        if CLASS_DEBUG: print("%s:: --updateGuideSize:: of Node::  " % self.__class__.__name__, self.node)
-        self.node.setComponentGuideSize(self.guide_size)
-        #set properties to be modified
-        self.setHasBeenModified()
-
     def onDeformSizeEditChange(self):
         if not self.is_deform_slider_edit_silent:
             self.updateDeformSlider()
@@ -212,6 +224,16 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if not self.is_deform_slider_silent:
             self.updateDeformSliderEdit()
             self.updateDeformSize()
+
+    def updateGuideSize(self):
+        #update the guide size valule
+        self.guide_size = float(self.guide_slider_size_edit.text())
+        #call the nodes guide resize funcion
+        if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size)
+        if CLASS_DEBUG: print("%s:: --updateGuideSize:: of Node::  " % self.__class__.__name__, self.node)
+        self.node.setComponentGuideSize(self.guide_size)
+        #set properties to be modified
+        self.setHasBeenModified()
 
     def updateDeformSize(self):
         self.deform_size = float(self.deform_slider_size_edit.text())
@@ -544,7 +566,7 @@ class MNRB_Node(NodeEditorNode):
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
         result = super().deserialize(data, hashmap, restore_id, exists)
-        
+
         self.setComponentGuideHiearchyName()
 
         self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])

@@ -21,6 +21,7 @@ class guide(Serializable):
         self.node = node
 
         self._guide_type = guideShapeType.sphere
+        
         self.side = side
 
         self.guide_name = name
