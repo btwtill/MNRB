@@ -4,10 +4,17 @@ class MNRB_Side():
         self.side = side_name
         self.prefix = side_prefix
 
+class MNRB_buildSteps():
+    static = "Build Static"
+    component = "Build Component"
+    connected = "Build Connected"
+
 class MNRB_Names():
     left = MNRB_Side("left", "L_")
     right = MNRB_Side("right", "R_")
     middle = MNRB_Side("middle", "M_")
+
+    build_steps = MNRB_buildSteps()
 
     component_id_attribute_name = "MNRB_Component_ID"
 
@@ -26,3 +33,5 @@ class MNRB_Names():
 
     guide_material_suffix = "_lambert_MNRB_guide_material"
     guide_shader_suffix = "_lambert_MNRB_guide_shader_SG"
+
+    

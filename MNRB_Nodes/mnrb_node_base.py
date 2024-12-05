@@ -153,23 +153,25 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def initActions(self):
         self.action_layout = QHBoxLayout()
 
+        button_layout = QVBoxLayout()
+
         self.build_guides_action_button = QPushButton("Build Guides")
         self.build_guides_action_button.clicked.connect(self.onBuildGuides)
 
-        self.build_static_action_button = QPushButton("Build Static")
-        self.build_static_action_button.clicked.connect(self.onBuildStatic)
+        button_layout.addWidget(self.build_guides_action_button)
 
-        self.build_component_action_button = QPushButton("Build")
-        self.build_component_action_button.clicked.connect(self.onBuildComponent)
+        self.build_step_dropdown = QComboBox()
+        self.build_step_dropdown.addItems([MNRB_Names.build_steps.static, MNRB_Names.build_steps.component, MNRB_Names.build_steps.connected])
+        self.build_step_dropdown.setCurrentIndex(1)
+        self.build_step_dropdown.setStyleSheet("background-color: #1C1C1C;")
+        button_layout.addWidget(self.build_step_dropdown)
 
-        self.connect_component_action_button = QPushButton("Connect")
-        self.connect_component_action_button.clicked.connect(self.onConnectComponents)
+        self.build_button = QPushButton("Build")
+        self.build_button.clicked.connect(self.onBuildStep)
 
-        self.action_layout.addWidget(self.build_guides_action_button)
-        self.action_layout.addWidget(self.build_static_action_button)
-        self.action_layout.addWidget(self.build_component_action_button)
-        self.action_layout.addWidget(self.connect_component_action_button)
+        button_layout.addWidget(self.build_button)
 
+        self.action_layout.addLayout(button_layout)
         self.layout.addLayout(self.action_layout)
         self.setLayout(self.layout)
 
@@ -268,9 +270,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
     def updateActionButtons(self):
         self.build_guides_action_button.setEnabled(self.is_valid)
-        self.build_static_action_button.setEnabled(self.is_valid)
-        self.build_component_action_button.setEnabled(self.is_valid)
-        self.connect_component_action_button.setEnabled(self.is_valid)
+        self.build_button.setEnabled(self.is_valid)
 
     def updateComponentName(self):
         self.component_name = self.component_name_edit.text()
@@ -320,6 +320,19 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if not self.is_deform_slider_silent:
             self.updateDeformSliderEdit()
             self.updateDeformSize()
+
+    def onBuildStep(self, step = None):
+        if step is None:
+            build_stage = self.build_step_dropdown.text()
+        else:
+            build_stage = step
+    
+        if build_stage == MNRB_Names.build_step.static:
+            self.onBuildStatic()
+        elif build_stage == MNRB_Names.build_step.component:
+            self.onBuildComponent()
+        elif build_stage == MNRB_Names.build_step.connected:
+            self.onConnectComponents()
 
     def onBuildGuides(self):
         if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildGuides ", self.node)
