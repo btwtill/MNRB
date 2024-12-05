@@ -250,9 +250,9 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.connect_component_action_button.setEnabled(self.is_valid)
 
     def updateComponentName(self):
-        if CLASS_DEBUG: print("%s:: --updateComponentName:: " % self.__class__.__name__, self.component_name_edit.text())
+        if CLASS_DEBUG: print("%s:: --updateComponentName:: Live Fetch from Line Edit:: " % self.__class__.__name__, self.component_name_edit.text())
         self.component_name = self.component_name_edit.text()
-        if CLASS_DEBUG: print("%s:: --updateComponentName:: " % self.__class__.__name__, self.component_name)
+        if CLASS_DEBUG: print("%s:: --updateComponentName:: self.component_name:: " % self.__class__.__name__, self.component_name)
         self.node.title = self.component_name
         self.node.updateGuideComponentHierarchyName()
 
@@ -310,16 +310,25 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
+
+        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing component_name:: " % self.__class__.__name__, data['component_name'])
         self.component_name_edit.setText(data['component_name'])
+        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing component disabled:: "% self.__class__.__name__, data['is_disabled'])
         self.disabled_checkbox.setChecked(data['is_disabled'])
+        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing guide Size:: "% self.__class__.__name__, data['guide_size'])
         self.guide_slider_size_edit.setText(str(data['guide_size']))
+        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing deform Size:: "% self.__class__.__name__, data['deform_size'])
         self.deform_slider_size_edit.setText(str(data['deform_size']))
 
+        if CLASS_DEBUG: print("%s:: --deserialize:: updating guide Size Edit "% self.__class__.__name__)
         self.onGuideSizeEditChange()
         self.is_silent = False
 
+        if CLASS_DEBUG: print("%s:: --deserialize:: updating component Name "% self.__class__.__name__)
         self.updateComponentName()
+        self.node.setComponentGuideHiearchyName()
         
+        if CLASS_DEBUG: print("%s:: --deserialize:: validate Properties "% self.__class__.__name__)
         self.validateProperties()
         return True
 
@@ -334,7 +343,7 @@ class MNRB_Node(NodeEditorNode):
     def __init__(self, scene, inputs=[], outputs=[], color = MNRBColor.yellow):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
-        self.guide_component_hierarchy = None
+        self._guide_component_hierarchy = None
 
         self._component_color = color
 
@@ -351,6 +360,13 @@ class MNRB_Node(NodeEditorNode):
 
         self.is_silent =  False
         self.reconstruct_guides = False
+
+    @property
+    def guide_component_hierarchy(self): return self._guide_component_hierarchy
+    @guide_component_hierarchy.setter
+    def guide_component_hierarchy(self, value):
+        print(value)
+        self._guide_component_hierarchy = value
 
     @property
     def component_color(self): return self._component_color
@@ -431,45 +447,57 @@ class MNRB_Node(NodeEditorNode):
             return False
 
     def updateGuideComponentHierarchyName(self):
+        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Calling Update Guide Component Hierarchy Name: " % self.__class__.__name__)
+        
         if self.is_silent:
             return
         
+        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Current Guide Hierarchy Name: " % self.__class__.__name__, self.guide_component_hierarchy)
+
         if self.guide_component_hierarchy is not None:
-            if MC.objectExists(self.guide_component_hierarchy):
-
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Old Component Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
-
-                has_duplicate_name = False
-
-                new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
-
-                is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
-                if is_same_name:
-                    return
-                
-                duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.scene_rig_hierarchy.getGuideHierarchyName(), new_guide_component_hierarchy_name)
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
-
-                has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
-
-                if duplicate_name != []:
-                    has_duplicate_name = True
-                    if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
-                    new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
-
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
-                
-                if has_valid_component_id:
-                    new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
-                    if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
-                    self.guide_component_hierarchy = new_name
-                    
-                    if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
-                    for guide in self.guides:
-                        guide.updateName(self.properties.component_name, has_duplicate_name)
-            else:
+            if not MC.objectExists(self.guide_component_hierarchy):
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
+                self.setComponentGuideHiearchyName()
+                return
+
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Old Component Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
+
+            has_duplicate_name = False
+
+            new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+
+            is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
+            if is_same_name:
+                return
+            
+            duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_guide_component_hierarchy_name)
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
+
+            has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
+
+            if duplicate_name != []:
+                has_duplicate_name = True
+                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
+                new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
+
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
+            
+            if has_valid_component_id:
+                new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
+                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
+                self.guide_component_hierarchy = new_name
+                
+                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
+                for guide in self.guides:
+                    guide.updateName(self.properties.component_name, has_duplicate_name)
+            else:
+                self.setComponentGuideHiearchyName()
+
+    def setComponentGuideHiearchyName(self):
+        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ", self.properties.component_name + GUIDE_HIERARCHY_SUFFIX )
+        self.guide_component_hierarchy = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: New Guide Hierarchy Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
 
     def reconstructGuides(self):
         if self.reconstruct_guides:
@@ -507,7 +535,6 @@ class MNRB_Node(NodeEditorNode):
     def serialize(self):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code
-        result_data['guide_component_hierarchy'] = self.guide_component_hierarchy
         result_data['component_color'] = self.component_color.name
         guides = []
         for guide in self.guides: guides.append(guide.serialize())
@@ -517,7 +544,9 @@ class MNRB_Node(NodeEditorNode):
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
         result = super().deserialize(data, hashmap, restore_id, exists)
-        self.guide_component_hierarchy = data['guide_component_hierarchy']
+        
+        self.setComponentGuideHiearchyName()
+
         self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])
 
         self.is_silent = True

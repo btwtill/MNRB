@@ -85,6 +85,7 @@ class NodeEditorSceneClipboard():
             if duplicate_title:
                 if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: found duplicate Title:: adding 1 to title:: ", node_data['title'])
                 node_data['properties']['component_name'] = node_data['properties']['component_name'] + "1"
+                if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: new node properties component name:: ", node_data['properties']['component_name'])
 
             new_node.deserialize(node_data, hashmap, restore_id = False)
 
