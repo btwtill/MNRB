@@ -4,8 +4,6 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene # type
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge#type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
-from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_DIRECT, EDGE_TYPE_BEZIER #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
 
 CLASS_DEBUG = True

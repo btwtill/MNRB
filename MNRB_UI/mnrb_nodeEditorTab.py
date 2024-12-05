@@ -6,9 +6,7 @@ from PySide2.QtGui  import QPixmap #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
-from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
 
 DRAGDROP_DEBUG = False

@@ -4,7 +4,6 @@ from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import Qt, QSize #type: ignore
 from PySide2.QtGui import QPixmap, QIcon #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
-from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 EVENT_DEBUG = False
 VALIDATION_DEBUG = True

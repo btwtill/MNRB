@@ -2,14 +2,11 @@ import math
 from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt, QEvent, Signal, QPoint, QRect, QRectF, QPointF # type: ignore
 from PySide2.QtGui import QPainter, QMouseEvent, QPen, QColor # type:ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
-from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node #type: ignore
-from MNRB.MNRB_Nodes.Nodes.base_component import MNRB_Node_BaseComponent #type: ignore
 
 EVENT_DEBUG = False
 CLASS_DEBUG = False

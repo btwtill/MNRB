@@ -4,9 +4,7 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_Guides.locator_guide_shape import LocatorGuideShape #type: ignore
 from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
-from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
-from MNRB.global_variables import GUIDE_SUFFIX, CENTERDECLARATION #type: ignore
-
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 
 CLASS_DEBUG = True
 
@@ -23,7 +21,7 @@ class guide(Serializable):
         self._guide_type = guideShapeType.sphere
 
         self.guide_name = name
-        self.name = self.node.properties.component_side_prefix + self.node.properties.component_name + "_" + self.guide_name + GUIDE_SUFFIX
+        self.name = self.node.properties.component_side_prefix + self.node.properties.component_name + "_" + self.guide_name + MNRB_Names.guide_suffix
         
         self._color = self.node.properties.component_color
 
@@ -91,7 +89,7 @@ class guide(Serializable):
     def updateName(self, name, has_duplicate_name):
         if MC.objectExists(self.name):
             if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
-            new_name =  self.node.properties.component_side_prefix + name + "_" + self.guide_name + GUIDE_SUFFIX
+            new_name =  self.node.properties.component_side_prefix + name + "_" + self.guide_name + MNRB_Names.guide_suffix
             if CLASS_DEBUG: print("%s:: --updateName:: new Guide Name:: " % self.__class__.__name__, new_name)
 
             if new_name == self.name:

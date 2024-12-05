@@ -4,7 +4,7 @@ from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QDoubleValidator #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
-from MNRB.global_variables import COMPONENT_ID_ATTRIBUTE_NAME, IDENITY_MATRIX, GUIDE_COMPONENT_HIERARCHY_SUFFIX #type: ignore
+from MNRB.global_variables import IDENITY_MATRIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
@@ -430,7 +430,7 @@ class MNRB_Node(NodeEditorNode):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
 
-        current_component_guide_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX
+        current_component_guide_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix
 
         if MC.objectExists(current_component_guide_hierarchy_name):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Guide Hierarchy Already Exists: " % self.__class__.__name__)
@@ -478,10 +478,10 @@ class MNRB_Node(NodeEditorNode):
         raise NotImplementedError
 
     def addComponentIdLink(self, object):
-        MC.addStringAttribute(object, COMPONENT_ID_ATTRIBUTE_NAME, str(self.id), True)
+        MC.addStringAttribute(object, MNRB_Names.component_id_attribute_name, str(self.id), True)
 
     def validateComponentIdLink(self, object):
-        component_id_attribute = MC.getAttribute(object, COMPONENT_ID_ATTRIBUTE_NAME)
+        component_id_attribute = MC.getAttribute(object, MNRB_Names.component_id_attribute_name)
         if component_id_attribute is not None:
             if int(component_id_attribute) == self.id:
                 return True
@@ -509,7 +509,7 @@ class MNRB_Node(NodeEditorNode):
 
             has_duplicate_name = False
 
-            new_guide_component_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX
+            new_guide_component_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix
 
             is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
             if is_same_name:
@@ -546,8 +546,8 @@ class MNRB_Node(NodeEditorNode):
                 guide.setPosition(self.guide_positions[index])
 
     def setComponentGuideHiearchyName(self):
-        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX )
-        self.guide_component_hierarchy = self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX
+        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix )
+        self.guide_component_hierarchy = self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: New Guide Hierarchy Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
 
     def setComponentGuideSize(self, size):

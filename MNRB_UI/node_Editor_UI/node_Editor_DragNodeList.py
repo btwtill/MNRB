@@ -2,7 +2,7 @@ import os
 from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
 from PySide2.QtGui import QPixmap, QIcon, QDrag #type: ignore
-from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, OPERATIONCODE_TESTCOMPONENT, NODELIST_MIMETYPE, MNRB_NODES, getClassFromOperationCode#type: ignore
+from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, getClassFromOperationCode#type: ignore
 
 
 

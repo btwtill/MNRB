@@ -1,5 +1,5 @@
 from MNRB.MNRB_Scene.virtual_hierarchy_object import VirtualHierarchyObject #type: ignore
-from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX, RIG_HIERARCHY_SUFFIX, RIG_HIERARCHY_COMPONENT_SUFFIX, RIG_HIERARCHY_SKELETON_SUFFIX, RIG_HIERARCHY_GEOMETRY_SUFFIX, RIG_HIERARCHY_SHAPES_SUFFIX #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 
 CLASS_DEBUG = True
 
@@ -11,12 +11,12 @@ class MNRB_Virtual_Hierarchy():
 
         self._hierarchy_name = self.scene.getSceneRigName()
 
-        self.guide_hierarchy_suffix = GUIDE_HIERARCHY_SUFFIX
-        self.rig_hierarchy_suffix = RIG_HIERARCHY_SUFFIX
-        self.components_hiearchy_suffix = RIG_HIERARCHY_COMPONENT_SUFFIX
-        self.skeleton_hiearchy_suffix = RIG_HIERARCHY_SKELETON_SUFFIX
-        self.geometry_hiearchy_suffix = RIG_HIERARCHY_GEOMETRY_SUFFIX
-        self.shapes_hiearchy_suffix = RIG_HIERARCHY_SHAPES_SUFFIX
+        self.guide_hierarchy_suffix = MNRB_Names.guide_hierarchy_suffix
+        self.rig_hierarchy_suffix = MNRB_Names.rig_hierarchy_suffix
+        self.components_hiearchy_suffix = MNRB_Names.rig_hierarchy_component_suffix
+        self.skeleton_hiearchy_suffix = MNRB_Names.rig_hierarchy_skeleton_suffix
+        self.geometry_hiearchy_suffix = MNRB_Names.rig_hierarchy_geometry_suffix
+        self.shapes_hiearchy_suffix = MNRB_Names.rig_hierarchy_shapes_suffix
         
         self._hierarchy_name_changed_listeners = []
 
@@ -33,7 +33,7 @@ class MNRB_Virtual_Hierarchy():
         for callback in self._hierarchy_name_changed_listeners: callback()
 
     def initHierarchy(self):
-        self.guide_hierarchy_object = VirtualHierarchyObject(self, suffix = GUIDE_HIERARCHY_SUFFIX)
+        self.guide_hierarchy_object = VirtualHierarchyObject(self, suffix = MNRB_Names.guide_hierarchy_suffix)
         self.rig_hierarchy_object = VirtualHierarchyObject(self, suffix = self.rig_hierarchy_suffix)
         self.skeleton_hierarchy_object = VirtualHierarchyObject(self, parent = self.rig_hierarchy_object, suffix = self.skeleton_hiearchy_suffix)
 
