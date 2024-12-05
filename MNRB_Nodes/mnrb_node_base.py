@@ -221,34 +221,14 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def setInvalid(self):
         self.is_valid = False
 
-    def onGuideSizeEditChange(self):
-        if not self.is_guide_slider_edit_silent:
-            self.updateGuideSlider()
-            self.updateGuideSize()
-
-    def onGuideSliderChange(self):
-        if not self.is_guide_slider_silent:
-            self.updateGuideSliderSizeEdit()
-            self.updateGuideSize()
-
-    def onDeformSizeEditChange(self):
-        if not self.is_deform_slider_edit_silent:
-            self.updateDeformSlider()
-            self.updateDeformSize()
-
-    def onDeformSliderChange(self):
-        if not self.is_deform_slider_silent:
-            self.updateDeformSliderEdit()
-            self.updateDeformSize()
+    def setSceneModified(self):
+        if not self.is_silent:
+            self.node.scene.setModified(True)
 
     def updateGuideSize(self):
-        #update the guide size valule
         self.guide_size = float(self.guide_slider_size_edit.text())
-        #call the nodes guide resize funcion
-        if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size)
-        if CLASS_DEBUG: print("%s:: --updateGuideSize:: of Node::  " % self.__class__.__name__, self.node)
+        if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size, " of Node:: self.node")
         self.node.setComponentGuideSize(self.guide_size)
-        #set properties to be modified
         self.setHasBeenModified()
 
     def updateDeformSize(self):
@@ -288,7 +268,6 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.connect_component_action_button.setEnabled(self.is_valid)
 
     def updateComponentName(self):
-        if CLASS_DEBUG: print("%s:: --updateComponentName:: Live Fetch from Line Edit:: " % self.__class__.__name__, self.component_name_edit.text())
         self.component_name = self.component_name_edit.text()
         if CLASS_DEBUG: print("%s:: --updateComponentName:: self.component_name:: " % self.__class__.__name__, self.component_name)
         self.node.title = self.component_name
@@ -298,10 +277,6 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index)))
         self.node.component_color = MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index))
-
-    def setSceneModified(self):
-        if not self.is_silent:
-            self.node.scene.setModified(True)
 
     def formatSliderValueToEditValue(self, value):
         if value != 0:
@@ -316,6 +291,26 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         scaled_value = int(slider_value_float * 100)
         if CLASS_DEBUG: print("%s:: --formatSliderEditTextToFloat:: new Slider Value as int" % self.__class__.__name__, scaled_value)
         return scaled_value
+
+    def onGuideSizeEditChange(self):
+        if not self.is_guide_slider_edit_silent:
+            self.updateGuideSlider()
+            self.updateGuideSize()
+
+    def onGuideSliderChange(self):
+        if not self.is_guide_slider_silent:
+            self.updateGuideSliderSizeEdit()
+            self.updateGuideSize()
+
+    def onDeformSizeEditChange(self):
+        if not self.is_deform_slider_edit_silent:
+            self.updateDeformSlider()
+            self.updateDeformSize()
+
+    def onDeformSliderChange(self):
+        if not self.is_deform_slider_silent:
+            self.updateDeformSliderEdit()
+            self.updateDeformSize()
 
     def onBuildGuides(self):
         if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildGuides ", self.node)
