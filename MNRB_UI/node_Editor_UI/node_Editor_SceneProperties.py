@@ -42,7 +42,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.connectHasBeenModifiedCallback(self.setSceneModified)
 
     def initActions(self):
-        self.action_layout = QtWidgets.QHBoxLayout()
+        self.action_layout = QtWidgets.QVBoxLayout()
 
         self.build_guides_action_button = QtWidgets.QPushButton("Build Guides")
         self.build_guides_action_button.clicked.connect(self.onBuildGuides)
