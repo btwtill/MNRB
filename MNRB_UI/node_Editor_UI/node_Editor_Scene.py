@@ -311,11 +311,6 @@ class NodeEditorScene(Serializable):
             print("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
 
         self.properties.deserialize(data['properties'], hashmap, restore_id)
-        
-        #Refactor Scene_rig_hiearchy
-        self.scene_rig_hierarchy.createGuideHierarchy()
-        self.scene_rig_hierarchy.createRigHierarchy()
-        self.scene_rig_hierarchy.createSkeletonHierarchy()
 
         for node_data in data['nodes']:
             found = None

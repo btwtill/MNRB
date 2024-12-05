@@ -8,6 +8,7 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 EVENT_DEBUG = False
 VALIDATION_DEBUG = True
+SERIALIZATION_DEBUG = True
 
 class ScenePropertyStateIcon(Enum):
     valid = os.path.join(os.path.dirname(__file__), "..", "icons", "valid.png")
@@ -172,11 +173,14 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def deserialize(self, data, hashmap = {}, restore_id = True):
         result = super().deserialize(data, hashmap, restore_id)
 
+        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: --deserialize:: current rig_name:: ", self.rig_name)
         self.rig_name_line_edit.setText(data['rig_name'])
+        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: --deserialize::  setting Line Edit Text to::", data['rig_name'])
         self.setHasBeenModified()
         self.is_silent = False
 
-        self.updateRigName()
+        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: --deserialize:: current rig_name:: ", self.rig_name)
         self.validateProperties()
         
+        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: ___________END SCENE PROPERTIES DESERIALIZATION")
         return True

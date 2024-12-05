@@ -5,6 +5,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #t
 
 EVENT_DEBUG = False
 CLASS_DEBUG = True
+SERIALIZEATION_DEBUG = True
 
 class NodeEditorPropertiesWidget(Serializable, QWidget):
     def __init__(self, parent=None) -> None:
@@ -78,7 +79,8 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
     def deserialize(self, data, hashmap = {}, restore_id=True):
 
         if restore_id: self.id =  data['id']
-
+        if SERIALIZEATION_DEBUG: print("%s:: --deserialize:: _________________START DESERIALIZING PROPERTIES " % self.__class__.__name__)
+        
         return True
     
 

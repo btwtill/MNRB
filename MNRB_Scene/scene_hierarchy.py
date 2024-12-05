@@ -20,14 +20,15 @@ class MNRB_Scene_Hierarchy():
         self.skeleton_hiearchy_suffix = RIG_HIERARCHY_SKELETON_SUFFIX
         self.geometry_hiearchy_suffix = RIG_HIERARCHY_GEOMETRY_SUFFIX
         self.shapes_hiearchy_suffix = RIG_HIERARCHY_SHAPES_SUFFIX
-
-        self.guide_hierarchy_object = None
-        self.rig_hierarchy_object = None
-        self.skeleton_hierarchy_object = None
         
         self._hierarchy_name_changed_listeners = []
 
-        self.scene.properties.connectHasBeenModifiedCallback(self.updateGuideHierarchyName)
+        self.scene.properties.connectHasBeenModifiedCallback(self.updateVirtualHierarchyName)
+
+        self.createGuideHierarchy()
+        self.createRigHierarchy()
+        self.createSkeletonHierachy()
+
 
     @property
     def hierarchy_name(self): return self._hierarchy_name
@@ -40,13 +41,14 @@ class MNRB_Scene_Hierarchy():
     def connectCallbackToHierarchyHasChanged(self, callback):
         self._hierarchy_name_changed_listeners.append(callback)
 
-    def updateGuideHierarchyName(self):
+    def updateVirtualHierarchyName(self):
+        if CLASS_DEBUG: print("%s:: --updateVirtualHierarchyName:: Old Name:: " % self.__class__.__name__, self.hierarchy_name, " New Name:: ", self.scene.getSceneRigName())
         self.hierarchy_name = self.scene.getSceneRigName()
 
     #guide Hierarchy
-    def createGuideHierarchy(self):
-        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --createGuideHierarchy:: self.guide_hierarchy_object:: ", self.guide_hierarchy_object)
+    def createGuideHierarchy(self):        
         self.guide_hierarchy_object = HierarchyObject(self, suffix = self.guide_hierarchy_suffix)
+        if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --createGuideHierarchy:: self.guide_hierarchy_object:: ", self.guide_hierarchy_object)
 
     def isGuideHierarchyObject(self) -> bool:
         if CLASS_DEBUG: print("SCENE_RIG_HIERARCHY:: --isGuideHierarchy:: self.guide_hierarchy_object:: ", self.guide_hierarchy_object)
