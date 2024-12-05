@@ -65,17 +65,20 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         #Side Index  
         side_prefix_layout = QHBoxLayout()
         self.left_prefix_button = MirroringSidePrefixButton(MNRB_Names.left.side)
-        self.mid_prefix_button = MirroringSidePrefixButton(MNRB_Names.middle.side)
+        self.mid_prefix_button = MirroringSidePrefixButton(MNRB_Names.middle.side, marked = True)
         self.right_prefix_button = MirroringSidePrefixButton(MNRB_Names.right.side)
 
         self.left_prefix_button.addButtonForDeselection(self.mid_prefix_button)
         self.left_prefix_button.addButtonForDeselection(self.right_prefix_button)
+        self.left_prefix_button.clicked.connect(self.setHasBeenModified)
 
         self.right_prefix_button.addButtonForDeselection(self.mid_prefix_button)
         self.right_prefix_button.addButtonForDeselection(self.left_prefix_button)
+        self.right_prefix_button.clicked.connect(self.setHasBeenModified)
 
         self.mid_prefix_button.addButtonForDeselection(self.right_prefix_button)
         self.mid_prefix_button.addButtonForDeselection(self.left_prefix_button)
+        self.right_prefix_button.clicked.connect(self.setHasBeenModified)
 
         side_prefix_layout.addWidget(self.left_prefix_button)
         side_prefix_layout.addWidget(self.mid_prefix_button)

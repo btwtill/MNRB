@@ -1,12 +1,15 @@
 from PySide2.QtWidgets import QPushButton #type: ignore
 
 class MirroringSidePrefixButton(QPushButton):
-    def __init__(self, text = "", parent = None):
+    def __init__(self, text = "", marked = False, parent = None):
         super().__init__(text, parent)
         self.name = text
-        self.is_marked = False
+        self.is_marked = marked
 
         self.buttons_to_deselect = []
+
+        if self.is_marked:
+            self.markSelected()
 
     def markSelected(self):
         self.is_marked = True
