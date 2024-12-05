@@ -1,9 +1,8 @@
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 CLASS_DEBUG = True
 
-class HierarchyObject():
+class VirtualHierarchyObject():
     def __init__(self, hierarchy, parent = None, suffix = ""):
         self.hierarchy = hierarchy
 
@@ -13,6 +12,7 @@ class HierarchyObject():
         self._name = self.rig_name + self.suffix
 
         self.hierarchy.connectCallbackToHierarchyHasChanged(self.updateName)
+        self.hierarchy.connectCallbackToHierarchyHasChanged(self.updateRigName)
             
     @property
     def name(self): return self._name
@@ -31,10 +31,25 @@ class HierarchyObject():
     def exists(self):
         return MC.objectExists(self.name)
 
+    def validateViewport(self):
+        return MC.objectExists(self.rig_name + self.suffix)
+
+    def ensureExistence(self):
+        if self.validateViewport():
+            return True
+        else:
+            self.draw()
+            return True
+
+    def updateRigName(self):
+        if CLASS_DEBUG: print("%s:: --updateRigName:: Setting Rig_name old:: ", self.rig_name, " To New:: ", self.hierarchy.hierarchy_name)
+        self.rig_name = self.hierarchy.hierarchy_name
+
     def updateName(self):
+        if CLASS_DEBUG: print("%s:: --updateName:: old Rig Name:: "% self.__class__.__name__, self.rig_name)
         if CLASS_DEBUG: print("%s:: --updateName:: old Name:: "% self.__class__.__name__, self.name)
         
-        if not MC.objectExists(self.name):
+        if not self.exists():
             if CLASS_DEBUG: print("SCENE_HIERARCHY:: --updateHierarchyObject:: ", self.name, " Object is Not in the Viewport!!")
             return
 

@@ -364,8 +364,8 @@ class MNRB_Node(NodeEditorNode):
         self._component_color = value
 
     def guideBuild(self) -> bool:
-        if self.scene.scene_rig_hierarchy.ensureGuideHierarchy():
-            current_guide_hierarchy = self.scene.scene_rig_hierarchy.guide_hierarchy_object.name
+        if self.scene.virtual_rig_hierarchy.guide_hierarchy_object.ensureExistence():
+            current_guide_hierarchy = self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name
         else:
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
@@ -399,10 +399,10 @@ class MNRB_Node(NodeEditorNode):
         return True
 
     def staticBuild(self):
-        if self.scene.scene_rig_hierarchy.ensureRigHierarchy():
-            current_rig_hierarchy = self.scene.scene_rig_hierarchy.rig_hierarchy_object.name
-            if self.scene.scene_rig_hierarchy.ensureSkeletonHierarchy():
-                current_skeleton_hierarchy = self.scene.scene_rig_hierarchy.skeleton_hierarchy_object.name
+        if self.scene.virtual_rig_hierarchy.rig_hierarchy_object.ensureExistence():
+            current_rig_hierarchy = self.scene.virtual_rig_hierarchy.rig_hierarchy_object.name
+            if self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.ensureExistence():
+                current_skeleton_hierarchy = self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name
         else:
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
