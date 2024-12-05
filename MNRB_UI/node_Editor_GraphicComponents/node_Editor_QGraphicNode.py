@@ -205,10 +205,10 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         path_valid_icon = QPainterPath()
         path_valid_icon.setFillRule(Qt.WindingFill)
-        top_left = QPointF(self.width - self.title_height - 1.0, 0 + 1.0)
+        top_left = QPointF(self.width - self.title_height + 4.0, 0 + 1.0)
         top_right = QPointF(self.width - 1.0, 0 + 1.0)
         lower_left = QPointF(self.width - self.title_height - 1.0, self.title_height - 1.0)
-        lower_right = QPointF(self.width - 1.0, self.title_height - 1.0)
+        lower_right = QPointF(self.width - 1.0, self.title_height - 6.0)
         top_right_rounded_upper = QPointF(self.width - self._edge_roundness - 1.0 , 0 + 1.0)
         top_right_rounded_lower = QPointF(self.width - 1.0, 0 + 1.0 + self._edge_roundness)
 
