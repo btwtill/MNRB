@@ -99,7 +99,7 @@ class guide(Serializable):
                 return
 
             if has_duplicate_name:
-                duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.scene_rig_hierarchy.getGuideHierarchyName(), new_name)
+                duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_name)
                 if CLASS_DEBUG: print("%s:: --updateName:: Duplicate:: " % self.__class__.__name__, duplicate_name)
                 if duplicate_name != []:
                     new_name = new_name + str(duplicate_name[1])

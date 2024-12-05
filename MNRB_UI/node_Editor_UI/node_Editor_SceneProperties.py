@@ -84,25 +84,42 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
 
     def validateProperties(self):
         if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Start Validation")
+
         if not self.validRigName():
-            self.is_valid = False
-            self.status_bar.showMessage("Scene Status:: Invalid Component Name!!")
-            self.setStatusBarIconLabel(ScenePropertyStateIcon.invalid)
+            self.setInvalid("Invalid Component Name!!")
             return False
         
-        if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Nodes to be checked:: ", self.scene.nodes)
+        if not self.validateNodes():
+            self.setInvalid("No components are valid!!")
+            return False
         
+        if not self.validateDuplicateNaming():
+            self.setInvalid("Duplicate Names detected!!")
+            return False
+
+        self.setValid()
+        return True
+
+    def validRigName(self):
+        if self.rig_name_line_edit.text() != "":
+            return True
+        else:
+            return False
+
+    def validateNodes(self):
+        if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateNodes: Nodes to be checked:: ", self.scene.nodes)
         is_one_node_valid = False
         for node in self.scene.nodes:
-            if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties:: ", node.properties.is_valid)
+            if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateNodes:: ", node.properties.is_valid)
             if node.properties.is_valid:
                 is_one_node_valid = True
+
         if not is_one_node_valid:
-            self.is_valid = False
-            self.status_bar.showMessage("Scene Status:: No Component is Valid!!")
-            self.setStatusBarIconLabel(ScenePropertyStateIcon.invalid)
+            
             return False
-        
+        return True if is_one_node_valid else False
+
+    def validateDuplicateNaming(self):
         is_duplicate_component_name = False
         encounters = set()
         for node in self.scene.nodes:
@@ -112,22 +129,17 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
                 break
             encounters.add(component_name)
 
-        if is_duplicate_component_name:
-            self.is_valid =False
-            self.status_bar.showMessage("Scene Status:: Duplicate component names Found!!")
-            self.setStatusBarIconLabel(ScenePropertyStateIcon.invalid)
-            return False
+        return False if is_duplicate_component_name else True
 
+    def setInvalid(self, message):
+        self.is_valid = False
+        self.status_bar.showMessage("Scene Status Invalid:: " + message)
+        self.setStatusBarIconLabel(ScenePropertyStateIcon.invalid)
+
+    def setValid(self):
         self.is_valid = True
-        self.status_bar.showMessage("Scene Status:: Ready")
+        self.status_bar.showMessage("Scene Status Valid:: Ready to Build!!")
         self.setStatusBarIconLabel(ScenePropertyStateIcon.valid)
-        return True
-
-    def validRigName(self):
-        if self.rig_name_line_edit.text() != "":
-            return True
-        else:
-            return False
 
     def updateActionButtons(self):
         self.build_guides_action_button.setEnabled(self.is_valid)
