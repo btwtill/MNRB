@@ -174,18 +174,36 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def validateProperties(self):
         if VALIDATE_DEBUG: print("%s:: --validateProperties:: Start Validating properties!" % self.__class__.__name__)
 
-        if not self.validComponentName():
-            self.is_valid = False
+        if not self.validateComponentName():
+            self.setInvalid()
             return False
         
-        if VALIDATE_DEBUG: print("%s:: --validateProperties:: Valid Component Name: " % self.__class__.__name__, self.component_name)
+        if self.validateDisabled():
+            self.setInvalid()
+            return False
+        
+        if self.validateDuplicates():
+            self.setInvalid()
+            return False
 
+        self.setValid()
+        return True
+
+    def validateComponentName(self):
+        if VALIDATE_DEBUG: print("%s:: --validateComponentName:: Valid Component Name: " % self.__class__.__name__, self.component_name)
+        if self.component_name_edit.text() != "" and self.component_name_edit.text() != "Undefined":
+            return True
+        else:
+            return False
+
+    def validateDisabled(self):
+        if VALIDATE_DEBUG: print("%s:: --validateDisabled:: Component is Disabled:  "% self.__class__.__name__ , self.is_disabled)
         if self.is_disabled:
-            self.is_valid = False
+            return True
+        else:
             return False
-        
-        if VALIDATE_DEBUG: print("%s:: --validateProperties:: Component is Disabled:  "% self.__class__.__name__ , self.is_disabled)
 
+    def validateDuplicates(self):
         is_duplicate_component_name = False
         encounters = set()
         for node in self.node.scene.nodes:
@@ -194,19 +212,14 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
                 is_duplicate_component_name = True
                 break
             encounters.add(component_name)
+            
+        return True if is_duplicate_component_name else False
 
-        if is_duplicate_component_name:
-            self.is_valid = False
-            return False
-
+    def setValid(self):
         self.is_valid = True
-        return True
 
-    def validComponentName(self):
-        if self.component_name_edit.text() != "" and self.component_name_edit.text() != "Undefined":
-            return True
-        else:
-            return False
+    def setInvalid(self):
+        self.is_valid = False
 
     def onGuideSizeEditChange(self):
         if not self.is_guide_slider_edit_silent:
@@ -390,7 +403,6 @@ class MNRB_Node(NodeEditorNode):
     def guide_component_hierarchy(self): return self._guide_component_hierarchy
     @guide_component_hierarchy.setter
     def guide_component_hierarchy(self, value):
-        print(value)
         self._guide_component_hierarchy = value
 
     @property
@@ -499,15 +511,15 @@ class MNRB_Node(NodeEditorNode):
             duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_guide_component_hierarchy_name)
             if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
 
-            has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
-
             if duplicate_name != []:
                 has_duplicate_name = True
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
                 new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
 
             if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
-            
+
+            has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
+
             if has_valid_component_id:
                 new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
