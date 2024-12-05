@@ -12,7 +12,6 @@ class VirtualHierarchyObject():
         self._name = self.rig_name + self.suffix
 
         self.hierarchy.connectCallbackToHierarchyHasChanged(self.updateName)
-        self.hierarchy.connectCallbackToHierarchyHasChanged(self.updateRigName)
             
     @property
     def name(self): return self._name
@@ -35,6 +34,7 @@ class VirtualHierarchyObject():
         return MC.objectExists(self.rig_name + self.suffix)
 
     def ensureExistence(self):
+        if CLASS_DEBUG: print("%s:: --ensureExistence:: " % self.__class__.__name__, self.suffix, " Current Rig Name:: ", self.rig_name)
         if self.validateViewport():
             return True
         else:
@@ -42,7 +42,7 @@ class VirtualHierarchyObject():
             return True
 
     def updateRigName(self):
-        if CLASS_DEBUG: print("%s:: --updateRigName:: Setting Rig_name old:: ", self.rig_name, " To New:: ", self.hierarchy.hierarchy_name)
+        if CLASS_DEBUG: print("%s:: --updateRigName:: Setting Rig_name old:: " % self.__class__.__name__, self.rig_name, " To New:: ", self.hierarchy.hierarchy_name)
         self.rig_name = self.hierarchy.hierarchy_name
 
     def updateName(self):
@@ -51,6 +51,8 @@ class VirtualHierarchyObject():
         
         if not self.exists():
             if CLASS_DEBUG: print("SCENE_HIERARCHY:: --updateHierarchyObject:: ", self.name, " Object is Not in the Viewport!!")
+            self.updateRigName()
+            self.name = self.rig_name + self.suffix
             return
 
         new_object_name = self.hierarchy.hierarchy_name + self.suffix
@@ -68,4 +70,5 @@ class VirtualHierarchyObject():
         
         new_name = MC.renameObject(self.name, new_object_name)
         self.name = new_name
+        self.updateRigName()
     
