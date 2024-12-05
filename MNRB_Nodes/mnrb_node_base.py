@@ -4,7 +4,7 @@ from PySide2.QtCore import Qt #type: ignore
 from PySide2.QtGui import QDoubleValidator #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
-from MNRB.global_variables import GUIDE_HIERARCHY_SUFFIX, COMPONENT_ID_ATTRIBUTE_NAME, IDENITY_MATRIX #type: ignore
+from MNRB.global_variables import COMPONENT_ID_ATTRIBUTE_NAME, IDENITY_MATRIX, GUIDE_COMPONENT_HIERARCHY_SUFFIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
@@ -21,8 +21,10 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         super().__init__(node)
 
         self.component_name = "Undefined"
+        self.component_side_prefix = MNRB_Names.middle.prefix
+        self.component_color = MNRBColor.yellow
         self.is_disabled = False
-        self.is_silent = True
+        self.is_silent = False
 
         self.guide_size = 1.0
         self.deform_size = 1.0
@@ -64,20 +66,23 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         #Side Index  
         side_prefix_layout = QHBoxLayout()
-        self.left_prefix_button = MirroringSidePrefixButton(MNRB_Names.left.side)
-        self.mid_prefix_button = MirroringSidePrefixButton(MNRB_Names.middle.side, marked = True)
-        self.right_prefix_button = MirroringSidePrefixButton(MNRB_Names.right.side)
+        self.left_prefix_button = MirroringSidePrefixButton(self, MNRB_Names.left.side, MNRB_Names.left.prefix)
+        self.mid_prefix_button = MirroringSidePrefixButton(self, MNRB_Names.middle.side, MNRB_Names.middle.prefix)
+        self.right_prefix_button = MirroringSidePrefixButton(self, MNRB_Names.right.side, MNRB_Names.right.prefix)
 
         self.left_prefix_button.addButtonForDeselection(self.mid_prefix_button)
         self.left_prefix_button.addButtonForDeselection(self.right_prefix_button)
+        self.left_prefix_button.clicked.connect(self.updateComponentName)
         self.left_prefix_button.clicked.connect(self.setHasBeenModified)
 
         self.right_prefix_button.addButtonForDeselection(self.mid_prefix_button)
         self.right_prefix_button.addButtonForDeselection(self.left_prefix_button)
+        self.right_prefix_button.clicked.connect(self.updateComponentName)
         self.right_prefix_button.clicked.connect(self.setHasBeenModified)
 
         self.mid_prefix_button.addButtonForDeselection(self.right_prefix_button)
         self.mid_prefix_button.addButtonForDeselection(self.left_prefix_button)
+        self.mid_prefix_button.clicked.connect(self.updateComponentName)
         self.right_prefix_button.clicked.connect(self.setHasBeenModified)
 
         side_prefix_layout.addWidget(self.left_prefix_button)
@@ -276,7 +281,11 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def updateComponentColor(self, index):
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index)))
-        self.node.component_color = MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index))
+        self.component_color = MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index))
+        if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting new Component Color:: " % self.__class__.__name__, self.component_color)
+
+        if not self.is_silent:
+            self.node.setGuideColors()
 
     def formatSliderValueToEditValue(self, value):
         if value != 0:
@@ -335,14 +344,17 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def serialize(self):
         result_data = super().serialize()
         result_data['component_name'] = self.component_name
+        result_data['component_color'] = self.component_color.name
+        result_data['component_side_prefix'] = self.component_side_prefix
         result_data['is_disabled'] = self.is_disabled
         result_data['guide_size'] = self.guide_size
         result_data['deform_size'] = self.deform_size
-
+        
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
+        self.is_silent = True
 
         if CLASS_DEBUG: print("%s:: --deserialize:: deserializing component_name:: " % self.__class__.__name__, data['component_name'])
         self.component_name_edit.setText(data['component_name'])
@@ -353,6 +365,17 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if CLASS_DEBUG: print("%s:: --deserialize:: deserializing deform Size:: "% self.__class__.__name__, data['deform_size'])
         self.deform_slider_size_edit.setText(str(data['deform_size']))
 
+        self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])
+        self.component_color_dropdown.setCurrentText(data['component_color'])
+
+        self.component_side_prefix = data['component_side_prefix']
+        if data['component_side_prefix'] == MNRB_Names.left.prefix:
+            self.left_prefix_button.mark()
+        elif data['component_side_prefix'] == MNRB_Names.right.prefix:
+            self.right_prefix_button.mark()
+        elif data['component_side_prefix'] == MNRB_Names.middle.prefix:
+            self.mid_prefix_button.mark()
+ 
         if CLASS_DEBUG: print("%s:: --deserialize:: updating guide Size Edit "% self.__class__.__name__)
         self.onGuideSizeEditChange()
         self.is_silent = False
@@ -400,17 +423,6 @@ class MNRB_Node(NodeEditorNode):
     def guide_component_hierarchy(self, value):
         self._guide_component_hierarchy = value
 
-    @property
-    def component_color(self): return self._component_color
-    @component_color.setter
-    def component_color(self, value):
-        if self._component_color != value:
-            self._component_color = value
-            if CLASS_DEBUG: print("%s:: --component_color:: Setting new Component Color:: " % self.__class__.__name__, value)
-            self.setGuideColors()
-        
-        self._component_color = value
-
     def guideBuild(self) -> bool:
         if self.scene.virtual_rig_hierarchy.guide_hierarchy_object.ensureExistence():
             current_guide_hierarchy = self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name
@@ -418,7 +430,7 @@ class MNRB_Node(NodeEditorNode):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
 
-        current_component_guide_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+        current_component_guide_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX
 
         if MC.objectExists(current_component_guide_hierarchy_name):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Guide Hierarchy Already Exists: " % self.__class__.__name__)
@@ -497,7 +509,7 @@ class MNRB_Node(NodeEditorNode):
 
             has_duplicate_name = False
 
-            new_guide_component_hierarchy_name = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
+            new_guide_component_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX
 
             is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
             if is_same_name:
@@ -526,17 +538,17 @@ class MNRB_Node(NodeEditorNode):
             else:
                 self.setComponentGuideHiearchyName()
 
-    def setComponentGuideHiearchyName(self):
-        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ", self.properties.component_name + GUIDE_HIERARCHY_SUFFIX )
-        self.guide_component_hierarchy = self.properties.component_name + GUIDE_HIERARCHY_SUFFIX
-        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: New Guide Hierarchy Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
-
     def reconstructGuides(self):
         if self.reconstruct_guides:
             if CLASS_DEBUG: print("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
 
             for index, guide in enumerate(self.guides):
                 guide.setPosition(self.guide_positions[index])
+
+    def setComponentGuideHiearchyName(self):
+        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX )
+        self.guide_component_hierarchy = self.properties.component_side_prefix + self.properties.component_name + GUIDE_COMPONENT_HIERARCHY_SUFFIX
+        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: New Guide Hierarchy Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
 
     def setComponentGuideSize(self, size):
         for guide in self.guides:
@@ -552,7 +564,7 @@ class MNRB_Node(NodeEditorNode):
     def setGuideColors(self):
         if CLASS_DEBUG: print("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)
         for guide in self.guides:
-            guide.color = self.component_color
+            guide.color = self.properties.component_color
 
     def remove(self):
         super().remove()
@@ -567,7 +579,6 @@ class MNRB_Node(NodeEditorNode):
     def serialize(self):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code
-        result_data['component_color'] = self.component_color.name
         guides = []
         for guide in self.guides: guides.append(guide.serialize())
         result_data['guides'] = guides
@@ -578,14 +589,6 @@ class MNRB_Node(NodeEditorNode):
         result = super().deserialize(data, hashmap, restore_id, exists)
 
         self.setComponentGuideHiearchyName()
-
-        self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])
-
-        self.is_silent = True
-        self.properties.is_silent = True
-        self.properties.component_color_dropdown.setCurrentText(data['component_color'])
-        self.properties.is_silent = False
-        self.is_silent = False
 
         for guide_data in data['guides']:
             new_guide = guide(self, guide_data['name'], deserialized=True)

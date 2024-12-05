@@ -14,6 +14,7 @@ RIG_SUFFIX = "_rig"
 COMPONENT_SUFFIX = "_cmpnt"
 
 GUIDE_HIERARCHY_SUFFIX = "_guides_hrc"
+GUIDE_COMPONENT_HIERARCHY_SUFFIX = "_cmpntGuides_hrc"
 RIG_HIERARCHY_SUFFIX = "_rig_hrc"
 
 RIG_HIERARCHY_COMPONENT_SUFFIX = "_components_hrc"

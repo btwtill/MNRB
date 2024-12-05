@@ -15,19 +15,17 @@ class guideShapeType(Enum):
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name, position = (0, 0, 0), side = CENTERDECLARATION, deserialized = False) -> None:
+    def __init__(self, node, name, position = (0, 0, 0), deserialized = False) -> None:
         super().__init__()
 
         self.node = node
 
         self._guide_type = guideShapeType.sphere
-        
-        self.side = side
 
         self.guide_name = name
-        self.name = self.node.properties.component_name + "_" + self.guide_name + GUIDE_SUFFIX
+        self.name = self.node.properties.component_side_prefix + self.node.properties.component_name + "_" + self.guide_name + GUIDE_SUFFIX
         
-        self._color = self.node.component_color
+        self._color = self.node.properties.component_color
 
         self.position = position
         self.size = self.node.properties.guide_size
@@ -93,7 +91,7 @@ class guide(Serializable):
     def updateName(self, name, has_duplicate_name):
         if MC.objectExists(self.name):
             if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
-            new_name =  name + "_" + self.guide_name + GUIDE_SUFFIX
+            new_name =  self.node.properties.component_side_prefix + name + "_" + self.guide_name + GUIDE_SUFFIX
             if CLASS_DEBUG: print("%s:: --updateName:: new Guide Name:: " % self.__class__.__name__, new_name)
 
             if new_name == self.name:
@@ -111,11 +109,9 @@ class guide(Serializable):
         serialized_data = OrderedDict([
             ('id', self.id),
             ('name', self.guide_name),
-            ('side', self.side)
         ])
         return serialized_data
 
     def deserialize(self, data, hashmap={}, restore_id=True):
         if restore_id: self.id = data['id']
-        self.side = data['side']
         return True
