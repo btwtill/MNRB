@@ -1,6 +1,6 @@
 from enum import Enum
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB_naming.MNRB_names import MNRB_Names
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 
 class MNRBColor(Enum):
     yellow = (1,1,0)

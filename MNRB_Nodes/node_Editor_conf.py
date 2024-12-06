@@ -3,7 +3,7 @@ from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException impor
 NODELIST_MIMETYPE = "application/x-item"
 
 OPERATIONCODE_BASECOMPONENT = 0
-OPERATIONCODE_TESTCOMPONENT = 1
+OPERATIONCODE_SINGLEDEFORMCOMPONENT = 1
 
 
 MNRB_NODES = {
