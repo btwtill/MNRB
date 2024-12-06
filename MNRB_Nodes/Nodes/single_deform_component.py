@@ -3,7 +3,7 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
-
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 GUIDE_DEBUG = True
 
 class MNRB_Node_SingleDeformComponent_Properties(MNRB_NodeProperties): pass
@@ -25,6 +25,9 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
 
         if not super().guideBuild():
             return False
+        
+        self.sinlge_deform_component_guide = guide(self, name = "single")
+        MC.parentObject(self.sinlge_deform_component_guide.name, self.guide_component_hierarchy)
 
         self.reconstructGuides()
         
@@ -33,6 +36,15 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         if not super().staticBuild():
             return False
         
+        guide_pos = self.sinlge_deform_component_guide.getPosition()
+
+        single_deform_joint = MC.createJoint(self.properties.component_side_prefix + "single" + self.properties.component_name + MNRB_Names.deform_suffix)
+        self.static_deforms.append(single_deform_joint)
+
+        MC.setJointPositionMatrix(single_deform_joint, guide_pos)
+        MC.parentObject(single_deform_joint, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
+        
+
         return True
     
     def componentBuild(self):

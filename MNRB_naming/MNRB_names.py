@@ -14,7 +14,7 @@ class MNRB_Names():
     right = MNRB_Side("right", "R_")
     middle = MNRB_Side("middle", "M_")
 
-    build_steps = MNRB_buildSteps()
+    build_step = MNRB_buildSteps()
 
     component_id_attribute_name = "MNRB_Component_ID"
 
@@ -33,5 +33,7 @@ class MNRB_Names():
 
     guide_material_suffix = "_lambert_MNRB_guide_material"
     guide_shader_suffix = "_lambert_MNRB_guide_shader_SG"
+
+    deform_suffix = "_def"
 
     

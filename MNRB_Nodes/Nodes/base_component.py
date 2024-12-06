@@ -25,7 +25,7 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
     Node_Properties_Class = MNRB_Node_BaseComponent_Properties
 
     def __init__(self, scene):
-        super().__init__(scene, inputs = [], outputs=[["base_ctrl", 1, True]])
+        super().__init__(scene, inputs = [], outputs=[["base_ctrl", 1, True], ["base_def", 2, True]])
 
     def guideBuild(self):
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)

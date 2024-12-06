@@ -161,7 +161,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         button_layout.addWidget(self.build_guides_action_button)
 
         self.build_step_dropdown = QComboBox()
-        self.build_step_dropdown.addItems([MNRB_Names.build_steps.static, MNRB_Names.build_steps.component, MNRB_Names.build_steps.connected])
+        self.build_step_dropdown.addItems([MNRB_Names.build_step.static, MNRB_Names.build_step.component, MNRB_Names.build_step.connected])
         self.build_step_dropdown.setCurrentIndex(1)
         self.build_step_dropdown.setStyleSheet("background-color: #1C1C1C;")
         button_layout.addWidget(self.build_step_dropdown)
@@ -321,12 +321,9 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
             self.updateDeformSliderEdit()
             self.updateDeformSize()
 
-    def onBuildStep(self, step = None):
-        if step is None:
-            build_stage = self.build_step_dropdown.text()
-        else:
-            build_stage = step
-    
+    def onBuildStep(self):
+        build_stage = self.build_step_dropdown.currentText()
+
         if build_stage == MNRB_Names.build_step.static:
             self.onBuildStatic()
         elif build_stage == MNRB_Names.build_step.component:
@@ -420,6 +417,7 @@ class MNRB_Node(NodeEditorNode):
         self.guide_positions = []
 
         self.controls = []
+        self.static_deforms = []
         self.deforms = []
 
         self.is_guide_build = False
@@ -449,12 +447,14 @@ class MNRB_Node(NodeEditorNode):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Guide Hierarchy Already Exists: " % self.__class__.__name__)
             self.reconstruct_guides = True
             self.guide_positions = []
+
+            if CLASS_DEBUG: print("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
             for guide in self.guides:
-                if CLASS_DEBUG: print("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
                 if guide.exists():
                     self.guide_positions.append(guide.getPosition())
                 else:
                     self.guide_positions.append(IDENITY_MATRIX)
+            
             MC.deleteObjectWithHierarchy(current_component_guide_hierarchy_name)
         else: 
             self.reconstruct_guides = False
@@ -473,19 +473,20 @@ class MNRB_Node(NodeEditorNode):
         return True
 
     def staticBuild(self):
+        self.guideBuild()
+
         if self.scene.virtual_rig_hierarchy.rig_hierarchy_object.ensureExistence():
             current_rig_hierarchy = self.scene.virtual_rig_hierarchy.rig_hierarchy_object.name
             if self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.ensureExistence():
                 current_skeleton_hierarchy = self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name
-                for deform in self.deforms:
+                for deform in self.static_deforms:
                     if MC.objectExists(deform):
-                        MC.deleteObject(deform)
+                        MC.deleteNode(deform)
         else:
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
         
-
-        self.deforms = []
+        self.static_deforms = []
 
         return True
     
@@ -559,9 +560,9 @@ class MNRB_Node(NodeEditorNode):
     def reconstructGuides(self):
         if self.reconstruct_guides:
             if CLASS_DEBUG: print("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
-
-            for index, guide in enumerate(self.guides):
-                guide.setPosition(self.guide_positions[index])
+            if self.guide_positions != []:
+                for index, guide in enumerate(self.guides):
+                    guide.setPosition(self.guide_positions[index])
 
     def setComponentGuideHiearchyName(self):
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix )
@@ -601,6 +602,10 @@ class MNRB_Node(NodeEditorNode):
         for guide in self.guides: guides.append(guide.serialize())
         result_data['guides'] = guides
 
+        static_deforms = []
+        for deform in self.static_deforms: static_deforms.append(deform)
+        result_data['static_deforms'] = static_deforms
+
         return result_data
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
@@ -612,5 +617,8 @@ class MNRB_Node(NodeEditorNode):
             new_guide = guide(self, guide_data['name'], deserialized=True)
             new_guide.deserialize(guide_data, hashmap, restore_id)
             self.guides.append(new_guide)
+        
+        for deform in data['static_deforms']:
+            self.static_deforms.append(deform)
 
         return True
