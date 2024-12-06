@@ -4,8 +4,6 @@ from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODev
 from PySide2.QtGui import QPixmap, QIcon, QDrag #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, getClassFromOperationCode#type: ignore
 
-
-
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
 DRAGDROP_DEBUG = False

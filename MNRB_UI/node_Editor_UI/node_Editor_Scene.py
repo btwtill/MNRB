@@ -198,6 +198,10 @@ class NodeEditorScene(Serializable):
     def isModified(self):
         return self.has_been_modified
 
+    def getItemAt(self, pos):
+        scene_pos = self.getView().mapToScene(pos)
+        return self.getView().itemAt(pos.x(), pos.y())
+
     def getSelectedItems(self):
         return self.grScene.selectedItems()
 
@@ -211,9 +215,6 @@ class NodeEditorScene(Serializable):
     def getView(self):
         return self.grScene.views()[0]
 
-    def setNodeClassSelectorFunction(self, selector_function):
-        self.nodeClassSelectorFunction = selector_function
-
     def getNodeClassFromData(self, node_data):
         return self.nodeClassSelectorFunction(node_data)
 
@@ -225,6 +226,9 @@ class NodeEditorScene(Serializable):
 
     def setModified(self, state):
         self.has_been_modified = state
+
+    def setNodeClassSelectorFunction(self, selector_function):
+        self.nodeClassSelectorFunction = selector_function
 
     def buildSceneGuides(self):
         for node in self.nodes:
