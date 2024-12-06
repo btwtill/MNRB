@@ -33,6 +33,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.setAcceptDrops(True)
 
+        self.setScene(self.grScene)
+        
         self.initViewItems()
         self.initViewStates()
         self.initUI()
@@ -60,8 +62,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self._drag_enter_listeners = []
         self._drop_listeners = []
-
-        self.setScene(self.grScene)
 
         #zoom Properties
         self.zoom_content_visibility_threshold = 9
@@ -418,7 +418,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         
         if len(selected_items) == 0:
             if self.grScene.scene.nodes == []:
-                self.centerOn(0, 0) 
+                self.centerOn(-1800, -600) 
             else:
                 combined_bounding_rectangle = QRectF()
                 for node in self.grScene.scene.nodes:

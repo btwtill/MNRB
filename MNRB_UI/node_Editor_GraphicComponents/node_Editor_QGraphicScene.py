@@ -36,7 +36,10 @@ class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
         self._dark_Grid_Size = 5
 
     def setGrSceneSize(self, width, height):
-        self.setSceneRect(-width // 2, -height // 2, width, height)
+        #self.setSceneRect(-width // 2, -height // 2, width, height)
+        print(-width / 2)
+        print(-height/ 2)
+        self.setSceneRect(-width / 2, -height / 2, width, height)
 
     #Has to be overriden otherwise draggin wont work
     def dragMoveEvent(self, event):
@@ -81,4 +84,4 @@ class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
 
         #drawCenterPoint 
         painter.setBrush(self.centerPointBrush)
-        painter.drawEllipse(QPoint(0, 0), 3, 3)
+        painter.drawEllipse(QPoint(-1800, -600), 3, 3)
