@@ -1,6 +1,6 @@
 from enum import Enum
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB.global_variables import GUIDE_SHADER_SUFFIX, GUIDE_MATERIAL_SUFFIX #type: ignore
+from MNRB_naming.MNRB_names import MNRB_Names
 
 class MNRBColor(Enum):
     yellow = (1,1,0)
@@ -20,8 +20,8 @@ class MNRBSceneColors():
 
     def initColors(self):
         for color in MNRBColor:
-            self.color_material_names.append(color.name + GUIDE_MATERIAL_SUFFIX)
-            self.color_shader_name.append(color.name + GUIDE_SHADER_SUFFIX)
+            self.color_material_names.append(color.name + MNRB_Names.guide_material_suffix)
+            self.color_shader_name.append(color.name + MNRB_Names.guide_shader_suffix)
 
     def initMaterials(self):
         for index, color in enumerate(MNRBColor):
