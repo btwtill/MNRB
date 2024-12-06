@@ -139,6 +139,7 @@ class NodeEditorNode(Serializable):
 
     def setPosition(self, x, y):
         self.grNode.setPos(x, y)
+        self.updateConnectedEdges()
 
     def getSocketPosition(self, index, position):
 

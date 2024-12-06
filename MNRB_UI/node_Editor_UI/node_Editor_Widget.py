@@ -113,6 +113,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         evaluate_properties = context_menu.addAction("validate")
         build_guides = context_menu.addAction("build guides")
+        build_static = context_menu.addAction("build static")
+        build_component = context_menu.addAction("build component")
+        build_connected = context_menu.addAction("build connected")
 
         action = context_menu.exec_(self.mapToGlobal(event.pos()))
 
@@ -129,6 +132,11 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: got item:: ", selected)
 
+        if selected and action == evaluate_properties: selected.properties.validateProperties() if not selected.properties.is_disabled else print("Disabled")
+        if selected and action == build_guides: selected.guideBuild() if not selected.properties.is_disabled else print("Disabled")
+        if selected and action == build_static: selected.staticBuild() if not selected.properties.is_disabled else print("Disabled")
+        if selected and action == build_component: selected.componentBuild() if not selected.properties.is_disabled else print("Disabled")
+        if selected and action == build_connected: selected.connectComponent() if not selected.properties.is_disabled else print("Disabled")
 
     def handleEdgeContextMenu(self, event):
         if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: Edge Context Menu Open:: ")
