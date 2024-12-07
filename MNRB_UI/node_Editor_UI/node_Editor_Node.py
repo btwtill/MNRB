@@ -180,6 +180,24 @@ class NodeEditorNode(Serializable):
         self.scene.removeNode(self)
         if REMOVE_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
 
+    def getInputNodesFromSocket(self, index):
+        input_socket = self.inputs[index]
+        if len(input_socket.edges) == 0: return None
+        connecting_edges = input_socket.edges
+        input_nodes = []
+
+        for edge in connecting_edges:
+            other_socket = edge.getOtherSocket(input_socket)
+            input_nodes.append(other_socket.node)
+
+    def getInputSocketValue(self, index):
+        input_socket = self.inputs[index]
+        if len(input_socket.edges) == 0: return None
+        connecting_edge = input_socket.edges[0]
+        other_socket = connecting_edge.getOtherSocket(input_socket)
+        socket_value = other_socket.socket_value
+        return socket_value
+
     def getNodeContentClass(self):
         return self.__class__.Node_Content_Class
 

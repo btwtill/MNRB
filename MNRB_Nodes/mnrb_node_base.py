@@ -564,6 +564,18 @@ class MNRB_Node(NodeEditorNode):
                 for index, guide in enumerate(self.guides):
                     guide.setPosition(self.guide_positions[index])
 
+    def getComponentPrefix(self):
+        return self.properties.component_side_prefix
+    
+    def getComponentName(self):
+        return self.properties.component_name
+    
+    def getInputConnectionValueAt(self, index):
+        prefix = self.getComponentPrefix()
+        component_name = self.getComponentName()
+        value = self.getInputSocketValue(index)
+        return prefix + component_name + "_" + value
+
     def setComponentGuideHiearchyName(self):
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix )
         self.guide_component_hierarchy = self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix
@@ -576,7 +588,7 @@ class MNRB_Node(NodeEditorNode):
                 guide.resize(size)
 
     def setComponentDeformRadius(self, size):
-        for deform in self.deforms:
+        for deform in self.static_deforms:
             if MC.objectExists(deform):
                 MC.setJointRadius(deform, size)
     

@@ -109,6 +109,9 @@ class NodeEditorEdge(Serializable):
         self.scene.removeEdge(self)
         self.grEdge = None
 
+    def getOtherSocket(self, given_socket):
+        return self.start_socket if given_socket == self.end_socket else self.end_socket
+
     def serialize(self):
 
         properties = self.properties.serialize()
