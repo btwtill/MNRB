@@ -36,6 +36,7 @@ class MNRB_Virtual_Hierarchy():
         self.guide_hierarchy_object = VirtualHierarchyObject(self, suffix = MNRB_Names.guide_hierarchy_suffix)
         self.rig_hierarchy_object = VirtualHierarchyObject(self, suffix = self.rig_hierarchy_suffix)
         self.skeleton_hierarchy_object = VirtualHierarchyObject(self, parent = self.rig_hierarchy_object, suffix = self.skeleton_hiearchy_suffix)
+        self.component_hierarchy_object = VirtualHierarchyObject(self, parent = self.rig_hierarchy_object, suffix = self.components_hiearchy_suffix)
 
     def connectCallbackToHierarchyHasChanged(self, callback):
         self._hierarchy_name_changed_listeners.append(callback)

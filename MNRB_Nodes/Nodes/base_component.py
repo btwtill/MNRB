@@ -47,6 +47,7 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
     
     def componentBuild(self):
         print("%s:: Building Component:: " % self)
+        super().componentBuild()
     
     def connectComponent(self):
         print("%s:: Connecting Component:: " % self)

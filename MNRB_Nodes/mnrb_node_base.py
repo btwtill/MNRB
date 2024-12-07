@@ -491,7 +491,10 @@ class MNRB_Node(NodeEditorNode):
         return True
     
     def componentBuild(self):
-        raise NotImplementedError
+        if self.scene.virtual_rig_hierarchy.rig_hierarchy_object.ensureExistence():
+            current_rig_hierarchy = self.scene.virtual_rig_hierarchy.rig_hierarchy_object.name
+            if self.scene.virtual_rig_hierarchy.component_hierarchy_object.ensureExistence():
+                current_component_hierarchy = self.scene.virtual_rig_hierarchy.component_hierarchy_object.name
     
     def connectComponent(self):
         raise NotImplementedError
@@ -554,6 +557,7 @@ class MNRB_Node(NodeEditorNode):
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
                 for guide in self.guides:
                     guide.updateName(self.properties.component_name, has_duplicate_name)
+
             else:
                 self.setComponentGuideHiearchyName()
 
