@@ -9,7 +9,7 @@ class deform(Serializable):
 
         self.node = node
         self.deform_name = name
-        self.name = self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.deform_name +  MNRB_Names.deform_suffix
+        self.name = self.assembleFullName()
 
         self.parent = parent
 
@@ -30,8 +30,21 @@ class deform(Serializable):
         if self.exists():
             MC.deleteNode(self.name)
     
+    def assembleFullName(self):
+        return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.deform_name +  MNRB_Names.deform_suffix
+    
     def updateName(self, has_duplicate_names):
-        pass
+        if self.exists():
+            new_name = self.assembleFullName()
+
+            if self.name == new_name:
+                return
+            
+            if has_duplicate_names:
+                duplicates = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name, new_name)
+                if duplicates != []:
+                    new_name = new_name + str(duplicates[1])
+                self.name = MC.renameObject(self.name, new_name)
 
     def serialize(self):
         serialized_data = OrderedDict([
@@ -47,7 +60,7 @@ class deform(Serializable):
         if restore_id: self.id = data['id']
         self.deform_name = data['deform_name']
 
-        self.name = self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.deform_name + MNRB_Names.deform_suffix
+        self.name = self.assembleFullName()
 
         if data['parent'] is not None:
             hashmap[self.id] = data['parent']

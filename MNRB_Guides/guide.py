@@ -13,7 +13,7 @@ class guideShapeType(Enum):
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name, position = (0, 0, 0), deserialized = False) -> None:
+    def __init__(self, node, name = "", position = (0, 0, 0), deserialized = False) -> None:
         super().__init__()
 
         self.node = node
@@ -21,7 +21,7 @@ class guide(Serializable):
         self._guide_type = guideShapeType.sphere
 
         self.guide_name = name
-        self.name = self.node.properties.component_side_prefix + self.node.properties.component_name + "_" + self.guide_name + MNRB_Names.guide_suffix
+        self.name = self.assembleFullName()
         
         self._color = self.node.properties.component_color
 
@@ -30,11 +30,10 @@ class guide(Serializable):
 
         self.guide_shape = self.createGuideShape()
 
-        if not deserialized:
-            self.draw()
+        self.node.guides.append(self)
 
         if not deserialized:
-            self.node.guides.append(self)
+            self.draw()
 
     @property
     def guide_type(self): return self._guide_type
@@ -86,10 +85,13 @@ class guide(Serializable):
         self.guide_shape = self.determinGuideShape()(self)
         return self.guide_shape
 
-    def updateName(self, name, has_duplicate_name):
+    def assembleFullName(self):
+        return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.guide_name + MNRB_Names.guide_suffix
+
+    def updateName(self, has_duplicate_name):
         if self.exists():
             if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
-            new_name =  self.node.properties.component_side_prefix + name + "_" + self.guide_name + MNRB_Names.guide_suffix
+            new_name =  self.assembleFullName()
             if CLASS_DEBUG: print("%s:: --updateName:: new Guide Name:: " % self.__class__.__name__, new_name)
 
             if new_name == self.name:
@@ -112,4 +114,8 @@ class guide(Serializable):
 
     def deserialize(self, data, hashmap={}, restore_id=True):
         if restore_id: self.id = data['id']
+        self.guide_name = data['name']
+
+        self.assembleFullName()
+
         return True

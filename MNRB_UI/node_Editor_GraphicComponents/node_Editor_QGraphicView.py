@@ -366,7 +366,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self._drop_listeners.append(callback)
 
     def cutIntersectingEdges(self):
-        
         for index in range(len(self.cutting_edge.line_points ) -1):
 
             point1 = self.cutting_edge.line_points[index]

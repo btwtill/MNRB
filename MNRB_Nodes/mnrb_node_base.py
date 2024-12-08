@@ -277,7 +277,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.component_name = self.component_name_edit.text()
         if CLASS_DEBUG: print("%s:: --updateComponentName:: self.component_name:: " % self.__class__.__name__, self.component_name)
         self.node.title = self.component_name
-        self.node.updateGuideComponentHierarchyName()
+        self.node.updateNames()
 
     def updateComponentColor(self, index):
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
@@ -481,7 +481,6 @@ class MNRB_Node(NodeEditorNode):
                 current_skeleton_hierarchy = self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name
 
                 for deform in self.deforms:
-                    print(deform)
                     if deform.exists():
                         deform.remove()
         else:
@@ -514,7 +513,7 @@ class MNRB_Node(NodeEditorNode):
         else:
             return False
 
-    def updateGuideComponentHierarchyName(self):
+    def updateNames(self):
         if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Calling Update Guide Component Hierarchy Name: " % self.__class__.__name__)
         
         if self.is_silent:
@@ -559,6 +558,8 @@ class MNRB_Node(NodeEditorNode):
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
                 for guide in self.guides:
                     guide.updateName(self.properties.component_name, has_duplicate_name)
+                for deform in self.deforms:
+                    deform.updateName(has_duplicate_name)
 
             else:
                 self.setComponentGuideHiearchyName()
@@ -631,9 +632,8 @@ class MNRB_Node(NodeEditorNode):
         self.setComponentGuideHiearchyName()
 
         for guide_data in data['guides']:
-            new_guide = guide(self, guide_data['name'], deserialized=True)
+            new_guide = guide(self, deserialized=True)
             new_guide.deserialize(guide_data, hashmap, restore_id)
-            self.guides.append(new_guide)
 
         for deform_data  in data['deforms']:
             new_deform = deform(self, deserialized = True)
