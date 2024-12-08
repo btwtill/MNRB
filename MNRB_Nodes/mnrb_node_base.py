@@ -521,12 +521,14 @@ class MNRB_Node(NodeEditorNode):
         MC.parentObject(new_component_hierarchy, components_hierarchy)
         self.component_hierarchy = new_component_hierarchy
 
-        self.input_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.input_suffix)
+        self.input_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.input_hierarchy_suffix)
         MC.parentObject(self.input_hiearchy, self.component_hierarchy)
-        self.output_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.output_suffix)
+        self.output_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.output_hierarchy_suffix)
         MC.parentObject(self.output_hiearchy, self.component_hierarchy)
-        self.system_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.system_suffix)
+        self.system_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.system_hierarchy_suffix)
         MC.parentObject(self.system_hiearchy, self.component_hierarchy)
+        self.control_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.control_hierarchy_suffix)
+        MC.parentObject(self.control_hiearchy, self.component_hierarchy)
 
     def connectComponent(self):
         raise NotImplementedError

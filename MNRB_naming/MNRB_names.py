@@ -21,9 +21,10 @@ class MNRB_Names():
     guide_suffix = "_guide"
     rig_suffix = "_rig"
     component_suffix = "_cmpnt"
-    input_suffix = "_input_hrc"
-    output_suffix = "_output_hrc"
-    system_suffix = "_system_hrc"
+    input_hierarchy_suffix = "_input_hrc"
+    output_hierarchy_suffix = "_output_hrc"
+    system_hierarchy_suffix = "_system_hrc"
+    control_hierarchy_suffix = "_control_hrc"
 
     guide_hierarchy_suffix = "_guides_hrc"
     guide_component_hierarchy_suffix = "_cmpntGuides_hrc"
