@@ -521,6 +521,13 @@ class MNRB_Node(NodeEditorNode):
         MC.parentObject(new_component_hierarchy, components_hierarchy)
         self.component_hierarchy = new_component_hierarchy
 
+        self.input_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.input_suffix)
+        MC.parentObject(self.input_hiearchy, self.component_hierarchy)
+        self.output_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.output_suffix)
+        MC.parentObject(self.output_hiearchy, self.component_hierarchy)
+        self.system_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.system_suffix)
+        MC.parentObject(self.system_hiearchy, self.component_hierarchy)
+
     def connectComponent(self):
         raise NotImplementedError
 
