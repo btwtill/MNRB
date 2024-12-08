@@ -411,6 +411,7 @@ class MNRB_Node(NodeEditorNode):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)
 
         self._guide_component_hierarchy = None
+        self._component_hierarchy = None
 
         self._component_color = color
 
@@ -433,6 +434,12 @@ class MNRB_Node(NodeEditorNode):
     @guide_component_hierarchy.setter
     def guide_component_hierarchy(self, value):
         self._guide_component_hierarchy = value
+
+    @property
+    def component_hierarchy(self): return self._component_hierarchy
+    @component_hierarchy.setter
+    def component_hierarchy(self, value):
+        self._component_hierarchy = value
 
     def guideBuild(self) -> bool:
         if self.scene.virtual_rig_hierarchy.guide_hierarchy_object.ensureExistence():
@@ -490,13 +497,30 @@ class MNRB_Node(NodeEditorNode):
         self.deforms = []
 
         return True
-    
+
     def componentBuild(self):
+        self.staticBuild()
         if self.scene.virtual_rig_hierarchy.rig_hierarchy_object.ensureExistence():
             current_rig_hierarchy = self.scene.virtual_rig_hierarchy.rig_hierarchy_object.name
-            if self.scene.virtual_rig_hierarchy.component_hierarchy_object.ensureExistence():
-                current_component_hierarchy = self.scene.virtual_rig_hierarchy.component_hierarchy_object.name
-    
+        else:
+            return False
+        
+        if self.scene.virtual_rig_hierarchy.component_hierarchy_object.ensureExistence():
+            components_hierarchy = self.scene.virtual_rig_hierarchy.component_hierarchy_object.name
+        else:
+            return False
+        
+        component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.component_suffix
+
+        if MC.objectExists(component_hierarchy):
+            MC.deleteObjectWithHierarchy(component_hierarchy)
+        
+        new_component_hierarchy = MC.createTransform(component_hierarchy)
+
+        self.addComponentIdLink(new_component_hierarchy)
+        MC.parentObject(new_component_hierarchy, components_hierarchy)
+        self.component_hierarchy = new_component_hierarchy
+
     def connectComponent(self):
         raise NotImplementedError
 
@@ -555,9 +579,12 @@ class MNRB_Node(NodeEditorNode):
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
                 self.guide_component_hierarchy = new_name
                 
+                if MC.objectExists(self.component_hierarchy):
+                    self.component_hierarchy =MC.renameObject(self.component_hierarchy, self.getComponentPrefix() + self.getComponentName() + "_" + MNRB_Names.component_suffix)
+                
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
                 for guide in self.guides:
-                    guide.updateName(self.properties.component_name, has_duplicate_name)
+                    guide.updateName(has_duplicate_name)
                 for deform in self.deforms:
                     deform.updateName(has_duplicate_name)
 
@@ -593,8 +620,11 @@ class MNRB_Node(NodeEditorNode):
 
     def setComponentGuideHiearchyName(self):
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix )
-        self.guide_component_hierarchy = self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix
+        self.guide_component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.guide_component_hierarchy_suffix
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: New Guide Hierarchy Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
+
+    def setComponentHierarchyName(self):
+        self.component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.component_suffix
 
     def setComponentGuideSize(self, size):
         for guide in self.guides:
@@ -638,6 +668,7 @@ class MNRB_Node(NodeEditorNode):
         result = super().deserialize(data, hashmap, restore_id, exists)
 
         self.setComponentGuideHiearchyName()
+        self.setComponentHierarchyName()
 
         for guide_data in data['guides']:
             new_guide = guide(self, deserialized=True)

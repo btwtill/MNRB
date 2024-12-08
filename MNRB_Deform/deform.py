@@ -39,12 +39,12 @@ class deform(Serializable):
 
             if self.name == new_name:
                 return
-            
+
             if has_duplicate_names:
                 duplicates = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name, new_name)
                 if duplicates != []:
                     new_name = new_name + str(duplicates[1])
-                self.name = MC.renameObject(self.name, new_name)
+            self.name = MC.renameObject(self.name, new_name)
 
     def select(self):
         MC.selectObject(self.name)
