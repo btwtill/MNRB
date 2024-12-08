@@ -65,6 +65,17 @@ class MC:
         cmds.select(clear=True)
 
     @staticmethod
+    def isSelectionClear() -> bool:
+        return True if cmds.ls(sl=True) == [] else False
+
+    @staticmethod
+    def selectObject(node_name):
+        if MC.isSelectionClear():
+            cmds.select(node_name)
+        else:
+            cmds.select(node_name, add=True)
+
+    @staticmethod
     def getObjectShapeNode(object) -> str:
         return cmds.listRelatives(object, s=1)[0]
 

@@ -116,6 +116,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
         build_static = context_menu.addAction("build static")
         build_component = context_menu.addAction("build component")
         build_connected = context_menu.addAction("build connected")
+        context_menu.addSeparator()
+        select_guides = context_menu.addAction("Select Guides")
+        select_deforms = context_menu.addAction("Select Deforms")
 
         action = context_menu.exec_(self.mapToGlobal(event.pos()))
 
@@ -137,6 +140,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
         if selected and action == build_static: selected.staticBuild() if not selected.properties.is_disabled else print("Disabled")
         if selected and action == build_component: selected.componentBuild() if not selected.properties.is_disabled else print("Disabled")
         if selected and action == build_connected: selected.connectComponent() if not selected.properties.is_disabled else print("Disabled")
+        if selected and action == select_guides: selected.selectAllGuides()
+        if selected and action == select_deforms: selected.selectAllDeforms()
+
 
     def handleEdgeContextMenu(self, event):
         if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: Edge Context Menu Open:: ")

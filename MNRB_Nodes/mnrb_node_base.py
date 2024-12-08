@@ -571,6 +571,14 @@ class MNRB_Node(NodeEditorNode):
                 for index, guide in enumerate(self.guides):
                     guide.setPosition(self.guide_positions[index])
 
+    def selectAllGuides(self):
+        for guide in self.guides:
+            guide.select()
+
+    def selectAllDeforms(self):
+        for deform in self.deforms:
+            deform.select()
+
     def getComponentPrefix(self):
         return self.properties.component_side_prefix
     

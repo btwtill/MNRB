@@ -46,6 +46,9 @@ class deform(Serializable):
                     new_name = new_name + str(duplicates[1])
                 self.name = MC.renameObject(self.name, new_name)
 
+    def select(self):
+        MC.selectObject(self.name)
+
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),

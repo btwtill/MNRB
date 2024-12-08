@@ -73,6 +73,9 @@ class guide(Serializable):
     def setPosition(self, matrix):
         MC.setObjectWorldPositionMatrix(self.name, matrix)
 
+    def select(self):
+        MC.selectObject(self.name)
+
     def determinGuideShape(self):
         print("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)
         if self.guide_type.value == guideShapeType.locator.value:
@@ -115,7 +118,8 @@ class guide(Serializable):
     def deserialize(self, data, hashmap={}, restore_id=True):
         if restore_id: self.id = data['id']
         self.guide_name = data['name']
-
-        self.assembleFullName()
+ 
+        self.name = self.assembleFullName()
+        print(self.name)
 
         return True
