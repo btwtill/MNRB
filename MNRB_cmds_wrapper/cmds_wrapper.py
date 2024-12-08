@@ -121,11 +121,6 @@ class MC:
     def listDestinationConnections(node, attribute) -> list:
         return cmds.listConnections(f"{node}.{attribute}", destination = True)
 
-    #joint specific methods
-    @staticmethod
-    def setJointRadius(joint, radius) -> None:
-        cmds.setAttr(f"{joint}.radius", radius)
-
     #nurbs methods
     @staticmethod
     def createNurbsSphere(name) -> str:
@@ -188,12 +183,17 @@ class MC:
     def setObjectWorldPositionMatrix(object_name, matrix):
         cmds.xform(object_name, matrix=matrix, worldSpace=True)
 
+    #joint specific methods
     @staticmethod
     def createJoint(name) -> str:
         new_joint = cmds.joint(name = name)
         MC.clearSelection()
         return new_joint
     
+    @staticmethod
+    def setJointRadius(joint, radius) -> None:
+        cmds.setAttr(f"{joint}.radius", radius)
+
     @staticmethod
     def setJointPositionMatrix(name, matrix, world_space = True):
         cmds.xform(name, worldSpace=world_space, matrix = matrix)

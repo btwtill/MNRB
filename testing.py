@@ -123,6 +123,9 @@ importlib.reload(NodeEditorRegistrationException)
 import MNRB.MNRB_Guides.locator_guide_shape as MNRBLocatorGuide
 importlib.reload(MNRBLocatorGuide)
 
+import MNRB.MNRB_Deform.deform as MNRBDeform
+importlib.reload(MNRBDeform)
+
 import MNRB.MNRB_Guides.nurbs_shpere_guide_shape as MNRBNurbsSphereGuide
 importlib.reload(MNRBNurbsSphereGuide)
 

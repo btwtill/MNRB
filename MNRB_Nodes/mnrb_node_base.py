@@ -11,6 +11,7 @@ from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
 from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringSidePrefixButton #type: ignore
+from MNRB.MNRB_Deform.deform import deform #type: ignore
 
 CLASS_DEBUG = True
 VALIDATE_DEBUG = True
@@ -417,7 +418,6 @@ class MNRB_Node(NodeEditorNode):
         self.guide_positions = []
 
         self.controls = []
-        self.static_deforms = []
         self.deforms = []
 
         self.is_guide_build = False
@@ -479,14 +479,16 @@ class MNRB_Node(NodeEditorNode):
             current_rig_hierarchy = self.scene.virtual_rig_hierarchy.rig_hierarchy_object.name
             if self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.ensureExistence():
                 current_skeleton_hierarchy = self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name
-                for deform in self.static_deforms:
-                    if MC.objectExists(deform):
-                        MC.deleteNode(deform)
+
+                for deform in self.deforms:
+                    print(deform)
+                    if deform.exists():
+                        deform.remove()
         else:
             if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
         
-        self.static_deforms = []
+        self.deforms = []
 
         return True
     
@@ -617,10 +619,9 @@ class MNRB_Node(NodeEditorNode):
         guides = []
         for guide in self.guides: guides.append(guide.serialize())
         result_data['guides'] = guides
-
-        static_deforms = []
-        for deform in self.static_deforms: static_deforms.append(deform)
-        result_data['static_deforms'] = static_deforms
+        deforms = []
+        for deform in self.deforms: deforms.append(deform.serialize())
+        result_data['deforms'] = deforms
 
         return result_data
     
@@ -633,8 +634,9 @@ class MNRB_Node(NodeEditorNode):
             new_guide = guide(self, guide_data['name'], deserialized=True)
             new_guide.deserialize(guide_data, hashmap, restore_id)
             self.guides.append(new_guide)
-        
-        for deform in data['static_deforms']:
-            self.static_deforms.append(deform)
 
+        for deform_data  in data['deforms']:
+            new_deform = deform(self, deserialized = True)
+            new_deform.deserialize(deform_data, hashmap, restore_id)
+        
         return True

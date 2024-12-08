@@ -87,7 +87,7 @@ class guide(Serializable):
         return self.guide_shape
 
     def updateName(self, name, has_duplicate_name):
-        if MC.objectExists(self.name):
+        if self.exists():
             if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
             new_name =  self.node.properties.component_side_prefix + name + "_" + self.guide_name + MNRB_Names.guide_suffix
             if CLASS_DEBUG: print("%s:: --updateName:: new Guide Name:: " % self.__class__.__name__, new_name)
