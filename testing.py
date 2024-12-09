@@ -42,6 +42,9 @@ importlib.reload(MNRBNodeBase)
 import MNRB.MNRB_cmds_wrapper.cmds_wrapper as MayaCommands
 importlib.reload(MayaCommands)
 
+import MNRB.MNRB_cmds_wrapper.matrix_functions as MatrixFunctions
+importlib.reload(MatrixFunctions)
+
 import MNRB.MNRB_UI.mnrb_editor as mnrb_editor
 importlib.reload(mnrb_editor)
 

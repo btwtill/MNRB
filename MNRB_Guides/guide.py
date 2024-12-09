@@ -5,6 +5,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #t
 from MNRB.MNRB_Guides.locator_guide_shape import LocatorGuideShape #type: ignore
 from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
 CLASS_DEBUG = True
 
@@ -64,8 +65,12 @@ class guide(Serializable):
     def exists(self) -> bool:
         return MC.objectExists(self.name)
 
-    def getPosition(self):
-        return MC.getObjectWorldPositionMatrix(self.name)
+    def getPosition(self, reset_scale = True):
+        guide_pos = MC.getObjectWorldPositionMatrix(self.name)
+        if not reset_scale:
+            return guide_pos
+        guide_noScale_pos = Matrix_functions.removeScaleFromMatrix(guide_pos)
+        return guide_noScale_pos
 
     def setColor(self):
         self.guide_shape.updateColor()

@@ -459,7 +459,7 @@ class MNRB_Node(NodeEditorNode):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
             for guide in self.guides:
                 if guide.exists():
-                    self.guide_positions.append(guide.getPosition())
+                    self.guide_positions.append(guide.getPosition(reset_scale = False))
                 else:
                     self.guide_positions.append(IDENITY_MATRIX)
             
