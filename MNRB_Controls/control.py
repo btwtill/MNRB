@@ -7,7 +7,7 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Controls.control_shape import control_shape #type: ignore
 
 class control(Serializable):
-    def __init__(self, node, name = "", parent = None, control_type = 0, deserialized = False):
+    def __init__(self, node, name = "", control_type = 0, deserialized = False):
         super().__init__()
 
         self.node = node
@@ -15,8 +15,6 @@ class control(Serializable):
          
         self.control_name  = name
         self.name = self.assembleFullName()
-
-        self.parent = parent
 
         self._control_type = control_type
         self.shape_path = self.determinShapePath()
@@ -38,8 +36,6 @@ class control(Serializable):
 
     def draw(self):
         self.control_shape.draw()
-        if self.parent is not None:
-            MC.parentObject(self.name, self.parent.name)
 
     def exists(self):
         return MC.objectExists(self.name)
@@ -69,7 +65,6 @@ class control(Serializable):
         serialized_data = OrderedDict([
             ('id', self.id),
             ('control_name', self.control_name),
-            ('parent', self.parent.id if self.parent is not None else None),
             ('control_type', self.control_type)
         ])
         return serialized_data

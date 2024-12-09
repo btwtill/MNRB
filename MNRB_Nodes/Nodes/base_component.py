@@ -65,8 +65,9 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         global_control.setPosition(guide_pos)
         global_control.setScale(2)
 
-        global_offset_control = control(self, "globalOffset", parent = global_control)
+        global_offset_control = control(self, "globalOffset")
         global_offset_control.setPosition(guide_pos)
+        MC.parentObject(global_offset_control.name, global_control.name)
         
 
         MC.parentObject(global_control.name, self.control_hierarchy)

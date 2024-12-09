@@ -4,14 +4,12 @@ from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 class deform(Serializable):
-    def __init__(self, node, name = "", parent = None, deserialized = False):
+    def __init__(self, node, name = "", deserialized = False):
         super().__init__()
 
         self.node = node
         self.deform_name = name
         self.name = self.assembleFullName()
-
-        self.parent = parent
 
         self.node.deforms.append(self)
 
@@ -21,8 +19,6 @@ class deform(Serializable):
     def draw(self):
         MC.createJoint(self.name)
         self.resize(self.node.properties.deform_size)
-        if self.parent is not None:
-            MC.parentObject(self.name, self.parent.name)
     
     def exists(self):
         return MC.objectExists(self.name)
@@ -57,8 +53,7 @@ class deform(Serializable):
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
-            ('deform_name', self.deform_name),
-            ('parent', self.parent.id if self.parent is not None else None)
+            ('deform_name', self.deform_name)
         ])
 
         return serialized_data
@@ -70,8 +65,6 @@ class deform(Serializable):
 
         self.name = self.assembleFullName()
 
-        if data['parent'] is not None:
-            hashmap[self.id] = data['parent']
 
         return True
     

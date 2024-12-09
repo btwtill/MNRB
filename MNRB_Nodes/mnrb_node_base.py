@@ -774,5 +774,5 @@ class MNRB_Node(NodeEditorNode):
         for control_data  in data['controls']:
             new_control = control(self, deserialized = True)
             new_control.deserialize(control_data, hashmap, restore_id)
-        
+
         return True
