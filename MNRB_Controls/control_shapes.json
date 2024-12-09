@@ -3,6 +3,10 @@
         {
             "name": "circle",
             "path": "control_shapes/circle_shape.mb"
+        },
+        {
+            "name": "four_arrow_circle",
+            "path": "control_shapes/four_arrow_circle_shape.mb"
         }
     ]
 }

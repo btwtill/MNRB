@@ -30,7 +30,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.guide_size = 1.0
         self.deform_size = 1.0
-        self.control_size = 1.0
+        self.control_size = 5.0
 
         self.is_guide_slider_edit_silent = False
         self.is_guide_slider_silent = False
@@ -570,9 +570,10 @@ class MNRB_Node(NodeEditorNode):
             components_hierarchy = self.scene.virtual_rig_hierarchy.component_hierarchy_object.name
         else:
             return False
-
-        if MC.objectExists(self.component_hierarchy):
-            MC.deleteObjectWithHierarchy(self.component_hierarchy)
+        
+        if self.component_hierarchy is not None:
+            if MC.objectExists(self.component_hierarchy):
+                MC.deleteObjectWithHierarchy(self.component_hierarchy)
 
         component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.component_suffix
         new_component_hierarchy = MC.createTransform(component_hierarchy)
@@ -589,6 +590,8 @@ class MNRB_Node(NodeEditorNode):
         MC.parentObject(self.system_hiearchy, self.component_hierarchy)
         self.control_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.control_hierarchy_suffix)
         MC.parentObject(self.control_hierarchy, self.component_hierarchy)
+
+        self.controls = []
 
         return True
 

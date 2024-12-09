@@ -61,6 +61,10 @@ class control(Serializable):
         MC.setObjectWorldPositionMatrix(self.name, matrix)
         MC.applyTransformScale(self.name)
 
+    def setScale(self, scale):
+        MC.scaleTransform(self.name, [scale, scale, scale])
+        MC.applyTransformScale(self.name)
+
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),

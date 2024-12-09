@@ -28,7 +28,7 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
     Node_Properties_Class = MNRB_Node_BaseComponent_Properties
 
     def __init__(self, scene):
-        super().__init__(scene, inputs = [], outputs=[["base_ctrl", SocketTypes.srt, True], ["base_def", SocketTypes.deform, True]])
+        super().__init__(scene, inputs = [], outputs=[["global_ctrl", SocketTypes.srt, True], ["global_def", SocketTypes.deform, True]])
 
     def guideBuild(self):
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
@@ -48,7 +48,7 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         
         guide_pos = self.guides[0].getPosition()
 
-        base_deform = deform(self, "base")
+        base_deform = deform(self, "global")
         MC.setJointPositionMatrix(base_deform.name, guide_pos)
         MC.parentObject(base_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
         
@@ -61,10 +61,15 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         
         guide_pos = self.guides[0].getPosition(reset_scale = False)
 
-        base_control = control(self, "base")
-        base_control.setPosition(guide_pos)
+        global_control = control(self, "global",  control_type = 1)
+        global_control.setPosition(guide_pos)
+        global_control.setScale(2)
 
-        MC.parentObject(base_control.name, self.control_hierarchy)
+        global_offset_control = control(self, "globalOffset", parent = global_control)
+        global_offset_control.setPosition(guide_pos)
+        
+
+        MC.parentObject(global_control.name, self.control_hierarchy)
     
     def connectComponent(self):
         print("%s:: Connecting Component:: " % self)
