@@ -2,7 +2,7 @@ import os
 import json
 import maya.cmds as cmds # type: ignore
 from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import Qt, QFile #type:  ignore 
+from PySide2.QtCore import Qt, QFile, QSettings, QPoint, QSize #type:  ignore 
 from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
@@ -71,7 +71,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def initUI(self):
         self.setGeometry(200, 200, 1200, 700)
-
+        self.readSettings()
+        
         self.createEditorActions()
         self.setupMenuBar()
         
@@ -91,7 +92,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.onOpenProject()
 
         self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
-            
+
+        
+
     def setupNodeEditorTab(self):
         #Set Up the NodeEditor Tab Object
         self.nodeEditorTabWindow = mnrb_NodeEditorTab()
@@ -497,6 +500,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         if self.projectNeedsSaving():
+            self.writeSettings()
             event.accept()
         else:
             event.ignore()
@@ -612,6 +616,20 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 title += "*"
 
         self.setWindowTitle(title)
+
+    def readSettings(self):
+        if CLASS_DEBUG: print("MNRB_EDITOR: Reading Settings...")
+        settings = QSettings("tlpf", "MNRB")
+        pos = settings.value('pos', QPoint(200, 200))
+        size = settings.value('size', QSize(400, 400))
+        self.move(pos)
+        self.resize(size)
+
+    def writeSettings(self):
+        if CLASS_DEBUG: print("MNRB_EDITOR: Writing Settings...")
+        settings = QSettings("tlpf", "MNRB")
+        settings.setValue('pos', self.pos())
+        settings.setValue('size', self.size())
 
     def validateProjectDirectory(self, path):
         project_path_content = os.listdir(path)
