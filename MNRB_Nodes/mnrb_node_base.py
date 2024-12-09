@@ -7,9 +7,9 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNod
 from MNRB.global_variables import IDENITY_MATRIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
-from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
-from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
-from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
+from MNRB.MNRB_Colors.colors import MNRBSceneColors #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringSidePrefixButton #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 

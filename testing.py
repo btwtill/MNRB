@@ -6,7 +6,7 @@ importlib.reload(NodeEditorConf)
 import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes as MNRBSocketTypes
 importlib.reload(MNRBSocketTypes)
 
-import MNRB.MNRB_naming.MNRB_names as MNRBNaming
+import MNRB.MNRB_Naming.MNRB_names as MNRBNaming
 importlib.reload(MNRBNaming)
 
 import MNRB.MNRB_Nodes.Nodes.__init__ as Init
@@ -15,7 +15,7 @@ importlib.reload(Init)
 import MNRB.global_variables as GlobalVar
 importlib.reload(GlobalVar)
 
-import MNRB.MNRB_colors.colors as MNRBColors
+import MNRB.MNRB_Colors.colors as MNRBColors
 importlib.reload(MNRBColors)
 
 import MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button as MNRBSideButton

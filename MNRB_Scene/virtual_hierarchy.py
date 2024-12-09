@@ -1,5 +1,5 @@
 from MNRB.MNRB_Scene.virtual_hierarchy_object import VirtualHierarchyObject #type: ignore
-from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 
 CLASS_DEBUG = True
 
