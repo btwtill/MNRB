@@ -143,6 +143,12 @@ class MC:
     def setNurbsSphereShapeRadius(object, size) -> None:
         shape_node = MC.listSourceConnections(object, "create")[0]
         cmds.setAttr(f"{shape_node}.radius", size)
+
+    @staticmethod
+    def createNurbsCircle(name):
+        new_circle = cmds.circle(name = name)
+        MC.clearSelection()
+        return new_circle[0]
     
     #lambert methods
     @staticmethod

@@ -4,6 +4,8 @@ from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
+from MNRB.MNRB_Deform.deform import deform #type: ignore
+from MNRB.MNRB_Controls.control import control #type: ignore
 
 GUIDE_DEBUG = True
 
@@ -44,11 +46,21 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         if not super().staticBuild():
             return False
         
+        guide_pos = self.guides[0].getPosition()
+
+        base_deform = deform(self, "base")
+        MC.setJointPositionMatrix(base_deform.name, guide_pos)
+        MC.parentObject(base_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
+        
         return True
     
     def componentBuild(self):
         print("%s:: Building Component:: " % self)
-        super().componentBuild()
+        if not super().componentBuild():
+            return False
+
+        base_control = control(self, "base")
+        MC.parentObject(base_control.name, self.control_hierarchy)
     
     def connectComponent(self):
         print("%s:: Connecting Component:: " % self)

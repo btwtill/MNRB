@@ -12,6 +12,7 @@ from MNRB.MNRB_Colors.colors import MNRBSceneColors #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringSidePrefixButton #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
+from MNRB.MNRB_Controls.control import control #type: ignore
 
 CLASS_DEBUG = True
 VALIDATE_DEBUG = True
@@ -527,8 +528,10 @@ class MNRB_Node(NodeEditorNode):
         MC.parentObject(self.output_hiearchy, self.component_hierarchy)
         self.system_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.system_hierarchy_suffix)
         MC.parentObject(self.system_hiearchy, self.component_hierarchy)
-        self.control_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.control_hierarchy_suffix)
-        MC.parentObject(self.control_hiearchy, self.component_hierarchy)
+        self.control_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.control_hierarchy_suffix)
+        MC.parentObject(self.control_hierarchy, self.component_hierarchy)
+
+        return True
 
     def connectComponent(self):
         raise NotImplementedError
@@ -663,12 +666,18 @@ class MNRB_Node(NodeEditorNode):
     def serialize(self):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code
+
         guides = []
         for guide in self.guides: guides.append(guide.serialize())
         result_data['guides'] = guides
+
         deforms = []
         for deform in self.deforms: deforms.append(deform.serialize())
         result_data['deforms'] = deforms
+
+        controls =[]
+        for control in self.controls: controls.append(control.serialize())
+        result_data['controls'] = controls
 
         return result_data
     
@@ -685,5 +694,9 @@ class MNRB_Node(NodeEditorNode):
         for deform_data  in data['deforms']:
             new_deform = deform(self, deserialized = True)
             new_deform.deserialize(deform_data, hashmap, restore_id)
+
+        for control_data  in data['controls']:
+            new_control = control(self, deserialized = True)
+            new_control.deserialize(control_data, hashmap, restore_id)
         
         return True

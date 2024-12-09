@@ -77,9 +77,9 @@ class guide(Serializable):
         MC.selectObject(self.name)
 
     def determinGuideShape(self):
-        print("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)
+        if CLASS_DEBUG: print("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)
         if self.guide_type.value == guideShapeType.locator.value:
-            print("GUIDE:: --determinGuideShape::  Return Value:: ", LocatorGuideShape)
+            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", LocatorGuideShape)
             return LocatorGuideShape
         if self.guide_type.value == guideShapeType.sphere.value:
             return NurbsShereGuideShape

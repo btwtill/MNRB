@@ -39,5 +39,6 @@ class MNRB_Names():
     guide_shader_suffix = "_lambert_MNRB_guide_shader_SG"
 
     deform_suffix = "_def"
+    control_suffix = "_ctrl"
 
     

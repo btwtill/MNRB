@@ -3,9 +3,9 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
+from MNRB.MNRB_Controls.control import control #type: ignore
 
 GUIDE_DEBUG = True
 
@@ -45,6 +45,9 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
 
         MC.setJointPositionMatrix(single_deform.name, guide_pos)
         MC.parentObject(single_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
+
+        single_control = control(self, "singleCtrl")
+        MC.parentObject(single_control.name, self.control_hierarchy)
 
         return True
     
