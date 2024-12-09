@@ -3,6 +3,7 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 
 GUIDE_DEBUG = True
 
@@ -25,7 +26,7 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
     Node_Properties_Class = MNRB_Node_BaseComponent_Properties
 
     def __init__(self, scene):
-        super().__init__(scene, inputs = [], outputs=[["base_ctrl", 1, True], ["base_def", 2, True]])
+        super().__init__(scene, inputs = [], outputs=[["base_ctrl", SocketTypes.srt, True], ["base_def", SocketTypes.deform, True]])
 
     def guideBuild(self):
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)

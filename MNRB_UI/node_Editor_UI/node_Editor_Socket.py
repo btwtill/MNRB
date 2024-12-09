@@ -2,6 +2,7 @@ from collections import OrderedDict
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket # type: ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 
 LEFT = 1
 RIGHT = 2
@@ -10,7 +11,7 @@ REMOVE_DEBUG = False
 SERIALIZE_DEBUG = True
 
 class NodeEditor_Socket(Serializable):
-    def __init__(self, node, index=0, position=LEFT, socket_type=0, socket_value ="undefined", accept_multi_edges=True, index_on_drawn_node_side = 1, is_input = True ):
+    def __init__(self, node, index=0, position=LEFT, socket_type=SocketTypes.srt, socket_value ="undefined", accept_multi_edges=True, index_on_drawn_node_side = 1, is_input = True ):
         super().__init__()
 
         self.node = node
