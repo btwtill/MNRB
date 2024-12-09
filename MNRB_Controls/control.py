@@ -40,6 +40,9 @@ class control(Serializable):
     def exists(self):
         return MC.objectExists(self.name)
 
+    def updateColor(self, color):
+        self.control_shape.updateColor(color.value)
+
     def select(self):
         MC.selectObject(self.name)
 
@@ -77,5 +80,7 @@ class control(Serializable):
 
         self.control_name = data['control_name']
         self.control_type = data['control_type']
+
+        self.name = self.assembleFullName()
 
         return True

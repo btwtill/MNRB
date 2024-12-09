@@ -329,10 +329,12 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index)))
         self.component_color = MNRBSceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index))
+        
         if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting new Component Color:: " % self.__class__.__name__, self.component_color)
 
         if not self.is_silent:
             self.node.setGuideColors()
+            self.node.setControlColors()
 
     def onGuideSizeEditChange(self):
         if not self.is_guide_slider_edit_silent:
@@ -473,8 +475,6 @@ class MNRB_Node(NodeEditorNode):
 
         self._guide_component_hierarchy = None
         self._component_hierarchy = None
-
-        self._component_color = color
 
         self.guides = []
         self.guide_positions = []
@@ -724,6 +724,10 @@ class MNRB_Node(NodeEditorNode):
         if CLASS_DEBUG: print("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)
         for guide in self.guides:
             guide.color = self.properties.component_color
+
+    def setControlColors(self):
+        for control in self.controls:
+            control.updateColor(self.properties.component_color)
 
     def remove(self):
         super().remove()

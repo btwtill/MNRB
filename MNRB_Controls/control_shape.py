@@ -20,5 +20,13 @@ class control_shape():
         MC.mergeNamespaceWithRoot(self.default_namespace)
         self.control.name = MC.renameObject(imported_control_name, self.control.name)
 
+        self.updateColor(self.control.node.properties.component_color.value)
+
         MC.scaleTransform(self.control.name, [self.control.node.properties.control_size, self.control.node.properties.control_size, self.control.node.properties.control_size])
         MC.applyTransformScale(self.control.name)
+
+    def updateColor(self, color):
+        all_shapes = MC.getShapeNodes(self.control.name)
+
+        for shape in all_shapes:
+            MC.setShapeNodeColor(shape, color)

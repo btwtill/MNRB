@@ -84,13 +84,17 @@ class MC:
         return cmds.listRelatives(object, s=1)
 
     @staticmethod
+    def setShapeNodeColor(shape_node, color):
+        cmds.setAttr(f"{shape_node}.overrideEnabled", 1)
+        cmds.setAttr(f"{shape_node}.overrideRGBColors", 1)
+        cmds.setAttr(f"{shape_node}.overrideColorR", color[0])
+        cmds.setAttr(f"{shape_node}.overrideColorG", color[1])
+        cmds.setAttr(f"{shape_node}.overrideColorB", color[2])
+
+    @staticmethod
     def setObjectDisplayColor(object, color) -> None:
         object_shape_node = MC.getObjectShapeNode(object)
-        cmds.setAttr(f"{object_shape_node}.overrideEnabled", 1)
-        cmds.setAttr(f"{object_shape_node}.overrideRGBColors", 1)
-        cmds.setAttr(f"{object_shape_node}.overrideColorR", color[0])
-        cmds.setAttr(f"{object_shape_node}.overrideColorG", color[1])
-        cmds.setAttr(f"{object_shape_node}.overrideColorB", color[2])
+        MC.setShapeNodeColor(object_shape_node, color)
 
     @staticmethod
     def createSpaceLocator(position) -> str:
@@ -246,3 +250,7 @@ class MC:
     @staticmethod
     def scaleTransform(object_name, scale):
         cmds.scale(scale[0], scale[1], scale[2], object_name, relative =True)
+
+    @staticmethod
+    def getShapeNodes(object_name) -> list:
+        return cmds.listRelatives(object_name, children = True, shapes=True)
