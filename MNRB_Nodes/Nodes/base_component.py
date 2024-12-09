@@ -7,7 +7,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #typ
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 
-GUIDE_DEBUG = True
+GUIDE_DEBUG = False
 
 class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
         

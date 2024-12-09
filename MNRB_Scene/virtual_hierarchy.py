@@ -1,7 +1,7 @@
 from MNRB.MNRB_Scene.virtual_hierarchy_object import VirtualHierarchyObject #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class MNRB_Virtual_Hierarchy():
     def __init__(self, scene) -> None:

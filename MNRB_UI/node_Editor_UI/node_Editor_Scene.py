@@ -15,9 +15,9 @@ from MNRB.MNRB_Scene.virtual_hierarchy import MNRB_Virtual_Hierarchy #type: igno
 from MNRB.MNRB_Colors.colors import MNRBSceneColors #type: ignore
 
 CLASS_DEBUG = False
-SERIALIZE_DEBUG = True
-SELECTION_DEBUG = True
-BUILD_DEBUG = True
+SERIALIZE_DEBUG = False
+SELECTION_DEBUG = False
+BUILD_DEBUG = False
 
 class NodeEditorScene(Serializable):
     def __init__(self):

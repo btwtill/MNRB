@@ -4,8 +4,8 @@ from PySide2.QtCore import QSize  #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 EVENT_DEBUG = False
-CLASS_DEBUG = True
-SERIALIZEATION_DEBUG = True
+CLASS_DEBUG = False
+SERIALIZEATION_DEBUG = False
 
 class NodeEditorPropertiesWidget(Serializable, QWidget):
     def __init__(self, parent=None) -> None:

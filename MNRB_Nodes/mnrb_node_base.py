@@ -14,9 +14,9 @@ from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringS
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 
-CLASS_DEBUG = True
-VALIDATE_DEBUG = True
-GUIDE_DEBUG = True
+CLASS_DEBUG = False
+VALIDATE_DEBUG = False
+GUIDE_DEBUG = False
 
 class MNRB_NodeProperties(NodeEditorNodeProperties):
     def __init__(self, node):

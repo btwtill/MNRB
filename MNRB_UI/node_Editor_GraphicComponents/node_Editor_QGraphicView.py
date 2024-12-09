@@ -10,7 +10,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #t
 
 EVENT_DEBUG = False
 CLASS_DEBUG = False
-SCENE_DEBUG = True
+SCENE_DEBUG = False
 MOVE_DEBUG = False
 WHEEL_DEBUG = False
 REMOVE_DEBUG = False

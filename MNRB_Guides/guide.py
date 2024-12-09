@@ -7,7 +7,7 @@ from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class guideShapeType(Enum):
     locator = 1

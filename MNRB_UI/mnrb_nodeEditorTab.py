@@ -10,7 +10,7 @@ from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
 
 DRAGDROP_DEBUG = False
-CONTEXT_DEBUG = True
+CONTEXT_DEBUG = False
 
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):

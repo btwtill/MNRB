@@ -10,8 +10,8 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_BEZIER, EDGE_
 from MNRB.MNRB_Nodes.node_Editor_conf import MNRB_NODES #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import ICONPATH #type: ignore
 
-CLASS_DEBUG = True
-CONTEXT_DEBUG = True
+CLASS_DEBUG = False
+CONTEXT_DEBUG = False
 
 class NodeEditorWidget(QtWidgets.QWidget):
     def __init__(self, property_widget = None, parent=None):

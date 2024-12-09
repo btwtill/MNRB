@@ -7,7 +7,7 @@ from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 
-GUIDE_DEBUG = True
+GUIDE_DEBUG = False
 
 class MNRB_Node_SingleDeformComponent_Properties(MNRB_NodeProperties): pass
 
@@ -57,7 +57,7 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
 
         single_control = control(self, "singleCtrl")
         single_control.setPosition(guide_pos)
-        
+
         MC.parentObject(single_control.name, self.control_hierarchy)
         
     def connectComponent(self):

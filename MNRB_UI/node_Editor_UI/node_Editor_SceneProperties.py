@@ -6,8 +6,8 @@ from PySide2.QtGui import QPixmap, QIcon #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
 
 EVENT_DEBUG = False
-VALIDATION_DEBUG = True
-SERIALIZATION_DEBUG = True
+VALIDATION_DEBUG = False
+SERIALIZATION_DEBUG = False
 
 class ScenePropertyStateIcon(Enum):
     valid = os.path.join(os.path.dirname(__file__), "..", "icons", "valid.png")

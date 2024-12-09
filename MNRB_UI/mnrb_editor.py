@@ -72,7 +72,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def initUI(self):
         self.setGeometry(200, 200, 1200, 700)
         self.readSettings()
-        
+
         self.createEditorActions()
         self.setupMenuBar()
         
@@ -92,8 +92,6 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.onOpenProject()
 
         self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
-
-        
 
     def setupNodeEditorTab(self):
         #Set Up the NodeEditor Tab Object
