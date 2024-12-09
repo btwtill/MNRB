@@ -40,6 +40,9 @@ class control(Serializable):
     def exists(self):
         return MC.objectExists(self.name)
 
+    def select(self):
+        MC.selectObject(self.name)
+
     def determinShapePath(self):
         control_shape_dict = self.loadControlShapes()
 
