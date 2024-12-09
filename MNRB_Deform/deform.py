@@ -30,6 +30,10 @@ class deform(Serializable):
         if self.exists():
             MC.deleteNode(self.name)
     
+    def resize(self, size):
+        if self.exists():
+            MC.setJointRadius(self.name, size)
+
     def assembleFullName(self):
         return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.deform_name +  MNRB_Names.deform_suffix
     

@@ -3,6 +3,9 @@ import importlib
 import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf
 importlib.reload(NodeEditorConf)
 
+import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes as MNRBSocketTypes
+importlib.reload(MNRBSocketTypes)
+
 import MNRB.MNRB_naming.MNRB_names as MNRBNaming
 importlib.reload(MNRBNaming)
 

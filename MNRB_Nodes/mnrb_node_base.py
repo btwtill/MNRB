@@ -642,9 +642,8 @@ class MNRB_Node(NodeEditorNode):
                 guide.resize(size)
 
     def setComponentDeformRadius(self, size):
-        for deform in self.static_deforms:
-            if MC.objectExists(deform):
-                MC.setJointRadius(deform, size)
+        for deform in self.deforms:
+            deform.resize(size)
     
     def setGuideColors(self):
         if CLASS_DEBUG: print("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)

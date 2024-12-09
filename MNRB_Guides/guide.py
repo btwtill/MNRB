@@ -120,6 +120,5 @@ class guide(Serializable):
         self.guide_name = data['name']
  
         self.name = self.assembleFullName()
-        print(self.name)
-
+        
         return True
