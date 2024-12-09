@@ -657,11 +657,22 @@ class MNRB_Node(NodeEditorNode):
         super().remove()
         if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
         self.removeGuideHierarchyFromViewport()
+        self.removeDeformsFromViewport()
+        self.removeComponentFromViewport()
 
     def removeGuideHierarchyFromViewport(self):
         if self.guide_component_hierarchy is not None:
             if MC.objectExists(self.guide_component_hierarchy):
                 MC.deleteObjectWithHierarchy(self.guide_component_hierarchy)
+
+    def removeDeformsFromViewport(self):
+        for deform in self.deforms:
+            if deform.exists():
+                deform.remove()
+
+    def removeComponentFromViewport(self):
+        if MC.objectExists(self.component_hierarchy):
+            MC.deleteObjectWithHierarchy(self.component_hierarchy)
 
     def serialize(self):
         result_data = super().serialize()

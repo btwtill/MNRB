@@ -20,6 +20,7 @@ class deform(Serializable):
 
     def draw(self):
         MC.createJoint(self.name)
+        self.resize(self.node.properties.deform_size)
         if self.parent is not None:
             MC.parentObject(self.name, self.parent.name)
     
