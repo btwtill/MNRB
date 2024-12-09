@@ -30,11 +30,14 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.guide_size = 1.0
         self.deform_size = 1.0
+        self.control_size = 1.0
 
         self.is_guide_slider_edit_silent = False
         self.is_guide_slider_silent = False
         self.is_deform_slider_edit_silent = False
         self.is_deform_slider_silent = False
+        self.is_control_slider_edit_silent = False
+        self.is_control_slider_silent = False
 
         self.updateActionButtons()
 
@@ -115,7 +118,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.guide_size_slider = QSlider(Qt.Horizontal)
         self.guide_size_slider.setMinimum(0)
-        self.guide_size_slider.setMaximum(10000)
+        self.guide_size_slider.setMaximum(1000)
         self.guide_size_slider.setValue(100)
         self.guide_size_slider.setTickPosition(QSlider.TicksBelow)
         self.guide_size_slider.setTickInterval(20)
@@ -140,13 +143,38 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.deform_size_slider = QSlider(Qt.Horizontal)
         self.deform_size_slider.setMinimum(0)
-        self.deform_size_slider.setMaximum(10000)
+        self.deform_size_slider.setMaximum(1000)
         self.deform_size_slider.setValue(100)
         self.deform_size_slider.setTickPosition(QSlider.TicksBelow)
         self.deform_size_slider.setTickInterval(20)
         self.deform_size_slider.sliderReleased.connect(self.onDeformSliderChange)
 
         self.layout.addWidget(self.deform_size_slider)
+
+        #control Size Adjustment
+        control_slider_label_layout = QHBoxLayout()
+        control_size_slider_label = QLabel("Control Size:")
+        control_size_slider_label.setAlignment(Qt.AlignCenter)
+        control_slider_label_layout.addWidget(control_size_slider_label)
+
+        self.control_slider_size_edit = QLineEdit()
+        self.control_slider_size_edit.setText(str(5.0))
+        self.control_slider_size_edit.editingFinished.connect(self.onControlSizeEditChange)
+
+        control_slider_label_layout.addWidget(control_size_slider_label)
+        control_slider_label_layout.addWidget(self.control_slider_size_edit)
+
+        self.layout.addLayout(control_slider_label_layout)
+
+        self.control_size_slider = QSlider(Qt.Horizontal)
+        self.control_size_slider.setMinimum(0)
+        self.control_size_slider.setMaximum(5000)
+        self.control_size_slider.setValue(500)
+        self.control_size_slider.setTickPosition(QSlider.TicksBelow)
+        self.control_size_slider.setTickInterval(20)
+        self.control_size_slider.sliderReleased.connect(self.onControlSliderChange)
+
+        self.layout.addWidget(self.control_size_slider)
 
         self.layout.addStretch()
         self.connectHasBeenModifiedCallback(self.updateDisabledState)
@@ -247,6 +275,13 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.node.setComponentDeformRadius(self.deform_size)
         self.setHasBeenModified()
 
+    def updateControlSize(self):
+        self.control_size = float(self.control_slider_size_edit.text())
+        if CLASS_DEBUG: print("%s:: --updatecontrolSize:: Setting control Size To: " % self.__class__.__name__, self.control_size)
+        if CLASS_DEBUG: print("%s:: --updatecontrolSize:: of Node::  " % self.__class__.__name__, self.node)
+        self.node.setComponentControlsSize(self.control_size)
+        self.setHasBeenModified()
+
     def updateDisabledState(self):
         self.is_disabled = self.disabled_checkbox.isChecked()
 
@@ -270,6 +305,16 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.deform_slider_size_edit.setText(str(self.formatSliderValueToEditValue(self.deform_size_slider.value())))
         self.is_deform_slider_edit_silent = False
 
+    def updateControlSlider(self):
+        self.is_control_slider_silent = True
+        self.control_size_slider.setValue(self.formatSliderEditToSliderValue(self.control_slider_size_edit.text()))
+        self.is_control_slider_silent = False
+
+    def updateControlSliderEdit(self):
+        self.is_control_slider_edit_silent = True
+        self.control_slider_size_edit.setText(str(self.formatSliderValueToEditValue(self.control_size_slider.value())))
+        self.is_control_slider_edit_silent = False
+
     def updateActionButtons(self):
         self.build_guides_action_button.setEnabled(self.is_valid)
         self.build_button.setEnabled(self.is_valid)
@@ -288,20 +333,6 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         if not self.is_silent:
             self.node.setGuideColors()
-
-    def formatSliderValueToEditValue(self, value):
-        if value != 0:
-            scaled_slider_value = round(value / 100, 2)
-        else:
-            scaled_slider_value = 0.01
-        if CLASS_DEBUG: print("%s:: --formatSliderValue:: new Slider Value:: " % self.__class__.__name__, scaled_slider_value)
-        return scaled_slider_value
-
-    def formatSliderEditToSliderValue(self, text):
-        slider_value_float = float(text)
-        scaled_value = int(slider_value_float * 100)
-        if CLASS_DEBUG: print("%s:: --formatSliderEditTextToFloat:: new Slider Value as int" % self.__class__.__name__, scaled_value)
-        return scaled_value
 
     def onGuideSizeEditChange(self):
         if not self.is_guide_slider_edit_silent:
@@ -322,6 +353,16 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if not self.is_deform_slider_silent:
             self.updateDeformSliderEdit()
             self.updateDeformSize()
+
+    def onControlSizeEditChange(self):
+        if not self.is_control_slider_edit_silent:
+            self.updateControlSlider()
+            self.updateControlSize()
+
+    def onControlSliderChange(self):
+        if not self.is_control_slider_silent:
+            self.updateControlSliderEdit()
+            self.updateControlSize()
 
     def onBuildStep(self):
         build_stage = self.build_step_dropdown.currentText()
@@ -353,6 +394,20 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if not self.is_disabled:
             self.node.connectComponent()
 
+    def formatSliderValueToEditValue(self, value):
+        if value != 0:
+            scaled_slider_value = round(value / 100, 2)
+        else:
+            scaled_slider_value = 0.01
+        if CLASS_DEBUG: print("%s:: --formatSliderValue:: new Slider Value:: " % self.__class__.__name__, scaled_slider_value)
+        return scaled_slider_value
+
+    def formatSliderEditToSliderValue(self, text):
+        slider_value_float = float(text)
+        scaled_value = int(slider_value_float * 100)
+        if CLASS_DEBUG: print("%s:: --formatSliderEditTextToFloat:: new Slider Value as int" % self.__class__.__name__, scaled_value)
+        return scaled_value
+
     def serialize(self):
         result_data = super().serialize()
         result_data['component_name'] = self.component_name
@@ -361,6 +416,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         result_data['is_disabled'] = self.is_disabled
         result_data['guide_size'] = self.guide_size
         result_data['deform_size'] = self.deform_size
+        result_data['control_size'] = self.control_size
         
         return result_data
     
@@ -377,6 +433,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         if CLASS_DEBUG: print("%s:: --deserialize:: deserializing deform Size:: "% self.__class__.__name__, data['deform_size'])
         self.deform_slider_size_edit.setText(str(data['deform_size']))
 
+        self.control_slider_size_edit.setText(str(data['control_size']))
+
         self.component_color = MNRBSceneColors.mapColorNameToColor(data['component_color'])
         self.component_color_dropdown.setCurrentText(data['component_color'])
 
@@ -390,6 +448,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
  
         if CLASS_DEBUG: print("%s:: --deserialize:: updating guide Size Edit "% self.__class__.__name__)
         self.onGuideSizeEditChange()
+        self.onDeformSizeEditChange()
+        self.onControlSizeEditChange()
         self.is_silent = False
 
         if CLASS_DEBUG: print("%s:: --deserialize:: updating component Name "% self.__class__.__name__)
@@ -510,12 +570,11 @@ class MNRB_Node(NodeEditorNode):
             components_hierarchy = self.scene.virtual_rig_hierarchy.component_hierarchy_object.name
         else:
             return False
-        
-        component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.component_suffix
 
-        if MC.objectExists(component_hierarchy):
-            MC.deleteObjectWithHierarchy(component_hierarchy)
-        
+        if MC.objectExists(self.component_hierarchy):
+            MC.deleteObjectWithHierarchy(self.component_hierarchy)
+
+        component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.component_suffix
         new_component_hierarchy = MC.createTransform(component_hierarchy)
 
         self.addComponentIdLink(new_component_hierarchy)
@@ -648,6 +707,9 @@ class MNRB_Node(NodeEditorNode):
         for deform in self.deforms:
             deform.resize(size)
     
+    def setComponentControlsSize(self, size):
+        pass
+
     def setGuideColors(self):
         if CLASS_DEBUG: print("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)
         for guide in self.guides:

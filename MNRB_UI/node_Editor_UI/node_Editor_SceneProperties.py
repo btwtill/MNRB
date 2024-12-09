@@ -100,7 +100,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         return True
 
     def validRigName(self):
-        if self.rig_name_line_edit.text() != "":
+        if self.rig_name_line_edit.text() != "" and self.rig_name_line_edit.text() != "Undefined" :
             return True
         else:
             return False

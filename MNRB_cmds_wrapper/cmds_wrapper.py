@@ -226,3 +226,23 @@ class MC:
     @staticmethod
     def mergeNamespaceWithRoot(namespace):
         cmds.namespace(removeNamespace=namespace, mergeNamespaceWithRoot=True)
+
+    @staticmethod
+    def applyTransform(object_name, scale = True, translate=True, rotate=True):
+        cmds.makeIdentity(object_name, apply=True, scale = scale, translate=translate, rotate=rotate, normal = True)
+
+    @staticmethod
+    def applyTransformScale(object_name):
+        cmds.makeIdentity(object_name, apply=True, scale = True)
+    
+    @staticmethod
+    def applyTransformTranslate(object_name):
+        cmds.makeIdentity(object_name, apply=True, translate = True)
+
+    @staticmethod
+    def applyTransformRotate(object_name):
+        cmds.makeIdentity(object_name, apply=True, rotate = True)
+
+    @staticmethod
+    def scaleTransform(object_name, scale):
+        cmds.scale(scale[0], scale[1], scale[2], object_name, relative =True)

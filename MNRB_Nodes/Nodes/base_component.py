@@ -58,8 +58,12 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         print("%s:: Building Component:: " % self)
         if not super().componentBuild():
             return False
+        
+        guide_pos = self.guides[0].getPosition(reset_scale = False)
 
         base_control = control(self, "base")
+        base_control.setPosition(guide_pos)
+
         MC.parentObject(base_control.name, self.control_hierarchy)
     
     def connectComponent(self):

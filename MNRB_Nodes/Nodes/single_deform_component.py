@@ -46,14 +46,19 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         MC.setJointPositionMatrix(single_deform.name, guide_pos)
         MC.parentObject(single_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
 
-        single_control = control(self, "singleCtrl")
-        MC.parentObject(single_control.name, self.control_hierarchy)
-
         return True
     
     def componentBuild(self):
         print("%s:: Building Component:: " % self)
-        super().componentBuild()   
+        if not super().componentBuild():
+            return False
+        
+        guide_pos = self.guides[0].getPosition(reset_scale = False)
+
+        single_control = control(self, "singleCtrl")
+        single_control.setPosition(guide_pos)
+        
+        MC.parentObject(single_control.name, self.control_hierarchy)
         
     def connectComponent(self):
         print("%s:: Connecting Component:: " % self)

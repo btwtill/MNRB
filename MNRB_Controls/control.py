@@ -19,9 +19,7 @@ class control(Serializable):
         self.parent = parent
 
         self._control_type = control_type
-
         self.shape_path = self.determinShapePath()
-
         self.control_shape = control_shape(self)
 
         if not deserialized:
@@ -43,8 +41,8 @@ class control(Serializable):
         if self.parent is not None:
             MC.parentObject(self.name, self.parent.name)
 
-    def resize(self):
-        self.control_shape.resize()
+    def exists(self):
+        return MC.objectExists(self.name)
 
     def determinShapePath(self):
         control_shape_dict = self.loadControlShapes()
@@ -58,6 +56,10 @@ class control(Serializable):
             data = json.loads(raw_data)
         
         return data
+
+    def setPosition(self, matrix):
+        MC.setObjectWorldPositionMatrix(self.name, matrix)
+        MC.applyTransformScale(self.name)
 
     def serialize(self):
         serialized_data = OrderedDict([

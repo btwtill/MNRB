@@ -16,6 +16,9 @@ class control_shape():
 
         imported_control_name_parts = imported_control.split(":")
         imported_control_name = imported_control_name_parts[1]
-        
+
         MC.mergeNamespaceWithRoot(self.default_namespace)
         self.control.name = MC.renameObject(imported_control_name, self.control.name)
+
+        MC.scaleTransform(self.control.name, [self.control.node.properties.control_size, self.control.node.properties.control_size, self.control.node.properties.control_size])
+        MC.applyTransformScale(self.control.name)
