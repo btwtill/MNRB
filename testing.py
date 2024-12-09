@@ -1,4 +1,5 @@
 import importlib
+from PySide2.QtWidgets import QApplication, QMainWindow
 
 import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf
 importlib.reload(NodeEditorConf)
@@ -20,6 +21,9 @@ importlib.reload(MNRBColors)
 
 import MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button as MNRBSideButton
 importlib.reload(MNRBSideButton)
+
+import MNRB.MNRB_Nodes.property_UI_GraphicComponents.receit_widget as MNRBReceitWidget
+importlib.reload(MNRBReceitWidget)
 
 import MNRB.MNRB_Scene.virtual_hierarchy_object as MNRB_VirtualHierarchyObject
 importlib.reload(MNRB_VirtualHierarchyObject)
@@ -147,6 +151,15 @@ importlib.reload(MNRBControl_shape)
 import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences 
 importlib.reload(MNRBPreferences)
 
-newEditor = mnrb_editor.mnrb_Editor()
 
-newEditor.show()
+def get_active_main_window():
+    # Iterate through all top-level widgets
+    for widget in QApplication.topLevelWidgets():
+        # Check if the widget is a QMainWindow and is visible
+        if isinstance(widget, QMainWindow) and widget.isVisible():
+            return widget
+    return None
+
+if get_active_main_window() is None:
+    newEditor = mnrb_editor.mnrb_Editor()
+    newEditor.show()

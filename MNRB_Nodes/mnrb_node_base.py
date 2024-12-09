@@ -11,6 +11,7 @@ from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
 from MNRB.MNRB_Colors.colors import MNRBSceneColors #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringSidePrefixButton #type: ignore
+from MNRB.MNRB_Nodes.property_UI_GraphicComponents.receit_widget import ReceitWidget #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 
@@ -101,6 +102,14 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.disabled_checkbox.stateChanged.connect(self.setHasBeenModified)
         self.layout.addWidget(self.disabled_checkbox)
         
+        self.test_expanding_widget = ReceitWidget("Click to Expand")
+        self.test_expanding_widget.add_widget(QPushButton("Button 01"))
+        self.test_expanding_widget.add_widget(QPushButton("Button 02"))
+        self.test_expanding_widget.add_widget(QPushButton("Button 03"))
+        self.test_expanding_widget.add_widget(QPushButton("Button 04"))
+
+        self.layout.addWidget(self.test_expanding_widget)
+
         #Guide Size Adjustment
         guide_slider_label_layout = QHBoxLayout()
         guide_size_slider_label = QLabel("Guide Size:")
@@ -193,7 +202,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.build_step_dropdown = QComboBox()
         self.build_step_dropdown.addItems([MNRB_Names.build_step.static, MNRB_Names.build_step.component, MNRB_Names.build_step.connected])
         self.build_step_dropdown.setCurrentIndex(1)
-        self.build_step_dropdown.setStyleSheet("background-color: #1C1C1C;")
+        self.build_step_dropdown.setStyleSheet("background-color: #2B2B2B;")
         button_layout.addWidget(self.build_step_dropdown)
 
         self.build_button = QPushButton("Build")
