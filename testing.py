@@ -138,11 +138,8 @@ importlib.reload(MNRBGuide)
 import MNRB.MNRB_Controls.control as MNRBControl
 importlib.reload(MNRBControl)
 
-import MNRB.MNRB_Controls.control_shape_circle as MNRBControlShapeCircle
-importlib.reload(MNRBControlShapeCircle)
-
-import MNRB.MNRB_Controls.control_types as MNRBControlShapeTypes
-importlib.reload(MNRBControlShapeTypes)
+import MNRB.MNRB_Controls.control_shape as MNRBControl_shape
+importlib.reload(MNRBControl_shape)
 
 import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences 
 importlib.reload(MNRBPreferences)

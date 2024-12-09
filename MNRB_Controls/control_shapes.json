@@ -1,0 +1,8 @@
+{
+    "shapes": [
+        {
+            "name": "circle",
+            "path": "control_shapes/circle_shape.mb"
+        }
+    ]
+}

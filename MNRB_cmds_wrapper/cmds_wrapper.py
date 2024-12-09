@@ -145,8 +145,8 @@ class MC:
         cmds.setAttr(f"{shape_node}.radius", size)
 
     @staticmethod
-    def createNurbsCircle(name):
-        new_circle = cmds.circle(name = name)
+    def createNurbsCircle(name, x_normal = 0, y_normal = 1, z_normal = 0):
+        new_circle = cmds.circle(name = name, normalX = 0, normalY = 1, normalZ = 0)
         MC.clearSelection()
         return new_circle[0]
     
@@ -214,3 +214,15 @@ class MC:
     @staticmethod
     def setJointPositionMatrix(name, matrix, world_space = True):
         cmds.xform(name, worldSpace=world_space, matrix = matrix)
+
+    @staticmethod
+    def importBinaryFile(path, namespace = "import"):
+        cmds.file(path, i=True, type="mayaBinary", mergeNamespacesOnClash = False, namespace=namespace)
+
+    @staticmethod
+    def selectNamespace(namespace) -> list:
+        return cmds.ls(namespace + ":*")
+    
+    @staticmethod
+    def mergeNamespaceWithRoot(namespace):
+        cmds.namespace(removeNamespace=namespace, mergeNamespaceWithRoot=True)
