@@ -14,6 +14,7 @@ from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringS
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.receit_widget import ReceitWidget #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
+from MNRB.MNRB_Nodes.property_UI_GraphicComponents.seperator_widget import SeparatorWidget #type: ignore
 
 CLASS_DEBUG = False
 VALIDATE_DEBUG = False
@@ -102,13 +103,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.disabled_checkbox.stateChanged.connect(self.setHasBeenModified)
         self.layout.addWidget(self.disabled_checkbox)
         
-        self.test_expanding_widget = ReceitWidget("Click to Expand")
-        self.test_expanding_widget.add_widget(QPushButton("Button 01"))
-        self.test_expanding_widget.add_widget(QPushButton("Button 02"))
-        self.test_expanding_widget.add_widget(QPushButton("Button 03"))
-        self.test_expanding_widget.add_widget(QPushButton("Button 04"))
-
-        self.layout.addWidget(self.test_expanding_widget)
+        self.component_size_widget = ReceitWidget("Click to Expand")
 
         #Guide Size Adjustment
         guide_slider_label_layout = QHBoxLayout()
@@ -123,7 +118,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         guide_slider_label_layout.addWidget(guide_size_slider_label)
         guide_slider_label_layout.addWidget(self.guide_slider_size_edit)
 
-        self.layout.addLayout(guide_slider_label_layout)
+        self.component_size_widget.add_layout(guide_slider_label_layout)
 
         self.guide_size_slider = QSlider(Qt.Horizontal)
         self.guide_size_slider.setMinimum(0)
@@ -133,7 +128,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.guide_size_slider.setTickInterval(20)
         self.guide_size_slider.sliderReleased.connect(self.onGuideSliderChange)
 
-        self.layout.addWidget(self.guide_size_slider)
+        self.component_size_widget.add_widget(self.guide_size_slider)
 
         #deform Size Adjustment
         deform_slider_label_layout = QHBoxLayout()
@@ -148,7 +143,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         deform_slider_label_layout.addWidget(deform_size_slider_label)
         deform_slider_label_layout.addWidget(self.deform_slider_size_edit)
 
-        self.layout.addLayout(deform_slider_label_layout)
+        self.component_size_widget.add_layout(deform_slider_label_layout)
 
         self.deform_size_slider = QSlider(Qt.Horizontal)
         self.deform_size_slider.setMinimum(0)
@@ -158,7 +153,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.deform_size_slider.setTickInterval(20)
         self.deform_size_slider.sliderReleased.connect(self.onDeformSliderChange)
 
-        self.layout.addWidget(self.deform_size_slider)
+        self.component_size_widget.add_widget(self.deform_size_slider)
 
         #control Size Adjustment
         control_slider_label_layout = QHBoxLayout()
@@ -173,7 +168,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         control_slider_label_layout.addWidget(control_size_slider_label)
         control_slider_label_layout.addWidget(self.control_slider_size_edit)
 
-        self.layout.addLayout(control_slider_label_layout)
+        self.component_size_widget.add_layout(control_slider_label_layout)
 
         self.control_size_slider = QSlider(Qt.Horizontal)
         self.control_size_slider.setMinimum(0)
@@ -183,7 +178,12 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.control_size_slider.setTickInterval(20)
         self.control_size_slider.sliderReleased.connect(self.onControlSliderChange)
 
-        self.layout.addWidget(self.control_size_slider)
+        self.component_size_widget.add_widget(self.control_size_slider)
+
+        self.layout.addWidget(self.component_size_widget)
+
+        separator = SeparatorWidget()
+        self.layout.addWidget(separator)
 
         self.layout.addStretch()
         self.connectHasBeenModifiedCallback(self.updateDisabledState)

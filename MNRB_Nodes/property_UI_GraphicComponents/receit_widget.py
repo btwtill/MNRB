@@ -7,16 +7,25 @@ class TriangleWidget(QWidget):
         super(TriangleWidget, self).__init__(parent)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
+        self.is_rotated = False
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
         # Define the triangle points
-        triangle = QPolygon([
-            QPoint(0, 2),  # Upper Left
-            QPoint(self.width() - 5, self.height() // 2),  # right center
-            QPoint(0, self.height() - 2)  # bottom left
-        ])
+        if self.is_rotated:
+            triangle = QPolygon([
+                QPoint(0, 2), #upper left
+                QPoint(self.width() - 5, 2), #upper right
+                QPoint((self.width() // 2) - 2, self.height() - 2) #bottom center
+            ])
+        else:
+            triangle = QPolygon([
+                QPoint(0, 2),  # Upper Left
+                QPoint(self.width() - 5, self.height() // 2),  # right center
+                QPoint(0, self.height() - 2)  # bottom left
+            ])
 
         # Set the brush and pen
         painter.setBrush(QBrush(QColor('#2B2B2B')))
@@ -24,6 +33,9 @@ class TriangleWidget(QWidget):
 
         # Draw the triangle
         painter.drawPolygon(triangle)
+
+    def rotate(self):
+        self.is_rotated = not self.is_rotated
 
 class IconWidgetBar(QWidget):
     def __init__(self, receit_widget, text = "Undefined", height=20, parent=None):
@@ -35,12 +47,12 @@ class IconWidgetBar(QWidget):
         self.setFixedHeight(height)
 
         # Apply darker background using QSS
-        self.setStyleSheet("background-color: #2B2B2B;")
+        #self.setStyleSheet("background-color: #2B2B2B;")
 
         # Main layout
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0,0,0,0)  # Add some padding
-        self.layout.setSpacing(5)
+        self.layout.setSpacing(10)
 
         self.triangle_widget = TriangleWidget(self)
         self.triangle_widget.setFixedSize(height, height)
@@ -60,6 +72,7 @@ class IconWidgetBar(QWidget):
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
+        self.triangle_widget.rotate()
         self.receit_widget.toggle_content()
 
 
@@ -70,6 +83,9 @@ class ReceitWidget(QWidget):
         # Main Layout
         self.main_layout = QVBoxLayout(self)
         self.setLayout(self.main_layout)
+
+        #set style
+        #self.setStyleSheet("background-color: #2B2B2B;")
 
         # Toggle Button
         self.base_area_widget = IconWidgetBar(self, "Edit Component Sizes...")
@@ -91,3 +107,5 @@ class ReceitWidget(QWidget):
     def add_widget(self, widget):
         self.content_layout.addWidget(widget)
 
+    def add_layout(self, layout):
+        self.content_layout.addLayout(layout)
