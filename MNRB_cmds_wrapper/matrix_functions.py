@@ -134,7 +134,7 @@ class Matrix_functions():
 
         parent_world_matrix_inverse = parent_world_matrix.inverse()
 
-        offset_matrix = parent_world_matrix_inverse * child_world_matrix
+        offset_matrix = child_world_matrix * parent_world_matrix_inverse
         offset_matrix_transformation = om.MTransformationMatrix(offset_matrix)
 
         offset_compose_node = MC.createComposeNode(child + "_parentOffset", underworld = underworld)
@@ -168,5 +168,5 @@ class Matrix_functions():
             Matrix_functions.connectDecomposeToSRT(decompose_node, child)
         else:
             MC.connectAttribute(mult_matrix_node, "matrixSum", child, "offsetParentMatrix")
-            
+
         return mult_matrix_node
