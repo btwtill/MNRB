@@ -79,7 +79,8 @@ class guide(Serializable):
         MC.setObjectWorldPositionMatrix(self.name, matrix)
 
     def select(self):
-        MC.selectObject(self.name)
+        if self.exists():
+            MC.selectObject(self.name)
 
     def determinGuideShape(self):
         if CLASS_DEBUG: print("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)

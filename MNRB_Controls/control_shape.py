@@ -28,7 +28,8 @@ class control_shape():
         MC.deleteNodeHistory(self.control.name)
 
     def updateColor(self, color):
-        all_shapes = MC.getObjectShapeNodes(self.control.name)
+        if self.control.exists():
+            all_shapes = MC.getObjectShapeNodes(self.control.name)
 
-        for shape in all_shapes:
-            MC.setShapeNodeColor(shape, color)
+            for shape in all_shapes:
+                MC.setShapeNodeColor(shape, color)
