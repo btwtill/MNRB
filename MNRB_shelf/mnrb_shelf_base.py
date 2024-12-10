@@ -3,12 +3,10 @@ Credit to vshotarov
 https://bindpose.com/scripting-custom-shelf-in-maya-python/
 """
 
-import maya.cmds as cmds
-
+import maya.cmds as cmds #type: ignore
 
 def _null(*args):
     pass
-
 
 class _shelf():
     """A simple class to build shelves in maya. Since the build method is empty,
