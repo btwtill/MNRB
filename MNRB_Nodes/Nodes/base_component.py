@@ -7,6 +7,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #typ
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 
 GUIDE_DEBUG = True
 
@@ -29,7 +30,7 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
     Node_Properties_Class = MNRB_Node_BaseComponent_Properties
 
     def __init__(self, scene):
-        super().__init__(scene, inputs = [], outputs=[["global_ctrl", SocketTypes.srt, True], ["global_def", SocketTypes.deform, True]])
+        super().__init__(scene, inputs = [], outputs=[["globalOffset", SocketTypes.srt, True], ["global_def", SocketTypes.deform, True]])
 
     def guideBuild(self):
         if not super().guideBuild():
@@ -64,13 +65,21 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         global_control.setPosition(guide_pos)
         global_control.setScale(2)
         MC.parentObject(global_control.name, self.control_hierarchy)
+        offset_matrix_compose_node = Matrix_functions.createComposeNodeFromTransformChannelbox(global_control.name)
+        Matrix_functions.setMatrixParentNoOffsetFromComposeNode(offset_matrix_compose_node, global_control.name)
 
         global_offset_control = control(self, "globalOffset")
+        global_offset_control.setPosition(guide_pos)
         MC.parentObject(global_offset_control.name, self.control_hierarchy)
-
         Matrix_functions.setMatrixParentNoOffset(global_offset_control.name, global_control.name)
-    
+
+        #create Outputs
+        global_offset_output = MC.createTransform(self.getComponentFullPrefix() + "globalOffset" + MNRB_Names.output_suffix)
+        MC.parentObject(global_offset_output, self.output_hierarchy)
+        Matrix_functions.decomposeTransformWorldMatrixTo(global_offset_control.name, global_offset_output)
+
     def connectComponent(self):
         if not super().connectComponent():
             return False
         print("%s:: Connecting Component:: " % self)
+

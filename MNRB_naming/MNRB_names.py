@@ -40,5 +40,7 @@ class MNRB_Names():
 
     deform_suffix = "_def"
     control_suffix = "_ctrl"
+    output_suffix = "_srtOut"
+    input_suffix = "_srtIn"
 
     

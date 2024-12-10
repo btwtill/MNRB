@@ -25,6 +25,8 @@ class control_shape():
         MC.scaleTransform(self.control.name, [self.control.node.properties.control_size, self.control.node.properties.control_size, self.control.node.properties.control_size])
         MC.applyTransformScale(self.control.name)
 
+        MC.deleteNodeHistory(self.control.name)
+
     def updateColor(self, color):
         all_shapes = MC.getObjectShapeNodes(self.control.name)
 

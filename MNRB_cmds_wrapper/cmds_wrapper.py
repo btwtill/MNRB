@@ -18,6 +18,10 @@ class MC:
         MC.clearSelection()
 
     @staticmethod
+    def deleteNodeHistory(node):
+        cmds.delete(node, constructionHistory=True)
+        
+    @staticmethod
     def renameObject(object, name) -> str:
         new_name = cmds.rename(object, name)
         MC.clearSelection()
@@ -201,6 +205,10 @@ class MC:
         cmds.connectAttr(f"{source_node}.{source_attribute_name}", f"{target_node}.{target_attribute}", force = force)
 
     @staticmethod
+    def disconnectAttribute(source_node, source_attribute_name, target_node, target_attribute):
+        cmds.disconnectAttr(f"{source_node}.{source_attribute_name}", f"{target_node}.{target_attribute}")
+
+    @staticmethod
     def setAttribute(object, attribute_name, value):
         cmds.setAttr(f"{object}.{attribute_name}", value)
 
@@ -297,4 +305,10 @@ class MC:
         MC.resetRotation(object)
         MC.resetScale(object)
 
-
+    #create utiility nodes
+    @staticmethod
+    def createDecomposeNode(name):
+        return cmds.createNode("decomposeMatrix", name = name + "_dcm_fNode")
+    
+    def createComposeNode(name):
+        return cmds.createNode("composeMatrix", name = name + "_cm_fNode")

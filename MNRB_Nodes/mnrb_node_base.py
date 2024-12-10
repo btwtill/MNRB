@@ -592,12 +592,12 @@ class MNRB_Node(NodeEditorNode):
         MC.parentObject(new_component_hierarchy, components_hierarchy)
         self.component_hierarchy = new_component_hierarchy
 
-        self.input_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.input_hierarchy_suffix)
-        MC.parentObject(self.input_hiearchy, self.component_hierarchy)
-        self.output_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.output_hierarchy_suffix)
-        MC.parentObject(self.output_hiearchy, self.component_hierarchy)
-        self.system_hiearchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.system_hierarchy_suffix)
-        MC.parentObject(self.system_hiearchy, self.component_hierarchy)
+        self.input_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.input_hierarchy_suffix)
+        MC.parentObject(self.input_hierarchy, self.component_hierarchy)
+        self.output_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.output_hierarchy_suffix)
+        MC.parentObject(self.output_hierarchy, self.component_hierarchy)
+        self.system_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.system_hierarchy_suffix)
+        MC.parentObject(self.system_hierarchy, self.component_hierarchy)
         self.control_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.control_hierarchy_suffix)
         MC.parentObject(self.control_hierarchy, self.component_hierarchy)
 
@@ -704,6 +704,9 @@ class MNRB_Node(NodeEditorNode):
     def getComponentName(self):
         return self.properties.component_name
     
+    def getComponentFullPrefix(self):
+        return self.getComponentPrefix() + self.getComponentName() + "_"
+
     def getInputConnectionValueAt(self, index):
         prefix = self.getComponentPrefix()
         component_name = self.getComponentName()
