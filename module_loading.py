@@ -54,6 +54,9 @@ def reloadMNRBModules():
     import MNRB.MNRB_cmds_wrapper.matrix_functions as MatrixFunctions
     importlib.reload(MatrixFunctions)
 
+    import MNRB.MNRB_cmds_wrapper.transform_functions as TransformFunctions
+    importlib.reload(TransformFunctions)
+
     import MNRB.MNRB_UI.mnrb_editor as mnrb_editor
     importlib.reload(mnrb_editor)
 

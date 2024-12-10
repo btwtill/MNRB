@@ -8,6 +8,7 @@ from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_cmds_wrapper.transform_functions import Transform_functions #type: ignore
 
 GUIDE_DEBUG = True
 
@@ -74,12 +75,16 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         Matrix_functions.setMatrixParentNoOffset(global_offset_control.name, global_control.name)
 
         #create Outputs
-        global_offset_output = MC.createTransform(self.getComponentFullPrefix() + "globalOffset" + MNRB_Names.output_suffix)
-        MC.parentObject(global_offset_output, self.output_hierarchy)
-        Matrix_functions.decomposeTransformWorldMatrixTo(global_offset_control.name, global_offset_output)
+        self.global_offset_output = MC.createTransform(self.getComponentFullPrefix() + "globalOffset" + MNRB_Names.output_suffix)
+        MC.parentObject(self.global_offset_output, self.output_hierarchy)
+        Matrix_functions.decomposeTransformWorldMatrixTo(global_offset_control.name, self.global_offset_output)
 
     def connectComponent(self):
         if not super().connectComponent():
             return False
         print("%s:: Connecting Component:: " % self)
+
+        deform = self.deforms[0]
+        Transform_functions.connectSrt(self.global_offset_output, deform.name)
+        
 
