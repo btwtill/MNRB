@@ -248,6 +248,10 @@ class NodeEditorScene(Serializable):
     def connectSceneComponents(self):
         for node in self.nodes:
             if not node.properties.is_disabled:
+                node.componentBuild()
+                
+        for node in self.nodes:
+            if not node.properties.is_disabled:
                 node.connectComponent()
 
     def saveSceneToFile(self, filename):

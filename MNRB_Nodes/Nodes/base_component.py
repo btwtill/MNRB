@@ -38,11 +38,18 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
             return False
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
 
-        base_component_guide = guide(self, name = "global")
-        MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
+        self.base_component_guide = guide(self, name = "global")
+        MC.parentObject(self.base_component_guide.name, self.guide_component_hierarchy)
 
         self.reconstructGuides()
-        
+    
+    def validateGuideBuild(self):
+        if not hasattr(self, 'base_component_guide'):
+            return False
+        if not self.base_component_guide.exists():
+            return False
+        return True
+
     def staticBuild(self):
         if not super().staticBuild():
             return False
@@ -50,34 +57,60 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
 
         guide_pos = self.guides[0].getPosition()
 
-        base_deform = deform(self, "global")
-        MC.setJointPositionMatrix(base_deform.name, guide_pos)
-        MC.parentObject(base_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
+        self.base_deform = deform(self, "global")
+        MC.setJointPositionMatrix(self.base_deform.name, guide_pos)
+        MC.parentObject(self.base_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
         
         return True
     
+    def validateStaticBuild(self):
+        if not hasattr(self, 'base_deform'):
+            return False
+        if not self.base_deform.exists():
+            return False
+        return True
+
     def componentBuild(self):
+        #validate static Build
+
         if not super().componentBuild():
             return False
         print("%s:: Building Component:: " % self.__class__.__name__, self)
-        guide_pos = self.guides[0].getPosition(reset_scale = False)
+        self.guide_pos = self.guides[0].getPosition(reset_scale = False)
 
-        global_control = control(self, "global",  control_type = 1)
-        global_control.setPosition(guide_pos)
-        global_control.setScale(2)
-        MC.parentObject(global_control.name, self.control_hierarchy)
-        offset_matrix_compose_node = Matrix_functions.createComposeNodeFromTransformChannelbox(global_control.name)
-        Matrix_functions.setMatrixParentNoOffsetFromComposeNode(offset_matrix_compose_node, global_control.name)
+        self.global_control = control(self, "global",  control_type = 1)
+        self.global_control.setPosition(self.guide_pos)
+        self.global_control.setScale(2)
+        MC.parentObject(self.global_control.name, self.control_hierarchy)
+        offset_matrix_compose_node = Matrix_functions.createComposeNodeFromTransformChannelbox(self.global_control.name)
+        Matrix_functions.setMatrixParentNoOffsetFromComposeNode(offset_matrix_compose_node, self.global_control.name)
 
-        global_offset_control = control(self, "globalOffset")
-        global_offset_control.setPosition(guide_pos)
-        MC.parentObject(global_offset_control.name, self.control_hierarchy)
-        Matrix_functions.setMatrixParentNoOffset(global_offset_control.name, global_control.name)
+        self.global_offset_control = control(self, "globalOffset")
+        self.global_offset_control.setPosition(self.guide_pos)
+        MC.parentObject(self.global_offset_control.name, self.control_hierarchy)
+        Matrix_functions.setMatrixParentNoOffset(self.global_offset_control.name, self.global_control.name)
 
         #create Outputs
         self.global_offset_output = MC.createTransform(self.getComponentFullPrefix() + "globalOffset" + MNRB_Names.output_suffix)
         MC.parentObject(self.global_offset_output, self.output_hierarchy)
-        Matrix_functions.decomposeTransformWorldMatrixTo(global_offset_control.name, self.global_offset_output)
+        Matrix_functions.decomposeTransformWorldMatrixTo(self.global_offset_control.name, self.global_offset_output)
+
+    def validateComponentBuild(self):
+        if not hasattr(self, 'guide_pos'):
+            return False
+        if not hasattr(self, ' global_control'):
+            return False
+        if not self.global_control.exists():
+            return False
+        if not hasattr(self, 'global_offset_control'):
+            return False
+        if not self.global_offset_control.exists():
+            return False
+        if not hasattr(self, 'global_offset_output'):
+            return False
+        if not self.global_offset_output.exists():
+            return False
+        return True
 
     def connectComponent(self):
         if not super().connectComponent():

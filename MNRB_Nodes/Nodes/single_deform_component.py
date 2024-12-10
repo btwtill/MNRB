@@ -36,20 +36,36 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
 
         self.reconstructGuides()
         
+    def validateGuideBuild(self):
+        if not hasattr(self, 'sinlge_deform_component_guide'):
+            return False
+        if not self.sinlge_deform_component_guide.exists():
+            return False
+        return True
+
     def staticBuild(self):
         print("%s:: Building Static:: " % self)
         if not super().staticBuild():
             return False
         
-        guide_pos = self.sinlge_deform_component_guide.getPosition()
+        self.guide_pos = self.sinlge_deform_component_guide.getPosition()
 
-        single_deform = deform(self, "singleDef")
+        self.single_deform = deform(self, "singleDef")
 
-        MC.setJointPositionMatrix(single_deform.name, guide_pos)
-        MC.parentObject(single_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
+        MC.setJointPositionMatrix(self.single_deform.name, self.guide_pos)
+        MC.parentObject(self.single_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
 
         return True
     
+    def validateStaticBuild(self):
+        if not hasattr(self, 'guide_pos'):
+            return False
+        if not hasattr(self, 'single_deform'):
+            return False
+        if not self.single_deform.exists():
+            return False
+        return True
+
     def componentBuild(self):
         print("%s:: Building Component:: " % self)
         if not super().componentBuild():
@@ -64,18 +80,32 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         MC.setObjectWorldPositionMatrix(self.root_input, guide_pos)
 
         #create controls
-        single_control = control(self, "singleCtrl")
-        Matrix_functions.setMatrixParentNoOffset(single_control.name, self.root_input)
-        MC.parentObject(single_control.name, self.control_hierarchy)
+        self.single_control = control(self, "singleCtrl")
+        Matrix_functions.setMatrixParentNoOffset(self.single_control.name, self.root_input)
+        MC.parentObject(self.single_control.name, self.control_hierarchy)
 
         #create Outputs
         self.deform_output = MC.createTransform(self.getComponentFullPrefix() + "singleDef" + MNRB_Names.output_suffix)
         MC.parentObject(self.deform_output, self.output_hierarchy)
-        Matrix_functions.decomposeTransformWorldMatrixTo(single_control.name, self.deform_output)
+        Matrix_functions.decomposeTransformWorldMatrixTo(self.single_control.name, self.deform_output)
+
+    def validateComponentBuild(self):
+        if not hasattr(self, 'root_input'):
+            return False
+        if not MC.objectExists(self.root_input):
+            return False
+        if not hasattr(self, 'single_control'):
+            return False
+        if not self.single_control.exists():
+            return False
+        if not hasattr(self, 'deform_output'):
+            return False
+        if not MC.objectExists(self.deform_output):
+            return False
+        return True
         
     def connectComponent(self):
         print("%s:: Connecting Component:: " % self)
-        self.componentBuild()
 
         srt_parent = self.getInputConnectionValueAt(0) + MNRB_Names.output_suffix
         deform_parent = self.getInputConnectionValueAt(1) + MNRB_Names.deform_suffix
