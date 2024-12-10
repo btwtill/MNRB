@@ -78,6 +78,7 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         self.root_input = MC.createTransform(self.getComponentFullPrefix() + "root" + MNRB_Names.input_suffix)
         MC.parentObject(self.root_input, self.input_hierarchy)
         MC.setObjectWorldPositionMatrix(self.root_input, guide_pos)
+        MC.applyTransformScale(self.root_input)
 
         #create controls
         self.single_control = control(self, "singleCtrl")
@@ -118,5 +119,7 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         #parent deform to deform parent
         MC.parentObject(deform_joint.name, deform_parent)
         deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform_joint.name, self.deform_output, deform_parent)
+
+        MC.resetJointOrientations(deform_joint.name)
 
         

@@ -241,6 +241,11 @@ class MC:
         cmds.xform(name, worldSpace=world_space, matrix = matrix)
 
     @staticmethod
+    def resetJointOrientations(name):
+        for channel in "XYZ":
+            MC.setAttribute(name, "jointOrient" + channel, 0)
+
+    @staticmethod
     def importBinaryFile(path, namespace = "import"):
         cmds.file(path, i=True, type="mayaBinary", mergeNamespacesOnClash = False, namespace=namespace)
 

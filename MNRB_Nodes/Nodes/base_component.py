@@ -119,5 +119,6 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
 
         deform = self.deforms[0]
         Transform_functions.connectSrt(self.global_offset_output, deform.name)
-        
+
+        MC.resetJointOrientations(deform.name)       
 
