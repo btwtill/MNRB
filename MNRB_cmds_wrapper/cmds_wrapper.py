@@ -20,7 +20,7 @@ class MC:
     @staticmethod
     def deleteNodeHistory(node):
         cmds.delete(node, constructionHistory=True)
-        
+
     @staticmethod
     def renameObject(object, name) -> str:
         new_name = cmds.rename(object, name)
@@ -312,3 +312,6 @@ class MC:
     
     def createComposeNode(name):
         return cmds.createNode("composeMatrix", name = name + "_cm_fNode")
+    
+    def createMultMatrixNode(name):
+        return cmds.createNode("multMatrix", name = name + "_mmtx_fNode")

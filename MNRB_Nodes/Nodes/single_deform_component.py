@@ -6,6 +6,8 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
 GUIDE_DEBUG = False
 
@@ -21,7 +23,7 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
     Node_Properties_Class = MNRB_Node_SingleDeformComponent_Properties
 
     def __init__(self, scene):
-        super().__init__(scene, inputs = [["parent_ctrl", SocketTypes.srt, False], ["parent_def", SocketTypes.deform, False]], outputs=[["singleDef_ctrl", SocketTypes.srt, True], ["singleDef_srt", SocketTypes.deform, True]])
+        super().__init__(scene, inputs = [["parent_ctrl", SocketTypes.srt, False], ["parent_def", SocketTypes.deform, False]], outputs=[["singleDef", SocketTypes.srt, True], ["singleDef", SocketTypes.deform, True]])
 
     def guideBuild(self):
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
@@ -53,12 +55,34 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         if not super().componentBuild():
             return False
         
+        #getting guides
         guide_pos = self.guides[0].getPosition(reset_scale = False)
 
-        single_control = control(self, "singleCtrl")
-        single_control.setPosition(guide_pos)
+        #create Inputs
+        self.root_input = MC.createTransform(self.getComponentFullPrefix() + "root" + MNRB_Names.input_suffix)
+        MC.parentObject(self.root_input, self.input_hierarchy)
+        MC.setObjectWorldPositionMatrix(self.root_input, guide_pos)
 
+        #create controls
+        single_control = control(self, "singleCtrl")
+        Matrix_functions.setMatrixParentNoOffset(single_control.name, self.root_input)
         MC.parentObject(single_control.name, self.control_hierarchy)
+
+        #create Outputs
+        self.deform_output = MC.createTransform(self.getComponentFullPrefix() + "singleDef" + MNRB_Names.output_suffix)
+        MC.parentObject(self.deform_output, self.output_hierarchy)
+        Matrix_functions.decomposeTransformWorldMatrixTo(single_control.name, self.deform_output)
         
     def connectComponent(self):
         print("%s:: Connecting Component:: " % self)
+        self.componentBuild()
+
+        srt_parent = self.getInputConnectionValueAt(0) + MNRB_Names.output_suffix
+        deform_parent = self.getInputConnectionValueAt(1) + MNRB_Names.deform_suffix
+
+        #matrix parent with underworld Offset
+        srt_parent_offset_composeNode, srt_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.root_input, srt_parent)
+
+        #parent deform to deform parent
+
+        

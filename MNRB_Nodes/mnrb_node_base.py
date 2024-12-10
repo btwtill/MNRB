@@ -708,10 +708,9 @@ class MNRB_Node(NodeEditorNode):
         return self.getComponentPrefix() + self.getComponentName() + "_"
 
     def getInputConnectionValueAt(self, index):
-        prefix = self.getComponentPrefix()
-        component_name = self.getComponentName()
-        value = self.getInputSocketValue(index)
-        return prefix + component_name + "_" + value
+        value, node = self.getInputSocketValueWithNode(index)
+        full_prefix = node.getComponentFullPrefix()
+        return full_prefix + value
 
     def setComponentGuideHiearchyName(self):
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix )
