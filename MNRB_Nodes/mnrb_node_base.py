@@ -253,7 +253,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         is_duplicate_component_name = False
         encounters = set()
         for node in self.node.scene.nodes:
-            component_name = node.properties.component_name
+            component_name = node.properties.component_side_prefix + node.properties.component_name
             if component_name in encounters:
                 is_duplicate_component_name = True
                 break
@@ -331,7 +331,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def updateComponentName(self):
         self.component_name = self.component_name_edit.text()
         if CLASS_DEBUG: print("%s:: --updateComponentName:: self.component_name:: " % self.__class__.__name__, self.component_name)
-        self.node.title = self.component_name
+        self.node.title = self.component_side_prefix + self.component_name
         self.node.updateNames()
 
     def updateComponentColor(self, index):
