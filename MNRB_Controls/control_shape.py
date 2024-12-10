@@ -26,7 +26,7 @@ class control_shape():
         MC.applyTransformScale(self.control.name)
 
     def updateColor(self, color):
-        all_shapes = MC.getShapeNodes(self.control.name)
+        all_shapes = MC.getObjectShapeNodes(self.control.name)
 
         for shape in all_shapes:
             MC.setShapeNodeColor(shape, color)

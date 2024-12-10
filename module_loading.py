@@ -1,4 +1,5 @@
 def reloadMNRBModules():
+    print("Reloading MNRB Shelf and Modules............")
     import importlib
     from PySide2.QtWidgets import QApplication, QMainWindow
 

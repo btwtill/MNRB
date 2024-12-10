@@ -1,6 +1,12 @@
 import math
+import MNRB.MNRB_cmds_wrapper.cmds_wrapper as wrapper #type: ignore
 
 class Matrix_functions():
+
+    @staticmethod
+    def getIdentityMatrix() -> list:
+        identity_matrix = [1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000]
+        return identity_matrix
 
     @staticmethod
     def flatToFourByFourMatrix(flat_matrix) -> list:
@@ -26,3 +32,9 @@ class Matrix_functions():
         matrix_four_by_four[2][:3] = Matrix_functions.normalize_row(matrix_four_by_four[2][:3])
 
         return [value for row in matrix_four_by_four for value in row]
+    
+    @staticmethod
+    def setMatrixParentNoOffset(child, parent):
+        wrapper.MC.connectAttribute(parent, "worldMatrix[0]", child, "offsetParentMatrix")
+        identity_matrix = Matrix_functions.getIdentityMatrix()
+        wrapper.MC.setObjectPositionMatrix(child, identity_matrix)

@@ -82,7 +82,7 @@ class MC:
     @staticmethod
     def getObjectShapeNodes(object) -> list:
         return cmds.listRelatives(object, s=1)
-
+    
     @staticmethod
     def setShapeNodeColor(shape_node, color):
         cmds.setAttr(f"{shape_node}.overrideEnabled", 1)
@@ -197,12 +197,25 @@ class MC:
         return cmds.getAttr(f"{node_name}.{attribute_name}")
     
     @staticmethod
+    def connectAttribute(source_node, source_attribute_name, target_node, target_attribute, force=False):
+        cmds.connectAttr(f"{source_node}.{source_attribute_name}", f"{target_node}.{target_attribute}", force = force)
+
+    @staticmethod
+    def setAttribute(object, attribute_name, value):
+        cmds.setAttr(f"{object}.{attribute_name}", value)
+
+    #xform
+    @staticmethod
     def getObjectWorldPositionMatrix(object_name) -> list:
         return cmds.xform(object_name, query =True, matrix = True, worldSpace=True)
     
     @staticmethod
     def setObjectWorldPositionMatrix(object_name, matrix):
         cmds.xform(object_name, matrix=matrix, worldSpace=True)
+
+    @staticmethod
+    def setObjectPositionMatrix(object_name, matrix):
+        cmds.xform(object_name, matrix = matrix, worldSpace=False)
 
     #joint specific methods
     @staticmethod
@@ -252,5 +265,36 @@ class MC:
         cmds.scale(scale[0], scale[1], scale[2], object_name, relative =True)
 
     @staticmethod
-    def getShapeNodes(object_name) -> list:
-        return cmds.listRelatives(object_name, children = True, shapes=True)
+    def resetTranslation(object, x = True, y= True, z = True):
+        if x:
+            MC.setAttribute(object, "translateX", 0)
+        if y:
+            MC.setAttribute(object, "translateY", 0)
+        if z:
+            MC.setAttribute(object, "translateZ", 0)
+
+    @staticmethod
+    def resetRotation(object, x = True, y= True, z = True):
+        if x:
+            MC.setAttribute(object, "rotateX", 0)
+        if y:
+            MC.setAttribute(object, "rotateY", 0)
+        if z:
+            MC.setAttribute(object, "rotateZ", 0)
+
+    @staticmethod
+    def resetScale(object, x = True, y= True, z = True):
+        if x:
+            MC.setAttribute(object, "scaleX", 1)
+        if y:
+            MC.setAttribute(object, "scaleY", 1)
+        if z:
+            MC.setAttribute(object, "scaleZ", 1)
+
+    @staticmethod
+    def clearTransforms(object):
+        MC.resetTranslation(object)
+        MC.resetRotation(object)
+        MC.resetScale(object)
+
+

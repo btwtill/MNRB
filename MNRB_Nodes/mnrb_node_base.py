@@ -549,7 +549,7 @@ class MNRB_Node(NodeEditorNode):
         
         return True
 
-    def staticBuild(self):
+    def staticBuild(self) -> bool:
         self.guideBuild()
 
         if self.scene.virtual_rig_hierarchy.rig_hierarchy_object.ensureExistence():
@@ -570,6 +570,7 @@ class MNRB_Node(NodeEditorNode):
 
     def componentBuild(self):
         self.staticBuild()
+        
         if self.scene.virtual_rig_hierarchy.rig_hierarchy_object.ensureExistence():
             current_rig_hierarchy = self.scene.virtual_rig_hierarchy.rig_hierarchy_object.name
         else:
@@ -604,8 +605,9 @@ class MNRB_Node(NodeEditorNode):
 
         return True
 
-    def connectComponent(self):
-        raise NotImplementedError
+    def connectComponent(self) -> bool:
+        self.componentBuild()
+        return True
 
     def addComponentIdLink(self, object):
         MC.addStringAttribute(object, MNRB_Names.component_id_attribute_name, str(self.id), True)

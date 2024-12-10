@@ -6,8 +6,9 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
+from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
-GUIDE_DEBUG = False
+GUIDE_DEBUG = True
 
 class MNRB_Node_BaseComponent_Properties(MNRB_NodeProperties):
         
@@ -31,10 +32,9 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         super().__init__(scene, inputs = [], outputs=[["global_ctrl", SocketTypes.srt, True], ["global_def", SocketTypes.deform, True]])
 
     def guideBuild(self):
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
-
         if not super().guideBuild():
             return False
+        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
 
         base_component_guide = guide(self, name = "global")
         MC.parentObject(base_component_guide.name, self.guide_component_hierarchy)
@@ -42,10 +42,10 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         self.reconstructGuides()
         
     def staticBuild(self):
-        print("%s:: Building Static:: " % self)
         if not super().staticBuild():
             return False
-        
+        print("%s:: Building Static:: " % self.__class__.__name__, self)
+
         guide_pos = self.guides[0].getPosition()
 
         base_deform = deform(self, "global")
@@ -55,22 +55,22 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
         return True
     
     def componentBuild(self):
-        print("%s:: Building Component:: " % self)
         if not super().componentBuild():
             return False
-        
+        print("%s:: Building Component:: " % self.__class__.__name__, self)
         guide_pos = self.guides[0].getPosition(reset_scale = False)
 
         global_control = control(self, "global",  control_type = 1)
         global_control.setPosition(guide_pos)
         global_control.setScale(2)
+        MC.parentObject(global_control.name, self.control_hierarchy)
 
         global_offset_control = control(self, "globalOffset")
-        global_offset_control.setPosition(guide_pos)
-        MC.parentObject(global_offset_control.name, global_control.name)
-        
+        MC.parentObject(global_offset_control.name, self.control_hierarchy)
 
-        MC.parentObject(global_control.name, self.control_hierarchy)
+        Matrix_functions.setMatrixParentNoOffset(global_offset_control.name, global_control.name)
     
     def connectComponent(self):
+        if not super().connectComponent():
+            return False
         print("%s:: Connecting Component:: " % self)
