@@ -16,8 +16,9 @@ class deform(Serializable):
         if not deserialized:
             self.draw()
 
-    def draw(self):
+    def draw(self, segment_scale_compensate = False):
         MC.createJoint(self.name)
+        MC.setAttribute(self.name, "segmentScaleCompensate", segment_scale_compensate)
         self.resize(self.node.properties.deform_size)
     
     def exists(self):

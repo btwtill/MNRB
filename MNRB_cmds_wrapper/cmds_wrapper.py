@@ -307,11 +307,20 @@ class MC:
 
     #create utiility nodes
     @staticmethod
-    def createDecomposeNode(name):
-        return cmds.createNode("decomposeMatrix", name = name + "_dcm_fNode")
+    def createDecomposeNode(name, underworld = False):
+        if underworld:
+            return cmds.createNode("decomposeMatrix", name = name + "_dcm_fNode_UW")
+        else:
+            return cmds.createNode("decomposeMatrix", name = name + "_dcm_fNode")
+
+    def createComposeNode(name, underworld = False):
+        if underworld:
+            return cmds.createNode("composeMatrix", name = name + "_cm_fNode_UW")
+        else:
+            return cmds.createNode("composeMatrix", name = name + "_cm_fNode")
     
-    def createComposeNode(name):
-        return cmds.createNode("composeMatrix", name = name + "_cm_fNode")
-    
-    def createMultMatrixNode(name):
-        return cmds.createNode("multMatrix", name = name + "_mmtx_fNode")
+    def createMultMatrixNode(name, underworld = False):
+        if underworld:
+            return cmds.createNode("multMatrix", name = name + "_mmtx_fNode_UW")
+        else:
+            return cmds.createNode("multMatrix", name = name + "_mmtx_fNode")

@@ -128,7 +128,7 @@ class Matrix_functions():
         MC.setAttribute(compose_node, "inputRotateOrder", rotate_order)
 
     @staticmethod
-    def setMatrixParentWithOffset(child, parent, decompose_result = True):
+    def setMatrixParentWithOffset(child, parent, decompose_result = True, underworld = False):
         child_world_matrix = om.MMatrix(MC.getObjectWorldPositionMatrix(child))
         parent_world_matrix = om.MMatrix(MC.getObjectWorldPositionMatrix(parent))
 
@@ -137,25 +137,36 @@ class Matrix_functions():
         offset_matrix = parent_world_matrix_inverse * child_world_matrix
         offset_matrix_transformation = om.MTransformationMatrix(offset_matrix)
 
-        offset_compose_node = MC.createComposeNode(child + "_parentOffset")
+        offset_compose_node = MC.createComposeNode(child + "_parentOffset", underworld = underworld)
         Matrix_functions.fillComposeMatrixNodeWithTransformationMatrix(offset_compose_node, offset_matrix_transformation)
 
-        offset_mult_matrix_node = MC.createMultMatrixNode(child + "_parentOffset")
+        offset_mult_matrix_node = MC.createMultMatrixNode(child + "_parentOffset", underworld = underworld)
         MC.connectAttribute(offset_compose_node, "outputMatrix", offset_mult_matrix_node, "matrixIn[0]")
         MC.connectAttribute(parent, "worldMatrix[0]", offset_mult_matrix_node, "matrixIn[1]")
 
         if decompose_result:
-            offset_decompose_node = MC.createDecomposeNode(child + "_parentOffset")
+            offset_decompose_node = MC.createDecomposeNode(child + "_parentOffset", underworld = underworld)
             MC.connectAttribute(offset_mult_matrix_node, "matrixSum", offset_decompose_node, "inputMatrix")
             Matrix_functions.connectDecomposeToSRT(offset_decompose_node, child)
         else:
             MC.connectAttribute(offset_mult_matrix_node, "matrixSum", child, "offsetParentMatrix")
             MC.clearTransforms(child)
-        print("Finished Matrix Parenting with Offset")
+
         return offset_compose_node, offset_mult_matrix_node
 
-        
-
-
-
-    
+    @staticmethod
+    def setLiveMatrixParentNoOffset(child, driver, parent, decompose_result = True):
+        #create mult Matrix node
+        mult_matrix_node = MC.createMultMatrixNode(child + "_matrixParentLink")
+        #connect child world matrix 
+        MC.connectAttribute(driver, "worldMatrix[0]", mult_matrix_node, "matrixIn[0]")
+        #connect parent inverse world matrix
+        MC.connectAttribute(parent, "worldInverseMatrix[0]", mult_matrix_node, "matrixIn[1]")
+        if decompose_result:
+            decompose_node = MC.createDecomposeNode(child + "_matrixParentLink")
+            MC.connectAttribute(mult_matrix_node, "matrixSum", decompose_node, "inputMatrix")
+            Matrix_functions.connectDecomposeToSRT(decompose_node, child)
+        else:
+            MC.connectAttribute(mult_matrix_node, "matrixSum", child, "offsetParentMatrix")
+            
+        return mult_matrix_node

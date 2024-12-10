@@ -80,9 +80,13 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         srt_parent = self.getInputConnectionValueAt(0) + MNRB_Names.output_suffix
         deform_parent = self.getInputConnectionValueAt(1) + MNRB_Names.deform_suffix
 
+        deform_joint = self.deforms[0]
+
         #matrix parent with underworld Offset
-        srt_parent_offset_composeNode, srt_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.root_input, srt_parent)
+        srt_parent_offset_compose_node, srt_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.root_input, srt_parent)
 
         #parent deform to deform parent
+        MC.parentObject(deform_joint.name, deform_parent)
+        deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform_joint.name, self.deform_output, deform_parent)
 
         

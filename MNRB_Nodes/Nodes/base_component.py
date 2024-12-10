@@ -31,7 +31,7 @@ class MNRB_Node_BaseComponent(MNRB_NodeTemplate):
     Node_Properties_Class = MNRB_Node_BaseComponent_Properties
 
     def __init__(self, scene):
-        super().__init__(scene, inputs = [], outputs=[["globalOffset", SocketTypes.srt, True], ["global_def", SocketTypes.deform, True]])
+        super().__init__(scene, inputs = [], outputs=[["globalOffset", SocketTypes.srt, True], ["global", SocketTypes.deform, True]])
 
     def guideBuild(self):
         if not super().guideBuild():
