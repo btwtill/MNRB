@@ -105,9 +105,12 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
             return False
         return True
         
-    def connectComponent(self):
+    def connectComponent(self, do_rebuild=False):
         print("%s:: Connecting Component:: " % self)
-
+        if do_rebuild:
+            if not super().connectComponent():
+                return False
+            
         srt_parent = self.getInputConnectionValueAt(0) + MNRB_Names.output_suffix
         deform_parent = self.getInputConnectionValueAt(1) + MNRB_Names.deform_suffix
 

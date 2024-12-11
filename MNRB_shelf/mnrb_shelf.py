@@ -1,12 +1,14 @@
 import os
 import importlib
-import MNRB.MNRB_shelf.mnrb_shelf_utility as mnrb_shelf_utility #type: ignore
-importlib.reload(mnrb_shelf_utility)
+import MNRB #type: ignore
+importlib.reload(MNRB)
 
 from MNRB.MNRB_shelf.mnrb_shelf_base import _shelf #type: ignore
 
 ICON_DIRECTORY = os.path.join(os.path.dirname(__file__), "icons")
 
+import MNRB.MNRB_shelf.mnrb_shelf_utility as mnrb_shelf_utility #type: ignore
+importlib.reload(mnrb_shelf_utility)
 
 class loadMNRBShelf(_shelf):
     def build(self):

@@ -2,6 +2,7 @@ import importlib
 import maya.utils #type: ignore
 import  MNRB.MNRB_UI.mnrb_editor as mnrb_editor #type: ignore
 from PySide2.QtWidgets import QApplication, QMainWindow #type: ignore
+
 import MNRB.module_loading as module_loading #type: ignore
 importlib.reload(module_loading)
 
