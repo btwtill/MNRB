@@ -1,33 +1,20 @@
 import importlib
-import maya.utils #type: ignore
-import  MNRB.MNRB_UI.mnrb_editor as mnrb_editor #type: ignore
-from PySide2.QtWidgets import QApplication, QMainWindow #type: ignore
+import os
+from MNRB.MNRB_shelf import mnrb_shelf_base #type: ignore
+importlib.reload(mnrb_shelf_base)
 
-import MNRB.module_loading as module_loading #type: ignore
+import MNRB.MNRB_shelf.module_loading as module_loading #type: ignore
 importlib.reload(module_loading)
 
+ICON_DIRECTORY = os.path.join(os.path.dirname(__file__), "icons")
 
-def openMNRBEditor():
-    def get_active_main_window():
-        # Iterate through all top-level widgets
-        for widget in QApplication.topLevelWidgets():
-            # Check if the widget is a QMainWindow and is visible
-            if isinstance(widget, QMainWindow) and widget.isVisible():
-                return widget
-        return None
+class loadMNRBShelf(mnrb_shelf_base._shelf):
+    def build(self):
 
-    if get_active_main_window() is None:
-        newEditor = mnrb_editor.mnrb_Editor()
-        newEditor.show()
+        #reload Shelf
+        self.addButton(label="", icon=ICON_DIRECTORY + "/reload.png", command=module_loading.reloadMNRBModules)
 
-def reloadShelf():
-    module_loading.reloadMNRBModules()
+        self.addButton(label="", icon=ICON_DIRECTORY + "/mnrb_editor.png", command=module_loading.open)
 
-    import importlib
-    from MNRB.MNRB_shelf import mnrb_shelf #type: ignore
-    importlib.reload(mnrb_shelf)
-
-    def load_userMNRB_shelf():
-        mnrb_shelf.loadMNRBShelf(name ="MNRB_shelf")
-
-    maya.utils.executeDeferred("load_userMNRB_shelf()")
+        # Separator
+        self.addButton(label="", icon=ICON_DIRECTORY + "/sep.png", command="print('Separator DUH!!')")

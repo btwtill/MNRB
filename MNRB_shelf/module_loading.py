@@ -1,7 +1,21 @@
+
+def open():
+    from PySide2.QtWidgets import QApplication, QMainWindow #type: ignore
+    from MNRB.MNRB_UI import mnrb_editor #type: ignore
+
+    def get_active_main_window():
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QMainWindow) and widget.isVisible():
+                return widget
+        return None
+
+    if get_active_main_window() is None:
+        newEditor = mnrb_editor.mnrb_Editor()
+        newEditor.show()
+
 def reloadMNRBModules():
     print("Reloading MNRB Shelf and Modules............")
     import importlib
-    from PySide2.QtWidgets import QApplication, QMainWindow
 
     import MNRB.MNRB_Nodes.node_Editor_conf as NodeEditorConf
     importlib.reload(NodeEditorConf)
@@ -158,3 +172,6 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences 
     importlib.reload(MNRBPreferences)
+
+    
+
