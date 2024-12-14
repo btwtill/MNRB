@@ -26,28 +26,24 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         super().__init__(scene, inputs = [["parent_ctrl", SocketTypes.srt, False], ["parent_def", SocketTypes.deform, False]], outputs=[["singleDef", SocketTypes.srt, True], ["singleDef", SocketTypes.deform, True]])
 
     def guideBuild(self):
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
-
         if not super().guideBuild():
             return False
         
+        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
+
         self.sinlge_deform_component_guide = guide(self, name = "single")
         MC.parentObject(self.sinlge_deform_component_guide.name, self.guide_component_hierarchy)
 
         self.reconstructGuides()
         
-    def validateGuideBuild(self):
-        if not hasattr(self, 'sinlge_deform_component_guide'):
-            return False
-        if not self.sinlge_deform_component_guide.exists():
-            return False
         return True
 
     def staticBuild(self):
-        print("%s:: Building Static:: " % self)
         if not super().staticBuild():
             return False
         
+        if GUIDE_DEBUG: print("%s:: Building Static:: " % self)
+
         self.guide_pos = self.sinlge_deform_component_guide.getPosition()
 
         self.single_deform = deform(self, "singleDef")
@@ -57,20 +53,13 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
 
         return True
     
-    def validateStaticBuild(self):
-        if not hasattr(self, 'guide_pos'):
-            return False
-        if not hasattr(self, 'single_deform'):
-            return False
-        if not self.single_deform.exists():
-            return False
-        return True
 
     def componentBuild(self):
-        print("%s:: Building Component:: " % self)
         if not super().componentBuild():
             return False
         
+        if GUIDE_DEBUG: print("%s:: Building Component:: " % self)
+
         #getting guides
         guide_pos = self.guides[0].getPosition(reset_scale = False)
 
@@ -89,28 +78,14 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         self.deform_output = MC.createTransform(self.getComponentFullPrefix() + "singleDef" + MNRB_Names.output_suffix)
         MC.parentObject(self.deform_output, self.output_hierarchy)
         Matrix_functions.decomposeTransformWorldMatrixTo(self.single_control.name, self.deform_output)
-
-    def validateComponentBuild(self):
-        if not hasattr(self, 'root_input'):
-            return False
-        if not MC.objectExists(self.root_input):
-            return False
-        if not hasattr(self, 'single_control'):
-            return False
-        if not self.single_control.exists():
-            return False
-        if not hasattr(self, 'deform_output'):
-            return False
-        if not MC.objectExists(self.deform_output):
-            return False
         return True
         
-    def connectComponent(self, do_rebuild=False):
-        print("%s:: Connecting Component:: " % self)
-        if do_rebuild:
-            if not super().connectComponent():
-                return False
-            
+    def connectComponent(self):
+        if not super().connectComponent():
+            return False
+        
+        if GUIDE_DEBUG: print("%s:: Connecting Component:: " % self)
+
         srt_parent = self.getInputConnectionValueAt(0) + MNRB_Names.output_suffix
         deform_parent = self.getInputConnectionValueAt(1) + MNRB_Names.deform_suffix
 
@@ -124,5 +99,6 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
         deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform_joint.name, self.deform_output, deform_parent)
 
         MC.resetJointOrientations(deform_joint.name)
+        return True
 
         

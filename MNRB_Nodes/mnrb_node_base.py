@@ -200,7 +200,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         button_layout.addWidget(self.build_guides_action_button)
 
         self.build_step_dropdown = QComboBox()
-        self.build_step_dropdown.addItems([MNRB_Names.build_step.static, MNRB_Names.build_step.component, MNRB_Names.build_step.connected])
+        self.build_step_dropdown.addItems([MNRB_Names.build_step.static, MNRB_Names.build_step.component])
         self.build_step_dropdown.setCurrentIndex(1)
         self.build_step_dropdown.setStyleSheet("background-color: #2B2B2B;")
         button_layout.addWidget(self.build_step_dropdown)
@@ -546,10 +546,9 @@ class MNRB_Node(NodeEditorNode):
         MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
         self.guide_component_hierarchy = current_component_guide_hierarchy
 
-        
         return True
 
-    def staticBuild(self, rebuild_guides = False) -> bool:
+    def staticBuild(self, rebuild_guides = True) -> bool:
         if rebuild_guides:
             self.guideBuild()
 
@@ -569,7 +568,7 @@ class MNRB_Node(NodeEditorNode):
 
         return True
 
-    def componentBuild(self, rebuild_static = False):
+    def componentBuild(self, rebuild_static = True):
         if rebuild_static:
             self.staticBuild()
         
@@ -607,9 +606,7 @@ class MNRB_Node(NodeEditorNode):
 
         return True
 
-    def connectComponent(self, rebuild_component = False) -> bool:
-        if rebuild_component:
-            self.componentBuild()
+    def connectComponent(self) -> bool:
         return True
 
     def addComponentIdLink(self, object):

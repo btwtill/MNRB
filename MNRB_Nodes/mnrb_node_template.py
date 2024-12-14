@@ -6,37 +6,13 @@ class MNRB_NodeTemplate(MNRB_Node):
         super().__init__(scene, inputs, outputs, color)
 
     def guideBuild(self):
-        if super().guideBuild():
-            return True
-        else:
-            return False
-
+        return super().guideBuild()
+    
     def staticBuild(self):
-        rebuild_guides = not self.validateGuideBuild()
-        if super().staticBuild(rebuild_guides = rebuild_guides):
-            return True
-        else:
-            return False
+        return super().staticBuild()
 
     def componentBuild(self):
-        rebuild_static = not self.validateStaticBuild()
-        if super().componentBuild(rebuild_static = rebuild_static):
-            return True
-        else:
-            return False
+        return super().componentBuild()
 
     def connectComponent(self):
-        rebuild_component = not self.validateComponentBuild()
-        if super().connectComponent(rebuild_component = rebuild_component):
-            return True
-        else:
-            return False
-            
-    def validateGuideBuild(self):
-        return False
-
-    def validateStaticBuild(self):
-        return False
-    
-    def validateComponentBuild(self):
-        return False
+        return super().connectComponent()
