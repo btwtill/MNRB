@@ -53,7 +53,6 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
 
         return True
     
-
     def componentBuild(self):
         if not super().componentBuild():
             return False

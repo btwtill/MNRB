@@ -180,6 +180,10 @@ class NodeEditorNode(Serializable):
         self.scene.removeNode(self)
         if REMOVE_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
 
+    def onConnectionChanged(self, socket):
+        print("%s:: Connection Changed!" % self.__class__.__name__)
+        print("%s:: Changed on:: " % self.__class__.__name__, socket )
+
     def getInputNodesFromSocket(self, index):
         input_socket = self.inputs[index]
         if len(input_socket.edges) == 0: return None

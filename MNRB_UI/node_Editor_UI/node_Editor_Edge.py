@@ -101,6 +101,7 @@ class NodeEditorEdge(Serializable):
 
     def remove(self):
         if REMOVE_DEBUG: print("EDGE:: --remove:: Start Removing Edge:: ", self)
+        old_sockets = [self.start_socket, self.end_socket]
 
         self.removeFromSockets()
 
@@ -108,6 +109,10 @@ class NodeEditorEdge(Serializable):
         self.scene.grScene.removeItem(self.grEdge)
         self.scene.removeEdge(self)
         self.grEdge = None
+
+        for socket in old_sockets:
+            if socket and socket.node:
+                socket.node.onConnectionChanged(socket)
 
     def getOtherSocket(self, given_socket):
         return self.start_socket if given_socket == self.end_socket else self.end_socket
