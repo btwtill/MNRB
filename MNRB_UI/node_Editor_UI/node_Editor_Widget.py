@@ -143,7 +143,6 @@ class NodeEditorWidget(QtWidgets.QWidget):
         if selected and action == select_guides: selected.selectAllGuides()
         if selected and action == select_deforms: selected.selectAllDeforms()
 
-
     def handleEdgeContextMenu(self, event):
         if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: Edge Context Menu Open:: ")
 
@@ -172,4 +171,4 @@ class NodeEditorWidget(QtWidgets.QWidget):
             scene_position = self.scene.getView().mapToScene(event.pos())
             new_node.setPosition(scene_position.x(), scene_position.y())
 
-    
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (self.__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

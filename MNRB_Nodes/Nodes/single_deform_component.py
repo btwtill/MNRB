@@ -84,9 +84,16 @@ class MNRB_Node_SingleDeformComponent(MNRB_NodeTemplate):
             return False
         
         if GUIDE_DEBUG: print("%s:: Connecting Component:: " % self)
+        
+        srt_parent_name = self.getInputConnectionValueAt(0)
+        if srt_parent_name == None:
+            return False
+        srt_parent =  srt_parent_name + MNRB_Names.output_suffix
 
-        srt_parent = self.getInputConnectionValueAt(0) + MNRB_Names.output_suffix
-        deform_parent = self.getInputConnectionValueAt(1) + MNRB_Names.deform_suffix
+        deform_parent_name = self.getInputConnectionValueAt(1)
+        if deform_parent_name == None:
+            return False
+        deform_parent = deform_parent_name + MNRB_Names.deform_suffix
 
         deform_joint = self.deforms[0]
 

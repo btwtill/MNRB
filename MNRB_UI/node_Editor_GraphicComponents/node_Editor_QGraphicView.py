@@ -117,7 +117,6 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         fake_leftMousePress_Event = QMouseEvent(event.type(), event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | Qt.LeftButton, event.modifiers())
         super().mousePressEvent(fake_leftMousePress_Event)
 
-    
     def middleMouseButtonRelease(self, event):
         if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonRelease:: Middle Mouse Button Release Start")
 
@@ -377,6 +376,13 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.grScene.scene.history.storeHistory("Delete Cutted Edges", set_modified = True)
 
+    def displayErrorMessage(self, message):
+        parent_widget = self.parentWidget().parentWidget().parentWidget().parentWidget().parentWidget().parentWidget()
+        print("parent Widget:: ", parent_widget.__class__)
+        print(dir(parent_widget))
+        parent_widget.statusBar().showMessage(message, 5000)
+        parent_widget.set_statusBar_color("#FFc43721", 5000)
+        
     def deleteSelected(self):
         selected_items = self.grScene.selectedItems()
         selected_nodes = []

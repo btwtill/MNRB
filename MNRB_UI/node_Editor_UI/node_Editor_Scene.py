@@ -245,6 +245,9 @@ class NodeEditorScene(Serializable):
             if not node.properties.is_disabled:
                 node.componentBuild()
 
+    def displayErrorMessage(self, message):
+        self.getView().displayErrorMessage(message)
+
     def connectSceneComponents(self):
         for node in self.nodes:
             if not node.properties.is_disabled:

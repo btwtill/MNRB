@@ -2,7 +2,7 @@ import os
 import json
 import maya.cmds as cmds # type: ignore
 from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import Qt, QFile, QSettings, QPoint, QSize #type:  ignore 
+from PySide2.QtCore import Qt, QFile, QSettings, QPoint, QSize, QTimer #type:  ignore 
 from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
@@ -615,6 +615,13 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.setWindowTitle(title)
 
+    def set_statusBar_color(self, color, duration):
+        original_stylesheet = self.statusBar().styleSheet()
+
+        self.statusBar().setStyleSheet(f"background-color: {color}")
+
+        QTimer.singleShot(duration, lambda: self.statusBar().setStyleSheet(original_stylesheet))
+
     def readSettings(self):
         if CLASS_DEBUG: print("MNRB_EDITOR: Reading Settings...")
         settings = QSettings("tlpf", "MNRB")
@@ -660,3 +667,5 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         if CLASS_DEBUG : print("MNRB_EDITOR:: -validateWorkingDirectory:: WorkingDirectoryName: ", os.path.basename(os.path.dirname(directory)))
 
         return not os.path.basename(os.path.dirname(directory)) == "default"
+    
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (self.__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

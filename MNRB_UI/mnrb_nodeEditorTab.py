@@ -12,7 +12,6 @@ from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ig
 DRAGDROP_DEBUG = False
 CONTEXT_DEBUG = False
 
-
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
         super().__init__()
@@ -198,3 +197,5 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def isModified(self):
         return self.central_widget.scene.isModified()
+
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (self.__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

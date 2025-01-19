@@ -709,6 +709,9 @@ class MNRB_Node(NodeEditorNode):
 
     def getInputConnectionValueAt(self, index):
         value, node = self.getInputSocketValueWithNode(index)
+        if value == None and node == None:
+            self.scene.displayErrorMessage(f"Unable to Get Connection from Node: {self.__class__.__name__} at Input Socket Index: {index}" )
+            return None
         full_prefix = node.getComponentFullPrefix()
         return full_prefix + value
 
