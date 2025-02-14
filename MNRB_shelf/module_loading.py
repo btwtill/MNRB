@@ -1,5 +1,6 @@
 
 def open():
+    """This function is to open the the tools UI"""
     from PySide2.QtWidgets import QApplication, QMainWindow #type: ignore
     from MNRB.MNRB_UI import mnrb_editor #type: ignore
 
@@ -172,6 +173,4 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences 
     importlib.reload(MNRBPreferences)
-
-    
 
