@@ -81,6 +81,9 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.mnrb_nodeEditorTab as NodeEditorTab
     importlib.reload(NodeEditorTab)
 
+    import MNRB.MNRB_UI.node_Editor_UI.node_Editor_multiEditPropertiesWidget as MNRBMultiEditWidget 
+    importlib.reload(MNRBMultiEditWidget)
+
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget as NodeEditorWidget
     importlib.reload(NodeEditorWidget)
 
@@ -173,4 +176,5 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences 
     importlib.reload(MNRBPreferences)
+
 

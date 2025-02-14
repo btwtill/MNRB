@@ -9,6 +9,7 @@ from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ig
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_BEZIER, EDGE_TYPE_DIRECT #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import MNRB_NODES #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import ICONPATH #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_multiEditPropertiesWidget import MultiEdit_PropertyWidget #type: ignore
 
 CLASS_DEBUG = False
 CONTEXT_DEBUG = False
@@ -82,7 +83,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
             
             self.property_widget.setWidget(self.scene.properties)
             self.property_widget.setWindowTitle(self.scene.properties.title)
-        else:
+        elif len(selected_items) == 1:
             active_widget = selected_items[0]
             if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to First in Selection:: ", active_widget)
             if hasattr(active_widget, 'node'):
@@ -91,6 +92,11 @@ class NodeEditorWidget(QtWidgets.QWidget):
             elif isinstance(active_widget, NodeEditor_QGraphicEdge):
                 self.property_widget.setWidget(active_widget.edge.properties)
                 self.property_widget.setWindowTitle(active_widget.edge.properties.title)
+        else:
+            print("NODEEDITORWIDGET:: --updatePropertyWindow:: Multi Selection Properties Window!!")
+            multi_edit_property_widget = MultiEdit_PropertyWidget(selected_items)
+            self.property_widget.setWidget(multi_edit_property_widget)
+            self.property_widget.setWindowTitle(multi_edit_property_widget.title)
 
     def contextMenuEvent(self, event):
         item  = self.scene.getItemAt(event.pos())

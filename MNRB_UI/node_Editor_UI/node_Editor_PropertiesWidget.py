@@ -84,3 +84,4 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
         return True
     
 
+    def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
