@@ -299,7 +299,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.guide_size_slider.setValue(self.formatSliderEditToSliderValue(self.guide_slider_size_edit.text()))
         self.is_guide_slider_silent = False
 
-    def updateGuideSliderSizeEdit(self):#
+    def updateGuideSliderSizeEdit(self):
         self.is_guide_slider_edit_silent = True
         self.guide_slider_size_edit.setText(str(self.formatSliderValueToEditValue(self.guide_size_slider.value())))
         self.is_guide_slider_edit_silent = False

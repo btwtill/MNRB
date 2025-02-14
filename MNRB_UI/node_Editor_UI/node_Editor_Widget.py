@@ -94,7 +94,12 @@ class NodeEditorWidget(QtWidgets.QWidget):
                 self.property_widget.setWindowTitle(active_widget.edge.properties.title)
         else:
             print("NODEEDITORWIDGET:: --updatePropertyWindow:: Multi Selection Properties Window!!")
-            multi_edit_property_widget = MultiEdit_PropertyWidget(selected_items)
+
+            filtered_selection = []
+            for item in selected_items:
+                if hasattr(item, 'node'): filtered_selection.append(item)
+
+            multi_edit_property_widget = MultiEdit_PropertyWidget(filtered_selection)
             self.property_widget.setWidget(multi_edit_property_widget)
             self.property_widget.setWindowTitle(multi_edit_property_widget.title)
 
