@@ -60,6 +60,9 @@ def reloadMNRBModules():
     import MNRB.MNRB_Nodes.Nodes.single_deform_component as MNRB_SingleDeform_Component_Node
     importlib.reload(MNRB_SingleDeform_Component_Node)
 
+    import MNRB.MNRB_Nodes.Nodes.multi_deform_component as MNRB_MultiDeformComponent_Node
+    importlib.reload(MNRB_MultiDeformComponent_Node)
+
     import MNRB.MNRB_Nodes.mnrb_node_base as MNRBNodeBase
     importlib.reload(MNRBNodeBase)
 
