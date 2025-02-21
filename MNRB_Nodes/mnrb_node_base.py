@@ -763,8 +763,9 @@ class MNRB_Node(NodeEditorNode):
                 deform.remove()
 
     def removeComponentFromViewport(self):
-        if MC.objectExists(self.component_hierarchy):
-            MC.deleteObjectWithHierarchy(self.component_hierarchy)
+        if self.component_hierarchy is not None:
+            if MC.objectExists(self.component_hierarchy):
+                MC.deleteObjectWithHierarchy(self.component_hierarchy)
 
     def serialize(self):
         result_data = super().serialize()
