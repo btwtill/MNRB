@@ -77,8 +77,6 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
     def addGuideToChain(self):
         if GUIDE_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
-        active_guides = len(self.guides)
-        if GUIDE_DEBUG: print("%s:: addGuideToChain:: Current Number of Guides" % self.__class__.__name__, active_guides)
 
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
@@ -91,9 +89,6 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
         self.multi_Def_Chain_start_guide = guide(self, name = "chain_start")
         MC.parentObject(self.multi_Def_Chain_start_guide.name, self.guide_component_hierarchy)
-
-        self.multi_Def_Chain_end_guide = guide(self, name = "chain_end")
-        MC.parentObject(self.multi_Def_Chain_end_guide.name, self.multi_Def_Chain_start_guide.name)
 
         self.reconstructGuides()
     

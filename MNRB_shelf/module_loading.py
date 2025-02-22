@@ -179,5 +179,3 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences 
     importlib.reload(MNRBPreferences)
-
-
