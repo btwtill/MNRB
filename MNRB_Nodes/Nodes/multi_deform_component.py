@@ -46,10 +46,14 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
 
     def serialize(self):
         result_data = super().serialize()
+        result_data["number_of_deforms"] = self.current_deform_count
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
+
+        self.deform_count_slider.setValue(data["number_of_deforms"])
+
         return True
 
 @registerNode(OPERATIONCODE_MULTIDEFORMCOMPONENT)
@@ -77,6 +81,7 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
     def addGuideToChain(self):
         if GUIDE_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
+        self.addInputSocket(input_type = 2, input_socket_value = "test", is_input_multi_edged = False)
 
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)

@@ -129,6 +129,30 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -initSockets:: input Array After:: ", self.inputs)
         if CLASS_DEBUG: print("NODE:: -initSockets:: output Array After:: ", self.outputs)
 
+    def addInputSocket(self, input_type, input_socket_value, is_input_multi_edged):
+        input_index = len(self.inputs) + 1
+        new_input_socket = self.__class__.Socket_Class(self, index=input_index, 
+                                       position=1, 
+                                       socket_type = input_type, 
+                                       socket_value = input_socket_value,
+                                       accept_multi_edges=is_input_multi_edged, 
+                                       index_on_drawn_node_side=input_index, 
+                                       is_input = True)
+        self.inputs.append(new_input_socket)
+        return new_input_socket
+
+    def addIOutputSocket(self, output_type, output_socket_value, is_output_multi_edged):
+        output_index = len(self.inputs) + len(self.outputs) + 1
+        new_output_socket = self.__class__.Socket_Class(self, index=output_index, 
+                                       position=1, 
+                                       socket_type = output_type, 
+                                       socket_value = output_socket_value,
+                                       accept_multi_edges=is_output_multi_edged, 
+                                       index_on_drawn_node_side=output_index, 
+                                       is_input = True)
+        self.outputs.append(new_output_socket)
+        return new_output_socket
+
     def updateConnectedEdges(self):
         for socket in (self.inputs + self.outputs):
             for edge in socket.edges:
