@@ -4,6 +4,7 @@ from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: igno
 
 SELECTION_DEBUG = False
 EVENT_DEBUG = False
+CLASS_DEBUG = True
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     def __init__(self, node, parent = None):
@@ -155,9 +156,11 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.is_drawing_bounding_box = value
 
     def wrapGrNodeToSockets(self):
+        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: " % self.__class__.__name__)
         full_socket_height = self.socket_padding + self.socket_radius
         full_node_length = (len(self.node.inputs) * full_socket_height) + (len(self.node.outputs) * full_socket_height) + self.title_height + self.socket_padding
         self.height = full_node_length
+        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: new grNode Height" % self.__class__.__name__, self.height)
 
     def onSelected(self):
         if SELECTION_DEBUG: print("GRAPHICNODE:: --onSelected:: ")

@@ -8,7 +8,7 @@ LEFT = 1
 RIGHT = 2
 
 REMOVE_DEBUG = False
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 
 class NodeEditor_Socket(Serializable):
     def __init__(self, node, index=0, position=LEFT, socket_type=SocketTypes.srt, socket_value ="undefined", accept_multi_edges=True, index_on_drawn_node_side = 1, is_input = True ):
@@ -28,6 +28,9 @@ class NodeEditor_Socket(Serializable):
 
         self.edges = []
 
+        self.updateOnNode()
+
+    def updateOnNode(self):
         self.setPosition()
         self.setContentLabel()
 

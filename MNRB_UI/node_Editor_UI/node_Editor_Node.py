@@ -7,9 +7,9 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #ty
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 EVENT_DEBUG = False
-SERIALIZE_DEBUG = False
+SERIALIZE_DEBUG = True
 REMOVE_DEBUG = False
 
 class NodeEditorNode(Serializable):
@@ -129,28 +129,17 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -initSockets:: input Array After:: ", self.inputs)
         if CLASS_DEBUG: print("NODE:: -initSockets:: output Array After:: ", self.outputs)
 
-    def addInputSocket(self, input_type, input_socket_value, is_input_multi_edged):
-        input_index = len(self.inputs) + 1
-        new_input_socket = self.__class__.Socket_Class(self, index=input_index, 
-                                       position=1, 
-                                       socket_type = input_type, 
-                                       socket_value = input_socket_value,
-                                       accept_multi_edges=is_input_multi_edged, 
-                                       index_on_drawn_node_side=input_index, 
-                                       is_input = True)
-        self.inputs.append(new_input_socket)
-        return new_input_socket
-
-    def addIOutputSocket(self, output_type, output_socket_value, is_output_multi_edged):
-        output_index = len(self.inputs) + len(self.outputs) + 1
+    def addOutputSocket(self, output_type = 1, output_socket_value = "undefined", is_output_multi_edged = True):
+        output_index = len(self.inputs) + len(self.outputs) 
         new_output_socket = self.__class__.Socket_Class(self, index=output_index, 
-                                       position=1, 
+                                       position=2, 
                                        socket_type = output_type, 
                                        socket_value = output_socket_value,
                                        accept_multi_edges=is_output_multi_edged, 
                                        index_on_drawn_node_side=output_index, 
-                                       is_input = True)
+                                       is_input = False)
         self.outputs.append(new_output_socket)
+        self.grNode.wrapGrNodeToSockets()
         return new_output_socket
 
     def updateConnectedEdges(self):
@@ -307,11 +296,32 @@ class NodeEditorNode(Serializable):
                         break
                 if SERIALIZE_DEBUG: print("NODE: --deserialize:: Deserializing Found Socket:: ", found)
                 found.deserialize(socket_data, hashmap, restore_id)
-        
+        if SERIALIZE_DEBUG: print("NODE: --deserialize:: 1")
+        if SERIALIZE_DEBUG: print("NODE: --deserialize:: all default registered Output Sockets: ", self.outputs)
         for index, socket_data in enumerate(data['outputs']):
             if not exists:
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: About to deserialize outputs socket:: ", self.outputs[index])
+
+                if SERIALIZE_DEBUG: 
+                    print("NODE: --deserialize:: 2") 
+                    print("NODE: --deserialize:: Full length of Output Sockets", len(data["outputs"])) 
+                    print("NODE: --deserialize:: Current Index", index) 
+                    print("NODE: --deserialize:: All Registered Outputs", len(self.outputs)) 
+                    print("NODE: --deserialize:: 3")
+
+                if (index + 1) > len(self.outputs):
+                    if SERIALIZE_DEBUG: print("NODE: --deserialize:: 4")
+                    if SERIALIZE_DEBUG: print("NODE: --deserialize:: an aditional Socket was detected", socket_data)
+
+                    self.addOutputSocket(socket_data["socket_type"], socket_data["socket_value"], socket_data["accept_multi_edges"])
+
+                if SERIALIZE_DEBUG: 
+                    print("NODE: --deserialize:: 5")
+                    print("NODE: --deserialize:: About to deserialize outputs socket:: ", self.outputs[index])
+
                 self.outputs[index].deserialize(socket_data, hashmap, restore_id)
+
+                if SERIALIZE_DEBUG: print("NODE: --deserialize:: 6")
+
             else:
                 for socket in self.outputs:
                     if socket.id == socket_data['id']:

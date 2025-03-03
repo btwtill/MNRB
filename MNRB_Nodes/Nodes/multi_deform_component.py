@@ -10,6 +10,7 @@ from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 GUIDE_DEBUG = True
+CLASS_DEBUG = True
 
 class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties): 
 
@@ -37,12 +38,14 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
         
         self.layout.addLayout(deform_count_layout)
 
-    def updateDeformCountSliderLabel(self):
+    def updateDeformCountSliderLabel(self, silent = False):
         self.last_deform_count = self.current_deform_count
         self.deform_count_slider_label.setText(self.deform_count_slider_label_text + str(self.deform_count_slider.value()))
         self.current_deform_count = self.deform_count_slider.value()
-
-        self.node.onDeformCountSliderChange()
+        if not self.is_silent:
+            if CLASS_DEBUG: print("%s::updateDeformCountSliderLabel:: Properties are Silent::" % self.__class__.__name__, self.is_silent)
+            if CLASS_DEBUG: print("%s::updateDeformCountSliderLabel:: About to update Deform Count" % self.__class__.__name__)
+            self.node.onDeformCountSliderChange()
 
     def serialize(self):
         result_data = super().serialize()
@@ -51,9 +54,9 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
         result = super().deserialize(data, hashmap, restore_id)
-
+        self.is_silent = True
         self.deform_count_slider.setValue(data["number_of_deforms"])
-
+        self.is_silent = False
         return True
 
 @registerNode(OPERATIONCODE_MULTIDEFORMCOMPONENT)
@@ -81,7 +84,7 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
     def addGuideToChain(self):
         if GUIDE_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
-        self.addInputSocket(input_type = 2, input_socket_value = "test", is_input_multi_edged = False)
+        self.addOutputSocket(output_type = 2, output_socket_value = "test", is_output_multi_edged = False)
 
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
