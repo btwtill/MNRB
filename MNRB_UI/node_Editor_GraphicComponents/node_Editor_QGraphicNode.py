@@ -112,7 +112,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
 
-        self.is_drawing_bounding_box = False
+        self.is_drawing_bounding_box = True
     
     def mouseMoveEvent(self, event):
         super().mouseMoveEvent(event)

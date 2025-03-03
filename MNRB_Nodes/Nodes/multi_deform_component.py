@@ -83,11 +83,12 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
             self.removeGuideFromChain()
 
     def addGuideToChain(self):
-        if GUIDE_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
+        if CLASS_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
         self.addOutputSocket(output_type = 2, output_socket_value = "test", is_output_multi_edged = False)
 
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
+        self.removeLastSocket()
 
     def guideBuild(self):
         if not super().guideBuild():

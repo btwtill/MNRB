@@ -36,4 +36,13 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
         self.socket_labels.append(new_socket_label)
         self.layout.addWidget(new_socket_label)
         
+    def getContentLabels(self):
+        return self.socket_labels
+    
+    def removeLastLabel(self):
+        print(self.socket_labels)
+        last_label = self.socket_labels.pop()
+        self.layout.removeWidget(last_label)
+        last_label.deleteLater()
+
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
