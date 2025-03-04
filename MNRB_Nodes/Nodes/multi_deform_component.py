@@ -86,6 +86,17 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
         if CLASS_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
         self.addOutputSocket(output_type = 2, output_socket_value = "test", is_output_multi_edged = False)
 
+        #get overall amount of deforms 
+
+        #create new guide with that name
+
+        #add guide to guides
+
+        #get last guide position 
+        
+        #set new guide position
+        
+
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
         self.removeLastSocket()
