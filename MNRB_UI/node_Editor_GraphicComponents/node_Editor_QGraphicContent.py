@@ -2,13 +2,14 @@ from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 
+CLASS_DEBUG = True
+
 class NodeEditor_QGraphicContent(QtWidgets.QWidget):
     def __init__(self, node, parent=None):
         super().__init__(parent)
 
         self.node = node
         self.socket_labels = []
-
         self.initUI()
 
     def initUI(self):
@@ -32,7 +33,11 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
         new_socket_label.setFont(new_socket_label_font)
 
         if alignment == RIGHT:
-            new_socket_label.setAlignment(Qt.AlignRight)
+            new_socket_label.setAlignment(Qt.AlignCenter)
+        else:
+            new_socket_label.setAlignment(Qt.AlignCenter)
+
+        self.layout.setAlignment(Qt.AlignCenter)
         self.socket_labels.append(new_socket_label)
         self.layout.addWidget(new_socket_label)
         
@@ -40,9 +45,15 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
         return self.socket_labels
     
     def removeLastLabel(self):
-        print(self.socket_labels)
+
         last_label = self.socket_labels.pop()
+
         self.layout.removeWidget(last_label)
         last_label.deleteLater()
+
+        self.layout.update()
+        self.updateGeometry()
+        self.adjustSize()
+        self.layout.setAlignment(Qt.AlignCenter)
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
