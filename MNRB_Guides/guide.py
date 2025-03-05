@@ -114,6 +114,10 @@ class guide(Serializable):
             if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
 
+    def remove(self):
+        if self.exists():
+            MC.deleteNode(self.name)
+
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),

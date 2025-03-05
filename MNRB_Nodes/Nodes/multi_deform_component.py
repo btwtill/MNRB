@@ -7,6 +7,7 @@ from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
+from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 GUIDE_DEBUG = True
@@ -19,6 +20,7 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
 
         self.last_deform_count = 0
         self.current_deform_count  = 0
+        self.auto_orient = True
 
     def initUI(self):
         super().initUI()
@@ -37,6 +39,11 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
         deform_count_layout.addWidget(self.deform_count_slider)
         
         self.layout.addLayout(deform_count_layout)
+
+        chain_orientation_label = QLabel("OrientChain")
+
+        auto_orientation_label = QLabel("Auto_Orient")
+
 
     def updateDeformCountSliderLabel(self, silent = False):
         self.last_deform_count = self.current_deform_count
@@ -75,6 +82,50 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
                 color=MNRBColor.yellow):
         super().__init__(scene, inputs, outputs, color)
 
+
+    def guideBuild(self):
+        if not super().guideBuild():
+            return False
+        
+        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
+
+        self.multi_Def_Chain_start_guide = guide(self, name = "chain_start")
+        MC.parentObject(self.multi_Def_Chain_start_guide.name, self.guide_component_hierarchy)
+
+        amount_of_extra_guides = self.properties.current_deform_count
+
+        for index in range(amount_of_extra_guides):
+            
+            new_guide_name = self.getComponentName() + str(index)
+
+            self.addGuideToChain(new_guide_name)
+
+        self.reconstructGuides()
+    
+    def staticBuild(self):
+        if not super().staticBuild():
+            return False
+        
+        for index, guide in enumerate(self.guides):
+            guide_pos = guide.getPosition()
+
+            new_deform = deform(self, guide.guide_name)
+            new_deform.setPosition(guide_pos)
+
+            if index > 0:
+                parent_deform = self.deforms[index - 1]
+                MC.parentObject(new_deform.name, parent_deform.name)
+            else:
+                MC.parentObject(new_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
+    
+
+    def componentBuild(self):
+        return super().componentBuild()
+
+    def connectComponent(self):
+        return super().connectComponent()
+    
+
     def onDeformCountSliderChange(self):
         if self.properties.current_deform_count > self.properties.last_deform_count:
             #get overall amount of deforms 
@@ -88,6 +139,10 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
             self.addGuideToChain(new_guide_name)
         else:
+
+            #remove the last two sockets
+            self.removeLastSocket()
+            self.removeLastSocket()
             self.removeGuideFromChain()
 
     def addGuideToChain(self, new_guide_name):
@@ -112,34 +167,8 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
-        self.removeLastSocket()
-        self.removeLastSocket()
-
-    def guideBuild(self):
-        if not super().guideBuild():
-            return False
         
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
+        if self.guides != [] and self.isAllGuidesExistend():
 
-        self.multi_Def_Chain_start_guide = guide(self, name = "chain_start")
-        MC.parentObject(self.multi_Def_Chain_start_guide.name, self.guide_component_hierarchy)
-
-        amount_of_extra_guides = self.properties.current_deform_count
-
-        for index in range(amount_of_extra_guides):
-            
-            new_guide_name = self.getComponentName() + str(index)
-
-            self.addGuideToChain(new_guide_name)
-
-
-        self.reconstructGuides()
-    
-    def staticBuild(self):
-        return super().staticBuild()
-
-    def componentBuild(self):
-        return super().componentBuild()
-
-    def connectComponent(self):
-        return super().connectComponent()
+            last_guide_in_chain = self.guides.pop()
+            last_guide_in_chain.remove()

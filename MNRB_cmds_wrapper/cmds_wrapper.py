@@ -227,10 +227,17 @@ class MC:
 
     #translation
     @staticmethod
+    def getTranslation(object_name) -> list:
+        return [MC.getAttribute(object_name, "translateX"), 
+                MC.getAttribute(object_name, "translateY"), 
+                MC.getAttribute(object_name, "translateZ")]
+
+    @staticmethod
     def addTranslation(object_name, x, y, z) -> list:
-        new_translateX = MC.getAttribute(object_name, "translateX") + x
-        new_translateY = MC.getAttribute(object_name, "translateY") + y
-        new_translateZ = MC.getAttribute(object_name, "translateZ") + z
+        translations = MC.getTranslation(object_name)
+        new_translateX = translations[0] + x
+        new_translateY = translations[1] + y
+        new_translateZ = translations[2] + z
 
         MC.setAttribute(object_name, "translateX", new_translateX)
         MC.setAttribute(object_name, "translateY", new_translateY)
@@ -238,6 +245,11 @@ class MC:
 
         return [new_translateX, new_translateY, new_translateZ]
 
+    @staticmethod
+    def addTranslationOnAxis(object_name, amount, axis) -> list:
+        new_translate = MC.getAttribute(object_name, "translate" + axis.upper()) + amount
+        MC.setAttribute(object_name, "translate" + axis.upper(), new_translate)
+        return 
 
     #joint specific methods
     @staticmethod
