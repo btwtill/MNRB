@@ -715,6 +715,14 @@ class MNRB_Node(NodeEditorNode):
         full_prefix = node.getComponentFullPrefix()
         return full_prefix + value
 
+    def isAllGuidesExistend(self):
+        for guide in self.guides:
+            if guide.exists() == False:
+                return False
+            else:
+                pass 
+        return True
+
     def setComponentGuideHiearchyName(self):
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix )
         self.guide_component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.guide_component_hierarchy_suffix

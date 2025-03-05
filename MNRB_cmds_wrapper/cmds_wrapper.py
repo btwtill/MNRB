@@ -225,6 +225,20 @@ class MC:
     def setObjectPositionMatrix(object_name, matrix):
         cmds.xform(object_name, matrix = matrix, worldSpace=False)
 
+    #translation
+    @staticmethod
+    def addTranslation(object_name, x, y, z) -> list:
+        new_translateX = MC.getAttribute(object_name, "translateX") + x
+        new_translateY = MC.getAttribute(object_name, "translateY") + y
+        new_translateZ = MC.getAttribute(object_name, "translateZ") + z
+
+        MC.setAttribute(object_name, "translateX", new_translateX)
+        MC.setAttribute(object_name, "translateY", new_translateY)
+        MC.setAttribute(object_name, "translateZ", new_translateZ)
+
+        return [new_translateX, new_translateY, new_translateZ]
+
+
     #joint specific methods
     @staticmethod
     def createJoint(name) -> str:

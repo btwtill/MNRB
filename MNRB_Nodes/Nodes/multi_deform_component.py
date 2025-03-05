@@ -71,34 +71,48 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
                 inputs = [["parent_ctrl", SocketTypes.srt, False], ["parent_def", SocketTypes.deform, False]], 
                 outputs=[
                         ["chain_start", SocketTypes.srt, True], ["chain_start", SocketTypes.deform, True],
-                        ["chain_end", SocketTypes.srt, True], ["chain_end", SocketTypes.deform, True],
                         ], 
                 color=MNRBColor.yellow):
         super().__init__(scene, inputs, outputs, color)
 
     def onDeformCountSliderChange(self):
         if self.properties.current_deform_count > self.properties.last_deform_count:
-            self.addGuideToChain()
+            #get overall amount of deforms 
+            current_deform_count = int(len(self.outputs) / 2)
+
+            new_guide_name = self.getComponentName() + str(current_deform_count)
+            
+            #create new output socket for chain
+            self.addOutputSocket(output_type = 1, output_socket_value = new_guide_name, is_output_multi_edged = True)
+            self.addOutputSocket(output_type = 2, output_socket_value = new_guide_name, is_output_multi_edged = True)
+
+            self.addGuideToChain(new_guide_name)
         else:
             self.removeGuideFromChain()
 
-    def addGuideToChain(self):
+    def addGuideToChain(self, new_guide_name):
         if CLASS_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
-        self.addOutputSocket(output_type = 2, output_socket_value = "test", is_output_multi_edged = False)
-
-        #get overall amount of deforms 
-
-        #create new guide with that name
-
-        #add guide to guides
-
-        #get last guide position 
         
-        #set new guide position
-        
+        if self.guides != [] and self.isAllGuidesExistend():
+
+            #parent guide
+            parent_guide = self.guides[-1]
+
+            #create new guide with that name
+            new_guide = guide(self, new_guide_name)
+
+            #get last guide position 
+            new_guide.setPosition(parent_guide.getPosition())
+            
+            #parent guide
+            MC.parentObject(new_guide.name, parent_guide.name)
+
+            #set new guide position
+            MC.addTranslation(new_guide.name, 5.0, 0.0, 0.0)
 
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
+        self.removeLastSocket()
         self.removeLastSocket()
 
     def guideBuild(self):
@@ -109,6 +123,15 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
         self.multi_Def_Chain_start_guide = guide(self, name = "chain_start")
         MC.parentObject(self.multi_Def_Chain_start_guide.name, self.guide_component_hierarchy)
+
+        amount_of_extra_guides = self.properties.current_deform_count
+
+        for index in range(amount_of_extra_guides):
+            
+            new_guide_name = self.getComponentName() + str(index)
+
+            self.addGuideToChain(new_guide_name)
+
 
         self.reconstructGuides()
     
