@@ -1,5 +1,5 @@
 from PySide2 import QtWidgets # type: ignore
-from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
+from PySide2.QtGui import QColor, QPen, QBrush, QPainterPath # type: ignore
 from PySide2.QtCore import QRectF, Qt #type: ignore
 
 SOCKET_COLOR = [
@@ -47,12 +47,17 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
 
     def paint(self, painter, option, widget=None):
         
+        multi_edge_shape = QPainterPath()
+        multi_edge_shape.setFillRule(Qt.WindingFill)
+        multi_edge_shape.addRoundedRect(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius, 2, 2)
+
         painter.setPen(self._pen)
         painter.setBrush(self._brush)
+
         if not self.socket.accept_multi_edges:
             painter.drawEllipse(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius)
         else:
-            painter.drawRect(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius)
+            painter.drawPath(multi_edge_shape.simplified())
 
         if self.is_drawing_bounding_box:
             painter.setPen(QPen(Qt.red, 1, Qt.DashLine))
