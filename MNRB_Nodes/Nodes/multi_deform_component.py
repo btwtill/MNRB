@@ -154,7 +154,7 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
             parent_guide = self.guides[-1]
 
             #create new guide with that name
-            new_guide = guide(self, new_guide_name)
+            new_guide = guide(self, new_guide_name, parent_guide)
 
             #get last guide position 
             new_guide.setPosition(parent_guide.getPosition())

@@ -6,7 +6,7 @@ from MNRB.MNRB_Guides.locator_guide_shape import LocatorGuideShape #type: ignore
 from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
-
+from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 CLASS_DEBUG = False
 
 class guideShapeType(Enum):
@@ -14,10 +14,12 @@ class guideShapeType(Enum):
     sphere = 2
 
 class guide(Serializable):
-    def __init__(self, node, name = "", position = (0, 0, 0), deserialized = False) -> None:
+    def __init__(self, node, name = "", guide_parent = None, position = (0, 0, 0), deserialized = False) -> None:
         super().__init__()
 
         self.node = node
+        self._guide_parent = None
+        self.parent_connector = None
 
         self._guide_type = guideShapeType.sphere
 
@@ -32,6 +34,8 @@ class guide(Serializable):
         self.guide_shape = self.createGuideShape()
 
         self.node.guides.append(self)
+
+        self.guide_parent = guide_parent
 
         if not deserialized:
             self.draw()
@@ -52,8 +56,21 @@ class guide(Serializable):
             self._color = value
             if CLASS_DEBUG: print("%s:: --component_color:: Setting new Guide Color:: " % self.__class__.__name__, self.color)
             self.setColor()
-
+            if self.parent_connector is not None:
+                self.parent_connector.updateColor()
         self._color = value
+
+    @property
+    def guide_parent(self): return self._guide_parent
+    @guide_parent.setter
+    def guide_parent(self, value):
+        if CLASS_DEBUG: print("%s::guide_parent::setter to: " % self.__class__.__name__, value)
+        if self.parent_connector is not None:
+            self.parent_connector.update()
+        elif self.parent_connector == None and value != None:
+            self.parent_connector = Guide_Connector(value, self)
+            self.parent_connector.build()
+        self._guide_parent = value
 
     def draw(self):
         self.guide_shape.draw()
@@ -114,14 +131,22 @@ class guide(Serializable):
             if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
 
+            if self.parent_connector is not None:
+                self.parent_connector.updateName()
+
     def remove(self):
         if self.exists():
             MC.deleteNode(self.name)
+        if self.parent_connector != None:
+            self.parent_connector.remove()
+
+    def parentToGuide(self):
+        if CLASS_DEBUG: print("%s::parentToGuide::" % self.__class__.__name__)
 
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
-            ('name', self.guide_name),
+            ('name', self.guide_name)
         ])
         return serialized_data
 

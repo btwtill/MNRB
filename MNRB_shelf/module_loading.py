@@ -81,6 +81,9 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.mnrb_ui_utils as utils
     importlib.reload(utils)
 
+    import MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector as MNRBGuideConnector
+    importlib.reload(MNRBGuideConnector)
+
     import MNRB.MNRB_UI.mnrb_nodeEditorTab as NodeEditorTab
     importlib.reload(NodeEditorTab)
 
