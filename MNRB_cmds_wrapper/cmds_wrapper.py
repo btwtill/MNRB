@@ -390,11 +390,10 @@ class MC:
 
     @staticmethod 
     def createRotateHelperNode(name, underworld = False) -> str:
-        # if underworld:
-        #     return cmds.createNode("rotateHelper", name = name + "_rh_fNode_UW")
-        # else:
-        #     return cmds.createNode("rotateHelper", name = name + "_rh_fNode")
-        return mel.eval('createNode -name "test" rotateHelper')
+        if underworld:
+            return cmds.createNode("rotateHelper", name = name + "_rh_fNode_UW")
+        else:
+            return cmds.createNode("rotateHelper", name = name + "_rh_fNode")
 
     @staticmethod  
     def createBlendMatrixNode(name, underworld = False) -> str:
@@ -431,6 +430,20 @@ class MC:
         else:
             return cmds.createNode("mesh", name = name + "_meshShape_fNode")
         
+    @staticmethod
+    def createPickMatrixNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("pickMatrix", name = name + "_pMtx_fNode_UW")
+        else:
+            return cmds.createNode("pickMatrix", name = name + "_pMtx_fNode")
+        
+    @staticmethod
+    def createAimMatrixNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("aimMatrix", name = name + "_aimMtx_fNode_UW")
+        else:
+            return cmds.createNode("aimMatrix", name = name + "_aimMtx_fNode")
+
     #Om functions
     @staticmethod
     def force_recalculate(node_name):

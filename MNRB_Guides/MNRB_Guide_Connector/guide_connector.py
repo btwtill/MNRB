@@ -93,11 +93,17 @@ class Guide_Connector():
             MC.connectAttribute(end_decompose_node, "outputTranslate" + channel, aim_vector_subtract_node, "input3D[1].input3D" + channel.lower())
         MC.setAttribute(aim_vector_subtract_node, "operation", 2)
 
-        aim_matrix_node = MC.createRotateHelperNode(self.name + "_aimMatrix")
+        aim_matrix_node = MC.createAimMatrixNode(self.name + "_aimMatrix")
         self.nodes.append(aim_matrix_node)
-        for channel in "XYZ":
-            MC.connectAttribute(up_vector_nudge_node, "output3D" + channel.lower(), aim_matrix_node, "forward" + channel)
-            MC.connectAttribute(aim_vector_subtract_node, "output3D" + channel.lower(), aim_matrix_node, "up" + channel)
+        MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", aim_matrix_node, "inputMatrix")
+        MC.connectAttribute(up_object, "worldMatrix[0]", aim_matrix_node, "secondaryTargetMatrix")
+        MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", aim_matrix_node, "primaryTargetMatrix")
+        MC.setAttribute(aim_matrix_node, "primaryInputAxisX", -1)
+        MC.setAttribute(aim_matrix_node, "secondaryMode", 1)
+
+        aim_matrix_decompose_node = MC.createDecomposeNode(self.name + "_aimMatrix")
+        self.nodes.append(aim_matrix_decompose_node)
+        MC.connectAttribute(aim_matrix_node, "outputMatrix", aim_matrix_decompose_node, "inputMatrix")
 
         position_blend_matrix_node = MC.createBlendMatrixNode(self.name + "_pos_blend")
         self.nodes.append(position_blend_matrix_node)
@@ -112,7 +118,7 @@ class Guide_Connector():
         connector_guide_point_matrix_node = MC.createComposeNode(self.name + "_posMatrix")
         self.nodes.append(connector_guide_point_matrix_node)
         for channel in "XYZ":
-            MC.connectAttribute(aim_matrix_node, "rotate" + channel, connector_guide_point_matrix_node, "inputRotate" + channel)
+            MC.connectAttribute(aim_matrix_decompose_node, "outputRotate" + channel, connector_guide_point_matrix_node, "inputRotate" + channel)
             MC.connectAttribute(position_blend_decompose_node, "outputTranslate" + channel, connector_guide_point_matrix_node, "inputTranslate" + channel)
 
         connection_distance_node = MC.createDistanceNode(self.name)
@@ -140,7 +146,7 @@ class Guide_Connector():
         direction_indecies = []
         mesh_nodes = []
 
-        for direction in [("positive", "Z"), ("positive", "X"), ("negative", "Z"), ("negative", "X")]:
+        for direction in [("positive", "Z"), ("positive", "Y"), ("negative", "Z"), ("negative", "Y")]:
             new_compose_node = MC.createComposeNode(self.name + "_" + direction[0] + direction[1] + "_offset")
             self.nodes.append(new_compose_node)
 
