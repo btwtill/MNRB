@@ -1,5 +1,9 @@
 import maya.cmds as cmds #type: ignore
+import maya.api.OpenMaya as om #type: ignore
+import maya.mel as mel #type:ignore
 from collections import Counter
+
+
 
 class MC:
      
@@ -54,6 +58,11 @@ class MC:
         MC.clearSelection()
 
     @staticmethod
+    def parentShape(shape, parent):
+        cmds.parent(shape, parent, shape=True, relative=True)
+        MC.clearSelection()
+
+    @staticmethod
     def createTransform(name) -> str:
         new_transform = cmds.createNode("transform", name = name, skipSelect=True)
         MC.clearSelection()
@@ -80,6 +89,10 @@ class MC:
             cmds.select(node_name, add=True)
 
     @staticmethod
+    def selectNode(node_name):
+        MC.selectObject
+
+    @staticmethod
     def getObjectShapeNode(object) -> str:
         return cmds.listRelatives(object, s=1)[0]
 
@@ -87,6 +100,12 @@ class MC:
     def getObjectShapeNodes(object) -> list:
         return cmds.listRelatives(object, s=1)
     
+    @staticmethod
+    def getObjectParentNode(object) -> list:
+        parent_node = cmds.listRelatives(object, parent=True)
+        MC.clearSelection()
+        return parent_node
+
     @staticmethod
     def setShapeNodeColor(shape_node, color):
         cmds.setAttr(f"{shape_node}.overrideEnabled", 1)
@@ -212,6 +231,10 @@ class MC:
     def setAttribute(object, attribute_name, value):
         cmds.setAttr(f"{object}.{attribute_name}", value)
 
+    @staticmethod
+    def setAttributeDouble3(object, attribute_name, value1, value2, value3):
+        cmds.setAttr(f"{object}.{attribute_name}", value1, value2, value3, type="double3")
+
     #xform
     @staticmethod
     def getObjectWorldPositionMatrix(object_name) -> list:
@@ -336,22 +359,83 @@ class MC:
         MC.resetRotation(object)
         MC.resetScale(object)
 
-    #create utiility nodes
+    #create utility nodes
     @staticmethod
-    def createDecomposeNode(name, underworld = False):
+    def createDecomposeNode(name, underworld = False) -> str:
         if underworld:
             return cmds.createNode("decomposeMatrix", name = name + "_dcm_fNode_UW")
         else:
             return cmds.createNode("decomposeMatrix", name = name + "_dcm_fNode")
 
-    def createComposeNode(name, underworld = False):
+    @staticmethod
+    def createComposeNode(name, underworld = False) -> str:
         if underworld:
             return cmds.createNode("composeMatrix", name = name + "_cm_fNode_UW")
         else:
             return cmds.createNode("composeMatrix", name = name + "_cm_fNode")
-    
-    def createMultMatrixNode(name, underworld = False):
+
+    @staticmethod
+    def createMultMatrixNode(name, underworld = False) -> str:
         if underworld:
             return cmds.createNode("multMatrix", name = name + "_mmtx_fNode_UW")
         else:
             return cmds.createNode("multMatrix", name = name + "_mmtx_fNode")
+
+    @staticmethod      
+    def createPlusMinusAverageNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("plusMinusAverage", name = name + "_pma_fNode_UW")
+        else:
+            return cmds.createNode("plusMinusAverage", name = name + "_pma_fNode")
+
+    @staticmethod 
+    def createRotateHelperNode(name, underworld = False) -> str:
+        # if underworld:
+        #     return cmds.createNode("rotateHelper", name = name + "_rh_fNode_UW")
+        # else:
+        #     return cmds.createNode("rotateHelper", name = name + "_rh_fNode")
+        return mel.eval('createNode -name "test" rotateHelper')
+
+    @staticmethod  
+    def createBlendMatrixNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("blendMatrix", name = name + "_bMtx_fNode_UW")
+        else:
+            return cmds.createNode("blendMatrix", name = name + "_bMtx_fNode")
+
+    @staticmethod 
+    def createDistanceNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("distanceBetween", name = name + "_dist_fNode_UW")
+        else:
+            return cmds.createNode("distanceBetween", name = name + "_dist_fNode")
+        
+    @staticmethod
+    def createMultiplyDivideNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("multiplyDivide", name = name + "_mdv_fNode_UW")
+        else:
+            return cmds.createNode("multiplyDivide", name = name + "_mdv_fNode")
+
+    @staticmethod 
+    def createPolyPlaneNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("polyPlane", name = name + "_polyPlane_fNode_UW")
+        else:
+            return cmds.createNode("polyPlane", name = name + "_polyPlane_fNode")
+    
+    @staticmethod
+    def createMeshNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("mesh", name = name + "_meshShape_fNode_UW")
+        else:
+            return cmds.createNode("mesh", name = name + "_meshShape_fNode")
+        
+    #Om functions
+    @staticmethod
+    def force_recalculate(node_name):
+        cmds.dgdirty(node_name)
+
+    @staticmethod
+    def refreshDeferred():
+        cmds.evalDeferred("cmds.refresh()")

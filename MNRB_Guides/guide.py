@@ -7,7 +7,8 @@ from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connector #type: ignore
-CLASS_DEBUG = False
+
+CLASS_DEBUG = True
 
 class guideShapeType(Enum):
     locator = 1
@@ -35,10 +36,10 @@ class guide(Serializable):
 
         self.node.guides.append(self)
 
-        self.guide_parent = guide_parent
-
         if not deserialized:
             self.draw()
+        
+        self.guide_parent = guide_parent
 
     @property
     def guide_type(self): return self._guide_type
@@ -68,6 +69,7 @@ class guide(Serializable):
         if self.parent_connector is not None:
             self.parent_connector.update()
         elif self.parent_connector == None and value != None:
+            if CLASS_DEBUG: print("%s::guide_parent::setter: " % self.__class__.__name__, self._guide_parent," ::trying to set to value:: ", value)
             self.parent_connector = Guide_Connector(value, self)
             self.parent_connector.build()
         self._guide_parent = value
