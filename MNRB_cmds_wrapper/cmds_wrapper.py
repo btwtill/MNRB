@@ -3,8 +3,6 @@ import maya.api.OpenMaya as om #type: ignore
 import maya.mel as mel #type:ignore
 from collections import Counter
 
-
-
 class MC:
      
     @staticmethod

@@ -218,9 +218,9 @@ class Guide_Connector():
                     self.nodes.pop()
 
     def updateColor(self):
-        if CLASS_DEBUG: print("%s::updateColor " % self.__class__.__name__)
         if MC.objectExists(self.name):
-            MC.assignObjectToShaderSet(self.guide.name, self.guide.color.name + MNRB_Names.guide_shader_suffix)
+            #MC.assignObjectToShaderSet(self.name, self.qguide.color.name + MNRB_Names.guide_shader_suffix)
+            if CLASS_DEBUG: print("%s::updateColor " % self.__class__.__name__)
     
     def update(self):
         if CLASS_DEBUG: print("%s::update " % self.__class__.__name__)
