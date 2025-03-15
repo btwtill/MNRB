@@ -200,9 +200,10 @@ class Guide_Connector():
             MC.connectAttribute(end_decompose_node, "outputTranslate", mesh_nodes[target_02_index], "pnts[2]")
             MC.connectAttribute(end_decompose_node, "outputTranslate", mesh_nodes[target_02_index], "pnts[3]")
 
-            #make connector unselectable
-            MC.setDisplayType(self.name, "reference")
-            MC.hideInOutliner(self.name)
+        #make connector unselectable
+        MC.setDisplayType(self.name, "reference")
+        if CLASS_DEBUG: print("%s::Parent:: " % self.__class__.__name__, self.name, " ---> to:: ", self.guide.node.guide_visualization_hierarchy)
+        MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
 
     def remove(self):

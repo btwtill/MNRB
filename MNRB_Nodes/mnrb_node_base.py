@@ -500,6 +500,7 @@ class MNRB_Node(NodeEditorNode):
 
         self._guide_component_hierarchy = None
         self._component_hierarchy = None
+        self.guide_visualization_hierarchy = None
 
         self.guides = []
         self.guide_positions = []
@@ -561,6 +562,10 @@ class MNRB_Node(NodeEditorNode):
         if CLASS_DEBUG: print("%s:: --guideBuild:: Object to be parented: " % self.__class__.__name__, "Child:: ",current_component_guide_hierarchy, " Parent:: ", current_guide_hierarchy)
         MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
         self.guide_component_hierarchy = current_component_guide_hierarchy
+
+        self.guide_visualization_hierarchy = MC.createTransform(self.guide_component_hierarchy + "_visualization")
+        MC.parentObject(self.guide_visualization_hierarchy, self.guide_component_hierarchy)
+        MC.hideInOutliner(self.guide_visualization_hierarchy)
 
         return True
 
