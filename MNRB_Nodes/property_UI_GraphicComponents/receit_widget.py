@@ -88,7 +88,7 @@ class ReceitWidget(QWidget):
         #self.setStyleSheet("background-color: #2B2B2B;")
 
         # Toggle Button
-        self.base_area_widget = IconWidgetBar(self, "Edit Component Sizes...")
+        self.base_area_widget = IconWidgetBar(self, title)
         
         # Content Area
         self.content_area = QFrame()

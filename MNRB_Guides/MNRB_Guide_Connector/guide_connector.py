@@ -1,5 +1,6 @@
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 
 CLASS_DEBUG = True
 
@@ -217,6 +218,8 @@ class Guide_Connector():
 
     def updateColor(self):
         if CLASS_DEBUG: print("%s::updateColor " % self.__class__.__name__)
+        if MC.objectExists(self.name):
+            MC.assignObjectToShaderSet(self.guide.name, self.guide.color.name + MNRB_Names.guide_shader_suffix)
     
     def update(self):
         if CLASS_DEBUG: print("%s::update " % self.__class__.__name__)

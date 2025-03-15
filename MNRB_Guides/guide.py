@@ -23,6 +23,7 @@ class guide(Serializable):
         self.parent_connector = None
 
         self._guide_type = guideShapeType.sphere
+        self.orientation_object_display = False
 
         self.guide_name = name
         self.name = self.assembleFullName()
@@ -33,6 +34,7 @@ class guide(Serializable):
         self.size = self.node.properties.guide_size
 
         self.guide_shape = self.createGuideShape()
+        self.guide_orientation = self.createGuideOrientationObject()
 
         self.node.guides.append(self)
 
@@ -112,6 +114,9 @@ class guide(Serializable):
     def createGuideShape(self):
         self.guide_shape = self.determinGuideShape()(self)
         return self.guide_shape
+
+    def createGuideOrientationObject(self):
+        if CLASS_DEBUG: print("%s::createGuideOrientationObject:: " % self.__class__.__name__)
 
     def assembleFullName(self):
         return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.guide_name + MNRB_Names.guide_suffix

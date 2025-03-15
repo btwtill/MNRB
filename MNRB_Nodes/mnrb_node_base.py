@@ -103,7 +103,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.disabled_checkbox.stateChanged.connect(self.setHasBeenModified)
         self.layout.addWidget(self.disabled_checkbox)
         
-        self.component_size_widget = ReceitWidget("Click to Expand")
+        self.component_size_widget = ReceitWidget("Component Size Settings")
 
         #Guide Size Adjustment
         guide_slider_label_layout = QHBoxLayout()
@@ -182,8 +182,24 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.layout.addWidget(self.component_size_widget)
 
-        separator = SeparatorWidget()
-        self.layout.addWidget(separator)
+        separator_01 = SeparatorWidget()
+        self.layout.addWidget(separator_01)
+
+        #add Guide Orientation Settings
+        guide_orientation_layout = ReceitWidget("Orientation Settings")
+        self.auto_align_guides_checkbox = QCheckBox("Auto Orient")
+        self.override_planar_orientation_checkbox = QCheckBox("Override Orientation")
+
+        guide_orientation_layout.add_widget(self.auto_align_guides_checkbox)
+        guide_orientation_layout.add_widget(self.override_planar_orientation_checkbox)
+
+        self.layout.addWidget(guide_orientation_layout)
+
+        separator_02 = SeparatorWidget()
+        self.layout.addWidget(separator_02)
+
+        component_settings_label = QLabel("Component Settings")
+        self.layout.addWidget(component_settings_label)
 
         self.layout.addStretch()
         self.connectHasBeenModifiedCallback(self.updateDisabledState)
