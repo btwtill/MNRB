@@ -199,8 +199,9 @@ class Guide_Connector():
             MC.connectAttribute(end_decompose_node, "outputTranslate", mesh_nodes[target_02_index], "pnts[2]")
             MC.connectAttribute(end_decompose_node, "outputTranslate", mesh_nodes[target_02_index], "pnts[3]")
 
-        MC.refreshDeferred()
-        MC.force_recalculate(aim_matrix_node)
+            #make connector unselectable
+            MC.setDisplayType(self.name, "reference")
+            MC.hideInOutliner(self.name)
 
 
     def remove(self):

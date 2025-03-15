@@ -120,6 +120,21 @@ class MC:
         MC.setShapeNodeColor(object_shape_node, color)
 
     @staticmethod
+    def setDisplayType(node, display_type) -> None:
+        MC.setAttribute(node, "overrideEnabled", 1)
+        if display_type == "normal" or display_type == "Normal":
+            MC.setAttribute(node, "overrideDisplayType", 0)
+        if display_type == "template" or display_type == "Template":
+            MC.setAttribute(node, "overrideDisplayType", 1)
+        if display_type == "reference" or display_type == "Reference":
+            MC.setAttribute(node, "overrideDisplayType", 2)
+
+    @staticmethod
+    def hideInOutliner(node) -> bool:
+        MC.setAttribute(node, "hiddenInOutliner", 1)
+        return MC.getAttribute(node, "hiddenInOutliner")
+
+    @staticmethod
     def createSpaceLocator(position) -> str:
         new_space_locator = cmds.spaceLocator(p=position)
         MC.clearSelection()
