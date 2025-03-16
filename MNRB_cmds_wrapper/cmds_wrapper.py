@@ -128,6 +128,13 @@ class MC:
             MC.setAttribute(node, "overrideDisplayType", 2)
 
     @staticmethod
+    def setOverrideVisibility(node, state = False) -> bool:
+        MC.setAttribute(node, "overrideEnabled", 1)
+        MC.setAttribute(node, "overrideVisibility", state)
+
+        return MC.getAttribute(node, "overrideVisibility")
+
+    @staticmethod
     def hideInOutliner(node) -> bool:
         MC.setAttribute(node, "hiddenInOutliner", 1)
         return MC.getAttribute(node, "hiddenInOutliner")
