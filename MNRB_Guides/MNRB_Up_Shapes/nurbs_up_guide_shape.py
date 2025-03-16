@@ -30,7 +30,13 @@ class NurbsShereUpGuideShape():
 
         MC.parentObject(self.guide.name_up, self.guide.node.guide_visualization_hierarchy)
 
+        self.hide()
+
+    def hide(self):
         MC.setOverrideVisibility(self.guide.name_up, False)
+
+    def show(self):
+        MC.setOverrideVisibility(self.guide.name_up, True)
 
     def resize(self, size):
         MC.setNurbsSphereShapeRadius(self.guide.name_up, size / 2)
