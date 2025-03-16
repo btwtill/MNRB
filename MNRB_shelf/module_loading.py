@@ -162,14 +162,26 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException
     importlib.reload(NodeEditorRegistrationException)
 
-    import MNRB.MNRB_Guides.locator_guide_shape as MNRBLocatorGuide
+    import MNRB.MNRB_Guides.MNRB_Guide_Shapes.locator_guide_shape as MNRBLocatorGuide
     importlib.reload(MNRBLocatorGuide)
+
+    import MNRB.MNRB_Guides.MNRB_Orientation_Shapes.locator_orient_guide_shape as MNRBLocatorGuideOrient
+    importlib.reload(MNRBLocatorGuideOrient)
+
+    import MNRB.MNRB_Guides.MNRB_Up_Shapes.locator_up_guide_shape as MNRBLocatorGuideUp
+    importlib.reload(MNRBLocatorGuideUp)
 
     import MNRB.MNRB_Deform.deform as MNRBDeform
     importlib.reload(MNRBDeform)
 
-    import MNRB.MNRB_Guides.nurbs_shpere_guide_shape as MNRBNurbsSphereGuide
+    import MNRB.MNRB_Guides.MNRB_Guide_Shapes.nurbs_shpere_guide_shape as MNRBNurbsSphereGuide
     importlib.reload(MNRBNurbsSphereGuide)
+
+    import MNRB.MNRB_Guides.MNRB_Orientation_Shapes.nurbs_orient_guide_shape as MNRBNurbsGuideOrient
+    importlib.reload(MNRBNurbsGuideOrient)
+
+    import MNRB.MNRB_Guides.MNRB_Up_Shapes.nurbs_up_guide_shape as MNRBNurbsGuideUp
+    importlib.reload(MNRBNurbsGuideUp)
 
     import MNRB.MNRB_Guides.guide as MNRBGuide
     importlib.reload(MNRBGuide)

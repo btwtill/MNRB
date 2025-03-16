@@ -2,8 +2,12 @@ from enum import Enum
 from collections import OrderedDict
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
-from MNRB.MNRB_Guides.locator_guide_shape import LocatorGuideShape #type: ignore
-from MNRB.MNRB_Guides.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
+from MNRB.MNRB_Guides.MNRB_Guide_Shapes.locator_guide_shape import LocatorGuideShape #type: ignore
+from MNRB.MNRB_Guides.MNRB_Guide_Shapes.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
+from MNRB.MNRB_Guides.MNRB_Up_Shapes.nurbs_up_guide_shape import NurbsShereUpGuideShape #type:ignore
+from MNRB.MNRB_Guides.MNRB_Up_Shapes.locator_up_guide_shape import LocatorUpGuideShape #type:ignore
+from MNRB.MNRB_Guides.MNRB_Orientation_Shapes.nurbs_orient_guide_shape import NurbsShereOrientGuideShape #type:ignore
+from MNRB.MNRB_Guides.MNRB_Orientation_Shapes.locator_orient_guide_shape import LocatorOrientGuideShape #type:ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connector #type: ignore
@@ -27,6 +31,8 @@ class guide(Serializable):
 
         self.guide_name = name
         self.name = self.assembleFullName()
+        self.name_up = self.name + "_Up"
+        self.name_orient = self.name + "_Orient"
         
         self._color = self.node.properties.component_color
 
@@ -34,7 +40,8 @@ class guide(Serializable):
         self.size = self.node.properties.guide_size
 
         self.guide_shape = self.createGuideShape()
-        self.guide_orientation = self.createGuideOrientationObject()
+        self.guide_up_shape = self.createGuideUpShape()
+        self.guide_orientation_shape = self.createGuideOrientationShape()
 
         self.node.guides.append(self)
 
@@ -59,8 +66,6 @@ class guide(Serializable):
             self._color = value
             if CLASS_DEBUG: print("%s:: --component_color:: Setting new Guide Color:: " % self.__class__.__name__, self.color)
             self.setColor()
-            if self.parent_connector is not None:
-                self.parent_connector.updateColor()
         self._color = value
 
     @property
@@ -77,8 +82,22 @@ class guide(Serializable):
         self._guide_parent = value
 
     def draw(self):
+        if CLASS_DEBUG: 
+            print("%s::draw::guide_shape_name " % self.__class__.__name__, self.name)
+            print("%s::draw::guide_shape Class " % self.__class__.__name__, self.guide_shape)
+            print("%s::draw::guide_up_shape_name " % self.__class__.__name__, self.name_up)
+            print("%s::draw::guide_up_shape Class " % self.__class__.__name__, self.guide_up_shape)
+            print("%s::draw::guide_orient_shape_name " % self.__class__.__name__, self.name_orient)
+            print("%s::draw::guide_orient_shape Class " % self.__class__.__name__, self.guide_orientation_shape)
+
         self.guide_shape.draw()
         self.guide_shape.resize(self.size)
+
+        self.guide_up_shape.draw()
+        self.guide_up_shape.resize(self.size)
+
+        self.guide_orientation_shape.draw()
+        self.guide_orientation_shape.resize(self.size)
 
     def resize(self, size):
         self.guide_shape.resize(size)
@@ -95,6 +114,9 @@ class guide(Serializable):
 
     def setColor(self):
         self.guide_shape.updateColor()
+        self.guide_up_shape.updateColor()
+        if self.parent_connector is not None:
+                self.parent_connector.updateColor()
 
     def setPosition(self, matrix):
         MC.setObjectWorldPositionMatrix(self.name, matrix)
@@ -109,14 +131,40 @@ class guide(Serializable):
             if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", LocatorGuideShape)
             return LocatorGuideShape
         if self.guide_type.value == guideShapeType.sphere.value:
+            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereGuideShape)
             return NurbsShereGuideShape
+
+    def determinGuideUpShape(self):
+        if CLASS_DEBUG: print("GUIDE:: --determinGuideUpShape:: guide Type: ", self.guide_type)
+        if self.guide_type.value == guideShapeType.locator.value:
+            if CLASS_DEBUG: print("GUIDE:: --determinGuideUpShape::  Return Value:: ", LocatorGuideShape)
+            return LocatorUpGuideShape
+        if self.guide_type.value == guideShapeType.sphere.value:
+            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereUpGuideShape)
+            return NurbsShereUpGuideShape
+    
+    def determinGuideOrientationShape(self):
+        if CLASS_DEBUG: print("GUIDE:: --determinGuideOrientationShape:: guide Type: ", self.guide_type)
+        if self.guide_type.value == guideShapeType.locator.value:
+            if CLASS_DEBUG: print("GUIDE:: --determinGuideOrientationShape::  Return Value:: ", LocatorGuideShape)
+            return LocatorOrientGuideShape
+        if self.guide_type.value == guideShapeType.sphere.value:
+            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereOrientGuideShape)
+            return NurbsShereOrientGuideShape
 
     def createGuideShape(self):
         self.guide_shape = self.determinGuideShape()(self)
         return self.guide_shape
 
-    def createGuideOrientationObject(self):
-        if CLASS_DEBUG: print("%s::createGuideOrientationObject:: " % self.__class__.__name__)
+    def createGuideUpShape(self):
+        if CLASS_DEBUG: print("%s::createGuideOrientationShape:: " % self.__class__.__name__)
+        self.guide_up_shape = self.determinGuideUpShape()(self)
+        return self.guide_up_shape
+
+    def createGuideOrientationShape(self):
+        if CLASS_DEBUG: print("%s::createGuideUpShape:: " % self.__class__.__name__)
+        self.guide_orientation_shape = self.determinGuideOrientationShape()(self)
+        return self.guide_orientation_shape
 
     def assembleFullName(self):
         return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.guide_name + MNRB_Names.guide_suffix
@@ -137,6 +185,8 @@ class guide(Serializable):
                     new_name = new_name + str(duplicate_name[1])
             if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
+            self.name_up = MC.renameObject(self.name_up, new_name + "_Up")
+            self.name_orient = MC.renameObject(self.name_orient, new_name + "_Orient")
 
             if self.parent_connector is not None:
                 self.parent_connector.updateName()
@@ -144,6 +194,10 @@ class guide(Serializable):
     def remove(self):
         if self.exists():
             MC.deleteNode(self.name)
+        if MC.objectExists(self.name_up):
+            MC.deleteNode(self.name_up)
+        if MC.objectExists(self.name_orient):
+            MC.deleteNode(self.name_orient)
         if self.parent_connector != None:
             self.parent_connector.remove()
 

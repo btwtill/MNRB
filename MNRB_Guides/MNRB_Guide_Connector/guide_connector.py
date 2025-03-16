@@ -46,6 +46,7 @@ class Guide_Connector():
 
     def initVariables(self):
         self.nodes = []
+        self.aim_orient_node = None
 
     def build(self):
         if CLASS_DEBUG: print("%s::build " % self.__class__.__name__)
@@ -82,11 +83,6 @@ class Guide_Connector():
             MC.connectAttribute(start_decompose_node, "outputTranslate" + channel, up_vector_subtract_node, "input3D[1].input3D" + channel.lower())
         MC.setAttribute(up_vector_subtract_node, "operation", 2)
 
-        up_vector_nudge_node = MC.createPlusMinusAverageNode(up_object + "_nudge")
-        self.nodes.append(up_vector_nudge_node)
-        MC.connectAttribute(up_vector_subtract_node, "output3D", up_vector_nudge_node, "input3D[0]")
-        MC.setAttributeDouble3(up_vector_nudge_node, "input3D[1]", 0.001, 0.001, 0.001)
-
         aim_vector_subtract_node = MC.createPlusMinusAverageNode(self.name + "_forward")
         self.nodes.append(aim_vector_subtract_node)
         for channel in "XYZ":
@@ -96,6 +92,7 @@ class Guide_Connector():
 
         aim_matrix_node = MC.createAimMatrixNode(self.name + "_aimMatrix")
         self.nodes.append(aim_matrix_node)
+        self.aim_orient_node = aim_matrix_node
         MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", aim_matrix_node, "inputMatrix")
         MC.connectAttribute(up_object, "worldMatrix[0]", aim_matrix_node, "secondaryTargetMatrix")
         MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", aim_matrix_node, "primaryTargetMatrix")
