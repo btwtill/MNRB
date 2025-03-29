@@ -34,6 +34,7 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
         self.deform_count_slider.setMinimum(0)
         self.deform_count_slider.setSingleStep(1)
         self.deform_count_slider.valueChanged.connect(self.updateDeformCountSliderLabel)
+        self.deform_count_slider.sliderReleased.connect(self.updateDeformCount)
         
         deform_count_layout.addWidget(self.deform_count_slider_label)
         deform_count_layout.addWidget(self.deform_count_slider)
@@ -49,9 +50,11 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
         self.last_deform_count = self.current_deform_count
         self.deform_count_slider_label.setText(self.deform_count_slider_label_text + str(self.deform_count_slider.value()))
         self.current_deform_count = self.deform_count_slider.value()
+
+    def updateDeformCount(self, silent = False):
         if not self.is_silent:
-            if CLASS_DEBUG: print("%s::updateDeformCountSliderLabel:: Properties are Silent::" % self.__class__.__name__, self.is_silent)
-            if CLASS_DEBUG: print("%s::updateDeformCountSliderLabel:: About to update Deform Count" % self.__class__.__name__)
+            if CLASS_DEBUG: print("%s::updateDeformCount:: Properties are Silent::" % self.__class__.__name__, self.is_silent)
+            if CLASS_DEBUG: print("%s::updateDeformCount:: About to update Deform Count" % self.__class__.__name__)
             self.node.onDeformCountSliderChange()
 
     def serialize(self):
@@ -127,48 +130,69 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
     
 
     def onDeformCountSliderChange(self):
+        if CLASS_DEBUG: 
+            print("%s ::onDeformCountSliderChange::current deform count from Slider::" % self.__class__.__name__, self.properties.current_deform_count)
+            print("%s ::onDeformCountSliderChange::actual registered deforms::" % self.__class__.__name__, len(self.outputs))
+
+        #get overall amount of deforms 
+        current_deform_count = int((len(self.outputs) - 2) / 2)
+
         if self.properties.current_deform_count > self.properties.last_deform_count:
-            #get overall amount of deforms 
-            current_deform_count = int(len(self.outputs) / 2)
 
-            new_guide_name = self.getComponentName() + str(current_deform_count)
-            
-            #create new output socket for chain
-            self.addOutputSocket(output_type = 1, output_socket_value = new_guide_name, is_output_multi_edged = True)
-            self.addOutputSocket(output_type = 2, output_socket_value = new_guide_name, is_output_multi_edged = True)
+            if GUIDE_DEBUG: 
+                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " current length of guides:: ", len(self.guides))
+                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " amount to be add ", current_deform_count - self.properties.current_deform_count)
+                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
+                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
 
-            self.addGuideToChain(new_guide_name)
+            for guide_amount in range(self.properties.current_deform_count - current_deform_count):
+
+                new_guide_name = self.getComponentName() + str(current_deform_count + guide_amount)
+
+                #create new output socket for chain
+                self.addOutputSocket(output_type = 1, output_socket_value = new_guide_name, is_output_multi_edged = True)
+                self.addOutputSocket(output_type = 2, output_socket_value = new_guide_name, is_output_multi_edged = True)
+
+                if self.isAllGuidesExistend():
+                    self.addGuideToChain(new_guide_name)
+
         else:
 
             #remove the last two sockets
-            self.removeLastSocket()
-            self.removeLastSocket()
-            self.removeGuideFromChain()
+            if current_deform_count >= 1:
+                if GUIDE_DEBUG: 
+                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " current length of guides:: ", len(self.guides))
+                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " amount to be removed ", current_deform_count - self.properties.current_deform_count)
+                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
+                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
+
+                for guide_amount in range(current_deform_count - self.properties.current_deform_count):
+                    self.removeLastSocket()
+                    self.removeLastSocket()
+
+                    if self.isAllGuidesExistend():
+                        self.removeGuideFromChain()
 
     def addGuideToChain(self, new_guide_name):
         if CLASS_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
+
+        #parent guide
+        parent_guide = self.guides[-1]
+
+        #create new guide with that name
+        new_guide = guide(self, new_guide_name, parent_guide)
+
+        #get last guide position 
+        new_guide.setPosition(parent_guide.getPosition())
         
-        if self.guides != [] and self.isAllGuidesExistend():
+        #parent guide
+        MC.parentObject(new_guide.name, parent_guide.name)
 
-            #parent guide
-            parent_guide = self.guides[-1]
-
-            #create new guide with that name
-            new_guide = guide(self, new_guide_name, parent_guide)
-
-            #get last guide position 
-            new_guide.setPosition(parent_guide.getPosition())
-            
-            #parent guide
-            MC.parentObject(new_guide.name, parent_guide.name)
-
-            #set new guide position
-            MC.addTranslation(new_guide.name, 5.0, 0.0, 0.0)
+        #set new guide position
+        MC.addTranslation(new_guide.name, 5.0, 0.0, 0.0)
 
     def removeGuideFromChain(self):
         if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
         
-        if self.guides != [] and self.isAllGuidesExistend():
-
-            last_guide_in_chain = self.guides.pop()
-            last_guide_in_chain.remove()
+        last_guide_in_chain = self.guides.pop()
+        last_guide_in_chain.remove()
