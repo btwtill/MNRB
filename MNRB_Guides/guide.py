@@ -101,6 +101,7 @@ class guide(Serializable):
 
     def resize(self, size):
         self.guide_shape.resize(size)
+        self.guide_up_shape.resize(size)
 
     def exists(self) -> bool:
         return MC.objectExists(self.name)
@@ -216,5 +217,12 @@ class guide(Serializable):
         self.guide_name = data['name']
  
         self.name = self.assembleFullName()
+        self.name_up = self.name + "_Up"
+        self.name_orient = self.name + "_Orient"
+
+        if CLASS_DEBUG: 
+            print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.name)
+            print("%s::deserialize:: Guide Up Name:: " % self.__class__.__name__, self.name_up)
+            print("%s::deserialize:: Guide Orient Name:: " % self.__class__.__name__, self.name_orient)
 
         return True
