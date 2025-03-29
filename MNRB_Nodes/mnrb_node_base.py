@@ -667,7 +667,7 @@ class MNRB_Node(NodeEditorNode):
             is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
             if is_same_name:
                 return
-            
+
             duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_guide_component_hierarchy_name)
             if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
 
@@ -684,10 +684,10 @@ class MNRB_Node(NodeEditorNode):
                 new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
                 self.guide_component_hierarchy = new_name
-                
+
                 if MC.objectExists(self.component_hierarchy):
                     self.component_hierarchy =MC.renameObject(self.component_hierarchy, self.getComponentPrefix() + self.getComponentName() + "_" + MNRB_Names.component_suffix)
-                
+
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
                 for guide in self.guides:
                     guide.updateName(has_duplicate_name)

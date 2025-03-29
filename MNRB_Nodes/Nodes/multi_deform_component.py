@@ -121,18 +121,18 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
             else:
                 MC.parentObject(new_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
     
-
     def componentBuild(self):
         return super().componentBuild()
 
     def connectComponent(self):
         return super().connectComponent()
     
-
     def onDeformCountSliderChange(self):
         if CLASS_DEBUG: 
             print("%s ::onDeformCountSliderChange::current deform count from Slider::" % self.__class__.__name__, self.properties.current_deform_count)
             print("%s ::onDeformCountSliderChange::actual registered deforms::" % self.__class__.__name__, len(self.outputs))
+            print("%s:: onDeformCountSliderChange:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
+            print("%s:: onDeformCountSliderChange:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
 
         #get overall amount of deforms 
         current_deform_count = int((len(self.outputs) - 2) / 2)
@@ -147,7 +147,7 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
             for guide_amount in range(self.properties.current_deform_count - current_deform_count):
 
-                new_guide_name = self.getComponentName() + str(current_deform_count + guide_amount)
+                new_guide_name = str(current_deform_count + guide_amount)
 
                 #create new output socket for chain
                 self.addOutputSocket(output_type = 1, output_socket_value = new_guide_name, is_output_multi_edged = True)
