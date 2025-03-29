@@ -21,7 +21,7 @@ class NurbsShereUpGuideShape():
 
         #create nodes to position and connect correctly
         self.offset_node = MC.createComposeNode(self.guide.name_up + "_offset")
-        MC.setAttribute(self.offset_node, "inputTranslateY", 2)
+        MC.setAttribute(self.offset_node, "inputTranslateY", 2.0)
         
         offset_multiply_node = MC.createMultMatrixNode(self.guide.name_up + "_offset")
         MC.connectAttribute(self.offset_node, "outputMatrix", offset_multiply_node, "matrixIn[0]")
@@ -30,7 +30,7 @@ class NurbsShereUpGuideShape():
 
         MC.parentObject(self.guide.name_up, self.guide.node.guide_visualization_hierarchy)
 
-        self.hide()
+        self.show()
 
     def hide(self):
         MC.setOverrideVisibility(self.guide.name_up, False)
@@ -40,6 +40,7 @@ class NurbsShereUpGuideShape():
 
     def resize(self, size):
         MC.setNurbsSphereShapeRadius(self.guide.name_up, size / 2)
+        MC.setAttribute(self.guide.name_up + "_offset" + "_cm_fNode", "inputTranslateY", size + size)
 
     def updateColor(self):
         if MC.objectExists(self.guide.name_up):
