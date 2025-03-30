@@ -27,6 +27,7 @@ class NurbsShereOrientGuideShape():
                 print("%s::updateName::" % self.__class__.__name__)
                 print("%s::updateName::From " % self.__class__.__name__, self.guide.name_orient)
                 print("%s::updateName::To " % self.__class__.__name__, new_name + MNRB_Names.guide_orient_suffix)
+            self.guide.name_orient = MC.renameObject(self.guide.name_orient, new_name + MNRB_Names.guide_orient_suffix)
 
     def updateColor(self):
         if MC.objectExists(self.guide.name_orient):

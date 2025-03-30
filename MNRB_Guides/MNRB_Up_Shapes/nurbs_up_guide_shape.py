@@ -48,6 +48,7 @@ class NurbsShereUpGuideShape():
                 print("%s::updateName::" % self.__class__.__name__)
                 print("%s::updateName::From " % self.__class__.__name__, self.guide.name_up)
                 print("%s::updateName::To " % self.__class__.__name__, new_name + MNRB_Names.guide_up_suffix)
+            self.guide.name_up = MC.renameObject(self.guide.name_up, new_name + MNRB_Names.guide_up_suffix)
 
     def updateColor(self):
         if MC.objectExists(self.guide.name_up):

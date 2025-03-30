@@ -686,7 +686,9 @@ class MNRB_Node(NodeEditorNode):
                 self.guide_component_hierarchy = new_name
 
                 if MC.objectExists(self.component_hierarchy):
-                    self.component_hierarchy =MC.renameObject(self.component_hierarchy, self.getComponentPrefix() + self.getComponentName() + "_" + MNRB_Names.component_suffix)
+                    self.component_hierarchy = MC.renameObject(self.component_hierarchy, self.getComponentPrefix() + self.getComponentName() + "_" + MNRB_Names.component_suffix)
+                if MC.objectExists(self.guide_visualization_hierarchy):
+                    self.guide_visualization_hierarchy = MC.renameObject(self.guide_visualization_hierarchy, self.guide_component_hierarchy + "_visualization")
 
                 if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
                 for guide in self.guides:
@@ -819,6 +821,7 @@ class MNRB_Node(NodeEditorNode):
 
         self.setComponentGuideHiearchyName()
         self.setComponentHierarchyName()
+        self.guide_visualization_hierarchy = self.guide_component_hierarchy + "_visualization"
 
         for guide_data in data['guides']:
             new_guide = guide(self, deserialized=True)

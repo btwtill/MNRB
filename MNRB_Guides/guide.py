@@ -187,8 +187,13 @@ class guide(Serializable):
             if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
             
-            self.guide_orientation_shape.updateName(new_name)
-            self.guide_up_shape.updateName(new_name)
+            if CLASS_DEBUG: print("%s::updateName::About to update orientShape and upShape::" % self.__class__.__name__)
+
+            try:
+                self.guide_orientation_shape.updateName(new_name)
+                self.guide_up_shape.updateName(new_name)
+            except Exception as e:
+                print(e)
 
             if self.parent_connector is not None:
                 self.parent_connector.updateName(new_name)
