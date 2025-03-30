@@ -31,7 +31,6 @@ class guide(Serializable):
 
         self.guide_name = name
         self.name = self.assembleFullName()
-        self.name_up = self.name + MNRB_Names.guide_up_suffix
         self.name_orient = self.name + MNRB_Names.guide_orient_suffix
         
         self._color = self.node.properties.component_color
@@ -82,14 +81,6 @@ class guide(Serializable):
         self._guide_parent = value
 
     def draw(self):
-        if CLASS_DEBUG: 
-            print("%s::draw::guide_shape_name " % self.__class__.__name__, self.name)
-            print("%s::draw::guide_shape Class " % self.__class__.__name__, self.guide_shape)
-            print("%s::draw::guide_up_shape_name " % self.__class__.__name__, self.name_up)
-            print("%s::draw::guide_up_shape Class " % self.__class__.__name__, self.guide_up_shape)
-            print("%s::draw::guide_orient_shape_name " % self.__class__.__name__, self.name_orient)
-            print("%s::draw::guide_orient_shape Class " % self.__class__.__name__, self.guide_orientation_shape)
-
         self.guide_shape.draw()
         self.guide_shape.resize(self.size)
 
@@ -189,11 +180,8 @@ class guide(Serializable):
             
             if CLASS_DEBUG: print("%s::updateName::About to update orientShape and upShape::" % self.__class__.__name__)
 
-            try:
-                self.guide_orientation_shape.updateName(new_name)
-                self.guide_up_shape.updateName(new_name)
-            except Exception as e:
-                print(e)
+            self.guide_orientation_shape.updateName(new_name)
+            self.guide_up_shape.updateName(new_name)
 
             if self.parent_connector is not None:
                 self.parent_connector.updateName(new_name)
@@ -201,8 +189,8 @@ class guide(Serializable):
     def remove(self):
         if self.exists():
             MC.deleteNode(self.name)
-        if MC.objectExists(self.name_up):
-            MC.deleteNode(self.name_up)
+        if self.guide_up_shape.exists():
+            self.guide_up_shape.remove()
         if MC.objectExists(self.name_orient):
             MC.deleteNode(self.name_orient)
         if self.parent_connector != None:
@@ -212,9 +200,11 @@ class guide(Serializable):
         if CLASS_DEBUG: print("%s::parentToGuide::" % self.__class__.__name__)
 
     def serialize(self):
+        up_shape = self.guide_up_shape.serialize()
         serialized_data = OrderedDict([
             ('id', self.id),
-            ('name', self.guide_name)
+            ('name', self.guide_name),
+            ('up_shape', up_shape)
         ])
         return serialized_data
 
@@ -223,12 +213,12 @@ class guide(Serializable):
         self.guide_name = data['name']
  
         self.name = self.assembleFullName()
-        self.name_up = self.name + MNRB_Names.guide_up_suffix
         self.name_orient = self.name + MNRB_Names.guide_orient_suffix
+
+        self.guide_up_shape.deserialize(data, hashmap, restore_id)
 
         if CLASS_DEBUG: 
             print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.name)
-            print("%s::deserialize:: Guide Up Name:: " % self.__class__.__name__, self.name_up)
             print("%s::deserialize:: Guide Orient Name:: " % self.__class__.__name__, self.name_orient)
 
         return True

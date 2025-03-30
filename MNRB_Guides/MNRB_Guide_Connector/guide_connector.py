@@ -64,7 +64,7 @@ class Guide_Connector():
         MC.clearTransforms(up_object)
         MC.setAttribute(up_object, "translateY", 2)
 
-        start_decompose_node = MC.createDecomposeNode(self.start_guide.name)
+        start_decompose_node = MC.createDecomposeNode(self.name + "_startGuide")
         self.nodes.append(start_decompose_node)
         MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", start_decompose_node, "inputMatrix")
 
@@ -72,7 +72,7 @@ class Guide_Connector():
         self.nodes.append(up_decompose_node)
         MC.connectAttribute(up_object, "worldMatrix[0]", up_decompose_node, "inputMatrix")
 
-        end_decompose_node = MC.createDecomposeNode(self.end_guide.name)
+        end_decompose_node = MC.createDecomposeNode(self.name + "_endGuide")
         self.nodes.append(end_decompose_node)
         MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", end_decompose_node, "inputMatrix")
 
@@ -165,7 +165,7 @@ class Guide_Connector():
 
             for position in ["lower", "upper"]:
                 mesh_plane_Node = MC.createMeshNode(self.name + "_" + direction[0] + direction[1] + "_" + position)
-                self.nodes.append(mesh_plane_Node)
+                # self.nodes.append(mesh_plane_Node)
                 mesh_nodes.append(mesh_plane_Node)
                 mesh_plane_node_parent = MC.getObjectParentNode(mesh_plane_Node)[0]
                 MC.parentShape(mesh_plane_Node, self.name)
@@ -221,10 +221,26 @@ class Guide_Connector():
 
     def updateName(self, new_name):
         if MC.objectExists(self.name):
+            old_name = self.name
+
             if CLASS_DEBUG: 
                 print("%s::updateName::" % self.__class__.__name__)
                 print("%s::updateName::From " % self.__class__.__name__, self.name)
                 print("%s::updateName::To " % self.__class__.__name__, new_name + MNRB_Names.guide_connector_suffix)
+            self.name = MC.renameObject(self.name, new_name + MNRB_Names.guide_connector_suffix)
+
+            if CLASS_DEBUG: 
+                print("%s::updateName::Nodes to be Updated::" % self.__class__.__name__)
+                for node_name in self.nodes:
+                    print("%s::updateName:: \t node -> " % self.__class__.__name__, node_name)
+
+            for index, node in enumerate(self.nodes):
+                if CLASS_DEBUG: 
+                    print("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
+                    print("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + MNRB_Names.guide_connector_suffix)
+                    print("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + MNRB_Names.guide_connector_suffix))
+                new_node_name = node.replace(old_name, new_name + MNRB_Names.guide_connector_suffix)
+                self.nodes[index] = MC.renameObject(node, new_node_name + MNRB_Names.guide_connector_suffix)
 
     def update(self):
         if CLASS_DEBUG: print("%s::update " % self.__class__.__name__)

@@ -1,55 +1,83 @@
+from collections import OrderedDict
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 CLASS_DEBUG = True
 
-class NurbsShereUpGuideShape():
+class NurbsShereUpGuideShape(Serializable):
     def __init__(self, guide) -> None:
+        super().__init__()
         self.guide = guide
 
-        self.offset_node = None
+        self.name = self.guide.name + MNRB_Names.guide_up_suffix
 
         self.guide_material = None
         self.guide_shader = None
 
+        self.nodes = []
+
     def draw(self):
-        if CLASS_DEBUG: print("%s::draw::UpShape Name::" % self.__class__.__name__, self.guide.name_up)
-        guide_shape = MC.createNurbsSphere(self.guide.name_up)
+        if CLASS_DEBUG: print("%s::draw::UpShape Name::" % self.__class__.__name__, self.name)
+        guide_shape = MC.createNurbsSphere(self.name)
         if CLASS_DEBUG: print("%s::draw::UpShape Name::After Creation::" % self.__class__.__name__, guide_shape)
-        self.guide.name_up = guide_shape
+        self.name = guide_shape
         MC.assignObjectToShaderSet(guide_shape, self.guide.color.name + MNRB_Names.guide_shader_suffix)
 
         #create nodes to position and connect correctly
-        self.offset_node = MC.createComposeNode(self.guide.name_up + "_offset")
+        self.offset_node = MC.createComposeNode(self.name + "_offset")
+        self.nodes.append(self.offset_node)
         MC.setAttribute(self.offset_node, "inputTranslateY", 2.0)
         
-        offset_multiply_node = MC.createMultMatrixNode(self.guide.name_up + "_offset")
+        offset_multiply_node = MC.createMultMatrixNode(self.name + "_offset")
+        self.nodes.append(offset_multiply_node)
+
         MC.connectAttribute(self.offset_node, "outputMatrix", offset_multiply_node, "matrixIn[0]")
         MC.connectAttribute(self.guide.name, "worldMatrix[0]", offset_multiply_node, "matrixIn[1]")
-        MC.connectAttribute(offset_multiply_node, "matrixSum", self.guide.name_up, "offsetParentMatrix")
+        MC.connectAttribute(offset_multiply_node, "matrixSum", self.name, "offsetParentMatrix")
 
-        MC.parentObject(self.guide.name_up, self.guide.node.guide_visualization_hierarchy)
+        MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
         self.show()
 
     def hide(self):
-        MC.setOverrideVisibility(self.guide.name_up, False)
+        MC.setOverrideVisibility(self.name, False)
 
     def show(self):
-        MC.setOverrideVisibility(self.guide.name_up, True)
+        MC.setOverrideVisibility(self.name, True)
 
     def resize(self, size):
-        MC.setNurbsSphereShapeRadius(self.guide.name_up, size / 2)
-        MC.setAttribute(self.guide.name_up + "_offset" + "_cm_fNode", "inputTranslateY", size + size)
+        MC.setNurbsSphereShapeRadius(self.name, size / 2)
+        MC.setAttribute(self.name + "_offset" + "_cm_fNode", "inputTranslateY", size + size)
+
+    def exists(self):
+        return MC.objectExists(self.name)
+
+    def remove(self):
+        if self.exists():
+            MC.deleteNode(self.name)
 
     def updateName(self, new_name):
-        if MC.objectExists(self.guide.name_up):
+        if MC.objectExists(self.name):
             if CLASS_DEBUG: 
                 print("%s::updateName::" % self.__class__.__name__)
-                print("%s::updateName::From " % self.__class__.__name__, self.guide.name_up)
+                print("%s::updateName::From " % self.__class__.__name__, self.name)
                 print("%s::updateName::To " % self.__class__.__name__, new_name + MNRB_Names.guide_up_suffix)
-            self.guide.name_up = MC.renameObject(self.guide.name_up, new_name + MNRB_Names.guide_up_suffix)
+            self.name = MC.renameObject(self.name, new_name + MNRB_Names.guide_up_suffix)
 
     def updateColor(self):
-        if MC.objectExists(self.guide.name_up):
-            MC.assignObjectToShaderSet(self.guide.name_up, self.guide.color.name + MNRB_Names.guide_shader_suffix)
+        if MC.objectExists(self.name):
+            MC.assignObjectToShaderSet(self.name, self.guide.color.name + MNRB_Names.guide_shader_suffix)
+
+    def serialize(self):
+        serialized_data = OrderedDict([
+            ('id', self.id),
+            ('name', self.name)
+        ])
+        return serialized_data
+    
+    def deserialize(self, data, hashmap={}, restore_id=True):
+        if restore_id: self.id = data['id']
+
+        self.name = data['name']
+

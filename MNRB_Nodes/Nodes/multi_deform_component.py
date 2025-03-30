@@ -80,8 +80,8 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
     def __init__(self, scene,
                 inputs = [["parent_ctrl", SocketTypes.srt, False], ["parent_def", SocketTypes.deform, False]], 
                 outputs=[
-                        ["chain_start", SocketTypes.srt, True], ["chain_start", SocketTypes.deform, True],
-                        ], 
+                        ["start", SocketTypes.srt, True], ["start", SocketTypes.deform, True],
+                        ],
                 color=MNRBColor.yellow):
         super().__init__(scene, inputs, outputs, color)
 
@@ -92,14 +92,14 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
         
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
 
-        self.multi_Def_Chain_start_guide = guide(self, name = "chain_start")
+        self.multi_Def_Chain_start_guide = guide(self, name = "start")
         MC.parentObject(self.multi_Def_Chain_start_guide.name, self.guide_component_hierarchy)
 
         amount_of_extra_guides = self.properties.current_deform_count
 
         for index in range(amount_of_extra_guides):
             
-            new_guide_name = self.getComponentName() + str(index)
+            new_guide_name = str(index)
 
             self.addGuideToChain(new_guide_name)
 
@@ -148,6 +148,7 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
             for guide_amount in range(self.properties.current_deform_count - current_deform_count):
 
                 new_guide_name = str(current_deform_count + guide_amount)
+                if CLASS_DEBUG: print("%s::New Guide Name:: " % self.__class__.__name__, new_guide_name)
 
                 #create new output socket for chain
                 self.addOutputSocket(output_type = 1, output_socket_value = new_guide_name, is_output_multi_edged = True)
@@ -174,7 +175,9 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
                         self.removeGuideFromChain()
 
     def addGuideToChain(self, new_guide_name):
-        if CLASS_DEBUG: print("%s:: addGuideToChain:: " % self.__class__.__name__)
+        if CLASS_DEBUG: 
+            print("%s:: addGuideToChain:: " % self.__class__.__name__)
+            print("%s:: addGuideToChain:: with name" % self.__class__.__name__, new_guide_name)
 
         #parent guide
         parent_guide = self.guides[-1]
