@@ -31,8 +31,8 @@ class guide(Serializable):
 
         self.guide_name = name
         self.name = self.assembleFullName()
-        self.name_up = self.name + "_Up"
-        self.name_orient = self.name + "_Orient"
+        self.name_up = self.name + MNRB_Names.guide_up_suffix
+        self.name_orient = self.name + MNRB_Names.guide_orient_suffix
         
         self._color = self.node.properties.component_color
 
@@ -186,11 +186,12 @@ class guide(Serializable):
                     new_name = new_name + str(duplicate_name[1])
             if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
-            self.name_up = MC.renameObject(self.name_up, new_name + "_Up")
-            self.name_orient = MC.renameObject(self.name_orient, new_name + "_Orient")
+            
+            self.guide_orientation_shape.updateName(new_name)
+            self.guide_up_shape.updateName(new_name)
 
             if self.parent_connector is not None:
-                self.parent_connector.updateName()
+                self.parent_connector.updateName(new_name)
 
     def remove(self):
         if self.exists():
@@ -217,8 +218,8 @@ class guide(Serializable):
         self.guide_name = data['name']
  
         self.name = self.assembleFullName()
-        self.name_up = self.name + "_Up"
-        self.name_orient = self.name + "_Orient"
+        self.name_up = self.name + MNRB_Names.guide_up_suffix
+        self.name_orient = self.name + MNRB_Names.guide_orient_suffix
 
         if CLASS_DEBUG: 
             print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.name)

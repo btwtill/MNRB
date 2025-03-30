@@ -38,6 +38,8 @@ class MNRB_Names():
     guide_material_suffix = "_lambert_MNRB_guide_material"
     guide_shader_suffix = "_lambert_MNRB_guide_shader_SG"
     guide_connector_suffix = "_connector"
+    guide_up_suffix = "_up"
+    guide_orient_suffix = "_orient"
 
     deform_suffix = "_def"
     control_suffix = "_ctrl"

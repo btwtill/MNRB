@@ -42,6 +42,13 @@ class NurbsShereUpGuideShape():
         MC.setNurbsSphereShapeRadius(self.guide.name_up, size / 2)
         MC.setAttribute(self.guide.name_up + "_offset" + "_cm_fNode", "inputTranslateY", size + size)
 
+    def updateName(self, new_name):
+        if MC.objectExists(self.guide.name_up):
+            if CLASS_DEBUG: 
+                print("%s::updateName::" % self.__class__.__name__)
+                print("%s::updateName::From " % self.__class__.__name__, self.guide.name_up)
+                print("%s::updateName::To " % self.__class__.__name__, new_name + MNRB_Names.guide_up_suffix)
+
     def updateColor(self):
         if MC.objectExists(self.guide.name_up):
             MC.assignObjectToShaderSet(self.guide.name_up, self.guide.color.name + MNRB_Names.guide_shader_suffix)
