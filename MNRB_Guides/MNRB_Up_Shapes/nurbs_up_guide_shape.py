@@ -63,7 +63,16 @@ class NurbsShereUpGuideShape(Serializable):
                 print("%s::updateName::" % self.__class__.__name__)
                 print("%s::updateName::From " % self.__class__.__name__, self.name)
                 print("%s::updateName::To " % self.__class__.__name__, new_name + MNRB_Names.guide_up_suffix)
+            old_name = self.name
             self.name = MC.renameObject(self.name, new_name + MNRB_Names.guide_up_suffix)
+
+            for index, node in enumerate(self.nodes):
+                if CLASS_DEBUG: 
+                    print("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
+                    print("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + MNRB_Names.guide_up_suffix)
+                    print("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + MNRB_Names.guide_up_suffix))
+                new_node_name = node.replace(old_name, new_name + MNRB_Names.guide_up_suffix)
+                self.nodes[index] = MC.renameObject(node, new_node_name)
 
     def updateColor(self):
         if MC.objectExists(self.name):
@@ -72,7 +81,8 @@ class NurbsShereUpGuideShape(Serializable):
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
-            ('name', self.name)
+            ('name', self.name),
+            ('guide_up_nodes', self.nodes)
         ])
         return serialized_data
     
@@ -80,4 +90,7 @@ class NurbsShereUpGuideShape(Serializable):
         if restore_id: self.id = data['id']
 
         self.name = data['name']
+
+        for node in data['guide_up_nodes']:
+            self.nodes.append(node)
 

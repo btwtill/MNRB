@@ -215,7 +215,7 @@ class guide(Serializable):
         self.name = self.assembleFullName()
         self.name_orient = self.name + MNRB_Names.guide_orient_suffix
 
-        self.guide_up_shape.deserialize(data, hashmap, restore_id)
+        self.guide_up_shape.deserialize(data['up_shape'], hashmap, restore_id)
 
         if CLASS_DEBUG: 
             print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.name)
