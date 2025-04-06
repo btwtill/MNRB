@@ -217,8 +217,10 @@ class Guide_Connector(Serializable):
 
     def updateColor(self):
         if MC.objectExists(self.name):
-            #MC.assignObjectToShaderSet(self.name, self.qguide.color.name + MNRB_Names.guide_shader_suffix)
             if CLASS_DEBUG: print("%s::updateColor " % self.__class__.__name__)
+            geometry_shape_nodes = MC.getHierarchyContent(self.name)
+            for node in geometry_shape_nodes:
+                MC.assignObjectToShaderSet(self.name, self.guide.color.name + MNRB_Names.guide_shader_suffix)
 
     def updateName(self, new_name):
         if MC.objectExists(self.name):
