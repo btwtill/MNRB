@@ -84,7 +84,8 @@ class NurbsShereOrientGuideShape(Serializable):
 
     def updateColor(self):
         if MC.objectExists(self.name):
-            MC.assignObjectToShaderSet(self.name, self.guide.color.name + MNRB_Names.guide_shader_suffix)
+            shape_node = MC.getHierarchyContent(self.name)[0]
+            MC.assignObjectToShaderSet(shape_node, self.guide.color.name + MNRB_Names.guide_shader_suffix)
 
     def serialize(self):
         if CLASS_DEBUG: print("%s::serialize::" % self.__class__.__name__)

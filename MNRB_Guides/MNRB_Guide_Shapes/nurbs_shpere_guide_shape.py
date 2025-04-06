@@ -18,4 +18,5 @@ class NurbsShereGuideShape():
 
     def updateColor(self):
         if MC.objectExists(self.guide.name):
-            MC.assignObjectToShaderSet(self.guide.name, self.guide.color.name + MNRB_Names.guide_shader_suffix)
+            shape_node = MC.getHierarchyContent(self.guide.name)[0]
+            MC.assignObjectToShaderSet(shape_node, self.guide.color.name + MNRB_Names.guide_shader_suffix)
