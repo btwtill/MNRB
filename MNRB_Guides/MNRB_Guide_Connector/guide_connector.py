@@ -58,27 +58,21 @@ class Guide_Connector(Serializable):
 
         MC.parentObject(self.name, self.guide.node.guide_component_hierarchy)
 
-        up_object = MC.createTransform(self.name + "_up_control")
-        self.nodes.append(up_object)
-
-        #set up_object position and parent
-        MC.parentObject(up_object, self.start_guide.name)
-        MC.clearTransforms(up_object)
-        MC.setAttribute(up_object, "translateY", 2)
+        up_object = self.guide.guide_up_shape
 
         start_decompose_node = MC.createDecomposeNode(self.name + "_startGuide")
         self.nodes.append(start_decompose_node)
         MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", start_decompose_node, "inputMatrix")
 
-        up_decompose_node = MC.createDecomposeNode(up_object)
+        up_decompose_node = MC.createDecomposeNode(up_object.name)
         self.nodes.append(up_decompose_node)
-        MC.connectAttribute(up_object, "worldMatrix[0]", up_decompose_node, "inputMatrix")
+        MC.connectAttribute(up_object.name, "worldMatrix[0]", up_decompose_node, "inputMatrix")
 
         end_decompose_node = MC.createDecomposeNode(self.name + "_endGuide")
         self.nodes.append(end_decompose_node)
         MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", end_decompose_node, "inputMatrix")
 
-        up_vector_subtract_node = MC.createPlusMinusAverageNode(up_object)
+        up_vector_subtract_node = MC.createPlusMinusAverageNode(up_object.name)
         self.nodes.append(up_vector_subtract_node)
         for channel in "XYZ":
             MC.connectAttribute(up_decompose_node, "outputTranslate" + channel, up_vector_subtract_node, "input3D[0].input3D" + channel.lower())
@@ -96,7 +90,7 @@ class Guide_Connector(Serializable):
         self.nodes.append(aim_matrix_node)
         self.aim_orient_node = aim_matrix_node
         MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", aim_matrix_node, "inputMatrix")
-        MC.connectAttribute(up_object, "worldMatrix[0]", aim_matrix_node, "secondaryTargetMatrix")
+        MC.connectAttribute(up_object.name, "worldMatrix[0]", aim_matrix_node, "secondaryTargetMatrix")
         MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", aim_matrix_node, "primaryTargetMatrix")
         MC.setAttribute(aim_matrix_node, "primaryInputAxisX", -1)
         MC.setAttribute(aim_matrix_node, "secondaryMode", 1)
@@ -203,6 +197,8 @@ class Guide_Connector(Serializable):
         MC.setDisplayType(self.name, "reference")
         if CLASS_DEBUG: print("%s::Parent:: " % self.__class__.__name__, self.name, " ---> to:: ", self.guide.node.guide_visualization_hierarchy)
         MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
+
+        self.updateColor()
 
     def remove(self):
         if CLASS_DEBUG: print("%s::remove " % self.__class__.__name__)
