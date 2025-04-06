@@ -58,21 +58,21 @@ class Guide_Connector(Serializable):
 
         MC.parentObject(self.name, self.guide.node.guide_component_hierarchy)
 
-        up_object = self.guide.guide_up_shape
+        up_object = self.guide.guide_parent.guide_up_shape.name
 
         start_decompose_node = MC.createDecomposeNode(self.name + "_startGuide")
         self.nodes.append(start_decompose_node)
         MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", start_decompose_node, "inputMatrix")
 
-        up_decompose_node = MC.createDecomposeNode(up_object.name)
+        up_decompose_node = MC.createDecomposeNode(up_object)
         self.nodes.append(up_decompose_node)
-        MC.connectAttribute(up_object.name, "worldMatrix[0]", up_decompose_node, "inputMatrix")
+        MC.connectAttribute(up_object, "worldMatrix[0]", up_decompose_node, "inputMatrix")
 
         end_decompose_node = MC.createDecomposeNode(self.name + "_endGuide")
         self.nodes.append(end_decompose_node)
         MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", end_decompose_node, "inputMatrix")
 
-        up_vector_subtract_node = MC.createPlusMinusAverageNode(up_object.name)
+        up_vector_subtract_node = MC.createPlusMinusAverageNode(up_object)
         self.nodes.append(up_vector_subtract_node)
         for channel in "XYZ":
             MC.connectAttribute(up_decompose_node, "outputTranslate" + channel, up_vector_subtract_node, "input3D[0].input3D" + channel.lower())
@@ -90,7 +90,7 @@ class Guide_Connector(Serializable):
         self.nodes.append(aim_matrix_node)
         self.aim_orient_node = aim_matrix_node
         MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", aim_matrix_node, "inputMatrix")
-        MC.connectAttribute(up_object.name, "worldMatrix[0]", aim_matrix_node, "secondaryTargetMatrix")
+        MC.connectAttribute(up_object, "worldMatrix[0]", aim_matrix_node, "secondaryTargetMatrix")
         MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", aim_matrix_node, "primaryTargetMatrix")
         MC.setAttribute(aim_matrix_node, "primaryInputAxisX", -1)
         MC.setAttribute(aim_matrix_node, "secondaryMode", 1)
