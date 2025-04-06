@@ -31,7 +31,6 @@ class guide(Serializable):
 
         self.guide_name = name
         self.name = self.assembleFullName()
-        self.name_orient = self.name + MNRB_Names.guide_orient_suffix
         
         self._color = self.node.properties.component_color
 
@@ -93,6 +92,7 @@ class guide(Serializable):
     def resize(self, size):
         self.guide_shape.resize(size)
         self.guide_up_shape.resize(size)
+        self.guide_orientation_shape.resize(size)
 
     def exists(self) -> bool:
         return MC.objectExists(self.name)
@@ -191,8 +191,8 @@ class guide(Serializable):
             MC.deleteNode(self.name)
         if self.guide_up_shape.exists():
             self.guide_up_shape.remove()
-        if MC.objectExists(self.name_orient):
-            MC.deleteNode(self.name_orient)
+        if self.guide_orientation_shape.exists():
+            self.guide_orientation_shape.remove()
         if self.parent_connector != None:
             self.parent_connector.remove()
 
@@ -200,11 +200,11 @@ class guide(Serializable):
         if CLASS_DEBUG: print("%s::parentToGuide::" % self.__class__.__name__)
 
     def serialize(self):
-        up_shape = self.guide_up_shape.serialize()
         serialized_data = OrderedDict([
             ('id', self.id),
             ('name', self.guide_name),
-            ('up_shape', up_shape)
+            ('up_shape', self.guide_up_shape.serialize()),
+            ('orientation_shape', self.guide_orientation_shape.serialize())
         ])
         return serialized_data
 
@@ -213,12 +213,12 @@ class guide(Serializable):
         self.guide_name = data['name']
  
         self.name = self.assembleFullName()
-        self.name_orient = self.name + MNRB_Names.guide_orient_suffix
 
+        self.guide_orientation_shape.deserialize(data['orientation_shape'], hashmap, restore_id)
         self.guide_up_shape.deserialize(data['up_shape'], hashmap, restore_id)
 
         if CLASS_DEBUG: 
-            print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.name)
-            print("%s::deserialize:: Guide Orient Name:: " % self.__class__.__name__, self.name_orient)
+            print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.guide_up_shape.name)
+            print("%s::deserialize:: Guide Orient Name:: " % self.__class__.__name__, self.guide_orientation_shape.name)
 
         return True
