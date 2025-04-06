@@ -183,19 +183,6 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.layout.addWidget(self.component_size_widget)
 
-        separator_01 = SeparatorWidget()
-        self.layout.addWidget(separator_01)
-
-        #add Guide Orientation Settings
-        guide_orientation_layout = ReceitWidget("Orientation Settings")
-        self.auto_align_guides_checkbox = QCheckBox("Auto Orient")
-        self.override_planar_orientation_checkbox = QCheckBox("Override Orientation")
-
-        guide_orientation_layout.add_widget(self.auto_align_guides_checkbox)
-        guide_orientation_layout.add_widget(self.override_planar_orientation_checkbox)
-
-        self.layout.addWidget(guide_orientation_layout)
-
         separator_02 = SeparatorWidget()
         self.layout.addWidget(separator_02)
 
