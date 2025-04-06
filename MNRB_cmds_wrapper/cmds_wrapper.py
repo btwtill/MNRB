@@ -198,6 +198,21 @@ class MC:
         cmds.setAttr(f"{shape_node}.radius", size)
 
     @staticmethod
+    def setNurbsSphereShapeDegree(object, degree) -> None:
+        shape_node = MC.listSourceConnections(object, "create")[0]
+        cmds.setAttr(f"{shape_node}.degree", degree)
+
+    @staticmethod
+    def setNurbsSphereShapeSpans(object, spans) -> None:
+        shape_node = MC.listSourceConnections(object, "create")[0]
+        cmds.setAttr(f"{shape_node}.spans", spans)
+
+    @staticmethod
+    def setNurbsSphereShapeSections(object, sections) -> None:
+        shape_node = MC.listSourceConnections(object, "create")[0]
+        cmds.setAttr(f"{shape_node}.sections", sections)
+
+    @staticmethod
     def createNurbsCircle(name, x_normal = 0, y_normal = 1, z_normal = 0):
         new_circle = cmds.circle(name = name, normalX = 0, normalY = 1, normalZ = 0)
         MC.clearSelection()
