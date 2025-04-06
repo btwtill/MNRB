@@ -20,6 +20,11 @@ class NurbsShereUpGuideShape(Serializable):
     def draw(self):
         if CLASS_DEBUG: print("%s::draw::UpShape Name::" % self.__class__.__name__, self.name)
         guide_shape = MC.createNurbsSphere(self.name)
+
+        MC.setNurbsSphereShapeDegree(guide_shape, 1)
+        MC.setNurbsSphereShapeSections(guide_shape, 2)
+        MC.setNurbsSphereShapeSpans(guide_shape, 2)
+
         if CLASS_DEBUG: print("%s::draw::UpShape Name::After Creation::" % self.__class__.__name__, guide_shape)
         self.name = guide_shape
         MC.assignObjectToShaderSet(guide_shape, self.guide.color.name + MNRB_Names.guide_shader_suffix)
@@ -27,7 +32,7 @@ class NurbsShereUpGuideShape(Serializable):
         #create nodes to position and connect correctly
         self.offset_node = MC.createComposeNode(self.name + "_offset")
         self.nodes.append(self.offset_node)
-        MC.setAttribute(self.offset_node, "inputTranslateY", 2.0)
+        MC.setAttribute(self.offset_node, "inputTranslateY", 3.0)
         
         offset_multiply_node = MC.createMultMatrixNode(self.name + "_offset")
         self.nodes.append(offset_multiply_node)
@@ -48,7 +53,7 @@ class NurbsShereUpGuideShape(Serializable):
 
     def resize(self, size):
         MC.setNurbsSphereShapeRadius(self.name, size / 2)
-        MC.setAttribute(self.name + "_offset" + "_cm_fNode", "inputTranslateY", size + size)
+        MC.setAttribute(self.name + "_offset" + "_cm_fNode", "inputTranslateY", 3.0 * size)
 
     def exists(self):
         return MC.objectExists(self.name)
