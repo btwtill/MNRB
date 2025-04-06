@@ -182,6 +182,10 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
         #parent guide
         parent_guide = self.guides[-1]
 
+        if CLASS_DEBUG: 
+            print("%s:: addGuideToChain:: parent guide:: " % self.__class__.__name__, parent_guide)
+            print("%s:: addGuideToChain:: parent guide Name:: " % self.__class__.__name__, parent_guide.name)
+
         #create new guide with that name
         new_guide = guide(self, new_guide_name, parent_guide)
 
