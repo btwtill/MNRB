@@ -77,8 +77,10 @@ class guide(Serializable):
             if CLASS_DEBUG: print("%s::guide_parent::setter: " % self.__class__.__name__, self.parent_connector)
             if CLASS_DEBUG: print("%s::guide_parent::setter: " % self.__class__.__name__, self._guide_parent," ::trying to set to value:: ", value)
             self.parent_connector = Guide_Connector(value, self)
+            self._guide_parent = value
             self.parent_connector.build()
-        self._guide_parent = value
+        else:
+            self._guide_parent = value
 
     def draw(self):
         self.guide_shape.draw()
