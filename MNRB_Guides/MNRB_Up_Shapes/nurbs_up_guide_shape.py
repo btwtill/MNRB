@@ -93,4 +93,3 @@ class NurbsShereUpGuideShape(Serializable):
 
         for node in data['guide_up_nodes']:
             self.nodes.append(node)
-
