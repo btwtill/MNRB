@@ -1,12 +1,14 @@
+from collections import OrderedDict
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 CLASS_DEBUG = True
 
-class Guide_Connector():
+class Guide_Connector(Serializable):
     def __init__(self, start_guide, end_guide):
-        
+        super().__init__()
         self.guide = end_guide
 
         self._start_guide = None
@@ -202,7 +204,6 @@ class Guide_Connector():
         if CLASS_DEBUG: print("%s::Parent:: " % self.__class__.__name__, self.name, " ---> to:: ", self.guide.node.guide_visualization_hierarchy)
         MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
-
     def remove(self):
         if CLASS_DEBUG: print("%s::remove " % self.__class__.__name__)
         if self.exists():
@@ -248,3 +249,18 @@ class Guide_Connector():
     def exists(self):
         if MC.objectExists(self.name): return True
         else: return False
+
+    def serialize(self):
+        result_Data = OrderedDict([
+            ('id', self.id),
+            ('name', self.name),
+            ('nodes', self.nodes)
+        ])
+        return result_Data
+
+    def deserialize(self, data, hashmap={}, restore_id=True):
+        if restore_id: self.id = data['id']
+        self.name = data['name']
+
+        for node in data['nodes']:
+            self.nodes.append(node)

@@ -74,6 +74,7 @@ class guide(Serializable):
         if self.parent_connector is not None:
             self.parent_connector.update()
         elif self.parent_connector == None and value != None:
+            if CLASS_DEBUG: print("%s::guide_parent::setter: " % self.__class__.__name__, self.parent_connector)
             if CLASS_DEBUG: print("%s::guide_parent::setter: " % self.__class__.__name__, self._guide_parent," ::trying to set to value:: ", value)
             self.parent_connector = Guide_Connector(value, self)
             self.parent_connector.build()
@@ -183,7 +184,10 @@ class guide(Serializable):
             self.guide_orientation_shape.updateName(new_name)
             self.guide_up_shape.updateName(new_name)
 
+            if CLASS_DEBUG: print("%s::updateName::parent_connector::" % self.__class__.__name__, self.parent_connector)
+
             if self.parent_connector is not None:
+                if CLASS_DEBUG: print("%s::updateName::About to update connector::" % self.__class__.__name__)
                 self.parent_connector.updateName(new_name)
 
     def remove(self):
@@ -200,9 +204,12 @@ class guide(Serializable):
         if CLASS_DEBUG: print("%s::parentToGuide::" % self.__class__.__name__)
 
     def serialize(self):
+
         serialized_data = OrderedDict([
             ('id', self.id),
             ('name', self.guide_name),
+            ('guide_parent_id', self.guide_parent.id if self.guide_parent is not None else None),
+            ('connector_id', self.parent_connector.id if self.parent_connector is not None else None),
             ('up_shape', self.guide_up_shape.serialize()),
             ('orientation_shape', self.guide_orientation_shape.serialize())
         ])
@@ -216,6 +223,9 @@ class guide(Serializable):
 
         self.guide_orientation_shape.deserialize(data['orientation_shape'], hashmap, restore_id)
         self.guide_up_shape.deserialize(data['up_shape'], hashmap, restore_id)
+
+        if data['guide_parent_id'] is not None:
+            hashmap[self.id] = data['guide_parent_id']
 
         if CLASS_DEBUG: 
             print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.guide_up_shape.name)
