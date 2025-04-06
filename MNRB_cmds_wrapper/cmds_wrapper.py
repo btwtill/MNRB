@@ -187,6 +187,12 @@ class MC:
         return new_sphere
     
     @staticmethod
+    def createNurbsCone(name, axis, radius) -> str:
+        new_cone = cmds.cone(name = name, axis = axis, radius = radius)[0]
+        MC.clearSelection()
+        return new_cone
+
+    @staticmethod
     def setNurbsSphereShapeRadius(object, size) -> None:
         shape_node = MC.listSourceConnections(object, "create")[0]
         cmds.setAttr(f"{shape_node}.radius", size)
