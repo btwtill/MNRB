@@ -252,6 +252,7 @@ class Guide_Connector(Serializable):
         result_Data = OrderedDict([
             ('id', self.id),
             ('name', self.name),
+            ('aim_node', self.aim_orient_node),
             ('nodes', self.nodes)
         ])
         return result_Data
