@@ -164,6 +164,12 @@ class guide(Serializable):
     def assembleFullName(self):
         return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.guide_name + MNRB_Names.guide_suffix
 
+    def setOrientationShapeDisplay(self, value):
+        if value:
+            self.guide_orientation_shape.show()
+        else:
+            self.guide_orientation_shape.hide()
+
     def updateName(self, has_duplicate_name):
         if self.exists():
             if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
