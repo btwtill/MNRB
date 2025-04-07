@@ -104,6 +104,12 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.disabled_checkbox.stateChanged.connect(self.setHasBeenModified)
         self.layout.addWidget(self.disabled_checkbox)
         
+        #add Guide Orientation Display
+        self.display_guide_orientation_checkbox = QCheckBox("Display Guide Orientation")
+        self.display_guide_orientation_checkbox.stateChanged.connect(self.setHasBeenModified)
+        self.display_guide_orientation_checkbox.stateChanged.connect(self.setGuideOrientationShapeDisplay)
+        self.layout.addWidget(self.display_guide_orientation_checkbox)
+
         self.component_size_widget = ReceitWidget("Component Size Settings")
 
         #Guide Size Adjustment
@@ -274,6 +280,12 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
     def setSceneModified(self):
         if not self.is_silent:
             self.node.scene.setModified(True)
+
+    def setGuideOrientationShapeDisplay(self):
+        if self.display_guide_orientation_checkbox.isChecked():
+            self.node.setGuideOrientationDisplay(True)
+        else:
+            self.node.setGuideOrientationDisplay(False)
 
     def updateGuideSize(self):
         self.guide_size = float(self.guide_slider_size_edit.text())
@@ -694,6 +706,10 @@ class MNRB_Node(NodeEditorNode):
             if self.guide_positions != []:
                 for index, guide in enumerate(self.guides):
                     guide.setPosition(self.guide_positions[index])
+
+    def setGuideOrientationDisplay(self, value):
+        for guide in self.guides:
+                guide.setOrientationShapeDisplay(value)
 
     def selectAllGuides(self):
         MC.clearSelection()
