@@ -55,7 +55,8 @@ class NurbsShereOrientGuideShape(Serializable):
         MC.connectAttribute(self.guide.name, "worldMatrix[0]", self.name, "offsetParentMatrix")
         MC.setDisplayType(self.name, "reference")
 
-        self.hide()
+        if not self.guide.node.displayGuideOrientation:
+            self.hide()
 
     def resize(self, size):
         MC.setAttributeDouble3(self.name, "scale", size, size, size)
@@ -90,10 +91,12 @@ class NurbsShereOrientGuideShape(Serializable):
             MC.assignObjectToShaderSet(shape_node, self.guide.color.name + MNRB_Names.guide_shader_suffix)
 
     def hide(self):
-        MC.setAttribute(self.name, "visibility", False)
+        if self.exists():
+            MC.setAttribute(self.name, "visibility", False)
 
     def show(self):
-        MC.setAttribute(self.name, "visibility", True)
+            if self.exists():
+                MC.setAttribute(self.name, "visibility", True)
 
     def serialize(self):
         if CLASS_DEBUG: print("%s::serialize::" % self.__class__.__name__)
