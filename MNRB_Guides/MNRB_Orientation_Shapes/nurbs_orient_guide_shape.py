@@ -75,7 +75,7 @@ class NurbsShereOrientGuideShape(Serializable):
         
         MC.setDisplayType(self.name, "reference")
 
-        
+        self.setAutoOrient(self.guide.node.properties.autoOrientGuide)
 
         if not self.guide.node.properties.displayGuideOrientation:
             self.hide()
