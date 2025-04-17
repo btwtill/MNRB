@@ -35,6 +35,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.deform_size = 1.0
         self.control_size = 5.0
 
+        self.displayGuideOrientation = False
+
         self.is_guide_slider_edit_silent = False
         self.is_guide_slider_silent = False
         self.is_deform_slider_edit_silent = False
@@ -282,12 +284,13 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
             self.node.scene.setModified(True)
 
     def setGuideOrientationShapeDisplay(self):
-        if self.display_guide_orientation_checkbox.isChecked():
-            self.node.displayGuideOrientation = True
-            self.node.setGuideOrientationDisplay(True)
-        else:
-            self.node.setGuideOrientationDisplay(False)
-            self.node.displayGuideOrientation = False
+        if not self.is_silent:
+            if self.display_guide_orientation_checkbox.isChecked():
+                self.displayGuideOrientation = True
+                self.node.setGuideOrientationDisplay(True)
+            else:
+                self.setGuideOrientationDisplay(False)
+                self.node.displayGuideOrientation = False
 
     def updateGuideSize(self):
         self.guide_size = float(self.guide_slider_size_edit.text())
@@ -446,6 +449,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         result_data['guide_size'] = self.guide_size
         result_data['deform_size'] = self.deform_size
         result_data['control_size'] = self.control_size
+        result_data['displayGuideOrientation'] = self.displayGuideOrientation
         
         return result_data
     
@@ -479,6 +483,10 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.onGuideSizeEditChange()
         self.onDeformSizeEditChange()
         self.onControlSizeEditChange()
+
+        self.displayGuideOrientation = data['displayGuideOrientation']
+        self.display_guide_orientation_checkbox.setChecked(self.displayGuideOrientation)
+ 
         self.is_silent = False
 
         if CLASS_DEBUG: print("%s:: --deserialize:: updating component Name "% self.__class__.__name__)
@@ -516,7 +524,6 @@ class MNRB_Node(NodeEditorNode):
         self.is_connected = False
 
         self.is_silent =  False
-        self.displayGuideOrientation = False
         self.reconstruct_guides = False
 
     @property
@@ -830,8 +837,6 @@ class MNRB_Node(NodeEditorNode):
         for control in self.controls: controls.append(control.serialize())
         result_data['controls'] = controls
 
-        result_data['displayGuideOrientation'] = self.displayGuideOrientation
-
         return result_data
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
@@ -840,7 +845,6 @@ class MNRB_Node(NodeEditorNode):
         self.setComponentGuideHiearchyName()
         self.setComponentHierarchyName()
         self.guide_visualization_hierarchy = self.guide_component_hierarchy + "_visualization"
-        self.displayGuideOrientation = data['displayGuideOrientation']
 
         for guide_data in data['guides']:
             new_guide = guide(self, deserialized=True)
