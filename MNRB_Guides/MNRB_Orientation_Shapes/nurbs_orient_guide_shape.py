@@ -14,6 +14,8 @@ class NurbsShereOrientGuideShape(Serializable):
         self.name = self.guide.name + MNRB_Names.guide_orient_suffix
         self.guide_material = None
         self.guide_shader = None
+        self.auto_orient_blend_node = None
+        self.auto_orient_input_node = None
 
         self.nodes = []
 
@@ -52,10 +54,30 @@ class NurbsShereOrientGuideShape(Serializable):
 
         MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
-        MC.connectAttribute(self.guide.name, "worldMatrix[0]", self.name, "offsetParentMatrix")
+        #Logic to set up the automatic Orientation Blending
+        self.auto_orient_blend_node = MC.createBlendMatrixNode(self.name + "orientation_blend_mmtx") # create Blend matrix
+        self.nodes.append(self.auto_orient_blend_node)
+
+        flip_compose_matrix_node = MC.createComposeNode(self.name + "flip_orient_matrix") # create compose Matrix with 180 rotation on y to flip 
+        self.nodes.append(flip_compose_matrix_node)
+        MC.setAttribute(flip_compose_matrix_node, "inputRotateY", 180)
+
+        self.auto_orient_input_node = MC.createMultMatrixNode(self.name + "flip_orient_mult_mtx") # create multi matrix node
+        self.nodes.append(self.auto_orient_input_node)
+        MC.connectAttribute(flip_compose_matrix_node, "outputMatrix", self.auto_orient_input_node, "matrixIn[0]") # connect compose to mmmtx node
+
+        MC.connectAttribute(self.guide.name, "worldMatrix[0]", self.auto_orient_blend_node, "inputMatrix") # connect source to Blend matrix
+        
+        MC.connectAttribute(self.auto_orient_input_node, "matrixSum", self.auto_orient_blend_node, "target[0].targetMatrix") # connect flip mmtx to blend matrix node
+        MC.setAttribute(self.auto_orient_blend_node, "target[0].translateWeight", 0) # remove translation from the blend interpolations
+
+        MC.connectAttribute(self.auto_orient_blend_node, "outputMatrix", self.name, "offsetParentMatrix") # connect blend to output orientation
+        
         MC.setDisplayType(self.name, "reference")
 
-        if not self.guide.node.displayGuideOrientation:
+        
+
+        if not self.guide.node.properties.displayGuideOrientation:
             self.hide()
 
     def resize(self, size):
@@ -90,6 +112,12 @@ class NurbsShereOrientGuideShape(Serializable):
             shape_node = MC.getHierarchyContent(self.name)[0]
             MC.assignObjectToShaderSet(shape_node, self.guide.color.name + MNRB_Names.guide_shader_suffix)
 
+    def setAutoOrient(self, value):
+        if value:
+            MC.setAttribute(self.auto_orient_blend_node, "target[0].weight", 1)
+        else:
+            MC.setAttribute(self.auto_orient_blend_node, "target[0].weight", 0)
+
     def hide(self):
         if self.exists():
             MC.setAttribute(self.name, "visibility", False)
@@ -102,6 +130,8 @@ class NurbsShereOrientGuideShape(Serializable):
         if CLASS_DEBUG: print("%s::serialize::" % self.__class__.__name__)
         result_data = OrderedDict([('id', self.id),
                                   ('name', self.name),
+                                  ('auto_orient_blend_node', self.auto_orient_blend_node),
+                                  ('auto_orient_input_node', self.auto_orient_input_node),
                                   ('guide_orient_nodes', self.nodes)])
         return result_data
     
@@ -109,6 +139,8 @@ class NurbsShereOrientGuideShape(Serializable):
         if restore_id: self.id = data['id']
 
         self.name = data['name']
+        self.auto_orient_blend_node = data['auto_orient_blend_node']
+        self.auto_orient_blend_node = data['auto_orient_input_node']
 
         for node in data['guide_orient_nodes']:
             self.nodes.append(node)
