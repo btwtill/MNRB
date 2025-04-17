@@ -36,6 +36,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.control_size = 5.0
 
         self.displayGuideOrientation = False
+        self.autoOrientGuide = False
 
         self.is_guide_slider_edit_silent = False
         self.is_guide_slider_silent = False
@@ -111,6 +112,13 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.display_guide_orientation_checkbox.stateChanged.connect(self.setHasBeenModified)
         self.display_guide_orientation_checkbox.stateChanged.connect(self.setGuideOrientationShapeDisplay)
         self.layout.addWidget(self.display_guide_orientation_checkbox)
+
+        #add Guide Auto Orientation
+        self.auto_orient_guide_checkbox = QCheckBox("Automatically Orient Guides")
+        self.auto_orient_guide_checkbox.stateChanged.connect(self.setHasBeenModified)
+        self.auto_orient_guide_checkbox.stateChanged.connect(self.setAutoGuideOrientation)
+
+        self.layout.addWidget(self.auto_orient_guide_checkbox)
 
         self.component_size_widget = ReceitWidget("Component Size Settings")
 
@@ -292,6 +300,15 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
                 self.setGuideOrientationDisplay(False)
                 self.node.displayGuideOrientation = False
 
+    def setAutoGuideOrientation(self):
+        if not self.is_silent:
+            if self.auto_orient_guide_checkbox.isChecked():
+                self.autoOrientGuide = True
+                self.node.setAutoGuideOrientation(True)
+            else:
+                self.autoOrientGuide = False
+                self.node.setAutoGuideOrientation(False)
+
     def updateGuideSize(self):
         self.guide_size = float(self.guide_slider_size_edit.text())
         if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size, " of Node:: self.node")
@@ -450,6 +467,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         result_data['deform_size'] = self.deform_size
         result_data['control_size'] = self.control_size
         result_data['displayGuideOrientation'] = self.displayGuideOrientation
+        result_data['autoOrientGuide'] = self.autoOrientGuide
         
         return result_data
     
@@ -486,6 +504,9 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.displayGuideOrientation = data['displayGuideOrientation']
         self.display_guide_orientation_checkbox.setChecked(self.displayGuideOrientation)
+
+        self.autoOrientGuide = data['autoOrientGuide']
+
  
         self.is_silent = False
 
@@ -717,10 +738,6 @@ class MNRB_Node(NodeEditorNode):
                 for index, guide in enumerate(self.guides):
                     guide.setPosition(self.guide_positions[index])
 
-    def setGuideOrientationDisplay(self, value):
-        for guide in self.guides:
-                guide.setOrientationShapeDisplay(value)
-
     def selectAllGuides(self):
         MC.clearSelection()
         for guide in self.guides:
@@ -762,6 +779,14 @@ class MNRB_Node(NodeEditorNode):
             else:
                 pass
         return True
+
+    def setAutoGuideOrientation(self, value):
+        for guide in self.guides:
+            guide.guide_orientation_shape.setAutoOrient(value)
+
+    def setGuideOrientationDisplay(self, value):
+        for guide in self.guides:
+                guide.setOrientationShapeDisplay(value)
 
     def setComponentGuideHiearchyName(self):
         if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + MNRB_Names.guide_component_hierarchy_suffix )
