@@ -17,7 +17,7 @@ from MNRB.MNRB_Controls.control import control #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.seperator_widget import SeparatorWidget #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 VALIDATE_DEBUG = False
 GUIDE_DEBUG = False
 
@@ -297,8 +297,8 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
                 self.displayGuideOrientation = True
                 self.node.setGuideOrientationDisplay(True)
             else:
-                self.setGuideOrientationDisplay(False)
-                self.node.displayGuideOrientation = False
+                self.displayGuideOrientation = False
+                self.node.setGuideOrientationDisplay(False)
 
     def setAutoGuideOrientation(self):
         if not self.is_silent:
@@ -501,6 +501,10 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.onGuideSizeEditChange()
         self.onDeformSizeEditChange()
         self.onControlSizeEditChange()
+
+        if CLASS_DEBUG: 
+            print("%s:: --deserialize:: updating guide Orientation Display "% self.__class__.__name__)
+            print("%s:: --deserialize:: deserializing displayGuideOrientation:: "% self.__class__.__name__, data['displayGuideOrientation'])
 
         self.displayGuideOrientation = data['displayGuideOrientation']
         self.display_guide_orientation_checkbox.setChecked(self.displayGuideOrientation)
@@ -785,6 +789,10 @@ class MNRB_Node(NodeEditorNode):
             guide.guide_orientation_shape.setAutoOrient(value)
 
     def setGuideOrientationDisplay(self, value):
+        if CLASS_DEBUG: 
+            print("%s:: --setGuideOrientationShapeDisplay:: setting Guide Orientation Shape Display to: " % self.__class__.__name__, value)
+            for guide in self.guides:
+                print("%s:: --setGuideOrientationShapeDisplay:: Guide: " % self.__class__.__name__, guide, " with name: ", guide.name)
         for guide in self.guides:
                 guide.setOrientationShapeDisplay(value)
 
