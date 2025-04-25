@@ -55,14 +55,14 @@ class NurbsShereOrientGuideShape(Serializable):
         MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
         #Logic to set up the automatic Orientation Blending
-        self.auto_orient_blend_node = MC.createBlendMatrixNode(self.name + "orientation_blend_mmtx") # create Blend matrix
+        self.auto_orient_blend_node = MC.createBlendMatrixNode(self.name + "_blend_mmtx") # create Blend matrix
         self.nodes.append(self.auto_orient_blend_node)
 
-        flip_compose_matrix_node = MC.createComposeNode(self.name + "flip_orient_matrix") # create compose Matrix with 180 rotation on y to flip 
+        flip_compose_matrix_node = MC.createComposeNode(self.name + "_flip_orient_matrix") # create compose Matrix with 180 rotation on y to flip 
         self.nodes.append(flip_compose_matrix_node)
         MC.setAttribute(flip_compose_matrix_node, "inputRotateY", 180)
 
-        self.auto_orient_input_node = MC.createMultMatrixNode(self.name + "flip_orient_mult_mtx") # create multi matrix node
+        self.auto_orient_input_node = MC.createMultMatrixNode(self.name + "_flip_orient_mult_mtx") # create multi matrix node
         self.nodes.append(self.auto_orient_input_node)
         MC.connectAttribute(flip_compose_matrix_node, "outputMatrix", self.auto_orient_input_node, "matrixIn[0]") # connect compose to mmmtx node
 
@@ -77,7 +77,9 @@ class NurbsShereOrientGuideShape(Serializable):
 
         self.setAutoOrient(self.guide.node.properties.autoOrientGuide)
 
-        if not self.guide.node.properties.displayGuideOrientation:
+        if self.guide.node.properties.displayGuideOrientation:
+            self.show()
+        else:
             self.hide()
 
     def resize(self, size):
@@ -140,7 +142,7 @@ class NurbsShereOrientGuideShape(Serializable):
 
         self.name = data['name']
         self.auto_orient_blend_node = data['auto_orient_blend_node']
-        self.auto_orient_blend_node = data['auto_orient_input_node']
+        self.auto_orient_input_node = data['auto_orient_input_node']
 
         for node in data['guide_orient_nodes']:
             self.nodes.append(node)
