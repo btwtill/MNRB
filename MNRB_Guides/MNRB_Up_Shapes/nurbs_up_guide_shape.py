@@ -43,7 +43,10 @@ class NurbsShereUpGuideShape(Serializable):
 
         MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
-        self.show()
+        if self.guide.node.properties.display_extended_rotation_controls:
+            self.show()
+        else:
+            self.hide()
 
     def hide(self):
         MC.setOverrideVisibility(self.name, False)
