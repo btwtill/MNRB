@@ -170,6 +170,12 @@ class guide(Serializable):
         else:
             self.guide_orientation_shape.hide()
 
+    def setExtendedRotationControlDisplay(self, value):
+        if value:
+            self.guide_up_shape.show()
+        else:
+            self.guide_up_shape.hide()
+
     def updateName(self, has_duplicate_name):
         if self.exists():
             if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
