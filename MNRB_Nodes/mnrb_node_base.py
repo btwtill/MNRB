@@ -37,6 +37,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
 
         self.displayGuideOrientation = False
         self.autoOrientGuide = False
+        self.display_extended_rotation_controls = False
 
         self.is_guide_slider_edit_silent = False
         self.is_guide_slider_silent = False
@@ -119,6 +120,15 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.auto_orient_guide_checkbox.stateChanged.connect(self.setAutoGuideOrientation)
 
         self.layout.addWidget(self.auto_orient_guide_checkbox)
+
+        self.component_size_widget = ReceitWidget("Component Size Settings")
+
+        #display extended rotation control
+        self.extended_rotation_control_checkbox = QCheckBox("extended Rotation Control")
+        self.extended_rotation_control_checkbox.stateChanged.connect(self.setHasBeenModified)
+        self.extended_rotation_control_checkbox.stateChanged.connect(self.setExtendedRotationControlDisplay)
+
+        self.layout.addWidget(self.extended_rotation_control_checkbox)
 
         self.component_size_widget = ReceitWidget("Component Size Settings")
 
@@ -309,6 +319,15 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
                 self.autoOrientGuide = False
                 self.node.setAutoGuideOrientation(False)
 
+    def setExtendedRotationControlDisplay(self):
+        if not self.is_silent:
+            if self.extended_rotation_control_checkbox.isChecked():
+                self.display_extended_rotation_controls = True
+                self.node.setExtendedRotationControlDisplay(True)
+            else:
+                self.display_extended_rotation_controls = False
+                self.node.setExtendedRotationControlDisplay(False)
+
     def updateGuideSize(self):
         self.guide_size = float(self.guide_slider_size_edit.text())
         if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size, " of Node:: self.node")
@@ -468,6 +487,7 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         result_data['control_size'] = self.control_size
         result_data['displayGuideOrientation'] = self.displayGuideOrientation
         result_data['autoOrientGuide'] = self.autoOrientGuide
+        result_data['extended_rotation_control'] = self.display_extended_rotation_controls
         
         return result_data
     
@@ -509,8 +529,11 @@ class MNRB_NodeProperties(NodeEditorNodeProperties):
         self.displayGuideOrientation = data['displayGuideOrientation']
         self.display_guide_orientation_checkbox.setChecked(self.displayGuideOrientation)
 
-        self.autoOrientGuide = data['autoOrientGuide']
+        self.display_extended_rotation_controls = data['extended_rotation_control']
+        self.extended_rotation_control_checkbox.setChecked(self.display_extended_rotation_controls)
 
+        self.autoOrientGuide = data['autoOrientGuide']
+        self.auto_orient_guide_checkbox.setChecked(self.autoOrientGuide)
  
         self.is_silent = False
 
@@ -816,6 +839,10 @@ class MNRB_Node(NodeEditorNode):
     
     def setComponentControlsSize(self, size):
         pass
+
+    def setExtendedRotationControlDisplay(self, value):
+        for guide in self.guides:
+            guide.setExtendedRotationControlDisplay(value)
 
     def setGuideColors(self):
         if CLASS_DEBUG: print("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)
