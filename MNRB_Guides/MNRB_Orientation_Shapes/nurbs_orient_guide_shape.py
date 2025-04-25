@@ -115,10 +115,11 @@ class NurbsShereOrientGuideShape(Serializable):
             MC.assignObjectToShaderSet(shape_node, self.guide.color.name + MNRB_Names.guide_shader_suffix)
 
     def setAutoOrient(self, value):
-        if value:
-            MC.setAttribute(self.auto_orient_blend_node, "target[0].weight", 1)
-        else:
-            MC.setAttribute(self.auto_orient_blend_node, "target[0].weight", 0)
+        if self.auto_orient_blend_node is not None:
+            if value:
+                MC.setAttribute(self.auto_orient_blend_node, "target[0].weight", 1)
+            else:
+                MC.setAttribute(self.auto_orient_blend_node, "target[0].weight", 0)
 
     def hide(self):
         if self.exists():
