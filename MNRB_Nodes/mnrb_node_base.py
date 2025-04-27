@@ -856,6 +856,20 @@ class MNRB_Node(NodeEditorNode):
     def mirror(self):
         if CLASS_DEBUG: print("%s:: --mirror:: Mirror Component: " % self.__class__.__name__)
 
+        # Create new Component of the same type 
+
+        # Fill the new Components properties with the same values as the original component
+        new_component = self.__class__(self.scene)
+
+        new_component.properties.component_name = self.properties.component_name
+        new_component.properties.component_color = self.properties.component_color
+        new_component.properties.component_side_prefix = self.properties.component_side_prefix
+        new_component.properties.guide_size = self.properties.guide_size
+        new_component.properties.deform_size = self.properties.deform_size
+        new_component.properties.control_size = self.properties.control_size
+        new_component.properties.displayGuideOrientation = self.properties.displayGuideOrientation
+        new_component.properties.autoOrientGuide = self.properties.autoOrientGuide
+
     def remove(self):
         super().remove()
         if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
