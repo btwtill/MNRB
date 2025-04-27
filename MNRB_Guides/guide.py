@@ -101,7 +101,7 @@ class guide(Serializable):
         return MC.objectExists(self.name)
 
     def getPosition(self, reset_scale = True):
-        guide_pos = MC.getObjectWorldPositionMatrix(self.name)
+        guide_pos = MC.getObjectWorldPositionMatrix(self.guide_orientation_shape.name)
         if not reset_scale:
             return guide_pos
         guide_noScale_pos = Matrix_functions.removeScaleFromMatrix(guide_pos)
