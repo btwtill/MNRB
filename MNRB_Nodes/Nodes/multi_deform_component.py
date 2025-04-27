@@ -8,7 +8,10 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
+from MNRB.MNRB_Controls.control import control #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 
 GUIDE_DEBUG = True
 CLASS_DEBUG = True
@@ -104,6 +107,8 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
         if not super().staticBuild():
             return False
         
+        if GUIDE_DEBUG: print("%s:: Building Static:: " % self)
+        
         for index, guide in enumerate(self.guides):
             guide_pos = guide.getPosition()
 
@@ -117,7 +122,42 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
                 MC.parentObject(new_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
     
     def componentBuild(self):
-        return super().componentBuild()
+        if not super().componentBuild():
+            return False
+        
+        if GUIDE_DEBUG: print("%s:: Building Component:: " % self)
+
+        root_guide_position = self.guides[0].getPosition()
+
+        # Create inputs
+        # Root input
+
+        root_input = MC.createTransform(self.getComponentFullPrefix() + "root" + MNRB_Names.input_suffix)
+        MC.parentObject(root_input, self.input_hierarchy)
+        MC.setObjectWorldPositionMatrix(root_input, root_guide_position)
+        MC.applyTransformScale(root_input)
+
+        # Create Controls
+        for index, guide in enumerate(self.guides):
+            if index == 0:
+                new_control = control(self, "chain_start")
+                Matrix_functions.setMatrixParentNoOffset(new_control.name, root_input)
+                # Create Outputs
+                output = MC.createTransform(self.getComponentFullPrefix() + "start" + MNRB_Names.output_suffix)
+                Matrix_functions.decomposeTransformWorldMatrixTo(new_control.name, output)
+
+            else:
+                new_control = control(self, f"chain_{index}")
+                control_position = self.guides[index].getPosition()
+                new_control.setPosition(control_position)
+                Matrix_functions.setMatrixParentWithOffset(new_control.name, self.controls[index - 1].name, decompose_result=False)
+                # Create Outputs
+                output = MC.createTransform(self.getComponentFullPrefix() + str(index) + MNRB_Names.output_suffix)
+                Matrix_functions.decomposeTransformWorldMatrixTo(new_control.name, output)
+            
+            MC.parentObject(output, self.output_hierarchy)
+            MC.parentObject(new_control.name, self.control_hierarchy)
+        
 
     def connectComponent(self):
         return super().connectComponent()
