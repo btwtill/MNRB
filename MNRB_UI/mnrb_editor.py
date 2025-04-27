@@ -197,6 +197,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.action_clear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shift+C', statusTip='save template as', triggered=self.onClearNodeEditor)
         self.action_align_on_x = QtWidgets.QAction('Align&X', self, shortcut = 'Alt+X', statusTip = 'align nodes vertivally', triggered=self.onNodeEditorAlignX)
         self.action_align_on_y = QtWidgets.QAction('Align&Y', self, shortcut = 'Alt+Y', statusTip = 'align nodes horizontally', triggered=self.onNodeEditorAlignY)
+        self.action_mirror_Node = QtWidgets.QAction('Mirror Node', self, shortcut = 'Alt+M', statusTip = 'mirror node', triggered=self.onNodeEditorMirrorNode)
 
         self.action_undo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
         self.action_redo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
@@ -270,6 +271,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.node_editor_menu.addAction(self.action_align_on_x)
         self.node_editor_menu.addAction(self.action_align_on_y)
+        self.node_editor_menu.addAction(self.action_mirror_Node)
 
         self.node_editor_menu.aboutToShow.connect(self.updateNodeEditorMenu)
     
@@ -452,6 +454,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def onNodeEditorAlignY(self):
         self.getNodeEditorTab().onAlignNodesY()
 
+    def onNodeEditorMirrorNode(self):
+        self.getNodeEditorTab().onMirrorNode()
+
     def onSceneMousePositionChange(self, x, y):
         self.statusMousePosition.setText("Scene Mouse Position: [%d %d]" % (x, y))
 
@@ -554,6 +559,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 self.action_delete.setEnabled(current_tab.canDelete())
                 self.action_undo.setEnabled(current_tab.canUndo())
                 self.action_redo.setEnabled(current_tab.canRedo())
+                self.action_mirror_Node.setEnabled(current_tab.canMirrorNode())
         else:
             self.setEditMenuActions(False)
 

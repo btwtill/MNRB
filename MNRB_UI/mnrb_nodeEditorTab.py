@@ -11,6 +11,7 @@ from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ig
 
 DRAGDROP_DEBUG = False
 CONTEXT_DEBUG = False
+CLASS_DEBUG = True
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
@@ -87,6 +88,9 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def canDelete(self):
         return self.central_widget.sceneHasSelectedItems()
 
+    def canMirrorNode(self):
+        return self.central_widget.sceneHasSelectedItems()
+
     def loadFile(self, path):
         # try:
             self.central_widget.scene.loadSceneFromFile(path)
@@ -154,6 +158,13 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def onAlignNodesY(self):
         self.central_widget.scene.alignSelectedNodesOnY()
+
+    def onMirrorNode(self):
+        if CLASS_DEBUG: print("NODEEDITORTAB:: --onMirrorNode:: Mirror Node")
+
+        gr_nodes = self.central_widget.scene.getSelectedNodes()
+        for gr_node in gr_nodes:
+            gr_node.node.mirror()
 
     def onDrop(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)

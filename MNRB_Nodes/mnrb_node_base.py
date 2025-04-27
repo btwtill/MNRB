@@ -853,6 +853,9 @@ class MNRB_Node(NodeEditorNode):
         for control in self.controls:
             control.updateColor(self.properties.component_color)
 
+    def mirror(self):
+        if CLASS_DEBUG: print("%s:: --mirror:: Mirror Component: " % self.__class__.__name__)
+
     def remove(self):
         super().remove()
         if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
