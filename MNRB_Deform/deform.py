@@ -52,8 +52,11 @@ class deform(Serializable):
         if self.exists():
             MC.selectObject(self.name)
 
-    def setPosition(self, matrix):
+    def setPosition(self, matrix, clear_Orient=True):
         MC.setObjectWorldPositionMatrix(self.name, matrix)
+        if clear_Orient:
+            MC.applyTransformRotate(self.name)
+            MC.applyTransformScale(self.name)
 
     def serialize(self):
         serialized_data = OrderedDict([
