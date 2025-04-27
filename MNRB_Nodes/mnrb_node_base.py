@@ -623,7 +623,7 @@ class MNRB_Node(NodeEditorNode):
 
         self.guide_visualization_hierarchy = MC.createTransform(self.guide_component_hierarchy + "_visualization")
         MC.parentObject(self.guide_visualization_hierarchy, self.guide_component_hierarchy)
-        #MC.hideInOutliner(self.guide_visualization_hierarchy)
+        MC.hideInOutliner(self.guide_visualization_hierarchy)
 
         return True
 
