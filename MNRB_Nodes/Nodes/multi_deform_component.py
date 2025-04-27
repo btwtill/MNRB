@@ -132,16 +132,18 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
         # Create inputs
         # Root input
 
-        root_input = MC.createTransform(self.getComponentFullPrefix() + "root" + MNRB_Names.input_suffix)
-        MC.parentObject(root_input, self.input_hierarchy)
-        MC.setObjectWorldPositionMatrix(root_input, root_guide_position)
-        MC.applyTransformScale(root_input)
+        self.root_input = MC.createTransform(self.getComponentFullPrefix() + "root" + MNRB_Names.input_suffix)
+        MC.parentObject(self.root_input, self.input_hierarchy)
+        MC.setObjectWorldPositionMatrix(self.root_input, root_guide_position)
+        MC.applyTransformScale(self.root_input)
+
+        self.deform_outputs = []
 
         # Create Controls
         for index, guide in enumerate(self.guides):
             if index == 0:
                 new_control = control(self, "chain_start")
-                Matrix_functions.setMatrixParentNoOffset(new_control.name, root_input)
+                Matrix_functions.setMatrixParentNoOffset(new_control.name, self.root_input)
                 # Create Outputs
                 output = MC.createTransform(self.getComponentFullPrefix() + "start" + MNRB_Names.output_suffix)
                 Matrix_functions.decomposeTransformWorldMatrixTo(new_control.name, output)
@@ -152,15 +154,42 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
                 new_control.setPosition(control_position)
                 Matrix_functions.setMatrixParentWithOffset(new_control.name, self.controls[index - 1].name, decompose_result=False)
                 # Create Outputs
-                output = MC.createTransform(self.getComponentFullPrefix() + str(index) + MNRB_Names.output_suffix)
+                output = MC.createTransform(self.getComponentFullPrefix() + str(index - 1) + MNRB_Names.output_suffix)
                 Matrix_functions.decomposeTransformWorldMatrixTo(new_control.name, output)
             
             MC.parentObject(output, self.output_hierarchy)
             MC.parentObject(new_control.name, self.control_hierarchy)
+            self.deform_outputs.append(output)
         
 
     def connectComponent(self):
-        return super().connectComponent()
+        if not super().connectComponent():
+            return False
+        
+        srt_parent_name = self.getInputConnectionValueAt(0)
+        if srt_parent_name == None:
+            return False
+        srt_parent =  srt_parent_name + MNRB_Names.output_suffix
+
+        deform_parent_name = self.getInputConnectionValueAt(1)
+        if deform_parent_name == None:
+            return False
+        deform_parent = deform_parent_name + MNRB_Names.deform_suffix
+
+        #Contect connected output to component input
+        srt_parent_offset_compose_node, srt_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.root_input, srt_parent)
+
+        #Connect control deform outputs to deforms 
+        # Parent deform to connected deform
+        MC.parentObject(self.deforms[0].name, deform_parent)
+
+        for index, deform in enumerate(self.deforms):
+            if index == 0:
+                deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform.name, self.deform_outputs[index], deform_parent)
+            else:
+                deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform.name, self.deform_outputs[index], self.deforms[index - 1].name)
+
+            MC.resetJointOrientations(deform.name)
     
     def onDeformCountSliderChange(self):
         if CLASS_DEBUG: 
