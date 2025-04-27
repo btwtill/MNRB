@@ -20,7 +20,6 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
 
         self.last_deform_count = 0
         self.current_deform_count  = 0
-        self.auto_orient = True
 
     def initUI(self):
         super().initUI()
@@ -40,10 +39,6 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
         deform_count_layout.addWidget(self.deform_count_slider)
         
         self.layout.addLayout(deform_count_layout)
-
-        chain_orientation_label = QLabel("OrientChain")
-
-        auto_orientation_label = QLabel("Auto_Orient")
 
 
     def updateDeformCountSliderLabel(self, silent = False):
