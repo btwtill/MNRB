@@ -1,7 +1,8 @@
 import math
+import json
 from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider, QComboBox #type: ignore
 from PySide2.QtCore import Qt #type: ignore
-from PySide2.QtGui import QDoubleValidator #type: ignore
+from PySide2 import QtWidgets # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 from MNRB.global_variables import IDENITY_MATRIX #type: ignore
@@ -852,24 +853,7 @@ class MNRB_Node(NodeEditorNode):
     def setControlColors(self):
         for control in self.controls:
             control.updateColor(self.properties.component_color)
-
-    def mirror(self):
-        if CLASS_DEBUG: print("%s:: --mirror:: Mirror Component: " % self.__class__.__name__)
-
-        # Create new Component of the same type 
-
-        # Fill the new Components properties with the same values as the original component
-        new_component = self.__class__(self.scene)
-
-        new_component.properties.component_name = self.properties.component_name
-        new_component.properties.component_color = self.properties.component_color
-        new_component.properties.component_side_prefix = self.properties.component_side_prefix
-        new_component.properties.guide_size = self.properties.guide_size
-        new_component.properties.deform_size = self.properties.deform_size
-        new_component.properties.control_size = self.properties.control_size
-        new_component.properties.displayGuideOrientation = self.properties.displayGuideOrientation
-        new_component.properties.autoOrientGuide = self.properties.autoOrientGuide
-
+               
     def remove(self):
         super().remove()
         if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
