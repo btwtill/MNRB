@@ -8,6 +8,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragN
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 
 DRAGDROP_DEBUG = False
 CONTEXT_DEBUG = False
@@ -160,11 +161,40 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         self.central_widget.scene.alignSelectedNodesOnY()
 
     def onMirrorNode(self):
-        if CLASS_DEBUG: print("NODEEDITORTAB:: --onMirrorNode:: Mirror Node")
+        if CLASS_DEBUG: print("NODEEDITORTAB:: --onMirrorNode:: ")
 
-        gr_nodes = self.central_widget.scene.getSelectedNodes()
-        for gr_node in gr_nodes:
-            gr_node.node.mirror()
+        # Create new Component of the same type 
+        if self.central_widget.scene.getSelectedNodes() == []:
+            return False
+
+        # copy the selected nodes
+        data = self.central_widget.scene.clipboard.serializeSceneToClipboard()
+        str_data = json.dumps(data, indent=4)
+        QtWidgets.QApplication.instance().clipboard().setText(str_data)
+ 
+        # paste the copied nodes
+        raw_data = QtWidgets.QApplication.instance().clipboard().text()
+
+        try:    
+            data = json.loads(raw_data)
+        except ValueError as e:
+            print("Pasting of invalid Json Data!", e)
+            return
+            
+        if 'nodes' not in data: 
+            print("Json does not contain any nodes!!")
+            return
+
+        node_names = []
+        for node in data["nodes"]:
+            node_title = node['title']
+            node_names.append(node_title)
+            if node['properties']['component_side_prefix'] == MNRB_Names.left.prefix:
+                node['properties']['component_side_prefix'] = MNRB_Names.right.prefix
+            elif node['properties']['component_side_prefix'] == MNRB_Names.right.prefix:
+                node['properties']['component_side_prefix'] = MNRB_Names.left.prefix
+
+        self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)
 
     def onDrop(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
