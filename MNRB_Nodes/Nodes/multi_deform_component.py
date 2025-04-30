@@ -161,7 +161,6 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
             MC.parentObject(new_control.name, self.control_hierarchy)
             self.deform_outputs.append(output)
         
-
     def connectComponent(self):
         if not super().connectComponent():
             return False
@@ -258,6 +257,9 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
         
         #parent guide
         MC.parentObject(new_guide.name, parent_guide.name)
+
+        #reset Transformations
+        MC.clearTransforms(new_guide.name)
 
         #set new guide position
         MC.addTranslation(new_guide.name, 5.0, 0.0, 0.0)
