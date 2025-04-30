@@ -56,14 +56,12 @@ class NurbsShereOrientGuideShape(Serializable):
 
         #Logic to set up the automatic Orientation Blending
         self.auto_orient_blend_node = MC.createBlendMatrixNode(self.name + "_blend_mmtx") # create Blend matrix
-        self.nodes.append(self.auto_orient_blend_node)
 
         flip_compose_matrix_node = MC.createComposeNode(self.name + "_flip_orient_matrix") # create compose Matrix with 180 rotation on y to flip 
         self.nodes.append(flip_compose_matrix_node)
         MC.setAttribute(flip_compose_matrix_node, "inputRotateY", 180)
 
         self.auto_orient_input_node = MC.createMultMatrixNode(self.name + "_flip_orient_mult_mtx") # create multi matrix node
-        self.nodes.append(self.auto_orient_input_node)
         MC.connectAttribute(flip_compose_matrix_node, "outputMatrix", self.auto_orient_input_node, "matrixIn[0]") # connect compose to mmmtx node
 
         MC.connectAttribute(self.guide.name, "worldMatrix[0]", self.auto_orient_blend_node, "inputMatrix") # connect source to Blend matrix
@@ -93,6 +91,7 @@ class NurbsShereOrientGuideShape(Serializable):
             MC.deleteNode(self.name)
 
     def updateName(self, new_name):
+        if CLASS_DEBUG: print("%s::updateName::Check wether this orientation shape" % self.__class__.__name__, self.name, "exists or not" )
         if MC.objectExists(self.name):
             if CLASS_DEBUG: 
                 print("%s::updateName::" % self.__class__.__name__)
@@ -108,6 +107,11 @@ class NurbsShereOrientGuideShape(Serializable):
                     print("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + MNRB_Names.guide_orient_suffix))
                 new_node_name = node.replace(old_name, new_name + MNRB_Names.guide_orient_suffix)
                 self.nodes[index] = MC.renameObject(node, new_node_name)
+
+            new_auto_orient_blend_node_Name = self.auto_orient_blend_node.replace(old_name, new_name + MNRB_Names.guide_orient_suffix)
+            self.auto_orient_blend_node = MC.renameObject(self.auto_orient_blend_node, new_auto_orient_blend_node_Name)
+            new_auto_orient_input_node_Name = self.auto_orient_input_node.replace(old_name, new_name + MNRB_Names.guide_orient_suffix)
+            self.auto_orient_input_node = MC.renameObject(self.auto_orient_input_node, new_auto_orient_input_node_Name)
 
     def updateColor(self):
         if MC.objectExists(self.name):

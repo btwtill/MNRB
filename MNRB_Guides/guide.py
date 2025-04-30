@@ -165,16 +165,18 @@ class guide(Serializable):
         return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.guide_name + MNRB_Names.guide_suffix
 
     def setOrientationShapeDisplay(self, value):
-        if value:
-            self.guide_orientation_shape.show()
-        else:
-            self.guide_orientation_shape.hide()
+        if self.exists():
+            if value:
+                self.guide_orientation_shape.show()
+            else:
+                self.guide_orientation_shape.hide()
 
     def setExtendedRotationControlDisplay(self, value):
-        if value:
-            self.guide_up_shape.show()
-        else:
-            self.guide_up_shape.hide()
+        if self.exists():
+            if value:
+                self.guide_up_shape.show()
+            else:
+                self.guide_up_shape.hide()
 
     def updateName(self, has_duplicate_name):
         if self.exists():
