@@ -14,7 +14,7 @@ from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: igno
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 
 GUIDE_DEBUG = True
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties): 
 

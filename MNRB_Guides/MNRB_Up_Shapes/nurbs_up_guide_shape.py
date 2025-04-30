@@ -3,7 +3,7 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NurbsShereUpGuideShape(Serializable):
     def __init__(self, guide) -> None:

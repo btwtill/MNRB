@@ -7,7 +7,7 @@ from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, getC
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
 DRAGDROP_DEBUG = False
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def __init__(self, parent = None):

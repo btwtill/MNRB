@@ -4,7 +4,7 @@ from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: igno
 
 SELECTION_DEBUG = False
 EVENT_DEBUG = False
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
     def __init__(self, node, parent = None):

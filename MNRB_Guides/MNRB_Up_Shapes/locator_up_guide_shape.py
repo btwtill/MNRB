@@ -1,6 +1,6 @@
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class LocatorUpGuideShape():
     def __init__(self, guide) -> None:

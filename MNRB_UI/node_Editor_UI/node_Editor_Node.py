@@ -7,7 +7,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #ty
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 EVENT_DEBUG = False
 SERIALIZE_DEBUG = False
 REMOVE_DEBUG = False

@@ -2,7 +2,7 @@ from PySide2 import QtWidgets # type: ignore
 from PySide2.QtCore import Qt # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NodeEditor_QGraphicContent(QtWidgets.QWidget):
     def __init__(self, node, parent=None):

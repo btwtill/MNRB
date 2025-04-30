@@ -4,7 +4,7 @@ from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class NurbsShereOrientGuideShape(Serializable):
     def __init__(self, guide) -> None:

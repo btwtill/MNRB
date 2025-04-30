@@ -7,7 +7,7 @@ from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class mnrb_Editor(QtWidgets.QMainWindow):
     def __init__(self, parent = getMayaWindow()):

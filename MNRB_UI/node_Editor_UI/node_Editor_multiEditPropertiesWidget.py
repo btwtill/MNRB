@@ -1,6 +1,6 @@
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class MultiEdit_PropertyWidget(MNRB_NodeProperties):
     def __init__(self, graphic_nodes = [], parent = None):
