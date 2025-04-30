@@ -212,6 +212,11 @@ class NodeEditorScene(Serializable):
                 nodes.append(item)
         return nodes
 
+    def getNodeFromSceneByName(self, name):
+        for node in self.nodes:
+            if node.properties.component_name == name:
+                return node
+
     def getView(self):
         return self.grScene.views()[0]
 
