@@ -9,6 +9,7 @@ from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import Invali
 from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 DRAGDROP_DEBUG = False
 CONTEXT_DEBUG = False
@@ -186,15 +187,26 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             return
 
         node_names = []
+        # change the side prefix of the nodes
         for node in data["nodes"]:
-            node_title = node['title']
-            node_names.append(node_title)
+            node_component_name = node['properties']['component_name']
+            node_names.append(node_component_name)
+
+            # change the side prefix of each node
             if node['properties']['component_side_prefix'] == MNRB_Names.left.prefix:
                 node['properties']['component_side_prefix'] = MNRB_Names.right.prefix
             elif node['properties']['component_side_prefix'] == MNRB_Names.right.prefix:
                 node['properties']['component_side_prefix'] = MNRB_Names.left.prefix
 
+            for guide in node['guides']:
+                guide_pos = MC.getObjectWorldPositionMatrix(guide['orientation_shape']['name'])
+                print("node::", node_component_name, "::guide::", guide['orientation_shape']['name'], "::Original Position::", guide_pos)
+
         self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)
+
+        # Get new Nodes from the scene as Object References
+        for node_name in node_names:
+            self.central_widget.scene.getNodeFromSceneByName(node_name)
 
     def onDrop(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)

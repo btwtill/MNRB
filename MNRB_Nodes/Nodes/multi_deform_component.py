@@ -43,7 +43,6 @@ class MNRB_Node_MultiDeformComponent_Properties(MNRB_NodeProperties):
         
         self.layout.addLayout(deform_count_layout)
 
-
     def updateDeformCountSliderLabel(self, silent = False):
         self.last_deform_count = self.current_deform_count
         self.deform_count_slider_label.setText(self.deform_count_slider_label_text + str(self.deform_count_slider.value()))
