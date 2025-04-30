@@ -10,10 +10,11 @@ from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
 DRAGDROP_DEBUG = False
 CONTEXT_DEBUG = False
-CLASS_DEBUG = True
+CLASS_DEBUG = False
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self, ):
@@ -168,6 +169,20 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         if self.central_widget.scene.getSelectedNodes() == []:
             return False
 
+        nodes_have_build_Guides = []
+
+        for gr_node in self.central_widget.scene.getSelectedNodes():
+            if gr_node.node.guides ==[]:
+                nodes_have_build_Guides.append(False)
+            else:
+                evaluation_list = []
+                for guide in gr_node.node.guides:
+                    evaluation_list.append(guide.exists())
+                if False in evaluation_list:
+                    nodes_have_build_Guides.append(False)
+                else:
+                    nodes_have_build_Guides.append(True)
+                        
         # copy the selected nodes
         data = self.central_widget.scene.clipboard.serializeSceneToClipboard()
         str_data = json.dumps(data, indent=4)
@@ -186,28 +201,47 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
             print("Json does not contain any nodes!!")
             return
 
-        node_names = []
+        mirrored_guide_Positions = []
+        node_component_names = []
+
         # change the side prefix of the nodes
-        for node in data["nodes"]:
-            node_component_name = node['properties']['component_name']
-            node_names.append(node_component_name)
+        for index, node_data in enumerate(data["nodes"]):
+            node_component_name = node_data['properties']['component_name']
+            node_component_names.append(node_component_name)
+            node_old_side_prefix = node_data['properties']['component_side_prefix']
 
-            # change the side prefix of each node
-            if node['properties']['component_side_prefix'] == MNRB_Names.left.prefix:
-                node['properties']['component_side_prefix'] = MNRB_Names.right.prefix
-            elif node['properties']['component_side_prefix'] == MNRB_Names.right.prefix:
-                node['properties']['component_side_prefix'] = MNRB_Names.left.prefix
+            # change the side prefix of each node_data
+            if node_old_side_prefix == MNRB_Names.left.prefix:
+                node_data['properties']['component_side_prefix'] = MNRB_Names.right.prefix
+            elif node_old_side_prefix == MNRB_Names.right.prefix:
+                node_data['properties']['component_side_prefix'] = MNRB_Names.left.prefix
 
-            for guide in node['guides']:
-                guide_pos = MC.getObjectWorldPositionMatrix(guide['orientation_shape']['name'])
-                print("node::", node_component_name, "::guide::", guide['orientation_shape']['name'], "::Original Position::", guide_pos)
+            if nodes_have_build_Guides[index]:
+                mirrored_guides = []
+
+                for guide in node_data['guides']:
+                    current_guide_name = node_old_side_prefix + node_component_name + "_" + guide['name'] + MNRB_Names.guide_suffix
+                    guide_pos = MC.getObjectWorldPositionMatrix(current_guide_name)
+                    print("node_data::", node_component_name, "::guide::", guide['orientation_shape']['name'], "::Original Position::", guide_pos)
+
+                    # Logic to get the mirrored World Space Positions for each guide position
+                    mirrored_guides.append(Matrix_functions.mirrorFlatMatrixInX(guide_pos))
+
+                mirrored_guide_Positions.append(mirrored_guides)
 
         self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)
 
-        # Get new Nodes from the scene as Object References
-        for node_name in node_names:
-            self.central_widget.scene.getNodeFromSceneByName(node_name)
+        for index, node_component_name in enumerate(node_component_names):
+            if nodes_have_build_Guides[index]:
+                # Build the guides from each new node and set there positions to the new mirrored positions, if the guides where previously built
+                new_node = self.central_widget.scene.getNodeFromSceneByName(node_component_name + "1")
 
+                new_node.guideBuild()
+
+                for guide_index, guide in enumerate(new_node.guides):
+                    guide.setPosition(mirrored_guide_Positions[index][guide_index])
+
+            
     def onDrop(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
         if event.mimeData().hasFormat(NODELIST_MIMETYPE):

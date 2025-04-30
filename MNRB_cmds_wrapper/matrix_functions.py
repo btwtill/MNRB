@@ -35,6 +35,25 @@ class Matrix_functions():
         return [value for row in matrix_four_by_four for value in row]
     
     @staticmethod
+    def mirrorFlatMatrixInX(matrix) -> list:
+        mirrored = matrix[:]
+
+        # Flip X axis (orientation vector)
+        mirrored[0]  = -mirrored[0]   # r00
+        mirrored[4]  = -mirrored[4]   # r10
+        mirrored[8]  = -mirrored[8]   # r20
+
+        # Flip translation X
+        mirrored[12] = -mirrored[12]
+
+        # Fix handedness by flipping Z axis
+        mirrored[2]  = -mirrored[2]   # r02
+        mirrored[6]  = -mirrored[6]   # r12
+        mirrored[10] = -mirrored[10]  # r22 (preserves scale.z behaviorally)
+
+        return mirrored
+
+    @staticmethod
     def setMatrixParentNoOffset(child, parent):
         MC.connectAttribute(parent, "worldMatrix[0]", child, "offsetParentMatrix")
         identity_matrix = Matrix_functions.getIdentityMatrix()
