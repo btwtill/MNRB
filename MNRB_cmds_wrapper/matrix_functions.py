@@ -33,25 +33,41 @@ class Matrix_functions():
         matrix_four_by_four[2][:3] = Matrix_functions.normalize_row(matrix_four_by_four[2][:3])
 
         return [value for row in matrix_four_by_four for value in row]
-    
+
+    @staticmethod
+    def rotate_matrix_x_180(matrix):
+        rotated = matrix[:]
+
+        # Flip the Y and Z axes of the rotation
+        rotated[1]  = -matrix[1]   # r01
+        rotated[2]  = -matrix[2]   # r02
+        rotated[5]  = -matrix[5]   # r11
+        rotated[6]  = -matrix[6]   # r12
+        rotated[9]  = -matrix[9]   # r21
+        rotated[10] = -matrix[10]  # r22
+
+        return rotated
+
     @staticmethod
     def mirrorFlatMatrixInX(matrix) -> list:
         mirrored = matrix[:]
 
-        # Flip X axis (orientation vector)
-        mirrored[0]  = -mirrored[0]   # r00
-        mirrored[4]  = -mirrored[4]   # r10
-        mirrored[8]  = -mirrored[8]   # r20
-
         # Flip translation X
         mirrored[12] = -mirrored[12]
 
-        # Fix handedness by flipping Z axis
-        mirrored[2]  = -mirrored[2]   # r02
-        mirrored[6]  = -mirrored[6]   # r12
-        mirrored[10] = -mirrored[10]  # r22 (preserves scale.z behaviorally)
-
+        mirrored = Matrix_functions.rotate_matrix_x_180(mirrored)
         return mirrored
+
+    @staticmethod
+    def multiply_matrices_4x4(a, b):
+        # a and b are both flat 16-element row-major matrices
+        result = [0] * 16
+        for row in range(4):
+            for col in range(4):
+                result[row*4 + col] = sum(
+                    a[row*4 + k] * b[k*4 + col] for k in range(4)
+            )
+        return result
 
     @staticmethod
     def setMatrixParentNoOffset(child, parent):
