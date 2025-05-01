@@ -58,6 +58,10 @@ class deform(Serializable):
             MC.applyTransformRotate(self.name)
             MC.applyTransformScale(self.name)
 
+    def setSegmentScaleCompensate(self, value):
+        if self.exists():
+            MC.setAttribute(self.name, "segmentScaleCompensate", value)
+
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
