@@ -2,7 +2,8 @@ import os
 from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
 from PySide2.QtGui import QPixmap, QIcon, QDrag #type: ignore
-from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, getClassFromOperationCode#type: ignore
+from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, MNRB_NODE_GROUPS, getClassFromOperationCode#type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeListGroup import NodeEditorDragNodeListGroup #type: ignore
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
@@ -28,6 +29,11 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
         if CLASS_DEBUG: print("DRAGNODELIST:: --addDragListItems:: Registered Items::", MNRB_NODES)
 
+        node_groups = MNRB_NODE_GROUPS
+
+        for group_id in node_groups.keys():
+            self.addDragListGroupItem(node_groups[group_id])
+
         keys = list(MNRB_NODES.keys())
         for key in keys:
             node = getClassFromOperationCode(key)
@@ -46,6 +52,9 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
         item.setData(Qt.ItemDataRole.UserRole, icon_pixmap)
         item.setData(Qt.ItemDataRole.UserRole + 1, operation_code)
+
+    def addDragListGroupItem(self, group_name):
+        item = NodeEditorDragNodeListGroup(group_name, self)
 
     def startDrag(self, *args, **kwargs):
         if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: ")
