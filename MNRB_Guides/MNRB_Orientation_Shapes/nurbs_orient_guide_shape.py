@@ -73,6 +73,8 @@ class NurbsShereOrientGuideShape(Serializable):
         
         MC.setDisplayType(self.name, "reference")
 
+        MC.connectAttribute(self.guide.name, "worldMatrix[0]", self.auto_orient_input_node, "matrixIn[1]") # connect source to flip mmtx node
+
         self.setAutoOrient(self.guide.node.properties.autoOrientGuide)
 
         if self.guide.node.properties.displayGuideOrientation:

@@ -198,7 +198,7 @@ class Guide_Connector(Serializable):
         if CLASS_DEBUG: print("%s::Parent:: " % self.__class__.__name__, self.name, " ---> to:: ", self.guide.node.guide_visualization_hierarchy)
         MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
-        MC.connectAttribute(self.aim_orient_node, "outputMatrix", self.guide.guide_orientation_shape.auto_orient_input_node, "matrixIn[1]")
+        MC.connectAttribute(self.aim_orient_node, "outputMatrix", self.guide.guide_orientation_shape.auto_orient_input_node, "matrixIn[1]", force = True)
 
         if self.guide.guide_parent is not None:
             MC.connectAttribute(self.aim_orient_node, "outputMatrix", self.guide.guide_parent.guide_orientation_shape.auto_orient_input_node, "matrixIn[1]", force = True)

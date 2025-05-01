@@ -21,6 +21,7 @@ from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connecto
 CLASS_DEBUG = False
 VALIDATE_DEBUG = False
 GUIDE_DEBUG = False
+DESERIALIZE_DEBUG = False
 
 class MNRB_NodeProperties(NodeEditorNodeProperties):
     def __init__(self, node):
@@ -911,48 +912,58 @@ class MNRB_Node(NodeEditorNode):
             new_guide = guide(self, deserialized=True)
             new_guide.deserialize(guide_data, hashmap, restore_id)
 
-        print("%s:: --deserialize::Guide:: " % self.__class__.__name__,  "Looking trough Deserialized Guides: ")
+        if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__,  "Looking trough Deserialized Guides: ")
         for guide_object in self.guides:
-            print("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object)
+            if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object)
 
             if guide_object.id in hashmap.keys():
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object, " with id:", guide_object.id, " has Parent guide with ID:: ", hashmap[guide_object.id])
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Selecting Parent Guide::")
+                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object, " with id:", guide_object.id, " has Parent guide with ID:: ", hashmap[guide_object.id])
+                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Selecting Parent Guide::")
                 for item in self.guides:
                     if item.id == hashmap[guide_object.id]:
                         parent_guide = item
                         break
+                    else:
+                        parent_guide = None
 
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Parent Guide:: ", parent_guide)
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Getting Id of guide Connector Object::")
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Looking through Data::", data['guides'])
+                if DESERIALIZE_DEBUG: 
+                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Getting Id of guide Connector Object::")
+                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Looking through Data::", data['guides'])
 
                 for guide_data in data['guides']:
-                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data ID:: ", guide_data['id'])
-                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data::", guide_data)
-                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Parent ID:: ", hashmap[guide_object.id])
+                    if DESERIALIZE_DEBUG: 
+                        print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data ID:: ", guide_data['id'])
+                        print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data::", guide_data)
+                        print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Parent ID:: ", hashmap[guide_object.id])
                     if guide_data['id'] == guide_object.id:
                         connector_id = guide_data['connector_id']
-                        print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Match Found::Setting Connector ID To:: ", guide_data['connector_id'])
+                        if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Match Found::Setting Connector ID To:: ", guide_data['connector_id'])
                         break
+                    else:
+                        connector_id = None
 
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Connector ID:: ", connector_id)
+                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Connector ID:: ", connector_id)
 
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Looking for Connector Data::")
-                print("%s::deserialize::GuideConnecterDataList:: " % self.__class__.__name__, data['guide_connectors'])
+                if DESERIALIZE_DEBUG: 
+                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Looking for Connector Data::")
+                    print("%s::deserialize::GuideConnecterDataList:: " % self.__class__.__name__, data['guide_connectors'])
                 
                 for connector_data in data['guide_connectors']:
-                    print("connecter id::", connector_id)
-                    print("connector Data id:: ", connector_data['id'])
+                    if DESERIALIZE_DEBUG: 
+                        print("connecter id::", connector_id)
+                        print("connector Data id:: ", connector_data['id'])
                     if connector_data['id'] == connector_id:
                         deserialize_connector_data = connector_data
                         break
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Create and deserialize new Connector Object width Data::", deserialize_connector_data)
+                    else:
+                        deserialize_connector_data = None
+
+                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Create and deserialize new Connector Object width Data::", deserialize_connector_data)
                 
                 guide_object.parent_connector = Guide_Connector(parent_guide, guide_object)
                 guide_object.parent_connector.deserialize(deserialize_connector_data, hashmap, restore_id)
 
-                print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Parent Connector:: ", guide_object.parent_connector)
+                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Parent Connector:: ", guide_object.parent_connector)
                 guide_object.guide_parent = parent_guide
                 
         for deform_data  in data['deforms']:

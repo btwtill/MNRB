@@ -113,6 +113,7 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
             new_deform = deform(self, guide.guide_name)
             new_deform.setPosition(guide_pos)
+            new_deform.setSegmentScaleCompensate(False)
 
             if index > 0:
                 parent_deform = self.deforms[index - 1]
