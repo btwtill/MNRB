@@ -236,9 +236,12 @@ class guide(Serializable):
         self.guide_name = data['name']
  
         self.name = self.assembleFullName()
+        
+        if data['orientation_shape'] is not None:
+            self.guide_orientation_shape.deserialize(data['orientation_shape'], hashmap, restore_id)
 
-        self.guide_orientation_shape.deserialize(data['orientation_shape'], hashmap, restore_id)
-        self.guide_up_shape.deserialize(data['up_shape'], hashmap, restore_id)
+        if data['up_shape'] is not None:
+            self.guide_up_shape.deserialize(data['up_shape'], hashmap, restore_id)
 
         if data['guide_parent_id'] is not None:
             hashmap[self.id] = data['guide_parent_id']

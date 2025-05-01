@@ -605,7 +605,7 @@ class MNRB_Node(NodeEditorNode):
             if CLASS_DEBUG: print("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
             for guide in self.guides:
                 if guide.exists():
-                    self.guide_positions.append(guide.getPosition(reset_scale = False))
+                    self.guide_positions.append(guide.getPosition(reset_scale = True))
                 else:
                     self.guide_positions.append(IDENITY_MATRIX)
             
@@ -959,12 +959,13 @@ class MNRB_Node(NodeEditorNode):
                         deserialize_connector_data = None
 
                 if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Create and deserialize new Connector Object width Data::", deserialize_connector_data)
-                
-                guide_object.parent_connector = Guide_Connector(parent_guide, guide_object)
-                guide_object.parent_connector.deserialize(deserialize_connector_data, hashmap, restore_id)
 
-                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Parent Connector:: ", guide_object.parent_connector)
-                guide_object.guide_parent = parent_guide
+                if deserialize_connector_data is not None:
+                    guide_object.parent_connector = Guide_Connector(parent_guide, guide_object)
+                    guide_object.parent_connector.deserialize(deserialize_connector_data, hashmap, restore_id)
+
+                    if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Parent Connector:: ", guide_object.parent_connector)
+                    guide_object.guide_parent = parent_guide
                 
         for deform_data  in data['deforms']:
             new_deform = deform(self, deserialized = True)
