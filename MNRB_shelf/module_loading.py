@@ -90,6 +90,9 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.mnrb_nodeEditorTab as NodeEditorTab
     importlib.reload(NodeEditorTab)
 
+    import MNRB.MNRB_UI.mnrb_skinningEditorTab as SkinningEditorTab
+    importlib.reload(SkinningEditorTab)
+
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_multiEditPropertiesWidget as MNRBMultiEditWidget 
     importlib.reload(MNRBMultiEditWidget)
 
