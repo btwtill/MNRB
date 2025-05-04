@@ -240,8 +240,7 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
                 for guide_index, guide in enumerate(new_node.guides):
                     guide.setPosition(mirrored_guide_Positions[index][guide_index])
-
-            
+ 
     def onDrop(self, event):
         if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
         if event.mimeData().hasFormat(NODELIST_MIMETYPE):
@@ -284,5 +283,8 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
     def isModified(self):
         return self.central_widget.scene.isModified()
+
+    def getAllActiveComponents(self):
+        pass
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (self.__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

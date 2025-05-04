@@ -26,6 +26,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self._project_name = None
         self.mnrb_base_editor_path_name = "mnrb_editor"
         self.mnrb_base_editor_path = None
+        self.mnrb_skinning_editor_path_name = "mnrb_skinning_editor"
+        self.mnrb_skinning_editor_path = None
 
         self.display_overlay = True
 
@@ -41,6 +43,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.project_name = os.path.basename(self._project_path)
         
         self.mnrb_base_editor_path = os.path.join(self._project_path, self.mnrb_base_editor_path_name)
+        self.mnrb_skinning_editor_path = os.path.join(self._project_path, self.mnrb_skinning_editor_path_name)
 
     @property
     def project_name(self): return self._project_name
@@ -111,7 +114,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def setupSkinEditorTab(self):
         # Skining tab PlaceHolder Widget
-        self.skinningEditorTabWindow = mnrb_SkinningEditorTab()
+        self.skinningEditorTabWindow = mnrb_SkinningEditorTab(self.nodeEditorTabWindow)
 
         second_tab_container = QtWidgets.QWidget()
         second_tab_layout = QtWidgets.QVBoxLayout(second_tab_container)
@@ -332,6 +335,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
                 #creating The Projcet Hirarchy
                 os.mkdir(self.mnrb_base_editor_path)
+                os.mkdir(self.mnrb_skinning_editor_path)
 
                 if self.display_overlay:
                     self.setCentralWidget(self.tabs)
@@ -376,6 +380,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             print("MNRB_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
 
         self.getNodeEditorTab().onOpenFile(self.mnrb_base_editor_path)
+        self.getSkinningEditorTab().onOpenFile(self.mnrb_skinning_editor_path)
         self.statusBar().showMessage('Opened project from ' + self.project_path, 5000)
 
     def onSaveProject(self):
@@ -385,6 +390,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         if self.project_path is not None:
 
             self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph.json"))
+            self.getSkinningEditorTab().onSaveFile(os.path.join(self.mnrb_skinning_editor_path, self.project_name + "_graph.json"))
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
             return True
@@ -587,6 +593,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
 
+    def getSkinningEditorTab(self):
+        return self.tabs.widget(1).findChildren(QtWidgets.QWidget)[0]
+
     def getMainWindowWidgetsFromTab(self, tab_index):
         return self.tabs.widget(tab_index).findChildren(QtWidgets.QMainWindow)
 
@@ -659,7 +668,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def validateProjectDirectory(self, path):
         project_path_content = os.listdir(path)
-        feature_tab_directories = [self.mnrb_base_editor_path_name]
+        feature_tab_directories = [self.mnrb_base_editor_path_name, self.mnrb_skinning_editor_path_name]
 
         if CLASS_DEBUG:
             print("MNRB_EDITOR:: -validateProjectDirectory:: Project Path", self.project_path)
