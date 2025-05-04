@@ -1,5 +1,6 @@
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList import SkinningEditorDeformList #type: ignore
+from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar import SkinningEditorToolbar #type: ignore
 
 class mnrb_SkinningEditorTab(QWidget): 
     def __init__(self, node_editor, parent=None):
@@ -15,8 +16,8 @@ class mnrb_SkinningEditorTab(QWidget):
         self.layout.addWidget(self.deformer_list)
         
         self.cluster_layout = QVBoxLayout()
+        self.skincluster_editor_toolbar = SkinningEditorToolbar(self)
 
-        self.skincluster_editor_toolbar = QLabel("Toolbar for the Skin Clusters")
         self.skincluster_object_list = QLabel("List of all Skincluters")
 
         self.cluster_layout.addWidget(self.skincluster_editor_toolbar)

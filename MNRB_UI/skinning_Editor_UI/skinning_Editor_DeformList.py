@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QListWidget #type: ignore
+from PySide2.QtWidgets import QListWidget, QSizePolicy #type: ignore
 
 class SkinningEditorDeformList(QListWidget):
     def __init__(self, parent=None):
@@ -9,4 +9,6 @@ class SkinningEditorDeformList(QListWidget):
         self.initUI()
 
     def initUI(self):
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.setMaximumWidth(350)
         deformer_list = self.tab.getComponentDeformerList()
