@@ -1,7 +1,7 @@
 import os
 from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
-from PySide2.QtGui import QPixmap, QIcon, QDrag #type: ignore
+from PySide2.QtGui import QPixmap, QIcon, QDrag, QColor #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, MNRB_NODE_GROUPS, getClassFromOperationCode#type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeListGroup import NodeEditorDragNodeListGroup #type: ignore
 
@@ -33,12 +33,19 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
         for group_id in node_groups.keys():
             # add group item
-            group = self.addDragListGroupItem(node_groups[group_id][0], node_groups[group_id][1])
+            base_item = QtWidgets.QListWidgetItem(self)
+            group_widget = self.addDragListGroupItem(node_groups[group_id][0], node_groups[group_id][1])
+            group_widget.adjustSize()
+            base_item.setSizeHint(group_widget.sizeHint())
+            base_item.setBackground(QColor(50, 50, 50))
+
+            self.setItemWidget(base_item, group_widget)
+
             # add nodes associated with the group
             for node_id in node_groups[group_id][1]:
                 node = getClassFromOperationCode(node_id)
                 item = self.addDragListItem(node.operation_title, node.icon, node.operation_code)
-                group.addListItem(item)
+                group_widget.addListItem(item)
 
     def addDragListItem(self, name, icon=None, operation_code=0):
         item = QtWidgets.QListWidgetItem(name, self)
@@ -58,8 +65,6 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def addDragListGroupItem(self, group_name, node_ids):
         print("DRAGNODELIST:: --addDragListGroupItem:: GroupName:: ", group_name, " NodeIDs:: ", node_ids)
         item = NodeEditorDragNodeListGroup(group_name, node_ids, self)
-
-        item.setSizeHint(QSize(32,32))
 
         return item
 
