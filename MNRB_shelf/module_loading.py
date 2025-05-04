@@ -171,6 +171,12 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException
     importlib.reload(NodeEditorRegistrationException)
 
+    #Skining Editor
+    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList as SkinningEditorDeformList
+    importlib.reload(SkinningEditorDeformList)
+
+
+    #Shapes
     import MNRB.MNRB_Guides.MNRB_Guide_Shapes.locator_guide_shape as MNRBLocatorGuide
     importlib.reload(MNRBLocatorGuide)
 
