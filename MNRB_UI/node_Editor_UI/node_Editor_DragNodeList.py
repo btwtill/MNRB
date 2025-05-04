@@ -32,13 +32,13 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         node_groups = MNRB_NODE_GROUPS
 
         for group_id in node_groups.keys():
-            self.addDragListGroupItem(node_groups[group_id])
-
-        keys = list(MNRB_NODES.keys())
-        for key in keys:
-            node = getClassFromOperationCode(key)
-
-            self.addDragListItem(node.operation_title, node.icon, node.operation_code)
+            # add group item
+            group = self.addDragListGroupItem(node_groups[group_id][0], node_groups[group_id][1])
+            # add nodes associated with the group
+            for node_id in node_groups[group_id][1]:
+                node = getClassFromOperationCode(node_id)
+                item = self.addDragListItem(node.operation_title, node.icon, node.operation_code)
+                group.addListItem(item)
 
     def addDragListItem(self, name, icon=None, operation_code=0):
         item = QtWidgets.QListWidgetItem(name, self)
@@ -53,8 +53,15 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         item.setData(Qt.ItemDataRole.UserRole, icon_pixmap)
         item.setData(Qt.ItemDataRole.UserRole + 1, operation_code)
 
-    def addDragListGroupItem(self, group_name):
-        item = NodeEditorDragNodeListGroup(group_name, self)
+        return item
+
+    def addDragListGroupItem(self, group_name, node_ids):
+        print("DRAGNODELIST:: --addDragListGroupItem:: GroupName:: ", group_name, " NodeIDs:: ", node_ids)
+        item = NodeEditorDragNodeListGroup(group_name, node_ids, self)
+
+        item.setSizeHint(QSize(32,32))
+
+        return item
 
     def startDrag(self, *args, **kwargs):
         if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: ")
