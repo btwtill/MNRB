@@ -6,6 +6,7 @@ from PySide2.QtCore import Qt, QFile, QSettings, QPoint, QSize, QTimer #type:  i
 from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
+from MNRB.MNRB_UI.mnrb_skinningEditorTab import mnrb_SkinningEditorTab #type: ignore
 
 CLASS_DEBUG = False
 
@@ -80,6 +81,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.tabs = QtWidgets.QTabWidget()
 
         self.setupNodeEditorTab()
+        self.setupSkinEditorTab()
         self.setupControlEditorTab()
         self.setupStatusBar()
 
@@ -107,8 +109,21 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         # Add the first tab to the QTabWidget
         self.tabs.addTab(first_tab_container, "MNRB")
 
+    def setupSkinEditorTab(self):
+        # Skining tab PlaceHolder Widget
+        self.skinningEditorTabWindow = mnrb_SkinningEditorTab()
+
+        second_tab_container = QtWidgets.QWidget()
+        second_tab_layout = QtWidgets.QVBoxLayout(second_tab_container)
+        second_tab_container.is_tab_widget = True
+
+        second_tab_layout.addWidget(self.skinningEditorTabWindow)
+
+        # Add the second tab to the QTabWidget
+        self.tabs.addTab(second_tab_container, "Skin")
+
     def setupControlEditorTab(self):
-        # Second tab PlaceHolder Widget
+        # Third tab PlaceHolder Widget
         second_tab_widget = QtWidgets.QWidget()
         second_tab_layout = QtWidgets.QHBoxLayout(second_tab_widget)
 
