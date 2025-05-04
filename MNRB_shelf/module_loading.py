@@ -175,6 +175,8 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList as SkinningEditorDeformList
     importlib.reload(SkinningEditorDeformList)
 
+    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar as SkinningEditorToolbar
+    importlib.reload(SkinningEditorToolbar)
 
     #Shapes
     import MNRB.MNRB_Guides.MNRB_Guide_Shapes.locator_guide_shape as MNRBLocatorGuide
