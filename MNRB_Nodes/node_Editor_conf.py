@@ -7,7 +7,7 @@ OPERATIONCODE_SINGLEDEFORMCOMPONENT = 1
 OPERATIONCODE_MULTIDEFORMCOMPONENT = 2
 
 MNRB_NODE_GROUPS = {
-    '0' : 'Basic_Components'
+    '0' : ('Base_Components', [0, 1, 2])
 }
 
 MNRB_NODES = {
