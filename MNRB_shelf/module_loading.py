@@ -81,6 +81,9 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.mnrb_ui_utils as utils
     importlib.reload(utils)
 
+    import MNRB.MNRB_UI.UI_GraphicComponents.triangleWidget as TriangleWidget
+    importlib.reload(TriangleWidget)
+
     import MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector as MNRBGuideConnector
     importlib.reload(MNRBGuideConnector)
 
@@ -122,6 +125,9 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList as NodeEditorDragNodeList
     importlib.reload(NodeEditorDragNodeList)
+
+    import MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeListGroup as NodeEditorDragNodeListGroup
+    importlib.reload(NodeEditorDragNodeListGroup)
 
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget as NodeEditorPropertiesWidget
     importlib.reload(NodeEditorPropertiesWidget)
