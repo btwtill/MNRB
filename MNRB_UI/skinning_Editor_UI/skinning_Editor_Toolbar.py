@@ -1,5 +1,5 @@
 from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout, QPushButton # type: ignore
-from PySide2.QtCore import QSize # type: ignore
+from PySide2.QtCore import QSize, Qt # type: ignore
 
 class SkinningEditorToolbar(QWidget):
     def __init__(self, parent=None):
@@ -8,13 +8,11 @@ class SkinningEditorToolbar(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.setMaximumHeight(50)
 
         self.layout = QHBoxLayout(self)
+
         test_button = QPushButton("Add new SkinCluster")
-        test_button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        test_button.setMaximumWidth(200)
 
-        self.layout.addWidget(test_button)
-
-    def sizeHint(self):
-        return QSize(200, 50)
+        self.layout.addWidget(test_button, alignment=Qt.AlignLeft)
