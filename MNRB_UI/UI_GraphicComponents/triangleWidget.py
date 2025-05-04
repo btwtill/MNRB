@@ -7,6 +7,8 @@ class TriangleWidget(QWidget):
         super().__init__(parent)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
+        self.color = QColor('#2B2B2B')
+
         self.is_rotated = False
 
     def paintEvent(self, event):
@@ -28,7 +30,7 @@ class TriangleWidget(QWidget):
             ])
 
         # Set the brush and pen
-        painter.setBrush(QBrush(QColor('#2B2B2B')))
+        painter.setBrush(QBrush(self.color))
         painter.setPen(Qt.NoPen)
 
         # Draw the triangle
@@ -36,3 +38,6 @@ class TriangleWidget(QWidget):
 
     def rotate(self):
         self.is_rotated = not self.is_rotated
+
+    def setColor(self, color):
+        self.color = color
