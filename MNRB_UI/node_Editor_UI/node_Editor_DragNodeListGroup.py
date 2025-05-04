@@ -29,6 +29,8 @@ class NodeEditorDragNodeListGroup(QWidget):
 
         self.setLayout(self.layout)
 
+        self.triangle_widget.rotate()
+
     def addListItem(self, item):
         self.list_items.append(item)
 
