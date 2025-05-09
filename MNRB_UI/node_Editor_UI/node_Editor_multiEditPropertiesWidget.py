@@ -69,3 +69,8 @@ class MultiEdit_PropertyWidget(MNRB_NodeProperties):
         if not self.is_disabled:
             for node in self.nodes:
                 node.connectComponent()
+    
+    def updateComponentColor(self, index):
+        for node in self.nodes:
+            node.properties.component_color_dropdown.setCurrentIndex(index)
+            node.properties.updateComponentColor(index)
