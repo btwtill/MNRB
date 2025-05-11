@@ -5,6 +5,7 @@ from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar import SkinningEdit
 class mnrb_SkinningEditorTab(QWidget): 
     def __init__(self, node_editor, parent=None):
         super().__init__(parent)
+        self.is_tab_widget = True
 
         self.node_editor = node_editor
         self.initUI()
@@ -27,10 +28,15 @@ class mnrb_SkinningEditorTab(QWidget):
 
     def getComponentDeformerList(self):
         component_list = self.node_editor.getAllActiveComponents()
-        return True
+        return component_list
     
     def onOpenFile(self, file_Path):
         return True
     
     def onSaveFile(self, file_Path):
         return True
+    
+    def activate(self):
+        current_active_deformers = self.getComponentDeformerList()
+
+        print(current_active_deformers)

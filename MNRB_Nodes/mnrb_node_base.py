@@ -18,7 +18,7 @@ from MNRB.MNRB_Controls.control import control #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.seperator_widget import SeparatorWidget #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 VALIDATE_DEBUG = False
 GUIDE_DEBUG = False
 DESERIALIZE_DEBUG = False

@@ -3,7 +3,7 @@ from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
 from PySide2.QtGui import QPixmap, QIcon, QDrag, QColor #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, MNRB_NODE_GROUPS, getClassFromOperationCode#type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeListGroup import NodeEditorDragNodeListGroup #type: ignore
+from MNRB.MNRB_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
@@ -64,7 +64,7 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
     def addDragListGroupItem(self, group_name, node_ids):
         print("DRAGNODELIST:: --addDragListGroupItem:: GroupName:: ", group_name, " NodeIDs:: ", node_ids)
-        item = NodeEditorDragNodeListGroup(group_name, node_ids, self)
+        item = List_Group_Item(group_name, node_ids, self)
 
         return item
 

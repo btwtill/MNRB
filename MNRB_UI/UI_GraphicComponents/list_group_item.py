@@ -3,7 +3,7 @@ from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel #type: ignore
 from PySide2.QtGui import QColor, QIcon #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.triangleWidget import TriangleWidget #type: ignore
 
-class NodeEditorDragNodeListGroup(QWidget):
+class List_Group_Item(QWidget):
     def __init__(self, name, node_ids, parent = None):
         super().__init__(parent)
 

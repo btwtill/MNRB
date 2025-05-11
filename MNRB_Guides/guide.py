@@ -12,7 +12,7 @@ from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 
 class guideShapeType(Enum):
     locator = 1

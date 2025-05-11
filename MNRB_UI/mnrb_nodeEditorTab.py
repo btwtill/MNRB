@@ -17,8 +17,9 @@ CONTEXT_DEBUG = False
 CLASS_DEBUG = False
 
 class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
-    def __init__(self, ):
+    def __init__(self):
         super().__init__()
+
         self.is_tab_widget = True
 
         self.initUI()
@@ -285,6 +286,18 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
         return self.central_widget.scene.isModified()
 
     def getAllActiveComponents(self):
+        nodes = self.central_widget.scene.nodes
+        deformer_list = {}
+
+        for node in nodes:
+            deformer_names = []
+            for deform in node.deforms:
+                deformer_names.append(deform.name)
+            deformer_list[node.getComponentFullPrefix()] = deformer_names
+
+        return deformer_list
+
+    def activate(self):
         pass
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (self.__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
