@@ -74,3 +74,12 @@ class MultiEdit_PropertyWidget(MNRB_NodeProperties):
         for node in self.nodes:
             node.properties.component_color_dropdown.setCurrentIndex(index)
             node.properties.updateComponentColor(index)
+
+    def setExtendedRotationControlDisplay(self):
+        for node in self.nodes:
+            if node.properties.extended_rotation_control_checkbox.isChecked():
+                node.properties.extended_rotation_control_checkbox.setChecked(False)
+            else:
+                node.properties.extended_rotation_control_checkbox.setChecked(True)
+            node.properties.setExtendedRotationControlDisplay()
+            
