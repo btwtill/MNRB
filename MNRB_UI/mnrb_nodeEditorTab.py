@@ -11,17 +11,37 @@ from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ig
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 DRAGDROP_DEBUG = False
 CONTEXT_DEBUG = False
 CLASS_DEBUG = False
 
-class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
-    def __init__(self, ):
-        super().__init__()
+class mnrb_NodeEditorTab(QtWidgets.QMainWindow, Serializable):
+    def __init__(self):
+        QtWidgets.QMainWindow().__init__()
+        Serializable.__init__(self)
         self.is_tab_widget = True
+        self._deformers = {}
 
         self.initUI()
+
+    @property
+    def deformers(self):
+        """
+        Get the deformers.
+
+        :return: Deformers.
+        """
+        return self._deformers
+    @deformers.setter
+    def deformers(self, value):
+        """
+        Set the deformers.
+
+        :param value: Deformers.
+        """
+        self._deformers = value
 
     def initUI(self):
     
@@ -284,7 +304,7 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def isModified(self):
         return self.central_widget.scene.isModified()
 
-    def getAllActiveComponents(self):
-        pass
+    def setDeformers(self, deformer_dict):
+        self.deformers = deformer_dict
 
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (self.__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])
