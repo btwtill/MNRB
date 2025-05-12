@@ -129,8 +129,8 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList as NodeEditorDragNodeList
     importlib.reload(NodeEditorDragNodeList)
 
-    import MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeListGroup as NodeEditorDragNodeListGroup
-    importlib.reload(NodeEditorDragNodeListGroup)
+    import MNRB.MNRB_UI.UI_GraphicComponents.list_group_item as ListGroupItem
+    importlib.reload(ListGroupItem)
 
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget as NodeEditorPropertiesWidget
     importlib.reload(NodeEditorPropertiesWidget)

@@ -4,7 +4,7 @@ from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 
 class Guide_Connector(Serializable):
     def __init__(self, start_guide, end_guide):

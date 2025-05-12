@@ -99,9 +99,10 @@ class NodeEditorWidget(QtWidgets.QWidget):
             for item in selected_items:
                 if hasattr(item, 'node'): filtered_selection.append(item)
 
-            multi_edit_property_widget = MultiEdit_PropertyWidget(filtered_selection)
-            self.property_widget.setWidget(multi_edit_property_widget)
-            self.property_widget.setWindowTitle(multi_edit_property_widget.title)
+            if filtered_selection != []:
+                multi_edit_property_widget = MultiEdit_PropertyWidget(filtered_selection)
+                self.property_widget.setWidget(multi_edit_property_widget)
+                self.property_widget.setWindowTitle(multi_edit_property_widget.title)
 
     def contextMenuEvent(self, event):
         item  = self.scene.getItemAt(event.pos())

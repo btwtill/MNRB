@@ -8,7 +8,7 @@ from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
 from MNRB.MNRB_UI.mnrb_skinningEditorTab import mnrb_SkinningEditorTab #type: ignore
 
-CLASS_DEBUG = False
+CLASS_DEBUG = True
 
 class mnrb_Editor(QtWidgets.QMainWindow):
     def __init__(self, parent = getMayaWindow()):
@@ -97,6 +97,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.onOpenProject()
 
         self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
+
+        self.tabs.currentChanged.connect(self.updateCurrentTab)
 
     def setupNodeEditorTab(self):
         #Set Up the NodeEditor Tab Object
@@ -589,6 +591,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.setProjectMenuActions(True)
         else:
             self.setProjectMenuActions(False)
+    
+    def updateCurrentTab(self):
+        self.getCurrentTabWidget().activate()
 
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
