@@ -1,10 +1,13 @@
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList import SkinningEditorDeformList #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar import SkinningEditorToolbar #type: ignore
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
-class mnrb_SkinningEditorTab(QWidget): 
+class mnrb_SkinningEditorTab(QWidget, Serializable): 
     def __init__(self, node_editor, parent=None):
-        super().__init__(parent)
+        QWidget.__init__(self, parent)
+        Serializable.__init__(self)
+
         self.is_tab_widget = True
 
         self.node_editor = node_editor
@@ -27,7 +30,7 @@ class mnrb_SkinningEditorTab(QWidget):
         self.layout.addLayout(self.cluster_layout)
 
     def getComponentDeformerList(self):
-        component_list = self.node_editor.getAllActiveComponents()
+        component_list = self.node_editor.getAllActiveComponentsDeformers()
         return component_list
     
     def onOpenFile(self, file_Path):

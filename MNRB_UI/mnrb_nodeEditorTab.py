@@ -11,16 +11,14 @@ from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ig
 from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 DRAGDROP_DEBUG = False
 CONTEXT_DEBUG = False
 CLASS_DEBUG = False
 
-class mnrb_NodeEditorTab(QtWidgets.QMainWindow, Serializable):
+class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self):
-        QtWidgets.QMainWindow().__init__()
-        Serializable.__init__(self)
+        super().__init__()
         self.is_tab_widget = True
         self._deformers = {}
 
@@ -304,7 +302,7 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow, Serializable):
     def isModified(self):
         return self.central_widget.scene.isModified()
 
-    def getAllActiveComponents(self):
+    def getAllActiveComponentsDeformers(self):
         nodes = self.central_widget.scene.nodes
         deformer_list = {}
 
