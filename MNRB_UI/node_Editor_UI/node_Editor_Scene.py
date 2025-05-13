@@ -71,15 +71,6 @@ class NodeEditorScene(Serializable):
         self._has_been_modified = value
         for callback in self._scene_changed_listeners: callback()
 
-    @property
-    def deformer_dict(self):
-        return self._deformer_dict
-    @deformer_dict.setter
-    def deformer_dict(self, value):
-        self._deformer_dict = value
-
-        for callback in self._build_has_been_triggered_listeners: callback()
-        
     def initUI(self):
         self.grScene_width = 64000
         self.grScene_height = 64000
@@ -245,20 +236,16 @@ class NodeEditorScene(Serializable):
     def getSceneRigName(self):
         return self.properties.getRigName()
 
-    def getAllActiveComponentsDeformers(self):
-        nodes = self.central_widget.scene.nodes
+    def getDeformerDict(self):
         deformer_list = {}
 
-        for node in nodes:
+        for node in self.nodes:
             deformer_names = []
             for deform in node.deforms:
                 deformer_names.append(deform.name)
             deformer_list[node.getComponentFullPrefix()] = deformer_names
 
         return deformer_list
-
-    def getDeformerDict(self):
-        return "self.deformer_dict"
 
     def setModified(self, state):
         self.has_been_modified = state
@@ -281,7 +268,7 @@ class NodeEditorScene(Serializable):
         for node in self.nodes:
             if not node.properties.is_disabled:
                 node.componentBuild()
-        self.deformer_dict = self.getAllActiveComponentsDeformers()
+        for callback in self._build_has_been_triggered_listeners: callback()
 
     def displayErrorMessage(self, message):
         self.getView().displayErrorMessage(message)

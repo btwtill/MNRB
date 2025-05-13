@@ -11,4 +11,4 @@ class SkinningEditorDeformList(QListWidget):
     def initUI(self):
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.setMaximumWidth(350)
-        deformer_list = self.tab.getComponentDeformerList()
+        deformer_list = self.tab.getComponentDeformerDict()
