@@ -9,9 +9,27 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
         Serializable.__init__(self)
 
         self.is_tab_widget = True
+        self._deformer_list = None
 
         self.node_editor = node_editor
         self.initUI()
+
+    @property
+    def deformer_list(self):
+        """
+        Get the deformer list.
+
+        :return: Deformer list.
+        """
+        return self._deformer_list
+    @deformer_list.setter
+    def deformer_list(self, value):
+        """
+        Set the deformer list.
+
+        :param value: Deformer list.
+        """
+        self._deformer_list = value
 
     def initUI(self):
         self.layout = QHBoxLayout(self)
@@ -28,10 +46,6 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
         self.cluster_layout.addWidget(self.skincluster_object_list)
 
         self.layout.addLayout(self.cluster_layout)
-
-    def getComponentDeformerList(self):
-        component_list = self.node_editor.getAllActiveComponentsDeformers()
-        return component_list
     
     def onOpenFile(self, file_Path):
         return True
@@ -39,6 +53,12 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
     def onSaveFile(self, file_Path):
         return True
     
+    def setComponentDeformerList(self):
+        self.deformer_list = "Test"
+
+    def getComponentDeformerList(self):
+        return self.deformer_list
+
     def activate(self):
         current_active_deformers = self.getComponentDeformerList()
 

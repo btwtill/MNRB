@@ -302,17 +302,8 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
     def isModified(self):
         return self.central_widget.scene.isModified()
 
-    def getAllActiveComponentsDeformers(self):
-        nodes = self.central_widget.scene.nodes
-        deformer_list = {}
-
-        for node in nodes:
-            deformer_names = []
-            for deform in node.deforms:
-                deformer_names.append(deform.name)
-            deformer_list[node.getComponentFullPrefix()] = deformer_names
-
-        return deformer_list
+    def getDeformerDict(self):
+        return self.central_widget.scene.getDeformerDict()
 
     def activate(self):
         pass

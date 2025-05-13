@@ -97,7 +97,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.onOpenProject()
 
         self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
-
+        self.getNodeEditorTab().central_widget.scene.connectBuildHasBeenTriggeredListenerCallback(self.getSkinningEditorTab().setComponentDeformerList)
         self.tabs.currentChanged.connect(self.updateCurrentTab)
 
     def setupNodeEditorTab(self):
