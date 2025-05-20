@@ -228,7 +228,10 @@ class NodeEditorScene(Serializable):
         return self.grScene.views()[0]
 
     def getNodeClassFromData(self, node_data):
-        return self.nodeClassSelectorFunction(node_data)
+        if self.nodeClassSelectorFunction is not None:
+            return self.nodeClassSelectorFunction(node_data)
+        else:
+            raise ValueError("nodeClassSelectorFunction is not set.")
 
     def getEdgeClass(self):
         return NodeEditorEdge
