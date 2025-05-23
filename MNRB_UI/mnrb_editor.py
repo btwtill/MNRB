@@ -386,7 +386,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.getNodeEditorTab().onOpenFile(self.mnrb_base_editor_path)
         self.getSkinningEditorTab().onOpenFile(self.mnrb_skinning_editor_path)
-        self.statusBar().showMessage('Opened project from ' + self.project_path, 5000)
+        self.statusBar().showMessage('Opened project from ' + str(self.project_path), 5000)
 
     def onSaveProject(self):
         if CLASS_DEBUG: print("MNRB_EDITOR:: --onSaveProject:: Start Saving Project")

@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import json
+import json, os
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList import SkinningEditorDeformList #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar import SkinningEditorToolbar #type: ignore
@@ -51,17 +51,17 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
         self.layout.addLayout(self.cluster_layout)
     
     def loadFileFromPath(self, file_Path):
-        try:
-            with open(file_Path, "r") as file:
-                    raw_data = file.read()
-                    data = json.loads(raw_data)
-                    self.deserialize(data)
+        if os.path.isdir(file_Path):
+            graph_items = os.listdir(file_Path)
 
-        except Exception as e:
-            print(f"Error loading file: {e}")
-            return False
-        return True
-
+            #check if there is a graph in the current project directory if not create a new one
+            if len(graph_items) >= 1:
+                self.loadFile(os.path.join(file_Path, graph_items[0]))
+            else:
+                self.onNewFile()
+        elif os.path.isfile(file_Path):
+            self.loadFile(file_Path)
+            
     def saveFileToPath(self, file_name):
         with open(file_name, "w") as file:
             file.write(json.dumps(self.serialize(), indent=4))
@@ -72,6 +72,25 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
     
     def onSaveFile(self, file_name):
         self.saveFileToPath(file_name)
+        return True
+
+    def onNewFile(self):
+        fake_data = OrderedDict([
+            ('id', 0),
+            ('deformer_dict', {})
+        ])
+        self.deserialize(fake_data, restore_id=False)
+
+    def loadFile(self, file_Path):
+        try:
+            with open(file_Path, "r") as file:
+                        raw_data = file.read()
+                        data = json.loads(raw_data)
+                        self.deserialize(data)
+
+        except Exception as e:
+                print(f"Error loading file: {e}")
+                return False
         return True
 
     def setComponentDeformerDict(self, value):
@@ -93,12 +112,12 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
     def serialize(self):
         serialized_data = OrderedDict([
             ('id', self.id),
-            ('deformer_dict', self.deformer_dict.serialize() if self.deformer_dict else None)
+            ('deformer_dict', self.deformer_dict)
         ])
         return serialized_data
     
     def deserialize(self, data, hashmap={}, restore_id = True):
         if restore_id: self.id = data['id']
-
+        print("SkinningEditorTab: Deserializing data: data['deformer_dict']")
         if 'deformer_dict' in data:
             self.setComponentDeformerDict(data['deformer_dict'])
