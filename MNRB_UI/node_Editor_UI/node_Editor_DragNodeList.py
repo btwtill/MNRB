@@ -2,7 +2,7 @@ import os
 from PySide2 import QtWidgets #type: ignore
 from PySide2.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
 from PySide2.QtGui import QPixmap, QIcon, QDrag, QColor #type: ignore
-from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, MNRB_NODE_GROUPS, getClassFromOperationCode#type: ignore
+from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE, MNRB_NODES, MNRB_NODE_GROUPS, getClassFromOperationCode #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")

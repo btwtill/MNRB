@@ -4,10 +4,10 @@ from PySide2.QtGui import QColor, QIcon #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.triangleWidget import TriangleWidget #type: ignore
 
 class List_Group_Item(QWidget):
-    def __init__(self, name, node_ids, parent = None):
+    def __init__(self, name, item_ids, parent = None):
         super().__init__(parent)
 
-        self.node_ids = node_ids
+        self.item_ids = item_ids
         self.name = name
         self.list_items = []
 

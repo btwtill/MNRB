@@ -11,7 +11,7 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
         Serializable.__init__(self)
 
         self.is_tab_widget = True
-        self._deformer_dict = None
+        self._deformer_dict = {}
 
         self.node_editor = node_editor
         self.initUI()
@@ -23,20 +23,13 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
     def deformer_dict(self, value):
         self._deformer_dict = value
 
-        print("SkinningEditorTab: Deformer Dictionary: ")
-        print(self._deformer_dict)
-
         if not isinstance(self._deformer_dict, dict):
-            print("Warning: _deformer_dict is not a dictionary.")
             self._deformer_dict = {}
             return
-        else:
-            for key, value in self._deformer_dict.items():
-                print(f"Key: {key}, Value: {value}")
 
     def initUI(self):
         self.layout = QHBoxLayout(self)
-        self.deformer_list = SkinningEditorDeformList(self)
+        self.deformer_list = SkinningEditorDeformList(self.deformer_dict, self)
 
         self.layout.addWidget(self.deformer_list)
         
@@ -105,6 +98,7 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
     def update_deformer_dict(self):
         new_dictionary = self.node_editor.getDeformerDict()
         self.setComponentDeformerDict(new_dictionary)
+        self.deformer_list.updateDeformerList(new_dictionary)
 
     def activate(self):
         self.update_deformer_dict()
