@@ -336,9 +336,11 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 self.project_path = os.path.join(self.mnrb_path, name)
                 os.mkdir(self.project_path)
 
-                #creating The Projcet Hirarchy
-                os.mkdir(self.mnrb_base_editor_path)
-                os.mkdir(self.mnrb_skinning_editor_path)
+                #creating The Project Hirarchy
+                if self.mnrb_base_editor_path:
+                    os.mkdir(self.mnrb_base_editor_path)
+                if self.mnrb_skinning_editor_path:
+                    os.mkdir(self.mnrb_skinning_editor_path)
 
                 if self.display_overlay:
                     self.setCentralWidget(self.tabs)
@@ -394,6 +396,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
             self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph.json"))
             self.getSkinningEditorTab().onSaveFile(os.path.join(self.mnrb_skinning_editor_path, self.project_name + "_graph.json"))
+
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
             return True

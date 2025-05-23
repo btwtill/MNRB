@@ -28,6 +28,7 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
 
         if not isinstance(self._deformer_dict, dict):
             print("Warning: _deformer_dict is not a dictionary.")
+            self._deformer_dict = {}
             return
         else:
             for key, value in self._deformer_dict.items():
@@ -35,9 +36,9 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
 
     def initUI(self):
         self.layout = QHBoxLayout(self)
-        self.deformer_dict = SkinningEditorDeformList(self)
+        self.deformer_list = SkinningEditorDeformList(self)
 
-        self.layout.addWidget(self.deformer_dict)
+        self.layout.addWidget(self.deformer_list)
         
         self.cluster_layout = QVBoxLayout()
         self.skincluster_editor_toolbar = SkinningEditorToolbar(self)
@@ -50,12 +51,18 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
         self.layout.addLayout(self.cluster_layout)
     
     def loadFileFromPath(self, file_Path):
-        with open(file_Path, "r") as file:
-                raw_data = file.read()
-                data = json.loads(raw_data)
-                self.deserialize(data)
+        try:
+            with open(file_Path, "r") as file:
+                    raw_data = file.read()
+                    data = json.loads(raw_data)
+                    self.deserialize(data)
 
-    def saveFileToPath(self, file_name, file_Path):
+        except Exception as e:
+            print(f"Error loading file: {e}")
+            return False
+        return True
+
+    def saveFileToPath(self, file_name):
         with open(file_name, "w") as file:
             file.write(json.dumps(self.serialize(), indent=4))
 
@@ -63,8 +70,8 @@ class mnrb_SkinningEditorTab(QWidget, Serializable):
         self.loadFileFromPath(file_Path)
         return True
     
-    def onSaveFile(self, file_name, file_Path):
-        self.saveFileToPath(file_name, file_Path)
+    def onSaveFile(self, file_name):
+        self.saveFileToPath(file_name)
         return True
 
     def setComponentDeformerDict(self, value):
