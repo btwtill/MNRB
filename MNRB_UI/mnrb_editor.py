@@ -79,7 +79,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.createEditorActions()
         self.setupMenuBar()
-        
+
     def initTabs(self):
         self.tabs = QtWidgets.QTabWidget()
 
@@ -394,8 +394,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         if self.project_path is not None:
 
-            self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph.json"))
-            self.getSkinningEditorTab().onSaveFile(os.path.join(self.mnrb_skinning_editor_path, self.project_name + "_graph.json"))
+            self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph.json")) # type: ignore
+            self.getSkinningEditorTab().onSaveFile(os.path.join(self.mnrb_skinning_editor_path, self.project_name + "_graph.json")) # type: ignore
 
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
@@ -415,7 +415,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 #create new Project Directory at ___Path
                 
                 #save all feature tabs to there new location
-                self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph"))
+                self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph")) # type: ignore
 
                 self.statusBar().showMessage(' Saved Project As to ' + self.project_path, 5000)
                 self.setTitleText()
@@ -581,12 +581,13 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                 except Exception as e:
                     print(e)
 
-                self.action_edit_cut.setEnabled(current_tab.canCut())
-                self.action_edit_copy.setEnabled(current_tab.canCopy())
-                self.action_delete.setEnabled(current_tab.canDelete())
-                self.action_undo.setEnabled(current_tab.canUndo())
-                self.action_redo.setEnabled(current_tab.canRedo())
-                self.action_mirror_Node.setEnabled(current_tab.canMirrorNode())
+                if current_tab != None:
+                    self.action_edit_cut.setEnabled(current_tab.canCut())
+                    self.action_edit_copy.setEnabled(current_tab.canCopy())
+                    self.action_delete.setEnabled(current_tab.canDelete())
+                    self.action_undo.setEnabled(current_tab.canUndo())
+                    self.action_redo.setEnabled(current_tab.canRedo())
+                    self.action_mirror_Node.setEnabled(current_tab.canMirrorNode())
         else:
             self.setEditMenuActions(False)
 
@@ -597,7 +598,10 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             self.setProjectMenuActions(False)
     
     def updateCurrentTab(self):
-        self.getCurrentTabWidget().activate()
+        currentTab = self.getCurrentTabWidget()
+
+        if currentTab != None:
+            currentTab.activate()
 
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
