@@ -84,7 +84,7 @@ class MNRB_Node_MultiDeformComponent(MNRB_NodeTemplate):
 
 
     def guideBuild(self):
-        if not super().guideBuild():
+        if not super().guideBuild(): # Check if the basic guide Strucutre is successfully build and only then continue
             return False
         
         if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)

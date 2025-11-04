@@ -5,6 +5,8 @@ from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_SIMPLEIKCOMPONENT, re
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
+from MNRB.MNRB_Guides.guide import guide #type: ignore
+from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 class MNRB_Node_SimpleIKComponent_Properties(MNRB_NodeProperties): 
 
@@ -44,3 +46,41 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
                 color=MNRBColor.yellow):
 
         super().__init__(scene, inputs, outputs, color)  # Initilize 
+
+    def guideBuild(self):
+        '''
+        Build all guide object of this component
+        '''
+
+        if not super().guideBuild():    # Check if the basic guide Strucutre is successfully build and only then continue
+            return False
+        
+        # Create Base Guide
+        baseGuide = guide(self, "base")
+
+        MC.parentObject(baseGuide.name, self.guide_component_hierarchy) # Parent baseGuide to guide hierarchy
+
+        # Create Pole Guide
+        poleGuide = guide(self, "pole", baseGuide)
+
+        MC.parentObject(poleGuide.name, baseGuide.name)
+        MC.clearTransforms(poleGuide.name)
+        MC.addTranslation(poleGuide.name, 0.5, 0.0, 0.0)
+
+        # Create End Guide
+        endGuide = guide(self, "end", poleGuide)
+        
+        MC.parentObject(endGuide.name, poleGuide.name)
+        MC.clearTransforms(endGuide.name)
+        MC.addTranslation(endGuide.name, 0.5, 0.0, 0.0)
+
+        self.reconstructGuides() # Reposition and construct guides that have been lost but user wants to restore
+    
+    def staticBuild(self):
+        return super().staticBuild()
+
+    def componentBuild(self):
+        return super().componentBuild()
+
+    def connectComponent(self):
+        return super().connectComponent()
