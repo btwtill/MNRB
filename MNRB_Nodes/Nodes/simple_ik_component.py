@@ -6,7 +6,10 @@ from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
+from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+
+GUIDE_DEBUG = True
 
 class MNRB_Node_SimpleIKComponent_Properties(MNRB_NodeProperties): 
 
@@ -50,10 +53,15 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
     def guideBuild(self):
         '''
         Build all guide object of this component
+            * Base Guide - start of the IK chain
+            * Pole Guide - Pole target of the IK chain
+            * End Guide - End of the IK Chain
         '''
 
         if not super().guideBuild():    # Check if the basic guide Strucutre is successfully build and only then continue
             return False
+        
+        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
         
         # Create Base Guide
         baseGuide = guide(self, "base")
@@ -75,9 +83,32 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
         MC.addTranslation(endGuide.name, 0.5, 0.0, 0.0)
 
         self.reconstructGuides() # Reposition and construct guides that have been lost but user wants to restore
+
+        return True
     
-    def staticBuild(self):
-        return super().staticBuild()
+    def staticBuild(self) -> bool:
+        '''
+        Build the Static deform objects of this component without connection to any input or output object
+        '''
+        if not super().staticBuild():   # Check if the basic structure of the static build exists and only then continue building
+            return False
+        
+        if GUIDE_DEBUG: print("%s:: Building Static :: " % self.__class__.__name__, self)
+
+        for index, guide in enumerate(self.guides):
+            guide_pos = guide.getPosition()
+
+            new_deform = deform(self, guide.guide_name)     # Create new deformation joint
+            new_deform.setPosition(guide_pos)               # Set new deformation joint position
+            new_deform.setSegmentScaleCompensate(False)     # Disable segment scale
+
+            if index > 0:                                   # If there is more then one guide parent each new one to the previous one
+                parent_deform = self.deforms[index - 1]
+                MC.parentObject(new_deform.name, parent_deform.name)
+            else:
+                MC.parentObject(new_deform.name, self.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name)
+
+        return True
 
     def componentBuild(self):
         return super().componentBuild()
