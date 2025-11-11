@@ -1,3 +1,4 @@
+import math
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node #type: ignore
 from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
@@ -8,8 +9,12 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #typ
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
+from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_Controls.control import control #type: ignore
+from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
 GUIDE_DEBUG = True
+CLASS_DEBUG = True
 
 class MNRB_Node_SimpleIKComponent_Properties(MNRB_NodeProperties): 
 
@@ -29,11 +34,11 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
 
     def __init__(self, scene,
                 inputs = [
-                    ["base_parent", SocketTypes.srt, False],
-                    ["base_parent", SocketTypes.deform, False],
-                    ["base_space", SocketTypes.space, True],
-                    ["pole_space", SocketTypes.space, True],
-                    ["end_space", SocketTypes.space, True],
+                    ["base", SocketTypes.srt, False],
+                    ["base", SocketTypes.deform, False],
+                    ["base", SocketTypes.space, True],
+                    ["pole", SocketTypes.space, True],
+                    ["end", SocketTypes.space, True],
 
                     ], 
                 outputs=[
@@ -111,7 +116,189 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
         return True
 
     def componentBuild(self):
-        return super().componentBuild()
+        '''
+        Build function creating all internal logic for the component, controls and kinematics
+        '''
+        if not super().componentBuild():  # If base component build setup is not working return false otherwise continue component build
+            return False
+        
+        if CLASS_DEBUG: print("%s:: Building Component :: " % self.__class__.__name__, self)
+
+        # Get component guide positions
+
+        base_guide_position = self.guides[0].getPosition()          # Base guide transform Matrix
+        pole_guide_position = self.guides[1].getPosition()          # Pole guide transform Matrix
+        end_guide_position = self.guides[2].getPosition()           # End guide transform Matrix
+
+        # Create Main Inputs
+        # Base Input
+        self.base_input = MC.createTransform(self.getComponentFullPrefix() + "base" + MNRB_Names.input_suffix)
+        MC.parentObject(self.base_input, self.input_hierarchy)
+        MC.setObjectWorldPositionMatrix(self.base_input, base_guide_position)
+        MC.applyTransformScale(self.base_input)
+
+        # Pole Input
+        self.pole_input = MC.createTransform(self.getComponentFullPrefix() + "pole" + MNRB_Names.input_suffix)
+        MC.parentObject(self.pole_input, self.input_hierarchy)
+        MC.setObjectWorldPositionMatrix(self.pole_input, pole_guide_position)
+        MC.applyTransformScale(self.pole_input)
+
+        # End Input
+        self.end_input = MC.createTransform(self.getComponentFullPrefix() + "end" + MNRB_Names.input_suffix)
+        MC.parentObject(self.end_input, self.input_hierarchy)
+        MC.setObjectWorldPositionMatrix(self.end_input, end_guide_position)
+        MC.applyTransformScale(self.end_input)
+
+        # Create Controls
+        # IK Base (start) Control
+        base_control = control(self, "base")
+        Matrix_functions.setMatrixParentNoOffset(base_control.name, self.base_input)
+        MC.parentObject(base_control.name, self.control_hierarchy)
+
+        pole_control_position = self.calculate_pole_vector_position(base_guide_position, pole_guide_position, end_guide_position, 5)
+
+        # IK Pole (polevector) control
+        pole_control = control(self, "pole")
+        MC.setTranslation(pole_control.name, *pole_control_position)
+        MC.parentObject(pole_control.name, self.control_hierarchy)
+        Matrix_functions.moveSRTToParentMatrixOffset(pole_control.name)         # Move translation values to parentOffsetMatrix
+        MC.clearTransforms(pole_control.name)
+
+        # IK end control
+        end_control = control(self, "end")
+        Matrix_functions.setMatrixParentNoOffset(end_control.name, self.end_input)
+        MC.parentObject(end_control.name, self.control_hierarchy)
+
+        # Create IK Joint Chain
+        # Create IK Hierarchy
+
+        ik_system_hierarchy = MC.createTransform("ik_system")
+        MC.parentObject(ik_system_hierarchy, self.system_hierarchy)
+
+        # Create Base Ik Joint
+        base_ik_joint = MC.createJoint(self.getComponentFullPrefix() + "base_forward_ik")
+        MC.parentObject(base_ik_joint, ik_system_hierarchy)
+ 
+        MC.setObjectWorldPositionMatrix(base_ik_joint, base_guide_position)     # Set joint position
+        MC.applyTransformRotate(base_ik_joint)                                  # Zero out Rotation 
+        MC.applyTransformScale(base_ik_joint)                                   # Unify scale to 111
+
+        # Create pole Ik Joint
+        pole_ik_joint = MC.createJoint(self.getComponentFullPrefix() + "pole_forward_ik")
+        MC.parentObject(pole_ik_joint, base_ik_joint)
+
+        MC.setObjectWorldPositionMatrix(pole_ik_joint, pole_guide_position)     # Set joint position
+        MC.applyTransformRotate(pole_ik_joint)                                  # Zero out Rotation 
+        MC.applyTransformScale(pole_ik_joint)                                   # Unify scale to 111
+
+        # Create end Ik Joint
+        end_ik_joint = MC.createJoint(self.getComponentFullPrefix() + "end_forward_ik")
+        MC.parentObject(end_ik_joint, pole_ik_joint)
+
+        MC.setObjectWorldPositionMatrix(end_ik_joint, end_guide_position)      # Set joint position
+        MC.applyTransformRotate(end_ik_joint)                                  # Zero out Rotation 
+        MC.applyTransformScale(end_ik_joint)                                   # Unify scale to 111
+
+        # Create Outputs
+        # Create IK Base (start) outputs
+        base_output = MC.createTransform(self.getComponentFullPrefix() + "base" + MNRB_Names.output_suffix)
+        Matrix_functions.decomposeTransformWorldMatrixTo(base_ik_joint, base_output)
+        MC.parentObject(base_output, self.output_hierarchy)
+
+        # Create IK Pole output
+        pole_output = MC.createTransform(self.getComponentFullPrefix() + "pole" + MNRB_Names.output_suffix)
+        Matrix_functions.decomposeTransformWorldMatrixTo(pole_ik_joint, pole_output)
+        MC.parentObject(pole_output, self.output_hierarchy)
+
+        # Create IK end output
+        end_output = MC.createTransform(self.getComponentFullPrefix() + "end" + MNRB_Names.output_suffix)
+        Matrix_functions.decomposeTransformWorldMatrixTo(end_ik_joint, end_output)
+        MC.parentObject(end_output, self.output_hierarchy)
+
+        # IK Creation
+        ik_objects = MC.createRotatePlaneIkSolver(
+            self.getComponentFullPrefix(),
+            [base_ik_joint, pole_ik_joint, end_ik_joint])                       # Create IK
+        
+        # Create Pole Vector
+        MC.createPoleVectorConstraint(
+            pole_control.name,
+            ik_objects[0],
+            self.getComponentFullPrefix() + "simple_rps_poleVectorConstraint")
+    
+        # Constraint Base and end
+        Ik_end_anchor = MC.createTransform(end_control.name + "_ik_anchor")
+        MC.parentObject(Ik_end_anchor, ik_system_hierarchy)
+        Matrix_functions.setMatrixParentNoOffset(Ik_end_anchor, end_control.name)
+
+        MC.parentObject(ik_objects[0], Ik_end_anchor)
+
+        Matrix_functions.setMatrixParentNoOffset(base_ik_joint, base_control.name)
+        MC.createOrientConstraint(end_control.name, end_ik_joint)
+
+        return True
 
     def connectComponent(self):
         return super().connectComponent()
+
+    def calculate_pole_vector_position(self, start_matrix, mid_matrix, end_matrix, multiplier=1.0):
+        """
+        Calculate pole vector position for a 3-joint IK chain.
+        
+        Args:
+            start_pos: tuple/list (x, y, z) - start joint position
+            mid_pos: tuple/list (x, y, z) - middle joint position
+            end_pos: tuple/list (x, y, z) - end joint position
+            multiplier: float - distance multiplier to push pole vector out
+        
+        Returns:
+            tuple: (x, y, z) pole vector position
+        """
+        start_pos = [start_matrix[12], start_matrix[13], start_matrix[14]]
+        mid_pos = [mid_matrix[12], mid_matrix[13], mid_matrix[14]]
+        end_pos = [end_matrix[12], end_matrix[13], end_matrix[14]]
+        
+        # Find the midpoint between start and end
+        chain_mid = [
+            (start_pos[0] + end_pos[0]) / 2.0,
+            (start_pos[1] + end_pos[1]) / 2.0,
+            (start_pos[2] + end_pos[2]) / 2.0
+        ]
+        
+        # Vector from chain midpoint to the actual middle joint
+        pole_direction = [
+            mid_pos[0] - chain_mid[0],
+            mid_pos[1] - chain_mid[1],
+            mid_pos[2] - chain_mid[2]
+        ]
+        
+        # Calculate magnitude (length) of the vector
+        magnitude = math.sqrt(
+            pole_direction[0]**2 + 
+            pole_direction[1]**2 + 
+            pole_direction[2]**2
+        )
+        
+        # Normalize the vector (make it unit length)
+        if magnitude > 0:
+            pole_direction = [
+                pole_direction[0] / magnitude,
+                pole_direction[1] / magnitude,
+                pole_direction[2] / magnitude
+            ]
+        
+        # Scale by multiplier
+        pole_direction = [
+            pole_direction[0] * multiplier,
+            pole_direction[1] * multiplier,
+            pole_direction[2] * multiplier
+        ]
+        
+        # Final pole vector position
+        pole_pos = [
+            mid_pos[0] + pole_direction[0],
+            mid_pos[1] + pole_direction[1],
+            mid_pos[2] + pole_direction[2]
+        ]
+        
+        return tuple(pole_pos)
