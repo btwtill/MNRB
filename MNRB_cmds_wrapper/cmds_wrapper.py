@@ -140,19 +140,13 @@ class MC:
         return MC.getAttribute(node, "hiddenInOutliner")
 
     @staticmethod
-    def createSpaceLocator(position) -> str:
+    def createSpaceLocator(position) -> str: #type: ignore
         new_space_locator = cmds.spaceLocator(p=position)
         MC.clearSelection()
         return new_space_locator[0]
     
     @staticmethod
-    def createSpaceLocator(position, name) -> str:
-        new_space_locator = cmds.spaceLocator(p=position, name = name)
-        MC.clearSelection()
-        return new_space_locator[0]
-    
-    @staticmethod
-    def createSpaceLocator(position, name) -> str:
+    def createSpaceLocator(position, name) -> str: #type: ignore
         new_space_locator = cmds.spaceLocator(p=position, name = name)
         MC.clearSelection()
         return new_space_locator[0]
@@ -257,7 +251,7 @@ class MC:
         cmds.setAttr(f"{node_name}.{target_attribute}", value, type="string")
 
     @staticmethod
-    def getAttribute(node_name, attribute_name) -> any:
+    def getAttribute(node_name, attribute_name):
         return cmds.getAttr(f"{node_name}.{attribute_name}")
     
     @staticmethod
@@ -297,6 +291,10 @@ class MC:
                 MC.getAttribute(object_name, "translateZ")]
 
     @staticmethod
+    def setTranslation(object_name, translation_x, translation_y, translation_z) -> None:
+        cmds.setAttr(f"{object_name}.translate", translation_x, translation_y, translation_z)
+
+    @staticmethod
     def addTranslation(object_name, x, y, z) -> list:
         translations = MC.getTranslation(object_name)
         new_translateX = translations[0] + x
@@ -310,10 +308,9 @@ class MC:
         return [new_translateX, new_translateY, new_translateZ]
 
     @staticmethod
-    def addTranslationOnAxis(object_name, amount, axis) -> list:
+    def addTranslationOnAxis(object_name, amount, axis):
         new_translate = MC.getAttribute(object_name, "translate" + axis.upper()) + amount
         MC.setAttribute(object_name, "translate" + axis.upper(), new_translate)
-        return 
 
     #joint specific methods
     @staticmethod
@@ -335,6 +332,33 @@ class MC:
         for channel in "XYZ":
             MC.setAttribute(name, "jointOrient" + channel, 0)
 
+# IK Functions
+    @staticmethod
+    def createRotatePlaneIkSolver(name, joint_chain) -> list[str]:
+        ik_objects = cmds.ikHandle(
+            name=name + "rps_ikHandle",
+            startJoint=joint_chain[0],
+            endEffector=joint_chain[-1],
+            solver="ikRPsolver")
+        MC.renameObject("effector1", name + "rps_effector")
+        return ik_objects
+
+    @staticmethod
+    def createPoleVectorConstraint(source, target_Ik_handle) -> str: # type: ignore
+        pole_vector_constraint = cmds.poleVectorConstraint(source, target_Ik_handle)
+        return pole_vector_constraint
+
+    @staticmethod
+    def createPoleVectorConstraint(source, target_Ik_handle, name) -> str:
+        pole_vector_constraint = cmds.poleVectorConstraint(source, target_Ik_handle, name=name)
+        return pole_vector_constraint
+
+# Maya Constraints
+    @staticmethod
+    def createOrientConstraint(source_object, target_object) -> str:
+        return cmds.orientConstraint(source_object, target_object)
+
+# Maya Org Functios
     @staticmethod
     def importBinaryFile(path, namespace = "import"):
         cmds.file(path, i=True, type="mayaBinary", mergeNamespacesOnClash = False, namespace=namespace)
