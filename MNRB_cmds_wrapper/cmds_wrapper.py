@@ -173,7 +173,7 @@ class MC:
     def listDestinationConnections(node, attribute) -> list:
         return cmds.listConnections(f"{node}.{attribute}", destination = True)
 
-    #nurbs methods
+# Nurbs methods
     @staticmethod
     def createNurbsSphere(name) -> str:
         new_sphere = cmds.sphere(name = name)[0]
@@ -212,7 +212,7 @@ class MC:
         MC.clearSelection()
         return new_circle[0]
     
-    #lambert methods
+# lambert methods
     @staticmethod
     def createLambertMaterial(name) -> str:
         return cmds.shadingNode("lambert", asShader=True, name = name)
@@ -244,11 +244,29 @@ class MC:
     @staticmethod
     def assignObjectToShaderSet(object, shader):
         return cmds.sets(object, edit=True, forceElement=shader)
-    
+
+# Attribute Functions
     @staticmethod
     def addStringAttribute(node_name, target_attribute, value, is_hidden) -> None:
         cmds.addAttr(node_name, dataType="string", longName = target_attribute, hidden = is_hidden)
         cmds.setAttr(f"{node_name}.{target_attribute}", value, type="string")
+
+    @staticmethod
+    def addFloatAttribute(node_name, attribute_name, default_value = 0, min = None, max = None):
+        if min == None and max == None:
+            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value)
+        elif min != None and max==None:
+            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value, minValue=min)
+        elif min == None and max!=None:
+            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value, maxValue=max)
+        else:
+            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value, maxValue=max, minValue=min)
+
+    @staticmethod
+    def addBoolAttribute(node_name, attribute_name, default_state = False, keyable = True):
+        cmds.addAttr(node_name, attributeType="bool", ln=attribute_name, defaultValue = default_state, keyable=keyable)
+        if keyable == False:
+            cmds.setAttr(f"{node_name}.{attribute_name}", cb = True)
 
     @staticmethod
     def getAttribute(node_name, attribute_name):
@@ -270,7 +288,16 @@ class MC:
     def setAttributeDouble3(object, attribute_name, value1, value2, value3):
         cmds.setAttr(f"{object}.{attribute_name}", value1, value2, value3, type="double3")
 
-    #xform
+    @staticmethod
+    def lockAndHideAllAttributes(node_name):
+        for axis in "XYZ":
+            cmds.setAttr(f"{node_name}.translate{axis}", keyable=False, cb=False)
+            cmds.setAttr(f"{node_name}.rotate{axis}", keyable=False, cb=False)
+            cmds.setAttr(f"{node_name}.scale{axis}", keyable=False, cb=False)
+        cmds.setAttr(f"{node_name}.visibility", keyable=False, cb=False)
+
+
+#xform
     @staticmethod
     def getObjectWorldPositionMatrix(object_name) -> list:
         return cmds.xform(object_name, query =True, matrix = True, worldSpace=True)
@@ -283,36 +310,7 @@ class MC:
     def setObjectPositionMatrix(object_name, matrix):
         cmds.xform(object_name, matrix = matrix, worldSpace=False)
 
-    #translation
-    @staticmethod
-    def getTranslation(object_name) -> list:
-        return [MC.getAttribute(object_name, "translateX"), 
-                MC.getAttribute(object_name, "translateY"), 
-                MC.getAttribute(object_name, "translateZ")]
-
-    @staticmethod
-    def setTranslation(object_name, translation_x, translation_y, translation_z) -> None:
-        cmds.setAttr(f"{object_name}.translate", translation_x, translation_y, translation_z)
-
-    @staticmethod
-    def addTranslation(object_name, x, y, z) -> list:
-        translations = MC.getTranslation(object_name)
-        new_translateX = translations[0] + x
-        new_translateY = translations[1] + y
-        new_translateZ = translations[2] + z
-
-        MC.setAttribute(object_name, "translateX", new_translateX)
-        MC.setAttribute(object_name, "translateY", new_translateY)
-        MC.setAttribute(object_name, "translateZ", new_translateZ)
-
-        return [new_translateX, new_translateY, new_translateZ]
-
-    @staticmethod
-    def addTranslationOnAxis(object_name, amount, axis):
-        new_translate = MC.getAttribute(object_name, "translate" + axis.upper()) + amount
-        MC.setAttribute(object_name, "translate" + axis.upper(), new_translate)
-
-    #joint specific methods
+# joint specific methods
     @staticmethod
     def createJoint(name) -> str:
         new_joint = cmds.joint(name = name)
@@ -371,6 +369,35 @@ class MC:
     def mergeNamespaceWithRoot(namespace):
         cmds.namespace(removeNamespace=namespace, mergeNamespaceWithRoot=True)
 
+# Transform Functions
+    @staticmethod
+    def getTranslation(object_name) -> list:
+        return [MC.getAttribute(object_name, "translateX"), 
+                MC.getAttribute(object_name, "translateY"), 
+                MC.getAttribute(object_name, "translateZ")]
+
+    @staticmethod
+    def setTranslation(object_name, translation_x, translation_y, translation_z) -> None:
+        cmds.setAttr(f"{object_name}.translate", translation_x, translation_y, translation_z)
+
+    @staticmethod
+    def addTranslation(object_name, x, y, z) -> list:
+        translations = MC.getTranslation(object_name)
+        new_translateX = translations[0] + x
+        new_translateY = translations[1] + y
+        new_translateZ = translations[2] + z
+
+        MC.setAttribute(object_name, "translateX", new_translateX)
+        MC.setAttribute(object_name, "translateY", new_translateY)
+        MC.setAttribute(object_name, "translateZ", new_translateZ)
+
+        return [new_translateX, new_translateY, new_translateZ]
+
+    @staticmethod
+    def addTranslationOnAxis(object_name, amount, axis):
+        new_translate = MC.getAttribute(object_name, "translate" + axis.upper()) + amount
+        MC.setAttribute(object_name, "translate" + axis.upper(), new_translate)
+
     @staticmethod
     def applyTransform(object_name, scale = True, translate=True, rotate=True):
         cmds.makeIdentity(object_name, apply=True, scale = scale, translate=translate, rotate=rotate, normal = True)
@@ -424,7 +451,7 @@ class MC:
         MC.resetRotation(object)
         MC.resetScale(object)
 
-    #create utility nodes
+# Create utility nodes
     @staticmethod
     def createDecomposeNode(name, underworld = False) -> str:
         if underworld:
@@ -509,7 +536,7 @@ class MC:
         else:
             return cmds.createNode("aimMatrix", name = name + "_aimMtx_fNode")
 
-    #Om functions
+# Om functions
     @staticmethod
     def force_recalculate(node_name):
         cmds.dgdirty(node_name)

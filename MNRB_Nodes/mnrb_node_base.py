@@ -669,6 +669,12 @@ class MNRB_Node(NodeEditorNode):
 
         component_hierarchy = self.getComponentPrefix() + self.getComponentName() + MNRB_Names.component_suffix
         new_component_hierarchy = MC.createTransform(component_hierarchy)
+        MC.lockAndHideAllAttributes(component_hierarchy)
+
+        MC.addBoolAttribute(new_component_hierarchy, "Input_Visibility", False, False)
+        MC.addBoolAttribute(new_component_hierarchy, "Output_Visibility", False, False)
+        MC.addBoolAttribute(new_component_hierarchy, "Control_Visibility", True, False)
+        MC.addBoolAttribute(new_component_hierarchy, "Systems_Visibility", False, False)
 
         self.addComponentIdLink(new_component_hierarchy)
         MC.parentObject(new_component_hierarchy, components_hierarchy)
@@ -676,12 +682,23 @@ class MNRB_Node(NodeEditorNode):
 
         self.input_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.input_hierarchy_suffix)
         MC.parentObject(self.input_hierarchy, self.component_hierarchy)
+        MC.connectAttribute(component_hierarchy, "Input_Visibility", self.input_hierarchy, "visibility")
+        MC.lockAndHideAllAttributes(self.input_hierarchy)
+
         self.output_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.output_hierarchy_suffix)
         MC.parentObject(self.output_hierarchy, self.component_hierarchy)
+        MC.connectAttribute(component_hierarchy, "Output_Visibility", self.output_hierarchy, "visibility")
+        MC.lockAndHideAllAttributes(self.output_hierarchy)
+
         self.system_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.system_hierarchy_suffix)
         MC.parentObject(self.system_hierarchy, self.component_hierarchy)
+        MC.connectAttribute(component_hierarchy, "Systems_Visibility", self.system_hierarchy, "visibility")
+        MC.lockAndHideAllAttributes(self.system_hierarchy)
+
         self.control_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + MNRB_Names.control_hierarchy_suffix)
         MC.parentObject(self.control_hierarchy, self.component_hierarchy)
+        MC.connectAttribute(component_hierarchy, "Control_Visibility", self.control_hierarchy, "visibility")
+        MC.lockAndHideAllAttributes(self.control_hierarchy)
 
         self.controls = []
 
@@ -906,7 +923,7 @@ class MNRB_Node(NodeEditorNode):
 
         self.setComponentGuideHiearchyName()
         self.setComponentHierarchyName()
-        self.guide_visualization_hierarchy = self.guide_component_hierarchy + "_visualization"
+        self.guide_visualization_hierarchy = self.guide_component_hierarchy + "_visualization" # type: ignore
 
         for guide_data in data['guides']:
             new_guide = guide(self, deserialized=True)
