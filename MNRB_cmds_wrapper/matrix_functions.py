@@ -138,6 +138,13 @@ class Matrix_functions():
         return compose_node
     
     @staticmethod
+    def moveSRTToParentMatrixOffset(srt_object, rotate_order = True, disconnect_from_source = True) -> bool:
+        composeMatrix = Matrix_functions.createComposeNodeFromTransformChannelbox(srt_object, rotate_order, disconnect_from_source)
+        MC.connectAttribute(composeMatrix, "outputMatrix", srt_object, "offsetParentMatrix")
+        MC.disconnectAttribute(composeMatrix, "outputMatrix", srt_object, "offsetParentMatrix")
+        return True
+        
+    @staticmethod
     def connectOutputMatrixToOffsetParentMatrix(source, target, rotate_order = True):
         MC.connectAttribute(source, "outputMatrix", target, "offsetParentMatrix")
         if rotate_order:
