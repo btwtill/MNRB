@@ -142,6 +142,7 @@ class Matrix_functions():
         composeMatrix = Matrix_functions.createComposeNodeFromTransformChannelbox(srt_object, rotate_order, disconnect_from_source)
         MC.connectAttribute(composeMatrix, "outputMatrix", srt_object, "offsetParentMatrix")
         MC.disconnectAttribute(composeMatrix, "outputMatrix", srt_object, "offsetParentMatrix")
+        MC.clearTransforms(srt_object)
         return True
         
     @staticmethod

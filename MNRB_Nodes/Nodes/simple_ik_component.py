@@ -162,7 +162,6 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
         MC.setTranslation(pole_control.name, *pole_control_position)
         MC.parentObject(pole_control.name, self.control_hierarchy)
         Matrix_functions.moveSRTToParentMatrixOffset(pole_control.name)         # Move translation values to parentOffsetMatrix
-        MC.clearTransforms(pole_control.name)
 
         # IK end control
         end_control = control(self, "end")
