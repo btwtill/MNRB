@@ -36,10 +36,7 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
                 inputs = [
                     ["base", SocketTypes.srt, False],
                     ["base", SocketTypes.deform, False],
-                    ["base", SocketTypes.space, True],
-                    ["pole", SocketTypes.space, True],
-                    ["end", SocketTypes.space, True],
-
+                    ["ik", SocketTypes.srt, False]
                     ], 
                 outputs=[
                         ["base", SocketTypes.srt, True],
@@ -137,11 +134,12 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
         MC.setObjectWorldPositionMatrix(self.base_input, base_guide_position)
         MC.applyTransformScale(self.base_input)
 
-        # Pole Input
+        pole_position = self.calculate_pole_vector_position(base_guide_position, pole_guide_position, end_guide_position, 5)
+
+        # Pole Input -> Created here because it needs the pole control position for correct placement
         self.pole_input = MC.createTransform(self.getComponentFullPrefix() + "pole" + MNRB_Names.input_suffix)
         MC.parentObject(self.pole_input, self.input_hierarchy)
-        MC.setObjectWorldPositionMatrix(self.pole_input, pole_guide_position)
-        MC.applyTransformScale(self.pole_input)
+        MC.setTranslation(self.pole_input, *pole_position)
 
         # End Input
         self.end_input = MC.createTransform(self.getComponentFullPrefix() + "end" + MNRB_Names.input_suffix)
@@ -155,13 +153,10 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
         Matrix_functions.setMatrixParentNoOffset(base_control.name, self.base_input)
         MC.parentObject(base_control.name, self.control_hierarchy)
 
-        pole_control_position = self.calculate_pole_vector_position(base_guide_position, pole_guide_position, end_guide_position, 5)
-
         # IK Pole (polevector) control
         pole_control = control(self, "pole")
-        MC.setTranslation(pole_control.name, *pole_control_position)
         MC.parentObject(pole_control.name, self.control_hierarchy)
-        Matrix_functions.moveSRTToParentMatrixOffset(pole_control.name)         # Move translation values to parentOffsetMatrix
+        Matrix_functions.setMatrixParentNoOffset(pole_control.name, self.pole_input)
 
         # IK end control
         end_control = control(self, "end")
@@ -214,6 +209,8 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
         Matrix_functions.decomposeTransformWorldMatrixTo(end_ik_joint, end_output)
         MC.parentObject(end_output, self.output_hierarchy)
 
+        self.deform_outputs = [base_output, pole_output, end_output]
+
         # IK Creation
         ik_objects = MC.createRotatePlaneIkSolver(
             self.getComponentFullPrefix(),
@@ -238,7 +235,45 @@ class MNRB_Node_SimpleIKComponent(MNRB_NodeTemplate):
         return True
 
     def connectComponent(self):
-        return super().connectComponent()
+        '''
+        Component Function that takes all the input connections from other components and connects them into the component structure
+        '''
+        if not super().connectComponent():
+            return False
+
+        # Get Name of base srt input parent
+        base_srt_parent = self.getInputConnectionValueAt(0)
+        if base_srt_parent == None:
+            return False
+        
+        base_srt_parent_name = base_srt_parent + MNRB_Names.output_suffix
+
+        base_parent_offset_compose_node, base_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.base_input, base_srt_parent_name)
+
+        # Get Name of second input socket (connected deform srt name)
+        deform_parent_name = self.getInputConnectionValueAt(1)
+        if deform_parent_name == None:
+            return False
+        deform_parent = deform_parent_name + MNRB_Names.deform_suffix
+
+        # Connect deform part of the component
+        MC.parentObject(self.deforms[0].name, deform_parent)
+
+        Matrix_functions.setLiveMatrixParentNoOffset(self.deforms[0].name, self.deform_outputs[0], deform_parent)
+        Matrix_functions.setLiveMatrixParentNoOffset(self.deforms[1].name, self.deform_outputs[1], self.deforms[0].name)
+        Matrix_functions.setLiveMatrixParentNoOffset(self.deforms[2].name, self.deform_outputs[2], self.deforms[1].name)
+        
+        # Get Name of ik srt input parent
+        ik_srt_parent = self.getInputConnectionValueAt(2)
+        if ik_srt_parent == None:
+            return False
+        
+        ik_srt_parent_name = ik_srt_parent + MNRB_Names.output_suffix
+
+        pole_parent_offset_compose_node, pole_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.pole_input, ik_srt_parent_name)
+        end_parent_offset_compose_node, end_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.end_input, ik_srt_parent_name)
+
+        return True
 
     def calculate_pole_vector_position(self, start_matrix, mid_matrix, end_matrix, multiplier=1.0):
         """

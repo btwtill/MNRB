@@ -816,6 +816,16 @@ class MNRB_Node(NodeEditorNode):
         full_prefix = node.getComponentFullPrefix()
         return full_prefix + value
 
+    def getAllInputConnectionValuesAt(self, index):
+        values, nodes = self.getAllInputValuesFromSocketWithNodes(index)
+        if values == [] and nodes == []:
+            self.scene.displayErrorMessage(f"Unable to get Connection from Node: {self.__class__.__name__} at Input Socket Index: {index}")
+            return None
+        input_objects = []
+        for index, node in enumerate(nodes):
+            input_objects.append(node.getComponentFullPrefix() + values[index])
+        return input_objects
+
     def isAllGuidesExistend(self):
         if self.guides == []:
             return False

@@ -235,6 +235,20 @@ class NodeEditorNode(Serializable):
         socket_value = other_socket.socket_value
         return socket_value, other_socket.node
 
+    def getAllInputValuesFromSocketWithNodes(self, index):
+        input_socket = self.inputs[index]
+        if len(input_socket.edges) == 0: return None, None
+        connecting_edges = input_socket.edges
+        socket_values = []
+        nodes = []
+        for edge in connecting_edges:
+            other_socket = edge.getOtherSocket(input_socket)
+            socket_values.append(other_socket.socket_value)
+            nodes.append(other_socket.node)
+
+        return socket_values, nodes
+
+
     def getNodeContentClass(self):
         return self.__class__.Node_Content_Class
 
