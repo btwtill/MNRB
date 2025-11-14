@@ -1,5 +1,5 @@
 import os
-from PySide2.QtWidgets import QListWidget, QSizePolicy, QListWidgetItem #type: ignore
+from PySide2.QtWidgets import QListWidget, QSizePolicy, QListWidgetItem, QAbstractItemView #type: ignore
 from PySide2.QtGui import QColor, QPixmap, QIcon  #type: ignore
 from PySide2.QtCore import QSize #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
@@ -16,7 +16,8 @@ class SkinningEditorDeformList(QListWidget):
     def initUI(self):
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.setMaximumWidth(250)
-        print(self.deformer_dict)
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        
         for key in self.deformer_dict.keys():
 
             base_item = QListWidgetItem(self)

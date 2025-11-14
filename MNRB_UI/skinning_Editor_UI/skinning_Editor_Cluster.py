@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializables
+from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
 
 class SkinningEditorCluster(Serializable):
     """s
@@ -28,6 +28,7 @@ class SkinningEditorCluster(Serializable):
         :return: Cluster name.
         """
         return self._cluster_name
+  
     @cluster_name.setter
     def cluster_name(self, value):
         """
