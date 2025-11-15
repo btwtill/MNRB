@@ -1,7 +1,7 @@
 import os
 from PySide2.QtWidgets import QListWidget, QSizePolicy, QListWidgetItem, QAbstractItemView #type: ignore
 from PySide2.QtGui import QColor, QPixmap, QIcon  #type: ignore
-from PySide2.QtCore import QSize #type: ignore
+from PySide2.QtCore import QSize, Qt #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
@@ -19,7 +19,6 @@ class SkinningEditorDeformList(QListWidget):
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         
         for key in self.deformer_dict.keys():
-
             base_item = QListWidgetItem(self)
             list_group_item = List_Group_Item(key, self.deformer_dict[key], self)
             list_group_item.adjustSize()
@@ -27,6 +26,7 @@ class SkinningEditorDeformList(QListWidget):
             base_item.setBackground(QColor(50, 50, 50))
 
             self.setItemWidget(base_item, list_group_item)
+            base_item.setFlags(base_item.flags() & ~Qt.ItemIsSelectable)
 
             for value in self.deformer_dict[key]:
                 item = self.addDragListItem(value, "")
