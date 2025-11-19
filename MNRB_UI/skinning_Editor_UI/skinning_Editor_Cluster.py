@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
+from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
 class SkinningEditorCluster(Serializable):
     """s

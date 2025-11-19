@@ -1,7 +1,7 @@
 from enum import Enum
 from collections import OrderedDict
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
+from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Shapes.locator_guide_shape import LocatorGuideShape #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Shapes.nurbs_shpere_guide_shape import NurbsShereGuideShape #type: ignore
 from MNRB.MNRB_Guides.MNRB_Up_Shapes.nurbs_up_guide_shape import NurbsShereUpGuideShape #type:ignore

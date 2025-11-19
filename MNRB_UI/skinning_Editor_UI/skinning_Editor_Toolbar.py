@@ -12,7 +12,7 @@ class SkinningEditorToolbar(QWidget):
 
         self.layout = QHBoxLayout(self)
 
-        test_button = QPushButton("Add new SkinCluster")
-        test_button.setMaximumWidth(200)
+        add_skincluster_button = QPushButton("New SkinCluster")
+        add_skincluster_button.setMaximumWidth(200)
 
-        self.layout.addWidget(test_button, alignment=Qt.AlignLeft)
+        self.layout.addWidget(add_skincluster_button, alignment=Qt.AlignLeft)

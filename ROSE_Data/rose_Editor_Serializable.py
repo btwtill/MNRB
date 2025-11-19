@@ -1,4 +1,3 @@
-
 CLASS_DEBUG = False
 
 class Serializable():

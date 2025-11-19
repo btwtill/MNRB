@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
+from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_EdgeProperties import NodeEditorEdgeProperties #type: ignore
 

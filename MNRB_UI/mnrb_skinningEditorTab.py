@@ -3,7 +3,7 @@ import json, os
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList import SkinningEditorDeformList #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar import SkinningEditorToolbar #type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable import Serializable #type: ignore
+from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
 class mnrb_SkinningEditorTab(QWidget, Serializable): 
     def __init__(self, node_editor, parent=None):

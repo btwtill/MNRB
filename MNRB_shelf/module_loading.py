@@ -102,7 +102,7 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget as NodeEditorWidget #type: ignore
     importlib.reload(NodeEditorWidget)
 
-    import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Serializable as NodeEditorSerializable #type: ignore
+    import MNRB.ROSE_Data.rose_Editor_Serializable as NodeEditorSerializable #type: ignore
     importlib.reload(NodeEditorSerializable)
 
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene as NodeEditorScene #type: ignore
