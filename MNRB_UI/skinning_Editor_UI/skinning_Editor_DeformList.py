@@ -44,6 +44,7 @@ class SkinningEditorDeformList(QListWidget):
         return item
     
     def updateDeformerList(self, deformer_dict):
+        # TODO: Check new list with previous list what was added and what was removed
         self.deformer_dict = deformer_dict
         self.clear()
         self.initUI()
