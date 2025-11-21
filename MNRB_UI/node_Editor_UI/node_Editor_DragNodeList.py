@@ -50,7 +50,7 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def addDragListItem(self, name, icon=None, operation_code=0):
         item = QtWidgets.QListWidgetItem(name, self)
 
-        icon_path = os.path.join(ICONPATH, icon)
+        icon_path = os.path.join(ICONPATH, icon) #type: ignore
         icon_pixmap = QPixmap(icon_path if icon != "" else os.path.join(ICONPATH, "default_node.png"))
         item.setIcon(QIcon(icon_pixmap))
         item.setSizeHint(QSize(32,32))

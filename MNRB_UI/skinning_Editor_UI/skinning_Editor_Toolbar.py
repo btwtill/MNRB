@@ -12,7 +12,10 @@ class SkinningEditorToolbar(QWidget):
 
         self.layout = QHBoxLayout(self)
 
-        add_skincluster_button = QPushButton("New SkinCluster")
-        add_skincluster_button.setMaximumWidth(200)
+        self.add_skincluster_button = QPushButton("New SkinCluster")
+        
+        self.remove_deprecated_deformers = QPushButton("remove Deprecated")
+        self.remove_deprecated_deformers.setEnabled(False)
 
-        self.layout.addWidget(add_skincluster_button, alignment=Qt.AlignLeft)
+        self.layout.addWidget(self.add_skincluster_button, alignment=Qt.AlignLeft)
+        self.layout.addWidget(self.remove_deprecated_deformers, alignment=Qt.AlignLeft)
