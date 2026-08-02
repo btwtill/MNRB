@@ -1,7 +1,7 @@
 import math
-from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import Qt, QEvent, Signal, QPoint, QRect, QRectF, QPointF # type: ignore
-from PySide2.QtGui import QPainter, QMouseEvent, QPen, QColor # type:ignore
+from PySide6 import QtWidgets # type: ignore
+from PySide6.QtCore import Qt, QEvent, Signal, QPoint, QRect, QRectF, QPointF # type: ignore
+from PySide6.QtGui import QPainter, QMouseEvent, QPen, QColor # type:ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
@@ -50,7 +50,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
     def initUI(self) -> None:
         #Set Render Attributes
-        self.setRenderHints(QPainter.Antialiasing | QPainter.HighQualityAntialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
+        self.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
         self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
 
         #set scroll Bar Policies

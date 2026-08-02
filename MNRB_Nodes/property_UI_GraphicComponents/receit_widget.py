@@ -1,5 +1,5 @@
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QFrame, QLabel, QHBoxLayout, QSizePolicy #type: ignore
-from PySide2.QtCore import Qt #type: ignore
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QFrame, QLabel, QHBoxLayout, QSizePolicy #type: ignore
+from PySide6.QtCore import Qt #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.triangleWidget import TriangleWidget #type: ignore
 
 class IconWidgetBar(QWidget):

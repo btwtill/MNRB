@@ -6,7 +6,7 @@ from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
 GUIDE_DEBUG = False

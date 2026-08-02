@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QPushButton #type: ignore
+from PySide6.QtWidgets import QPushButton #type: ignore
 
 class MirroringSidePrefixButton(QPushButton):
     def __init__(self, properties_widget, text = "", value = "M_", marked = False, parent = None):

@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QFrame #type: ignore
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QFrame #type: ignore
 
 
 class SeparatorWidget(QFrame):

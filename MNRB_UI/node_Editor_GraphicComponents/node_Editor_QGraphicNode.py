@@ -1,6 +1,6 @@
-from PySide2 import QtWidgets # type:ignore
-from PySide2.QtCore import Qt, QRectF, QPointF # type: ignore
-from PySide2.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
+from PySide6 import QtWidgets # type:ignore
+from PySide6.QtCore import Qt, QRectF, QPointF # type: ignore
+from PySide6.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
 
 SELECTION_DEBUG = False
 EVENT_DEBUG = False

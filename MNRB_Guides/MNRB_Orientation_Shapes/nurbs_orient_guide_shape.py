@@ -1,8 +1,8 @@
 from collections import OrderedDict
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
-from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
+from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 
 CLASS_DEBUG = False
 

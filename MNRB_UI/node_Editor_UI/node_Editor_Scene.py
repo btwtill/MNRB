@@ -1,7 +1,7 @@
 import json
 import os
 from collections import OrderedDict
-from PySide2.QtCore import QRectF #type: ignore
+from PySide6.QtCore import QRectF #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable # type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
@@ -12,7 +12,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneCli
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSceneProperties #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 from MNRB.MNRB_Scene.virtual_hierarchy import MNRB_Virtual_Hierarchy #type: ignore
-from MNRB.MNRB_Colors.colors import MNRBSceneColors #type: ignore
+from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False

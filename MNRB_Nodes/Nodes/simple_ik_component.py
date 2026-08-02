@@ -1,6 +1,6 @@
 import math
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node #type: ignore
-from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
+from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_SIMPLEIKCOMPONENT, registerNode #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
@@ -9,7 +9,7 @@ from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #typ
 from MNRB.MNRB_Guides.guide import guide #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 

@@ -1,5 +1,5 @@
-from PySide2 import QtWidgets # type: ignore
-from shiboken2 import wrapInstance # type: ignore
+from PySide6 import QtWidgets # type: ignore
+from shiboken6 import wrapInstance # type: ignore
 import maya.OpenMayaUI as omui # type: ignore
 
 def getMayaWindow():

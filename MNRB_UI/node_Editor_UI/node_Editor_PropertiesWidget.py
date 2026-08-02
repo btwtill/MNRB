@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel #type: ignore
-from PySide2.QtCore import QSize  #type: ignore
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel #type: ignore
+from PySide6.QtCore import QSize  #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
 EVENT_DEBUG = False

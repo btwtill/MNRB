@@ -1,5 +1,5 @@
-from PySide2.QtWidgets import QWidget, QSizePolicy, QHBoxLayout, QPushButton # type: ignore
-from PySide2.QtCore import QSize, Qt # type: ignore
+from PySide6.QtWidgets import QWidget, QSizePolicy, QHBoxLayout, QPushButton # type: ignore
+from PySide6.QtCore import QSize, Qt # type: ignore
 
 class SkinningEditorToolbar(QWidget):
     def __init__(self, parent=None):

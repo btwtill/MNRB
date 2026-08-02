@@ -1,7 +1,7 @@
-from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider, QComboBox #type: ignore
-from PySide2.QtCore import Qt #type: ignore
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider, QComboBox #type: ignore
+from PySide6.QtCore import Qt #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_Node #type: ignore
-from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
+from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import OPERATIONCODE_MULTIDEFORMCOMPONENT, registerNode #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_template import MNRB_NodeTemplate #type: ignore
 from MNRB.MNRB_Nodes.mnrb_node_base import MNRB_NodeProperties #type: ignore
@@ -11,7 +11,7 @@ from MNRB.MNRB_Deform.deform import deform #type: ignore
 from MNRB.MNRB_Controls.control import control #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 
 GUIDE_DEBUG = True
 CLASS_DEBUG = False

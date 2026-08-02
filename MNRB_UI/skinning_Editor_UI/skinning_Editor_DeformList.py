@@ -1,7 +1,7 @@
 import os
-from PySide2.QtWidgets import QListWidget, QSizePolicy, QListWidgetItem, QAbstractItemView #type: ignore
-from PySide2.QtGui import QColor, QPixmap, QIcon  #type: ignore
-from PySide2.QtCore import QSize, Qt #type: ignore
+from PySide6.QtWidgets import QListWidget, QSizePolicy, QListWidgetItem, QAbstractItemView #type: ignore
+from PySide6.QtGui import QColor, QPixmap, QIcon  #type: ignore
+from PySide6.QtCore import QSize, Qt #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")

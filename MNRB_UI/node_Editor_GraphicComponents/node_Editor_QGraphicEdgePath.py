@@ -1,6 +1,6 @@
 import math
-from PySide2.QtCore import QPointF #type: ignore
-from PySide2.QtGui import QPainterPath #type: ignore
+from PySide6.QtCore import QPointF #type: ignore
+from PySide6.QtGui import QPainterPath #type: ignore
 
 EDGE_CP_ROUNDNESS = 100
 

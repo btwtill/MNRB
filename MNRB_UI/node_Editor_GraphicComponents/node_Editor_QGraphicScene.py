@@ -1,7 +1,7 @@
 import math
-from PySide2 import QtWidgets # type: ignore
-from PySide2.QtGui import QColor, QPen, QBrush # type: ignore
-from PySide2.QtCore import QLine, QPoint, Qt, Signal # type: ignore
+from PySide6 import QtWidgets # type: ignore
+from PySide6.QtGui import QColor, QPen, QBrush # type: ignore
+from PySide6.QtCore import QLine, QPoint, Qt, Signal # type: ignore
 
 class NodeEditor_QGraphicScene(QtWidgets.QGraphicsScene):
     itemSelected = Signal()

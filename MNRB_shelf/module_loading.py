@@ -1,7 +1,7 @@
 
 def open():
     """This function is to open the the tools UI"""
-    from PySide2.QtWidgets import QApplication, QMainWindow #type: ignore
+    from PySide6.QtWidgets import QApplication, QMainWindow #type: ignore
     from MNRB.MNRB_UI import mnrb_editor #type: ignore
 
     def get_active_main_window():
@@ -24,7 +24,7 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_SocketTypes as MNRBSocketTypes #type: ignore
     importlib.reload(MNRBSocketTypes)
 
-    import MNRB.MNRB_Naming.MNRB_names as MNRBNaming #type: ignore
+    import MNRB.MNRB_naming.MNRB_names as MNRBNaming #type: ignore
     importlib.reload(MNRBNaming)
 
     import MNRB.MNRB_Nodes.Nodes.__init__ as Init #type: ignore
@@ -33,7 +33,7 @@ def reloadMNRBModules():
     import MNRB.global_variables as GlobalVar #type: ignore
     importlib.reload(GlobalVar)
 
-    import MNRB.MNRB_Colors.colors as MNRBColors #type: ignore
+    import MNRB.MNRB_colors.colors as MNRBColors #type: ignore
     importlib.reload(MNRBColors)
 
     import MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button as MNRBSideButton #type: ignore

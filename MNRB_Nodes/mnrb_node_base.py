@@ -1,16 +1,16 @@
 import math
 import json
-from PySide2.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider, QComboBox #type: ignore
-from PySide2.QtCore import Qt #type: ignore
-from PySide2 import QtWidgets # type: ignore
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider, QComboBox #type: ignore
+from PySide6.QtCore import Qt #type: ignore
+from PySide6 import QtWidgets # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 from MNRB.global_variables import IDENITY_MATRIX #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Guides.guide import guide #type: ignore
-from MNRB.MNRB_Colors.colors import MNRBColor #type: ignore
-from MNRB.MNRB_Colors.colors import MNRBSceneColors #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_colors.colors import MNRBColor #type: ignore
+from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.side_button import MirroringSidePrefixButton #type: ignore
 from MNRB.MNRB_Nodes.property_UI_GraphicComponents.receit_widget import ReceitWidget #type: ignore
 from MNRB.MNRB_Deform.deform import deform #type: ignore

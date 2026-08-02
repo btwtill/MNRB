@@ -1,8 +1,9 @@
 import os
 import json
 import maya.cmds as cmds # type: ignore
-from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import Qt, QFile, QSettings, QPoint, QSize, QTimer #type:  ignore 
+from PySide6 import QtWidgets # type: ignore
+from PySide6.QtGui import QAction #type: ignore
+from PySide6.QtCore import Qt, QFile, QSettings, QPoint, QSize, QTimer #type:  ignore
 from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
@@ -207,30 +208,30 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setCentralWidget(self.overlay_Widget)
         
     def createEditorActions(self):
-        self.action_new_project = QtWidgets.QAction('&New', self, shortcut='Ctrl+N', statusTip='create new project', triggered=self.onNewProjectFromMenuBar)
-        self.action_open_project = QtWidgets.QAction('&Open', self, shortcut='Ctrl+O', statusTip='open a project', triggered=self.onOpenProjectFromMenuBar)
-        self.action_save_project = QtWidgets.QAction('&Save', self, shortcut='Ctrl+S', statusTip='save project', triggered=self.onSaveProject)
-        #self.action_save_project_as = QtWidgets.QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
-        self.action_exit = QtWidgets.QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='exit tool', triggered=self.close)
+        self.action_new_project = QAction('&New', self, shortcut='Ctrl+N', statusTip='create new project', triggered=self.onNewProjectFromMenuBar)
+        self.action_open_project = QAction('&Open', self, shortcut='Ctrl+O', statusTip='open a project', triggered=self.onOpenProjectFromMenuBar)
+        self.action_save_project = QAction('&Save', self, shortcut='Ctrl+S', statusTip='save project', triggered=self.onSaveProject)
+        #self.action_save_project_as = QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
+        self.action_exit = QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='exit tool', triggered=self.close)
 
-        self.action_load_template = QtWidgets.QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
-        self.actionSaveTemplateAs = QtWidgets.QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='save template as', triggered=self.onSaveNodeEditorTemplateAs)
-        self.action_clear = QtWidgets.QAction('&Clear', self, shortcut='Ctrl+Shift+C', statusTip='save template as', triggered=self.onClearNodeEditor)
-        self.action_align_on_x = QtWidgets.QAction('Align&X', self, shortcut = 'Alt+X', statusTip = 'align nodes vertivally', triggered=self.onNodeEditorAlignX)
-        self.action_align_on_y = QtWidgets.QAction('Align&Y', self, shortcut = 'Alt+Y', statusTip = 'align nodes horizontally', triggered=self.onNodeEditorAlignY)
-        self.action_mirror_Node = QtWidgets.QAction('Mirror Node', self, shortcut = 'Alt+M', statusTip = 'mirror node', triggered=self.onNodeEditorMirrorNode)
+        self.action_load_template = QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
+        self.actionSaveTemplateAs = QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='save template as', triggered=self.onSaveNodeEditorTemplateAs)
+        self.action_clear = QAction('&Clear', self, shortcut='Ctrl+Shift+C', statusTip='save template as', triggered=self.onClearNodeEditor)
+        self.action_align_on_x = QAction('Align&X', self, shortcut = 'Alt+X', statusTip = 'align nodes vertivally', triggered=self.onNodeEditorAlignX)
+        self.action_align_on_y = QAction('Align&Y', self, shortcut = 'Alt+Y', statusTip = 'align nodes horizontally', triggered=self.onNodeEditorAlignY)
+        self.action_mirror_Node = QAction('Mirror Node', self, shortcut = 'Alt+M', statusTip = 'mirror node', triggered=self.onNodeEditorMirrorNode)
 
-        self.action_undo = QtWidgets.QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
-        self.action_redo = QtWidgets.QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
-        self.action_delete = QtWidgets.QAction('&Delete', self, shortcut='Del', statusTip='delete currently Selected', triggered=self.onEditDelete)
+        self.action_undo = QAction('&Undo', self, shortcut='Ctrl+Z', statusTip='undo last operation', triggered=self.onEditUndo)
+        self.action_redo = QAction('&Redo', self, shortcut='Ctrl+Y', statusTip='redo last operation', triggered=self.onEditRedo)
+        self.action_delete = QAction('&Delete', self, shortcut='Del', statusTip='delete currently Selected', triggered=self.onEditDelete)
 
-        self.action_edit_preferences = QtWidgets.QAction('&Preferences', self, statusTip='open Preferences', triggered=self.onOpenPreferences)
+        self.action_edit_preferences = QAction('&Preferences', self, statusTip='open Preferences', triggered=self.onOpenPreferences)
 
-        self.action_edit_copy = QtWidgets.QAction('&Copy', self, shortcut='Ctrl+C', statusTip='copy current selection', triggered=self.onEditCopy)
-        self.action_edit_cut = QtWidgets.QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
-        self.action_edit_paste = QtWidgets.QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
+        self.action_edit_copy = QAction('&Copy', self, shortcut='Ctrl+C', statusTip='copy current selection', triggered=self.onEditCopy)
+        self.action_edit_cut = QAction('&Cut', self, shortcut='Ctrl+X', statusTip='cut current selection', triggered=self.onEditCut)
+        self.action_edit_paste = QAction('&Paste', self, shortcut='Ctrl+V', statusTip='past current clipboard', triggered=self.onEditPaste)
 
-        self.action_about = QtWidgets.QAction('&About', self, shortcut = '', statusTip='information about MNRB', triggered=self.onAbout)
+        self.action_about = QAction('&About', self, shortcut = '', statusTip='information about MNRB', triggered=self.onAbout)
     
     def setupMenuBar(self):
         menu_bar = self.menuBar()

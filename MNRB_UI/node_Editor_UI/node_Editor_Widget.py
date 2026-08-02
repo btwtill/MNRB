@@ -1,6 +1,6 @@
 import os
-from PySide2 import QtWidgets # type: ignore
-from PySide2.QtGui import QIcon #type: ignore
+from PySide6 import QtWidgets # type: ignore
+from PySide6.QtGui import QIcon, QAction #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView import NodeEditor_QGraphicView # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
@@ -57,7 +57,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         for key in keys:
             node = MNRB_NODES[key]
             icon_path = os.path.join(ICONPATH, node.icon) if node.icon != "" else os.path.join(ICONPATH, "default_node.png")
-            self.node_actions[node.operation_code] = QtWidgets.QAction(QIcon(icon_path), node.operation_title)
+            self.node_actions[node.operation_code] = QAction(QIcon(icon_path), node.operation_title)
             self.node_actions[node.operation_code].setData(node.operation_code)
 
     def centerView(self):

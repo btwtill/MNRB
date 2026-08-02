@@ -1,6 +1,6 @@
 import os
-from PySide2.QtWidgets import QWidget, QHBoxLayout, QLabel #type: ignore
-from PySide2.QtGui import QColor, QIcon #type: ignore
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel #type: ignore
+from PySide6.QtGui import QColor, QIcon #type: ignore
 from MNRB.MNRB_UI.UI_GraphicComponents.triangleWidget import TriangleWidget #type: ignore
 
 class List_Group_Item(QWidget):

@@ -2,7 +2,7 @@ import json
 import os
 from collections import OrderedDict
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_Controls.control_shape import control_shape #type: ignore
 

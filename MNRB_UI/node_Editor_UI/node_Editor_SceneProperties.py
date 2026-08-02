@@ -1,8 +1,8 @@
 import os
 from enum import Enum
-from PySide2 import QtWidgets #type: ignore 
-from PySide2.QtCore import Qt, QSize #type: ignore
-from PySide2.QtGui import QPixmap, QIcon #type: ignore
+from PySide6 import QtWidgets #type: ignore 
+from PySide6.QtCore import Qt, QSize #type: ignore
+from PySide6.QtGui import QPixmap, QIcon #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
 
 EVENT_DEBUG = False

@@ -1,6 +1,6 @@
 from collections import OrderedDict
 import json, os
-from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel #type: ignore
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList import SkinningEditorDeformList #type: ignore
 from MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar import SkinningEditorToolbar #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore

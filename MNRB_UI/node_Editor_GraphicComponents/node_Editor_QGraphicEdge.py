@@ -1,6 +1,6 @@
-from PySide2 import QtWidgets #type: ignore
-from PySide2.QtCore import Qt #type: ignore
-from PySide2.QtGui import QColor, QPen, QPainterPath #type: ignore
+from PySide6 import QtWidgets #type: ignore
+from PySide6.QtCore import Qt #type: ignore
+from PySide6.QtGui import QColor, QPen, QPainterPath #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath import  NodeEditor_QGaphicEdgePathDirect, NodeEditor_QGraphicEdgePathBezier #type: ignore
 
 SELECTION_DEBUG = False

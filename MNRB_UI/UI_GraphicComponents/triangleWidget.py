@@ -1,6 +1,6 @@
-from PySide2.QtWidgets import QWidget, QSizePolicy #type: ignore
-from PySide2.QtGui import QPainter, QPolygon, QBrush, QColor #type: ignore
-from PySide2.QtCore import Qt, QPoint #type: ignore
+from PySide6.QtWidgets import QWidget, QSizePolicy #type: ignore
+from PySide6.QtGui import QPainter, QPolygon, QBrush, QColor #type: ignore
+from PySide6.QtCore import Qt, QPoint #type: ignore
 
 class TriangleWidget(QWidget):
     def __init__(self, parent=None):

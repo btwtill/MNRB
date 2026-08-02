@@ -8,7 +8,7 @@ from MNRB.MNRB_Guides.MNRB_Up_Shapes.nurbs_up_guide_shape import NurbsShereUpGui
 from MNRB.MNRB_Guides.MNRB_Up_Shapes.locator_up_guide_shape import LocatorUpGuideShape #type:ignore
 from MNRB.MNRB_Guides.MNRB_Orientation_Shapes.nurbs_orient_guide_shape import NurbsShereOrientGuideShape #type:ignore
 from MNRB.MNRB_Guides.MNRB_Orientation_Shapes.locator_orient_guide_shape import LocatorOrientGuideShape #type:ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 from MNRB.MNRB_Guides.MNRB_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 

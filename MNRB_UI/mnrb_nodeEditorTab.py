@@ -1,14 +1,14 @@
 import os
 import json
-from PySide2 import QtWidgets # type: ignore
-from PySide2.QtCore import QIODevice, QDataStream, Qt #type: ignore
-from PySide2.QtGui  import QPixmap #type: ignore
+from PySide6 import QtWidgets # type: ignore
+from PySide6.QtCore import QIODevice, QDataStream, Qt #type: ignore
+from PySide6.QtGui  import QPixmap #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
 from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 from MNRB.MNRB_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
-from MNRB.MNRB_Naming.MNRB_names import MNRB_Names #type: ignore
+from MNRB.MNRB_naming.MNRB_names import MNRB_Names #type: ignore
 from MNRB.MNRB_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.MNRB_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 

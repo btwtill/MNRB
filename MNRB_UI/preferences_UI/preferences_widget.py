@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel #type: ignore
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel #type: ignore
 
 class MNRBPreferences(QWidget):
     def __init__(self):
