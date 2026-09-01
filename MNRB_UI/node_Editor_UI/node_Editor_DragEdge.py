@@ -52,6 +52,13 @@ class NodeEditorDragEdge():
         if CLASS_DEBUG: print("DRAGEDGE:: --endEdgeDrag:: Finished ending Dragging!")
         return False
     
+    def cancelEdgeDrag(self):
+        if CLASS_DEBUG: print("DRAGEDGE:: --cancelEdgeDrag:: Cancelling Dragging Edge")
+        if self.drag_edge is not None:
+            self.drag_edge.remove()
+            self.drag_edge = None
+        self.drag_edge_start_socket = None
+
     def updateDestination(self, x, y):
         if self.drag_edge is not None and self.drag_edge.grEdge is not None:
             self.drag_edge.grEdge.setDestinationSocketPosition(x, y)

@@ -1,7 +1,7 @@
 import os
 import json
 from PySide6 import QtWidgets # type: ignore
-from PySide6.QtCore import QIODevice, QDataStream, Qt #type: ignore
+from PySide6.QtCore import QIODevice, QDataStream, Qt, QTimer #type: ignore
 from PySide6.QtGui  import QPixmap #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
@@ -54,6 +54,11 @@ class mnrb_NodeEditorTab(QtWidgets.QMainWindow):
 
         self.central_widget.scene.connectViewDragEnterListenerCallback(self.onDragEnter)
         self.central_widget.scene.connectViewDropListenerCallback(self.onDrop)
+
+        #deferred to the next event loop tick so the view already has its real
+        #layout size by the time it centers - calling this immediately would
+        #compute against a still-0x0 viewport before the window is first shown.
+        QTimer.singleShot(0, self.centerNodeEditorView)
 
     def add_dock_widgets(self):
         """Add left and right dock widgets to the secondary main window."""

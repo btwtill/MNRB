@@ -101,8 +101,19 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         #center view
         if event.key() == Qt.Key_F:
             self.centerView()
+        elif event.key() == Qt.Key_Escape:
+            self.cancelActiveDragModes()
         else:
             super().keyPressEvent(event)
+
+    def cancelActiveDragModes(self) -> None:
+        if self.mode == MODE_EDGEDRAG:
+            self.dragging_edge.cancelEdgeDrag()
+            self.mode = MODE_NOOP
+        elif self.mode == MODE_EDGE_CUT:
+            self.cutting_edge.line_points = []
+            self.cutting_edge.update()
+            self.mode = MODE_NOOP
         
     def middleMouseButtonPress(self, event) -> None:
         if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
@@ -160,7 +171,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             else:
                 print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
 
-        if SCENE_DEBUG and event.modifiers() == Qt.CTRL: 
+        if SCENE_DEBUG and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in Scene:: ")
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tNodes:: ")
             for node in self.grScene.scene.nodes:
@@ -195,11 +206,11 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             isinstance(item_on_click, NodeEditor_QGraphicEdge) or
             item_on_click is None):
             
-            if event.modifiers() & Qt.SHIFT:
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
                 if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Shift Click On Node")
-                    
+
                 event.ignore()
-                fake_mouse_event = QMouseEvent(QEvent.MouseButtonPress, event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | Qt.LeftButton, event.modifiers() | Qt.CTRL)
+                fake_mouse_event = QMouseEvent(QEvent.MouseButtonPress, event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | Qt.LeftButton, event.modifiers() | Qt.KeyboardModifier.ControlModifier)
                 super().mousePressEvent(fake_mouse_event)
                 return
 
@@ -219,7 +230,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         if item_on_click is None:
             
-            if event.modifiers() & Qt.CTRL:
+            if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
                 self.mode = MODE_EDGE_CUT
                 if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Setting Edge Cut Mode ", self.mode)
 
@@ -244,12 +255,12 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             isinstance(item_on_release, NodeEditor_QGraphicEdge) or 
             item_on_release is None):
 
-            if event.modifiers() & Qt.SHIFT:
-                if EVENT_DEBUG: 
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                if EVENT_DEBUG:
                     print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Shift Release On Node")
                     print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Adding ", item_on_release, " to selection")
                 event.ignore()
-                fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers() | Qt.CTRL)
+                fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers() | Qt.KeyboardModifier.ControlModifier)
                 super().mouseReleaseEvent(fake_mouse_event)
                 return
 
@@ -423,7 +434,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         
         if len(selected_items) == 0:
             if self.grScene.scene.nodes == []:
-                self.centerOn(-1800, -600) 
+                self.centerOn(0, 0)
             else:
                 combined_bounding_rectangle = QRectF()
                 for node in self.grScene.scene.nodes:

@@ -129,6 +129,11 @@ class NodeEditorNode(Serializable):
         if CLASS_DEBUG: print("NODE:: -initSockets:: input Array After:: ", self.inputs)
         if CLASS_DEBUG: print("NODE:: -initSockets:: output Array After:: ", self.outputs)
 
+        #the graphics node's first wrap (during its own __init__) ran before the socket
+        #labels above existed, so its width was only ever sized for the title. Re-wrap now
+        #that the initial socket set - and its labels - actually exist.
+        self.grNode.wrapGrNodeToSockets()
+
     def addOutputSocket(self, output_type = 1, output_socket_value = "undefined", is_output_multi_edged = True):
         output_index = len(self.inputs) + len(self.outputs) 
         new_output_socket = self.__class__.Socket_Class(self, index=output_index, 

@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets # type:ignore
 from PySide6.QtCore import Qt, QRectF, QPointF # type: ignore
-from PySide6.QtGui import QFont, QBrush, QPen, QColor, QPainterPath # type: ignore
+from PySide6.QtGui import QFont, QFontMetrics, QBrush, QPen, QColor, QPainterPath # type: ignore
 
 SELECTION_DEBUG = False
 EVENT_DEBUG = False
@@ -15,6 +15,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._was_moved = False
         self._last_selected_state = False
 
+        self._raw_title = ""
+
         self.initGraphicElements()
         self.initContent()
         self.initUI()
@@ -25,11 +27,10 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     @title.setter
     def title(self, value):
-        if len(value) > 11:
-            self._title = value[:9] + ".."
-        else:
-            self._title = value
-        self.title_item.setPlainText(self.title)
+        self._raw_title = value
+        available_width = max(self.width - 2 * self._title_padding, 0)
+        self._title = QFontMetrics(self._title_font).elidedText(value, Qt.ElideRight, int(available_width))
+        self.title_item.setPlainText(self._title)
 
     @property
     def content(self): return self.node.content if self.node else None
@@ -96,6 +97,10 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.title_item.setDefaultTextColor(self._title_color)
         self.title_item.setFont(self._title_font)
         self.title_item.setPos(self._title_padding, 0)
+        #QTextDocument adds its own 4px margin on every side by default, on top of
+        #_title_padding - left in place, elidedText's fit calculation runs out of room
+        #and the title wraps even though it was just sized to fit exactly.
+        self.title_item.document().setDocumentMargin(0)
         self.title_item.setTextWidth(
             self.width  - 2 * self._title_padding
         )
@@ -161,6 +166,47 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         full_node_length = (len(self.node.inputs) * full_socket_height) + (len(self.node.outputs) * full_socket_height) + self.title_height + self.socket_padding
         self.height = full_node_length
         if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: new grNode Height" % self.__class__.__name__, self.height)
+
+        self.width = self.computeRequiredWidth()
+        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: new grNode Width" % self.__class__.__name__, self.width)
+
+        #re-apply the title width/elision and the content widget geometry, both of which
+        #depend on self.width and would otherwise only ever be set once at construction time
+        self.title_item.setTextWidth(self.width - 2 * self._title_padding)
+        self.title = self._raw_title
+
+        if self.content is not None:
+            content_rect = QRectF(self._edge_padding, self.title_height + self._edge_padding, self.width - 2 * self._edge_padding, self.height - 2 * self._edge_padding - self.title_height)
+            self.content.setGeometry(content_rect.toRect())
+            #QGraphicsProxyWidget can re-fit itself to the embedded widget's layout
+            #sizeHint via a queued LayoutRequest after addSocketLabel/removeLastLabel,
+            #undoing the line above. Set the proxy item's own geometry too so the
+            #actually-drawn item stays authoritative regardless of that timing.
+            if self.grContent is not None:
+                self.grContent.setGeometry(content_rect)
+
+        #socket dots are positioned once, at socket-creation time, against whatever
+        #grNode.width/height was at that moment. Now that width/height can change later
+        #(e.g. more sockets added), every existing socket needs to be re-placed against
+        #the new size, or older sockets are left stranded at the node's old edge.
+        existing_sockets = self.node.inputs + self.node.outputs
+        if existing_sockets and hasattr(existing_sockets[0], 'setPosition'):
+            for socket in existing_sockets:
+                socket.setPosition()
+            self.node.updateConnectedEdges()
+
+    def computeRequiredWidth(self):
+        #width is driven only by socket labels, not by the title - the title is elided
+        #to fit instead of growing the node, so renaming a node doesn't resize it.
+        minimum_width = 100
+        required_width = minimum_width
+
+        if self.content is not None:
+            for socket_label in self.content.getContentLabels():
+                label_width = socket_label.fontMetrics().horizontalAdvance(socket_label.text())
+                required_width = max(required_width, label_width + 2 * self._edge_padding + 2 * self.socket_padding)
+
+        return max(required_width, minimum_width)
 
     def onSelected(self):
         if SELECTION_DEBUG: print("GRAPHICNODE:: --onSelected:: ")

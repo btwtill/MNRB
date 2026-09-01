@@ -16,6 +16,7 @@ class NodeEditor_QGraphicContent(QtWidgets.QWidget):
 
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setContentsMargins(3,0,3,0)
