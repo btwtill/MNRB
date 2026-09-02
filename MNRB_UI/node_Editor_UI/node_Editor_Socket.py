@@ -35,6 +35,10 @@ class NodeEditor_Socket(Serializable):
         self.setContentLabel()
 
     def getPosition(self):
+        if self.node.grNode.display_mode == self.node.grNode.DISPLAY_MODE_COLLAPSED:
+            #collapsed nodes hide every real socket and funnel all connections on
+            #each side through one merge-point dot instead
+            return self.node.grNode.getMergedSocketPosition(self.position)
         return self.node.getSocketPosition(self.index, self.position)
 
     def setContentLabel(self):

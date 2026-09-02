@@ -1,12 +1,19 @@
 from PySide6 import QtWidgets # type:ignore
 from PySide6.QtCore import Qt, QRectF, QPointF # type: ignore
 from PySide6.QtGui import QFont, QFontMetrics, QBrush, QPen, QColor, QPainterPath # type: ignore
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicCollapsedSocket #type: ignore
 
 SELECTION_DEBUG = False
 EVENT_DEBUG = False
 CLASS_DEBUG = False
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
+
+    #node display modes, matching Maya's own Node Editor 1/2/3 convention
+    DISPLAY_MODE_COLLAPSED = 1
+    DISPLAY_MODE_CONNECTIONS_ONLY = 2
+    DISPLAY_MODE_FULL = 3
+
     def __init__(self, node, parent = None):
         super().__init__(parent)
 
@@ -16,6 +23,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._last_selected_state = False
 
         self._raw_title = ""
+        self._display_mode = self.DISPLAY_MODE_FULL
 
         self.initGraphicElements()
         self.initContent()
@@ -34,6 +42,14 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     @property
     def content(self): return self.node.content if self.node else None
+
+    @property
+    def display_mode(self): return self._display_mode
+
+    @display_mode.setter
+    def display_mode(self, value):
+        self._display_mode = value
+        self.wrapGrNodeToSockets()
 
     @property
     def width(self): return self._width
@@ -64,6 +80,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._edge_padding = 5
 
         self.title_height = 20
+        self.collapsed_width = 80
 
         #initialize the variables for the Graphical Elements
         self._title_font = QFont("Verdana", 8)
@@ -105,6 +122,14 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             self.width  - 2 * self._title_padding
         )
         self.title = self.node.title
+
+        #merge-point dots for collapsed (display mode 1) nodes - all incoming
+        #connections funnel to one, all outgoing to the other. Only shown while
+        #collapsed; positioned/toggled in wrapGrNodeToSockets().
+        self.merged_input_socket = NodeEditor_QGraphicCollapsedSocket(self)
+        self.merged_output_socket = NodeEditor_QGraphicCollapsedSocket(self)
+        self.merged_input_socket.setVisible(False)
+        self.merged_output_socket.setVisible(False)
 
     def initContent(self):
         if self.content is not None:
@@ -162,13 +187,39 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
     def wrapGrNodeToSockets(self):
         if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: " % self.__class__.__name__)
-        full_socket_height = self.socket_padding + self.socket_radius
-        full_node_length = (len(self.node.inputs) * full_socket_height) + (len(self.node.outputs) * full_socket_height) + self.title_height + self.socket_padding
-        self.height = full_node_length
-        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: new grNode Height" % self.__class__.__name__, self.height)
 
-        self.width = self.computeRequiredWidth()
-        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: new grNode Width" % self.__class__.__name__, self.width)
+        all_sockets = self.node.inputs + self.node.outputs
+        #the very first call happens before initSockets() has run, while inputs/outputs
+        #are still the raw constructor arguments rather than real Socket objects
+        sockets_exist = bool(all_sockets) and hasattr(all_sockets[0], 'hasEdge')
+        labels = self.content.getContentLabels() if self.content is not None else []
+        pairs = list(zip(all_sockets, labels)) if sockets_exist else []
+
+        if self.display_mode == self.DISPLAY_MODE_COLLAPSED:
+            visible_pairs = []
+            #bypass the height property's 60px floor - a collapsed node is meant
+            #to be smaller than that, just the title row
+            self._height = self.title_height + self.socket_padding
+            self.width = self.collapsed_width
+        else:
+            if self.display_mode == self.DISPLAY_MODE_CONNECTIONS_ONLY and sockets_exist:
+                visible_pairs = [pair for pair in pairs if pair[0].hasEdge()]
+            else:
+                visible_pairs = pairs
+
+            full_socket_height = self.socket_padding + self.socket_radius
+            socket_count_for_height = len(visible_pairs) if sockets_exist else len(all_sockets)
+            self.height = (socket_count_for_height * full_socket_height) + self.title_height + self.socket_padding
+            self.width = self.computeRequiredWidth(visible_pairs if sockets_exist else None)
+
+        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: new grNode Height/Width" % self.__class__.__name__, self.height, self.width)
+
+        #show/hide each real socket dot + label to match the current display mode
+        visible_sockets = set(socket for socket, _ in visible_pairs)
+        for socket, label in pairs:
+            is_visible = socket in visible_sockets
+            label.setVisible(is_visible)
+            socket.grSocket.setVisible(is_visible)
 
         #re-apply the title width/elision and the content widget geometry, both of which
         #depend on self.width and would otherwise only ever be set once at construction time
@@ -187,24 +238,42 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         #socket dots are positioned once, at socket-creation time, against whatever
         #grNode.width/height was at that moment. Now that width/height can change later
-        #(e.g. more sockets added), every existing socket needs to be re-placed against
-        #the new size, or older sockets are left stranded at the node's old edge.
-        existing_sockets = self.node.inputs + self.node.outputs
-        if existing_sockets and hasattr(existing_sockets[0], 'setPosition'):
-            for socket in existing_sockets:
+        #(e.g. more sockets added, or the display mode changes), every existing socket
+        #needs to be re-placed against the new size, or older sockets are left stranded.
+        if sockets_exist:
+            for socket in all_sockets:
                 socket.setPosition()
             self.node.updateConnectedEdges()
 
-    def computeRequiredWidth(self):
+        #the two merge-point dots only ever show in collapsed mode
+        is_collapsed = self.display_mode == self.DISPLAY_MODE_COLLAPSED
+        self.merged_input_socket.setVisible(is_collapsed)
+        self.merged_output_socket.setVisible(is_collapsed)
+        if is_collapsed:
+            self.merged_input_socket.setPos(*self.getMergedSocketPosition(1))   # 1 == LEFT (inputs)
+            self.merged_output_socket.setPos(*self.getMergedSocketPosition(2))  # 2 == RIGHT (outputs)
+
+    def getMergedSocketPosition(self, position):
+        x = 0 if position == 1 else self.width  # 1 == LEFT (inputs), 2 == RIGHT (outputs)
+        y = self.title_height / 2
+        return [x, y]
+
+    def computeRequiredWidth(self, visible_pairs = None):
         #width is driven only by socket labels, not by the title - the title is elided
         #to fit instead of growing the node, so renaming a node doesn't resize it.
         minimum_width = 100
         required_width = minimum_width
 
-        if self.content is not None:
-            for socket_label in self.content.getContentLabels():
-                label_width = socket_label.fontMetrics().horizontalAdvance(socket_label.text())
-                required_width = max(required_width, label_width + 2 * self._edge_padding + 2 * self.socket_padding)
+        if visible_pairs is not None:
+            labels = [label for _, label in visible_pairs]
+        elif self.content is not None:
+            labels = self.content.getContentLabels()
+        else:
+            labels = []
+
+        for socket_label in labels:
+            label_width = socket_label.fontMetrics().horizontalAdvance(socket_label.text())
+            required_width = max(required_width, label_width + 2 * self._edge_padding + 2 * self.socket_padding)
 
         return max(required_width, minimum_width)
 

@@ -163,14 +163,29 @@ class NodeEditorNode(Serializable):
 
         if EVENT_DEBUG : print("NODE:: -getSocketPosition:: Calculating positions for Socket at Index: ", index, " Position: ", position)
 
-        total_amount_sockets = len(self.inputs) + len(self.outputs)
+        all_sockets = self.inputs + self.outputs
+        effective_index = index
+        total_amount_sockets = len(all_sockets)
+
+        #in connections-only display mode, hidden (unconnected) sockets are skipped
+        #entirely, so visible sockets need to be ranked/counted among themselves
+        #rather than against the full socket list
+        if self.grNode.display_mode == self.grNode.DISPLAY_MODE_CONNECTIONS_ONLY:
+            visible_sockets = [socket for socket in all_sockets if socket.hasEdge()]
+            target_socket = next((socket for socket in all_sockets if socket.index == index), None)
+            if target_socket in visible_sockets:
+                effective_index = visible_sockets.index(target_socket)
+                total_amount_sockets = len(visible_sockets)
+
+        if total_amount_sockets == 0:
+            total_amount_sockets = 1
 
         x = 0 if position == LEFT else self.grNode.width
 
         socket_area_distance = self.grNode.height - self.grNode.title_height - self.grNode.socket_padding
         socket_distance = socket_area_distance / total_amount_sockets
 
-        y = self.grNode.title_height + (socket_distance * index) + self.grNode.socket_padding
+        y = self.grNode.title_height + (socket_distance * effective_index) + self.grNode.socket_padding
 
         if EVENT_DEBUG : print("NODE:: -getSocketPosition:: X Position of Socket: ", x)
         if EVENT_DEBUG : print("NODE:: -getSocketPosition:: Y Position of Socket: ", y)
@@ -285,6 +300,7 @@ class NodeEditorNode(Serializable):
             ('title', self.title),
             ("position_x", self.grNode.scenePos().x()),
             ("position_y", self.grNode.scenePos().y()),
+            ('display_mode', self.grNode.display_mode),
             ('inputs', inputs),
             ('outputs', outputs),
             ('properties', properties)
@@ -307,6 +323,12 @@ class NodeEditorNode(Serializable):
         self.title = data['title']
 
         self.setPosition(data['position_x'], data['position_y'])
+
+        #defaults to FULL for save files predating display modes. The resulting
+        #wrap here can be based on incomplete data (edges load after all nodes do,
+        #at the scene level) - NodeEditorScene.deserialize() re-wraps every node
+        #once more after edges are restored to correct for that.
+        self.grNode.display_mode = data.get('display_mode', self.grNode.DISPLAY_MODE_FULL)
 
         data['inputs'].sort(key=lambda socket: socket['index_on_drawn_node_side'] + socket['position'] * 10000)
         data['outputs'].sort(key=lambda socket: socket['index_on_drawn_node_side'] + socket['position'] * 10000)

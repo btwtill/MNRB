@@ -103,6 +103,12 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.centerView()
         elif event.key() == Qt.Key_Escape:
             self.cancelActiveDragModes()
+        elif event.key() == Qt.Key_1:
+            self.setDisplayModeForSelectedNodes(NodeEditor_QGraphicNode.DISPLAY_MODE_COLLAPSED)
+        elif event.key() == Qt.Key_2:
+            self.setDisplayModeForSelectedNodes(NodeEditor_QGraphicNode.DISPLAY_MODE_CONNECTIONS_ONLY)
+        elif event.key() == Qt.Key_3:
+            self.setDisplayModeForSelectedNodes(NodeEditor_QGraphicNode.DISPLAY_MODE_FULL)
         else:
             super().keyPressEvent(event)
 
@@ -114,6 +120,16 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.cutting_edge.line_points = []
             self.cutting_edge.update()
             self.mode = MODE_NOOP
+
+    def setDisplayModeForSelectedNodes(self, mode) -> None:
+        selected_nodes = self.grScene.scene.getSelectedNodes()
+        if not selected_nodes:
+            return
+
+        for gr_node in selected_nodes:
+            gr_node.display_mode = mode
+
+        self.grScene.scene.history.storeHistory("Changed Node Display Mode", set_modified = True)
         
     def middleMouseButtonPress(self, event) -> None:
         if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")

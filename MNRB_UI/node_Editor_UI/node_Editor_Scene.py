@@ -396,6 +396,12 @@ class NodeEditorScene(Serializable):
             edge = all_current_edges_in_scene.pop()
             edge.remove()
 
+        #nodes deserialize (and apply their display_mode) before edges do, so a
+        #CONNECTIONS_ONLY node's hasEdge()-based socket filtering ran with no edges
+        #yet restored. Re-wrap every node now that edges are back to correct that.
+        for node in self.nodes:
+            node.grNode.wrapGrNodeToSockets()
+
         if SERIALIZE_DEBUG: print("_______________________________________________________________SCENE DESERIALIZED")
         
         return True
