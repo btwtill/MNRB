@@ -1,40 +1,37 @@
 import json
-import os
 from collections import OrderedDict
-from PySide6.QtCore import QRectF #type: ignore
-from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable # type: ignore
-from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene # type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
+from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicScene import NodeEditor_QGraphicScene #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneHistory import NodeEditorSceneHistory #type: ignore
-from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneClipboard #type: ignore
-from MNRB.MNRB_UI.node_Editor_UI.node_Editor_SceneProperties import NodeEditorSceneProperties #type: ignore
-from MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
-from MNRB.MNRB_Scene.virtual_hierarchy import MNRB_Virtual_Hierarchy #type: ignore
-from MNRB.MNRB_colors.colors import MNRBSceneColors #type: ignore
+from MNRB.MNRB_UI.mnrb_ui_utils import findIndexByAttribute #type: ignore
+from MNRB.MNRB_UI.pipeline_Editor_UI.pipeline_Editor_SceneProperties import PipelineEditorSceneProperties #type: ignore
 
 CLASS_DEBUG = False
 SERIALIZE_DEBUG = False
 SELECTION_DEBUG = False
-BUILD_DEBUG = False
 
-class NodeEditorScene(Serializable):
-    def __init__(self):
+class PipelineEditorScene(Serializable):
+    """Logical scene for the Pipeline tab's canvas - mirrors NodeEditorScene
+    (node_Editor_UI/node_Editor_Scene.py) minus everything that's rig-specific
+    (no virtual rig hierarchy, no guide/static/component build methods). Nodes here
+    are PipelineStepNode instances that each wrap one tab's existing build method."""
+
+    def __init__(self, node_editor_tab = None, skinning_tab = None):
         super().__init__()
-        
-        self.grScene = NodeEditor_QGraphicScene(self)
-        self.properties = NodeEditorSceneProperties(self)
-        self.virtual_rig_hierarchy = MNRB_Virtual_Hierarchy(self)
 
-        self.colors = MNRBSceneColors(self)
+        #the tabs step nodes actually call into to run their build
+        self.node_editor_tab = node_editor_tab
+        self.skinning_tab = skinning_tab
+
+        self.grScene = NodeEditor_QGraphicScene(self)
+        self.properties = PipelineEditorSceneProperties(self)
 
         self.nodes = []
         self.edges = []
-        
-        self.initUI()
 
-        self._deformer_dict = {}
+        self.initUI()
 
         self._last_selected_items = []
 
@@ -45,8 +42,6 @@ class NodeEditorScene(Serializable):
         self._item_selected_listeners = []
         self._items_deselected_listeners = []
 
-        self._build_has_been_triggered_listeners = []
-
         self.nodeClassSelectorFunction = None
 
         self.history = NodeEditorSceneHistory(self)
@@ -55,9 +50,7 @@ class NodeEditorScene(Serializable):
         self.grScene.itemSelected.connect(self.onItemSelected)
         self.grScene.itemsDeselected.connect(self.onItemsDeselected)
 
-        self.history.connectHistoryModifiedListenersCallback(self.properties.validateProperties)
-
-        if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
+        if CLASS_DEBUG: print("PIPELINE_EDITOR_SCENE:: -__init__:: Initialized Pipeline Editor Scene")
 
     @property
     def has_been_modified(self): return self._has_been_modified
@@ -65,53 +58,49 @@ class NodeEditorScene(Serializable):
     def has_been_modified(self, value):
         if not self._has_been_modified and value:
             self._has_been_modified = value
-
             for callback in self._has_been_modified_listeners: callback()
-    
+
         self._has_been_modified = value
         for callback in self._scene_changed_listeners: callback()
 
     def initUI(self):
         self.grScene_width = 64000
         self.grScene_height = 64000
-
         self.grScene.setGrSceneSize(self.grScene_width, self.grScene_height)
 
     def addNode(self, node):
         self.nodes.append(node)
-    
+
     def addEdge(self, edge):
         self.edges.append(edge)
-    
+
     def connectHasBeenModifiedListenerCallback(self, callback):
         self._has_been_modified_listeners.append(callback)
 
     def connectItemSelectedListenerCallback(self, callback):
         self._item_selected_listeners.append(callback)
-    
+
     def connectItemsDeselectedListenerCallback(self, callback):
         self._items_deselected_listeners.append(callback)
 
     def connectViewDragEnterListenerCallback(self, callback):
         self.getView().connectViewDragEnterListenerCallback(callback)
-    
+
     def connectViewDropListenerCallback(self, callback):
         self.getView().connectViewDropListenerCallback(callback)
 
     def connectSceneChangedCallback(self, callback):
         self._scene_changed_listeners.append(callback)
 
-    def connectBuildHasBeenTriggeredListenerCallback(self, callback):
-        self._build_has_been_triggered_listeners.append(callback)
-
     def alignSelectedNodesOnX(self):
         selected_nodes = self.getSelectedNodes()
+        if not selected_nodes: return
 
-        combined_bounding_rectangle = QRectF()
+        combined_bounding_rectangle = None
         total_height = 0
-
         for gr_node in selected_nodes:
-            combined_bounding_rectangle = combined_bounding_rectangle.united(gr_node.mapToScene(gr_node.boundingRect()).boundingRect())
+            rect = gr_node.mapToScene(gr_node.boundingRect()).boundingRect()
+            combined_bounding_rectangle = rect if combined_bounding_rectangle is None else combined_bounding_rectangle.united(rect)
             total_height += gr_node.height + 20
 
         x = combined_bounding_rectangle.left()
@@ -122,12 +111,13 @@ class NodeEditorScene(Serializable):
 
     def alignSelectedNodesOnY(self):
         selected_nodes = self.getSelectedNodes()
+        if not selected_nodes: return
 
-        combined_bounding_rectangle = QRectF()
+        combined_bounding_rectangle = None
         total_width = 0
-
         for gr_node in selected_nodes:
-            combined_bounding_rectangle = combined_bounding_rectangle.united(gr_node.mapToScene(gr_node.boundingRect()).boundingRect())
+            rect = gr_node.mapToScene(gr_node.boundingRect()).boundingRect()
+            combined_bounding_rectangle = rect if combined_bounding_rectangle is None else combined_bounding_rectangle.united(rect)
             total_width += gr_node.width + 20
 
         y = combined_bounding_rectangle.top()
@@ -137,42 +127,14 @@ class NodeEditorScene(Serializable):
             gr_node.node.setPosition(x + (total_width / len(selected_nodes)) * index, y)
 
     def removeNode(self, node):
-        if CLASS_DEBUG: 
-            print("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ")
-            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
-            for index, _node in enumerate(self.nodes):
-                print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", _node, " at Index:: ", index, " with ID: ", _node.id)
-            print("NODE_EDITOR_SCENE:: -removeNode:: Index of node to be Removed:: ", findIndexByAttribute(self.nodes, node.id))
-        
         index_node_remove = findIndexByAttribute(self.nodes, node.id)
-        #self.nodes.remove(node)
         del self.nodes[index_node_remove]
 
-        if CLASS_DEBUG: 
-            print("NODE_EDITOR_SCENE:: -removeNode:: After:: After:: ")
-            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
-            for index, _node in enumerate(self.nodes):
-                print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", _node, " at Index:: ", index, " with ID: ", _node.id)
-    
     def removeEdge(self, edge):
-        if CLASS_DEBUG: 
-            print("NODE_EDITOR_SCENE:: -removeEdge:: Before:: Edges:: ")
-            print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t Amount", len(self.edges))
-            for index, _edge in enumerate(self.edges):
-                print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge, " at Index:: ", index, " with ID: ", _edge.id)
-            print("NODE_EDITOR_SCENE:: -removeNode:: Index of edge to be Removed:: ", findIndexByAttribute(self.edges, edge.id))
-
         index_edge_remove = findIndexByAttribute(self.edges, edge.id)
         del self.edges[index_edge_remove]
 
-        if CLASS_DEBUG:
-            print("NODE_EDITOR_SCENE:: -removeEdge:: After:: Edges:: ")
-            print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t Amount", len(self.edges))
-            for index, _edge in enumerate(self.edges):
-                print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge , " at Index:: ", index, " with ID: ", _edge.id)
-
     def onItemSelected(self):
-        if SELECTION_DEBUG: print("SCENE:: --onItemSelected:: Executing On Selection Callbacks ")
         current_selected_items = self.getSelectedItems()
         if current_selected_items != self._last_selected_items:
             self._last_selected_items = current_selected_items
@@ -180,13 +142,11 @@ class NodeEditorScene(Serializable):
             for callback in self._item_selected_listeners: callback()
 
     def onItemsDeselected(self):
-        if SELECTION_DEBUG: print("SCENE:: --onItemDeselect:: Executing On Deselection Selection Callbacks")
-    
         current_selected_items = self.getSelectedItems()
         if self._last_selected_items == current_selected_items:
             return
         self.reset_last_selected_states()
-        
+
         if current_selected_items == []:
             self._last_selected_items = []
             self.history.storeHistory("Deselect Everything")
@@ -206,7 +166,6 @@ class NodeEditorScene(Serializable):
         return self.has_been_modified
 
     def getItemAt(self, pos):
-        scene_pos = self.getView().mapToScene(pos)
         return self.getView().itemAt(pos.x(), pos.y())
 
     def getSelectedItems(self):
@@ -219,9 +178,9 @@ class NodeEditorScene(Serializable):
                 nodes.append(item)
         return nodes
 
-    def getNodeFromSceneByName(self, name):
+    def getNodeFromSceneByTitle(self, title):
         for node in self.nodes:
-            if node.properties.component_name == name:
+            if node.title == title:
                 return node
 
     def getView(self):
@@ -236,131 +195,97 @@ class NodeEditorScene(Serializable):
     def getEdgeClass(self):
         return NodeEditorEdge
 
-    def getSceneRigName(self):
-        return self.properties.getRigName()
-
-    def getDeformerDict(self):
-        deformer_list = {}
-
-        for node in self.nodes:
-            deformer_entries = []
-            for deform in node.deforms:
-                deformer_entries.append({"id": deform.id, "name": deform.name})
-            deformer_list[node.getComponentFullPrefix()] = deformer_entries
-
-        return deformer_list
-
-    def getDeformById(self, deform_id):
-        for node in self.nodes:
-            for deform in node.deforms:
-                if deform.id == deform_id:
-                    return deform
-        return None
-
-    def getDeformByName(self, name):
-        for node in self.nodes:
-            for deform in node.deforms:
-                if deform.name == name:
-                    return deform
-        return None
-
     def setModified(self, state):
         self.has_been_modified = state
 
     def setNodeClassSelectorFunction(self, selector_function):
         self.nodeClassSelectorFunction = selector_function
 
-    def buildSceneGuides(self):
-        for node in self.nodes:
-            if not node.properties.is_disabled:
-                node.guideBuild()
-
-    def buildSceneStatic(self):
-        for node in self.nodes:
-            if not node.properties.is_disabled:
-                node.staticBuild()
-
-    def buildSceneComponents(self):
-        for node in self.nodes:
-            if not node.properties.is_disabled:
-                node.componentBuild()
-        for callback in self._build_has_been_triggered_listeners: callback()
-
     def displayErrorMessage(self, message):
         self.getView().displayErrorMessage(message)
 
-    def connectSceneComponents(self):
-        for node in self.nodes:
-            if not node.properties.is_disabled:
-                node.componentBuild()
-                
-        for node in self.nodes:
-            if not node.properties.is_disabled:
-                node.connectComponent()
+    def getTopologicallySortedNodes(self):
+        """Order nodes by their sequence-socket connections (input -> output).
+        Falls back to appending whatever's left if a cycle/disconnected leftover
+        would otherwise hang the sort - good enough for a build orchestration
+        graph, not meant to be a general-purpose graph algorithm."""
+        remaining = list(self.nodes)
+        ordered = []
+
+        while remaining:
+            ready = [
+                node for node in remaining
+                if not any(
+                    edge.start_socket.node in remaining
+                    for input_socket in node.inputs
+                    for edge in input_socket.edges
+                )
+            ]
+
+            if not ready:
+                ordered.extend(remaining)
+                break
+
+            for node in ready:
+                ordered.append(node)
+                remaining.remove(node)
+
+        return ordered
+
+    def buildFullPipeline(self):
+        """Runs every non-disabled step in topological order. Returns a list of
+        (node, success, message) - success is None for a skipped (disabled) step."""
+        results = []
+        for node in self.getTopologicallySortedNodes():
+            if node.properties.is_disabled:
+                results.append((node, None, "Skipped (disabled)"))
+                continue
+
+            success, message = node.runStep()
+            results.append((node, success, message))
+
+        return results
 
     def saveSceneToFile(self, filename):
-
         with open(filename, "w") as file:
             file.write(json.dumps(self.serialize(), indent=4))
-        
         self.has_been_modified = False
 
-        if SERIALIZE_DEBUG: print("SCENE: --saveSceneToFile:: Successfully stored Scene ", self, " to File: ", filename)
-
     def loadSceneFromFile(self, filename):
-
         with open(filename, "r") as file:
-            # try:
-                raw_data = file.read()
-                data = json.loads(raw_data)
-                self.deserialize(data)
-            # except json.JSONDecodeError:
-            #     raise InvalidFile("%s is not a Valid Json File" % os.path.basename(filename))
-            # except Exception as e:
-            #     print("SCENE:: --loadSceneFromFile:: Excepting while trying to load a file to the scene:: ", e)
-            
-        if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
+            raw_data = file.read()
+            data = json.loads(raw_data)
+            self.deserialize(data)
         self.history.storeHistory("Loaded From File.", set_modified = False)
 
     def clearScene(self):
         while len(self.nodes) > 0:
             self.nodes[0].remove()
-        
         self.history.storeHistory("Cleared Scene", set_modified = True)
 
     def serialize(self):
-        
-        nodes, edges = [] , []
-
-        for node in self.nodes : nodes.append(node.serialize())
-        for edge in self.edges : edges.append(edge.serialize())
+        nodes, edges = [], []
+        for node in self.nodes: nodes.append(node.serialize())
+        for edge in self.edges: edges.append(edge.serialize())
 
         properties = self.properties.serialize()
 
         serialized_data = OrderedDict([
-            ('id', self.id), 
-            ('grScene_width', self.grScene_width), 
+            ('id', self.id),
+            ('grScene_width', self.grScene_width),
             ('grScene_height', self.grScene_height),
             ('nodes', nodes),
             ('edges', edges),
             ('properties', properties)
-            ])
-
-        if SERIALIZE_DEBUG: print("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
-
+        ])
         return serialized_data
 
     def deserialize(self, data, hashmap={}, restore_id = True):
-
         hashmap = {}
 
         if restore_id: self.id = data['id']
 
         all_current_nodes_in_scene = self.nodes.copy()
-
-        if SERIALIZE_DEBUG:
-            print("_______________________________________________________________")
-            print("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
 
         self.properties.deserialize(data['properties'], hashmap, restore_id)
 
@@ -368,19 +293,12 @@ class NodeEditorScene(Serializable):
             found = None
             for node in all_current_nodes_in_scene:
                 if node.id == node_data['id']:
-                    if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Found Existing node", node, " with ID: ", node.id, " matching data ID: ", node_data['id'])
                     found = node
                     break
             if not found:
-                if SERIALIZE_DEBUG: 
-                    print("SCENE: --deserialize:: Did not find existing node matching ID:: ", node_data['id'])
-                    print("SCENE: --deserialize:: Creating New Node:: ")
                 new_node = self.getNodeClassFromData(node_data)(self)
-                if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Done Creating New Node:: ", new_node)
-                if SERIALIZE_DEBUG: print("SCENE: --deserialize:: deserializing new Node:: ", new_node)
                 new_node.deserialize(node_data, hashmap, restore_id)
             else:
-                if SERIALIZE_DEBUG: print("SCENE:: --deserialize:: Deserializing Existing Node:: ", found, ":: with Data:: ", node_data)
                 found.deserialize(node_data, hashmap, restore_id, exists = True)
                 index_to_remove = findIndexByAttribute(all_current_nodes_in_scene, found.id)
                 del all_current_nodes_in_scene[index_to_remove]
@@ -409,12 +327,4 @@ class NodeEditorScene(Serializable):
             edge = all_current_edges_in_scene.pop()
             edge.remove()
 
-        #nodes deserialize (and apply their display_mode) before edges do, so a
-        #CONNECTIONS_ONLY node's hasEdge()-based socket filtering ran with no edges
-        #yet restored. Re-wrap every node now that edges are back to correct that.
-        for node in self.nodes:
-            node.grNode.wrapGrNodeToSockets()
-
-        if SERIALIZE_DEBUG: print("_______________________________________________________________SCENE DESERIALIZED")
-        
         return True

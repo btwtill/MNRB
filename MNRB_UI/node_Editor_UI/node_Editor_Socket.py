@@ -35,14 +35,21 @@ class NodeEditor_Socket(Serializable):
         self.setContentLabel()
 
     def getPosition(self):
-        if self.node.grNode.display_mode == self.node.grNode.DISPLAY_MODE_COLLAPSED:
+        graphic_node = self.node.grNode
+        #not every graphics node class implements collapsible display modes (e.g.
+        #pipeline step nodes don't), so this is deliberately defensive rather than
+        #assuming graphic_node.display_mode always exists
+        if hasattr(graphic_node, 'display_mode') and graphic_node.display_mode == graphic_node.DISPLAY_MODE_COLLAPSED:
             #collapsed nodes hide every real socket and funnel all connections on
             #each side through one merge-point dot instead
-            return self.node.grNode.getMergedSocketPosition(self.position)
+            return graphic_node.getMergedSocketPosition(self.position)
         return self.node.getSocketPosition(self.index, self.position)
 
     def setContentLabel(self):
-        self.node.content.addSocketLabel(self.socket_value, self.position, 0)
+        #some node types (e.g. pipeline steps) don't attach a content widget at
+        #all, since they don't show per-socket labels
+        if self.node.content is not None:
+            self.node.content.addSocketLabel(self.socket_value, self.position, 0)
 
     def addEdge(self, edge):
         self.edges.append(edge)

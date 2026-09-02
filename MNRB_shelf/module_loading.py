@@ -1,18 +1,26 @@
 
 def open():
     """This function is to open the the tools UI"""
-    from PySide6.QtWidgets import QApplication, QMainWindow #type: ignore
+    from PySide6.QtWidgets import QApplication #type: ignore
     from MNRB.MNRB_UI import mnrb_editor #type: ignore
 
-    def get_active_main_window():
+    def get_active_editor_window():
+        #was previously isinstance(widget, QMainWindow), which matches ANY visible
+        #top-level QMainWindow in the whole Qt application, not specifically MNRB's
+        #own editor - too loose to reliably prevent duplicate editor windows
         for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, QMainWindow) and widget.isVisible():
+            if isinstance(widget, mnrb_editor.mnrb_Editor) and widget.isVisible():
                 return widget
         return None
 
-    if get_active_main_window() is None:
-        newEditor = mnrb_editor.mnrb_Editor()
-        newEditor.show()
+    existing_editor = get_active_editor_window()
+    if existing_editor is not None:
+        existing_editor.raise_()
+        existing_editor.activateWindow()
+        return
+
+    newEditor = mnrb_editor.mnrb_Editor()
+    newEditor.show()
 
 def reloadMNRBModules():
     print("Reloading MNRB Shelf and Modules............")
@@ -78,9 +86,6 @@ def reloadMNRBModules():
     import MNRB.MNRB_cmds_wrapper.transform_functions as TransformFunctions #type: ignore
     importlib.reload(TransformFunctions)
 
-    import MNRB.MNRB_UI.mnrb_editor as mnrb_editor #type: ignore
-    importlib.reload(mnrb_editor)
-
     import MNRB.MNRB_UI.mnrb_ui_utils as utils #type: ignore
     importlib.reload(utils)
 
@@ -113,6 +118,38 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.mnrb_skinningEditorTab as SkinningEditorTab #type: ignore
     importlib.reload(SkinningEditorTab)
+
+    #Pipeline Editor - same reload-order requirement as the Skinning Editor block
+    #above: dependencies before the modules that import them
+    import MNRB.MNRB_UI.pipeline_Editor_UI.pipeline_Editor_StepGraphicNode as PipelineEditorStepGraphicNode #type: ignore
+    importlib.reload(PipelineEditorStepGraphicNode)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.pipeline_Editor_StepNode as PipelineEditorStepNode #type: ignore
+    importlib.reload(PipelineEditorStepNode)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.pipeline_Editor_conf as PipelineEditorConf #type: ignore
+    importlib.reload(PipelineEditorConf)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.steps.control_rig_step as ControlRigStep #type: ignore
+    importlib.reload(ControlRigStep)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.steps.skinning_step as SkinningStep #type: ignore
+    importlib.reload(SkinningStep)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.steps.output_path_step as OutputPathStep #type: ignore
+    importlib.reload(OutputPathStep)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.pipeline_Editor_SceneProperties as PipelineEditorSceneProperties #type: ignore
+    importlib.reload(PipelineEditorSceneProperties)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.pipeline_Editor_Scene as PipelineEditorScene #type: ignore
+    importlib.reload(PipelineEditorScene)
+
+    import MNRB.MNRB_UI.pipeline_Editor_UI.pipeline_Editor_Widget as PipelineEditorWidget #type: ignore
+    importlib.reload(PipelineEditorWidget)
+
+    import MNRB.MNRB_UI.mnrb_pipelineEditorTab as PipelineEditorTab #type: ignore
+    importlib.reload(PipelineEditorTab)
 
     import MNRB.MNRB_UI.node_Editor_UI.node_Editor_multiEditPropertiesWidget as MNRBMultiEditWidget  #type: ignore
     importlib.reload(MNRBMultiEditWidget)
@@ -225,3 +262,10 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.preferences_UI.preferences_widget as MNRBPreferences  #type: ignore
     importlib.reload(MNRBPreferences)
+
+    #mnrb_editor.py imports mnrb_nodeEditorTab/mnrb_skinningEditorTab/mnrb_pipelineEditorTab/
+    #MNRBPreferences directly at its own module level, so it has to reload last -
+    #this used to reload first (before any of those), meaning it could silently
+    #hold stale references to all three tab classes on a second reload
+    import MNRB.MNRB_UI.mnrb_editor as mnrb_editor #type: ignore
+    importlib.reload(mnrb_editor)

@@ -109,8 +109,37 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             self.setDisplayModeForSelectedNodes(NodeEditor_QGraphicNode.DISPLAY_MODE_CONNECTIONS_ONLY)
         elif event.key() == Qt.Key_3:
             self.setDisplayModeForSelectedNodes(NodeEditor_QGraphicNode.DISPLAY_MODE_FULL)
+        elif event.key() == Qt.Key_M:
+            self.toggleDisabledForSelectedNodes()
         else:
             super().keyPressEvent(event)
+
+    def toggleDisabledForSelectedNodes(self) -> None:
+        #generic across both canvases - both rig-component nodes and pipeline
+        #steps expose a disabled_checkbox on their properties (different classes,
+        #same attribute name/shape). Driven through the checkbox itself, not by
+        #setting is_disabled directly, so its stateChanged wiring (which is what
+        #actually updates is_disabled and marks things modified on each class)
+        #fires normally and the checkbox stays visually in sync if its properties
+        #panel is open.
+        selected_nodes = self.grScene.scene.getSelectedNodes()
+        if not selected_nodes:
+            return
+
+        applicable_nodes = [gr_node for gr_node in selected_nodes if hasattr(gr_node.node.properties, 'disabled_checkbox')]
+        if not applicable_nodes:
+            return
+
+        #if any selected node is currently enabled, this toggle disables all of
+        #them; only re-enables when every selected node was already disabled -
+        #mirrors how a single keypress across a mixed selection should behave
+        new_state = not all(gr_node.node.properties.is_disabled for gr_node in applicable_nodes)
+
+        for gr_node in applicable_nodes:
+            gr_node.node.properties.disabled_checkbox.setChecked(new_state)
+            gr_node.update()
+
+        self.grScene.scene.history.storeHistory("Toggled Node Disabled State", set_modified = True)
 
     def cancelActiveDragModes(self) -> None:
         if self.mode == MODE_EDGEDRAG:
@@ -449,6 +478,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 print("GRAPHICSVIEW:: --deleteSelected:: \tLogical Edge \t", edge.edge)
 
         for node in selected_nodes:
+            if not getattr(node.node, 'is_deletable', True):
+                if REMOVE_DEBUG: print("GRAPHICSVIEW:: --deleteSelected:: skipping non-deletable node:: ", node.node)
+                continue
             if node.node in node.node.scene.nodes:
                 if REMOVE_DEBUG: print("GRAPHICSVIEW:: --deleteSelected:: about to Remove Node")
                 node.node.remove()

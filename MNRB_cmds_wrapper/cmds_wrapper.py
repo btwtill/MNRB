@@ -363,6 +363,17 @@ class MC:
         cmds.file(path, i=True, type="mayaBinary", mergeNamespacesOnClash = False, namespace=namespace)
 
     @staticmethod
+    def exportSceneAs(file_path) -> None:
+        #exportAll writes a copy without changing the current scene's own file
+        #association - a package/ship action should never rename the artist's
+        #actual working file out from under them
+        cmds.file(file_path, exportAll=True, type="mayaBinary", force=True)
+
+    @staticmethod
+    def exportSelectedAs(file_path) -> None:
+        cmds.file(file_path, exportSelected=True, type="mayaBinary", force=True)
+
+    @staticmethod
     def selectNamespace(namespace) -> list:
         return cmds.ls(namespace + ":*")
     

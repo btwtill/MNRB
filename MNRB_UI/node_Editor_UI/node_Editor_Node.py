@@ -23,9 +23,13 @@ class NodeEditorNode(Serializable):
         super().__init__()
 
         self.scene = scene
-        
+
         self._title = title
-        
+
+        #opt-out for a node type that must always stay in the graph (e.g. the
+        #pipeline's OutputPathStep) - checked by NodeEditor_QGraphicView.deleteSelected()
+        self.is_deletable = True
+
         self.inputs = inputs
         self.outputs = outputs
 
@@ -300,7 +304,10 @@ class NodeEditorNode(Serializable):
             ('title', self.title),
             ("position_x", self.grNode.scenePos().x()),
             ("position_y", self.grNode.scenePos().y()),
-            ('display_mode', self.grNode.display_mode),
+            #not every graphics node class implements collapsible display modes
+            #(e.g. pipeline step nodes don't) - defensive rather than assuming
+            #self.grNode.display_mode always exists
+            ('display_mode', getattr(self.grNode, 'display_mode', None)),
             ('inputs', inputs),
             ('outputs', outputs),
             ('properties', properties)
@@ -324,11 +331,14 @@ class NodeEditorNode(Serializable):
 
         self.setPosition(data['position_x'], data['position_y'])
 
-        #defaults to FULL for save files predating display modes. The resulting
-        #wrap here can be based on incomplete data (edges load after all nodes do,
-        #at the scene level) - NodeEditorScene.deserialize() re-wraps every node
-        #once more after edges are restored to correct for that.
-        self.grNode.display_mode = data.get('display_mode', self.grNode.DISPLAY_MODE_FULL)
+        #defaults to FULL for save files predating display modes, and is skipped
+        #entirely for graphics node classes that don't implement collapsible
+        #display modes at all (e.g. pipeline step nodes). The resulting wrap here
+        #can be based on incomplete data (edges load after all nodes do, at the
+        #scene level) - NodeEditorScene.deserialize() re-wraps every node once
+        #more after edges are restored to correct for that.
+        if hasattr(self.grNode, 'display_mode'):
+            self.grNode.display_mode = data.get('display_mode', self.grNode.DISPLAY_MODE_FULL)
 
         data['inputs'].sort(key=lambda socket: socket['index_on_drawn_node_side'] + socket['position'] * 10000)
         data['outputs'].sort(key=lambda socket: socket['index_on_drawn_node_side'] + socket['position'] * 10000)

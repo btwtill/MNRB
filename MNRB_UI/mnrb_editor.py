@@ -8,6 +8,7 @@ from MNRB.MNRB_UI.mnrb_ui_utils import getMayaWindow # type: ignore
 from MNRB.MNRB_UI.mnrb_nodeEditorTab import mnrb_NodeEditorTab # type: ignore
 from MNRB.MNRB_UI.preferences_UI.preferences_widget import MNRBPreferences #type: ignore
 from MNRB.MNRB_UI.mnrb_skinningEditorTab import mnrb_SkinningEditorTab #type: ignore
+from MNRB.MNRB_UI.mnrb_pipelineEditorTab import mnrb_PipelineEditorTab #type: ignore
 
 CLASS_DEBUG = True
 
@@ -29,6 +30,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.mnrb_base_editor_path = None
         self.mnrb_skinning_editor_path_name = "mnrb_skinning_editor"
         self.mnrb_skinning_editor_path = None
+        self.mnrb_pipeline_editor_path_name = "mnrb_pipeline_editor"
+        self.mnrb_pipeline_editor_path = None
 
         self.display_overlay = True
 
@@ -45,6 +48,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         
         self.mnrb_base_editor_path = os.path.join(self._project_path, self.mnrb_base_editor_path_name)
         self.mnrb_skinning_editor_path = os.path.join(self._project_path, self.mnrb_skinning_editor_path_name)
+        self.mnrb_pipeline_editor_path = os.path.join(self._project_path, self.mnrb_pipeline_editor_path_name)
 
     @property
     def project_name(self): return self._project_name
@@ -86,11 +90,13 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.setupNodeEditorTab()
         self.setupSkinEditorTab()
+        self.setupPipelineEditorTab()
         self.setupControlEditorTab()
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getSkinningEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
+        self.getPipelineEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
 
 
         if self.display_overlay:
@@ -102,6 +108,11 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
         self.getNodeEditorTab().central_widget.scene.connectBuildHasBeenTriggeredListenerCallback(self.getSkinningEditorTab().pullDeformerDictFromNodeEditor)
         self.getSkinningEditorTab().connectSelectionChangedListenerCallback(self.updateEditMenu)
+        #same fix as the Skinning tab needed earlier - selecting a node fires
+        #PipelineEditorScene.onItemSelected() -> history.storeHistory(), but nothing
+        #was telling the Edit menu (and therefore action_delete's enabled state) to
+        #re-check itself when that happens on the Pipeline tab specifically
+        self.getPipelineEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
 
         self.tabs.currentChanged.connect(self.updateCurrentTab)
 
@@ -131,6 +142,17 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         # Add the second tab to the QTabWidget
         self.tabs.addTab(second_tab_container, "Skin")
+
+    def setupPipelineEditorTab(self):
+        self.pipelineEditorTabWindow = mnrb_PipelineEditorTab(self.nodeEditorTabWindow, self.skinningEditorTabWindow)
+
+        third_tab_container = QtWidgets.QWidget()
+        third_tab_layout = QtWidgets.QVBoxLayout(third_tab_container)
+        third_tab_container.is_tab_widget = True
+
+        third_tab_layout.addWidget(self.pipelineEditorTabWindow)
+
+        self.tabs.addTab(third_tab_container, "Pipeline")
 
     def setupControlEditorTab(self):
         # Third tab PlaceHolder Widget
@@ -345,6 +367,8 @@ class mnrb_Editor(QtWidgets.QMainWindow):
                     os.mkdir(self.mnrb_base_editor_path)
                 if self.mnrb_skinning_editor_path:
                     os.mkdir(self.mnrb_skinning_editor_path)
+                if self.mnrb_pipeline_editor_path:
+                    os.mkdir(self.mnrb_pipeline_editor_path)
 
                 if self.display_overlay:
                     self.setCentralWidget(self.tabs)
@@ -388,8 +412,14 @@ class mnrb_Editor(QtWidgets.QMainWindow):
             print("MNRB_EDITOR:: dipslay Overlay:: ", self.display_overlay)
             print("MNRB_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
 
+        #back-compat: a project created before the Pipeline tab existed won't have
+        #this subfolder yet
+        if not os.path.isdir(self.mnrb_pipeline_editor_path):
+            os.mkdir(self.mnrb_pipeline_editor_path)
+
         self.getNodeEditorTab().onOpenFile(self.mnrb_base_editor_path)
         self.getSkinningEditorTab().onOpenFile(self.mnrb_skinning_editor_path)
+        self.getPipelineEditorTab().onOpenFile(self.mnrb_pipeline_editor_path)
         self.statusBar().showMessage('Opened project from ' + str(self.project_path), 5000)
 
     def onSaveProject(self):
@@ -400,6 +430,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
             self.getNodeEditorTab().onSaveFile(os.path.join(self.mnrb_base_editor_path, self.project_name + "_graph.json")) # type: ignore
             self.getSkinningEditorTab().onSaveFile(os.path.join(self.mnrb_skinning_editor_path, self.project_name + "_graph.json")) # type: ignore
+            self.getPipelineEditorTab().onSaveFile(os.path.join(self.mnrb_pipeline_editor_path, self.project_name + "_graph.json")) # type: ignore
 
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
@@ -535,7 +566,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.preference_widget.show()
 
     def isModified(self):
-        return self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified()
+        return self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified() or self.getPipelineEditorTab().isModified()
 
     def closeEvent(self, event):
         if self.projectNeedsSaving():
@@ -617,6 +648,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
     def getSkinningEditorTab(self):
         return self.tabs.widget(1).findChildren(QtWidgets.QWidget)[0]
+
+    def getPipelineEditorTab(self):
+        return self.tabs.widget(2).findChildren(QtWidgets.QMainWindow)[0]
 
     def getMainWindowWidgetsFromTab(self, tab_index):
         return self.tabs.widget(tab_index).findChildren(QtWidgets.QMainWindow)
