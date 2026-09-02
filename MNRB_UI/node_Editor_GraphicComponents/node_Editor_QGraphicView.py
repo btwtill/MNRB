@@ -3,7 +3,7 @@ from PySide6 import QtWidgets # type: ignore
 from PySide6.QtCore import Qt, QEvent, Signal, QPoint, QRect, QRectF, QPointF # type: ignore
 from PySide6.QtGui import QPainter, QMouseEvent, QPen, QColor # type:ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_DragEdge import NodeEditorDragEdge #type: ignore
-from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket #type: ignore
+from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicSocket, NodeEditor_QGraphicCollapsedSocket #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.MNRB_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.MNRB_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
@@ -213,15 +213,31 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                     item_counter += 1
             print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicEdges")
             
+    def isNodeRelatedItem(self, item) -> bool:
+        #anything visually part of a node - not just the grNode/title item itself,
+        #which are the only things carrying a direct .node attribute, but also the
+        #proxy widget hosting its socket labels and the socket dots themselves.
+        #Without this, shift/ctrl-click additive selection only worked when the
+        #click happened to land on the title bar.
+        if item is None:
+            return True
+        if isinstance(item, NodeEditor_QGraphicEdge):
+            return True
+        if hasattr(item, 'node'):
+            return True
+        if isinstance(item, (NodeEditor_QGraphicSocket, NodeEditor_QGraphicCollapsedSocket)):
+            return True
+        if isinstance(item, QtWidgets.QGraphicsProxyWidget):
+            return True
+        return False
+
     def leftMouseButtonPress(self, event):
 
         item_on_click = self.getItemAtEvent(event)
         self.last_mouse_button_press_position = self.mapToScene(event.pos())
 
-        if (hasattr(item_on_click, 'node') or 
-            isinstance(item_on_click, NodeEditor_QGraphicEdge) or
-            item_on_click is None):
-            
+        if self.isNodeRelatedItem(item_on_click):
+
             if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
                 if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Shift Click On Node")
 
@@ -267,9 +283,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         item_on_release = self.getItemAtEvent(event)
 
-        if (hasattr(item_on_release, 'node') or 
-            isinstance(item_on_release, NodeEditor_QGraphicEdge) or 
-            item_on_release is None):
+        if self.isNodeRelatedItem(item_on_release):
 
             if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
                 if EVENT_DEBUG:
