@@ -90,7 +90,9 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
-        
+        self.getSkinningEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
+
+
         if self.display_overlay:
             self.setupProjectOverlay()
         else:
@@ -99,6 +101,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
 
         self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
         self.getNodeEditorTab().central_widget.scene.connectBuildHasBeenTriggeredListenerCallback(self.getSkinningEditorTab().pullDeformerDictFromNodeEditor)
+        self.getSkinningEditorTab().connectSelectionChangedListenerCallback(self.updateEditMenu)
 
         self.tabs.currentChanged.connect(self.updateCurrentTab)
 
@@ -465,7 +468,12 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         except Exception as e: print(e)
 
     def onEditDelete(self):
-        self.getNodeEditorTab().onDelete()
+        #dispatch to whichever tab is actually active, matching how updateEditMenu
+        #already generically enables/disables this action per-tab - this used to
+        #be hardcoded to the node editor regardless of which tab had focus
+        current_tab = self.getCurrentTabWidget()
+        if current_tab is not None:
+            current_tab.onDelete()
 
     def onEditCopy(self):
         self.getNodeEditorTab().onEditCopy()
@@ -527,7 +535,7 @@ class mnrb_Editor(QtWidgets.QMainWindow):
         self.preference_widget.show()
 
     def isModified(self):
-        return self.getNodeEditorTab().isModified()
+        return self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified()
 
     def closeEvent(self, event):
         if self.projectNeedsSaving():

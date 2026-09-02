@@ -93,6 +93,24 @@ def reloadMNRBModules():
     import MNRB.MNRB_UI.mnrb_nodeEditorTab as NodeEditorTab #type: ignore
     importlib.reload(NodeEditorTab)
 
+    #Skinning Editor - must reload before mnrb_skinningEditorTab below, since that
+    #module imports all of these at its own module level and would otherwise keep
+    #holding stale class references across repeated reloads
+    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Cluster as SkinningEditorCluster #type: ignore
+    importlib.reload(SkinningEditorCluster)
+
+    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_ClusterComponentWidget as SkinningEditorClusterComponentWidget #type: ignore
+    importlib.reload(SkinningEditorClusterComponentWidget)
+
+    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList as SkinningEditorDeformList #type: ignore
+    importlib.reload(SkinningEditorDeformList)
+
+    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_ClusterList as SkinningEditorClusterList #type: ignore
+    importlib.reload(SkinningEditorClusterList)
+
+    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar as SkinningEditorToolbar #type: ignore
+    importlib.reload(SkinningEditorToolbar)
+
     import MNRB.MNRB_UI.mnrb_skinningEditorTab as SkinningEditorTab #type: ignore
     importlib.reload(SkinningEditorTab)
 
@@ -173,13 +191,6 @@ def reloadMNRBModules():
 
     import MNRB.MNRB_UI.node_Editor_Exceptions.node_Editor_RegistrationException as NodeEditorRegistrationException #type: ignore
     importlib.reload(NodeEditorRegistrationException)
-
-    #Skining Editor
-    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_DeformList as SkinningEditorDeformList #type: ignore
-    importlib.reload(SkinningEditorDeformList)
-
-    import MNRB.MNRB_UI.skinning_Editor_UI.skinning_Editor_Toolbar as SkinningEditorToolbar #type: ignore
-    importlib.reload(SkinningEditorToolbar)
 
     #Shapes
     import MNRB.MNRB_Guides.MNRB_Guide_Shapes.locator_guide_shape as MNRBLocatorGuide #type: ignore

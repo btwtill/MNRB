@@ -154,6 +154,19 @@ class SkinningEditorCluster(Serializable):
         MC.importDeformerWeights(self.maya_skin_cluster_node, self.target_mesh, file_path)
         return True, file_path
 
+    def hasStoredWeights(self, folder_path):
+        return os.path.isfile(self.getWeightsFilePath(folder_path))
+
+    def removeStoredWeights(self, folder_path):
+        file_path = self.getWeightsFilePath(folder_path)
+
+        if not os.path.isfile(file_path):
+            return False, "No stored weights file found for '%s'" % self.cluster_name
+
+        os.remove(file_path)
+        self._exported_influence_names = set()
+        return True, file_path
+
     def areWeightsValid(self):
         if not self._exported_influence_names:
             return False
