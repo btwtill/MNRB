@@ -46,4 +46,6 @@ class MNRB_Names():
     output_suffix = "_srtOut"
     input_suffix = "_srtIn"
 
+    skincluster_suffix = "_skinCluster"
+
     

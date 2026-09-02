@@ -1,3 +1,4 @@
+import os
 import maya.cmds as cmds #type: ignore
 import maya.api.OpenMaya as om #type: ignore
 import maya.mel as mel #type:ignore
@@ -535,6 +536,42 @@ class MC:
             return cmds.createNode("aimMatrix", name = name + "_aimMtx_fNode_UW")
         else:
             return cmds.createNode("aimMatrix", name = name + "_aimMtx_fNode")
+
+# Skinning Functions
+    @staticmethod
+    def getViewportSelection() -> list:
+        return cmds.ls(sl=True)
+
+    @staticmethod
+    def objectIsMesh(name) -> bool:
+        if cmds.objectType(name) == "mesh":
+            return True
+        shapes = cmds.listRelatives(name, shapes=True, type="mesh") or []
+        return len(shapes) > 0
+
+    @staticmethod
+    def createSkinCluster(joint_names, mesh_name, cluster_name) -> str:
+        skin_cluster = cmds.skinCluster(*joint_names, mesh_name, name=cluster_name, toSelectedBones=True)
+        MC.clearSelection()
+        return skin_cluster[0]
+
+    #exact deformerWeights flags to be verified/adjusted against the target Maya
+    #version's documentation once this is exercised for real
+    @staticmethod
+    def exportDeformerWeights(deformer_name, mesh_name, file_path) -> None:
+        directory, file_name = os.path.split(file_path)
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
+        cmds.select(mesh_name)
+        cmds.deformerWeights(file_name, path=directory, deformer=deformer_name, export=True)
+        MC.clearSelection()
+
+    @staticmethod
+    def importDeformerWeights(deformer_name, mesh_name, file_path) -> None:
+        directory, file_name = os.path.split(file_path)
+        cmds.select(mesh_name)
+        cmds.deformerWeights(file_name, path=directory, deformer=deformer_name, im=True, method="index")
+        MC.clearSelection()
 
 # Om functions
     @staticmethod

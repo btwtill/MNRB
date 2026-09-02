@@ -243,12 +243,26 @@ class NodeEditorScene(Serializable):
         deformer_list = {}
 
         for node in self.nodes:
-            deformer_names = []
+            deformer_entries = []
             for deform in node.deforms:
-                deformer_names.append(deform.name)
-            deformer_list[node.getComponentFullPrefix()] = deformer_names
+                deformer_entries.append({"id": deform.id, "name": deform.name})
+            deformer_list[node.getComponentFullPrefix()] = deformer_entries
 
         return deformer_list
+
+    def getDeformById(self, deform_id):
+        for node in self.nodes:
+            for deform in node.deforms:
+                if deform.id == deform_id:
+                    return deform
+        return None
+
+    def getDeformByName(self, name):
+        for node in self.nodes:
+            for deform in node.deforms:
+                if deform.name == name:
+                    return deform
+        return None
 
     def setModified(self, state):
         self.has_been_modified = state

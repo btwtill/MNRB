@@ -29,7 +29,10 @@ class SkinningEditorDeformList(QListWidget):
             base_item.setFlags(base_item.flags() & ~Qt.ItemIsSelectable)
 
             for value in self.deformer_dict[key]:
-                item = self.addDragListItem(value, "")
+                #getDeformerDict() now returns {"id", "name"} entries instead of bare
+                #name strings, so a future drag-drop onto a skinCluster container has
+                #an id to work with, not just display text
+                item = self.addDragListItem(value["name"], "")
                 list_group_item.addListItem(item)
 
     def addDragListItem(self, name, icon=None):
