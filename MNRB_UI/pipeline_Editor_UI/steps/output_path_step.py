@@ -61,8 +61,9 @@ class OutputPathStepProperties(PipelineStepProperties):
 class OutputPathStep(PipelineStepNode):
     """The pipeline's terminal node - holds the output directory for the full rig
     build and, on run, exports the scene there. Input only (nothing runs after
-    packaging) and cannot be deleted, since a pipeline without a destination
-    doesn't mean anything."""
+    packaging). At least one Output Path node must always remain in the graph,
+    since a pipeline without a destination doesn't mean anything - see
+    is_deletable below for the rule once more than one exists."""
 
     operation_code = OPERATIONCODE_OUTPUTPATHSTEP
     operation_title = "Output Path"
@@ -71,7 +72,19 @@ class OutputPathStep(PipelineStepNode):
 
     def __init__(self, scene):
         super().__init__(scene, inputs = [["In", SocketTypes.sequence, True]], outputs = [])
-        self.is_deletable = False
+
+    @property
+    def is_deletable(self):
+        #deletable as soon as a sibling Output Path node exists to take over -
+        #only the last remaining one is protected
+        output_path_nodes = [node for node in self.scene.nodes if isinstance(node, OutputPathStep)]
+        return len(output_path_nodes) > 1
+
+    @is_deletable.setter
+    def is_deletable(self, value):
+        #NodeEditorNode.__init__ unconditionally assigns self.is_deletable - swallow
+        #it here, deletability is always computed live from sibling count above
+        pass
 
     def runStep(self):
         output_directory = self.properties.output_directory
@@ -116,6 +129,4 @@ class OutputPathStep(PipelineStepNode):
         return True, "Exported to %s" % file_path
 
     def deserialize(self, data, hashmap = {}, restore_id = True, exists = False):
-        result = super().deserialize(data, hashmap, restore_id, exists)
-        self.is_deletable = False
-        return result
+        return super().deserialize(data, hashmap, restore_id, exists)
