@@ -144,8 +144,6 @@ def reloadROSEModules():
     import MNRB.ROSE_UI.pipeline_Editor_UI.steps.control_rig_step as ControlRigStep #type: ignore
     importlib.reload(ControlRigStep)
 
-    #output_path_step must reload before skinning_step - skinning_step now
-    #imports OutputPathStep at module level to check whether it's enabled
     import MNRB.ROSE_UI.pipeline_Editor_UI.steps.output_path_step as OutputPathStep #type: ignore
     importlib.reload(OutputPathStep)
 

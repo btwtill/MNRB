@@ -577,14 +577,16 @@ class MC:
         #skin_method: 0=Classic Linear, 1=Dual Quaternion, 2=Weight Blended
         #normalize_weights: 0=None, 1=Interactive, 2=Post
         #weight_distribution: 0=Distance, 1=Neighbors
-        #allow_multiple_bind_poses maps to skinCluster's -mbm/multipleBindPose flag -
-        #verify this against your Maya version's Python command reference the first
-        #time this is exercised for real, same caveat as exportDeformerWeights below
+        #allow_multiple_bind_poses is intentionally NOT passed through - confirmed
+        #wrong as multipleBindPose (TypeError: Invalid flag). Get the real flag by
+        #using Maya's Bind Skin option box with that checkbox toggled and reading
+        #the skinCluster command Maya echoes to the Script Editor, then it can be
+        #wired back in here
         skin_cluster = cmds.skinCluster(
             *joint_names, mesh_name, name=cluster_name, toSelectedBones=True,
             bindMethod=bind_method, skinMethod=skin_method, normalizeWeights=normalize_weights,
             weightDistribution=weight_distribution, maximumInfluences=maximum_influences,
-            obeyMaxInfluences=obey_maximum_influences, multipleBindPose=allow_multiple_bind_poses
+            obeyMaxInfluences=obey_maximum_influences
         )
         MC.clearSelection()
         return skin_cluster[0]
