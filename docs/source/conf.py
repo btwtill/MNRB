@@ -14,7 +14,7 @@ print(path)
 sys.path.insert(0, path)
 
 
-project = 'MNRB'
+project = 'ROSE'
 copyright = '2025, Till Pfarr'
 author = 'Till Pfarr'
 release = '0.1.0'

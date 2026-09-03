@@ -3,4 +3,4 @@ Modules
 
 .. toctree::
 
-    MNRB_shelf
+    ROSE_shelf

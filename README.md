@@ -23,10 +23,10 @@ There access a new python tab and enter the following code
 ```
 Python: 
 
-from MNRB.MNRB_shelf import mnrb_shelf_utility
+from MNRB.ROSE_shelf import rose_shelf_utility
 import importlib
-importlib.reload(mnrb_shelf_utility)
-mnrb_shelf_utility.loadMNRBShelf(name="mnrb_shelf")
+importlib.reload(rose_shelf_utility)
+rose_shelf_utility.loadROSEShelf(name="rose_shelf")
 
 ```
 
@@ -41,13 +41,13 @@ import maya.utils
 
 
 # ==========================================
-# Load MNRB Shelf
+# Load ROSE Shelf
 # ==========================================
 
-from MNRB.MNRB_shelf import mnrb_shelf_utility
+from MNRB.ROSE_shelf import rose_shelf_utility
 
 def load_user_shelf():
-    mnrb_shelf_utility.loadMNRBShelf(name="mnrb_shelf")
+    rose_shelf_utility.loadROSEShelf(name="rose_shelf")
 
 maya.utils.executeDeferred("load_user_shelf()")
 ```
