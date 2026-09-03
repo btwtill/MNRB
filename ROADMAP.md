@@ -50,6 +50,12 @@ Its own tab for authoring and managing control curve shapes as swappable layers 
 
 Its own tab for building and controlling a curve-net-based mesh deformation system — not yet scoped in detail (net topology, drive/follow relationships, and how it plugs into the Skinning/Pipeline build chain are all open design questions). Greenfield: no reserved naming or partial infrastructure exists for this yet, unlike Phase 6.
 
+## Phase 8 — Attribute Editor tab
+
+Its own tab that gathers all attributes exposed by the components in the current rig — mirroring how the Skinning Editor's deform list gathers deforms (`SkinningEditorCluster`/`skinning_Editor_DeformList.py`'s pattern of collecting, refreshing, and diff-tracking items from across the rig, rather than authoring them fresh in this tab). Once gathered, each attribute can be assigned to a control, and building this stage proxies the assigned attributes onto their target controls (`cmds.addAttr(..., proxy=...)`-style) so they're animatable/keyable directly from the control after build. Per-attribute keyable/non-keyable is configurable at assignment time.
+
+Directly depends on the **Attribute system for components** backlog item below — this tab is the UI for gathering and assigning attributes that item's more general component-attribute system would expose, so that item effectively needs to land first (or alongside) rather than after.
+
 ## Backlog (not scheduled into a phase yet)
 
 - **Tab-search to add/find nodes** in the Node Editor (type-to-search node creation, and a way to jump to an existing node by name) — quality-of-life on top of an already-functional editor, not an MVP blocker.

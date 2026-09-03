@@ -235,14 +235,24 @@ class PipelineEditorScene(Serializable):
     def buildFullPipeline(self):
         """Runs every non-disabled step in topological order. Returns a list of
         (node, success, message) - success is None for a skipped (disabled) step."""
+        ordered_nodes = self.getTopologicallySortedNodes()
+
         results = []
-        for node in self.getTopologicallySortedNodes():
+        for node in ordered_nodes:
             if node.properties.is_disabled:
                 results.append((node, None, "Skipped (disabled)"))
                 continue
 
             success, message = node.runStep()
             results.append((node, success, message))
+
+        #revert pass, regardless of each step's success/failure - a step that
+        #temporarily mutated the scene purely to produce a clean export (e.g.
+        #SkinningStep's mesh reparenting) shouldn't leave the working scene
+        #reorganized just because the run is over. Reverse order mirrors LIFO
+        #cleanup of whatever was set up going forward through the chain.
+        for node in reversed(ordered_nodes):
+            node.revertStep()
 
         return results
 

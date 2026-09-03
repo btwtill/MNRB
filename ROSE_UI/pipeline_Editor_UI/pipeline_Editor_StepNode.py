@@ -63,6 +63,14 @@ class PipelineStepNode(NodeEditorNode):
         """Returns (success: bool, message: str). Override in concrete step types."""
         return False, "runStep() not implemented for %s" % self.__class__.__name__
 
+    def revertStep(self):
+        """Called on every step after a full pipeline run finishes, regardless of
+        success/failure, so a step that temporarily mutates the scene purely to
+        produce a clean export (e.g. SkinningStep's mesh reparenting) can undo
+        that afterward. No-op by default - only override if runStep() left
+        something behind that shouldn't persist in the working scene."""
+        pass
+
     def serialize(self):
         result_data = super().serialize()
         result_data['operation_code'] = self.__class__.operation_code

@@ -11,6 +11,12 @@ class SkinningStep(PipelineStepNode):
     operation_title = "Skinning"
     icon = ""
 
+    def __init__(self, scene):
+        super().__init__(scene)
+        #(mesh, original_parent_or_None) for every mesh moved by this run -
+        #consumed and cleared by revertStep()
+        self._reparent_actions = []
+
     def runStep(self):
         skinning_tab = self.scene.skinning_tab
         if skinning_tab is None:
@@ -63,6 +69,22 @@ class SkinningStep(PipelineStepNode):
 
         for mesh in target_meshes:
             current_parent = MC.getObjectParentNode(mesh)
-            if current_parent and current_parent[0] == geometry_group:
+            original_parent = current_parent[0] if current_parent else None
+            if original_parent == geometry_group:
                 continue
             MC.parentObject(mesh, geometry_group)
+            self._reparent_actions.append((mesh, original_parent))
+
+    def revertStep(self):
+        #reverse order so a mesh that was reparented under another mesh that
+        #also moved this run gets its original parent restored before that
+        #parent itself moves back
+        for mesh, original_parent in reversed(self._reparent_actions):
+            if not MC.objectExists(mesh):
+                continue
+            if original_parent is not None and MC.objectExists(original_parent):
+                MC.parentObject(mesh, original_parent)
+            else:
+                MC.unparentObject(mesh)
+
+        self._reparent_actions = []

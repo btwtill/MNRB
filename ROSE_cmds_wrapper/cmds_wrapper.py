@@ -57,6 +57,11 @@ class MC:
         MC.clearSelection()
 
     @staticmethod
+    def unparentObject(child):
+        cmds.parent(child, world=True)
+        MC.clearSelection()
+
+    @staticmethod
     def parentShape(shape, parent):
         cmds.parent(shape, parent, shape=True, relative=True)
         MC.clearSelection()
@@ -357,6 +362,10 @@ class MC:
     def createOrientConstraint(source_object, target_object) -> str:
         return cmds.orientConstraint(source_object, target_object)
 
+    @staticmethod
+    def createParentConstraint(driver, driven, maintain_offset = True) -> str:
+        return cmds.parentConstraint(driver, driven, maintainOffset=maintain_offset)[0]
+
 # Maya Org Functios
     @staticmethod
     def importBinaryFile(path, namespace = "import"):
@@ -561,8 +570,22 @@ class MC:
         return len(shapes) > 0
 
     @staticmethod
-    def createSkinCluster(joint_names, mesh_name, cluster_name) -> str:
-        skin_cluster = cmds.skinCluster(*joint_names, mesh_name, name=cluster_name, toSelectedBones=True)
+    def createSkinCluster(joint_names, mesh_name, cluster_name, bind_method = 0, skin_method = 0,
+                           normalize_weights = 1, weight_distribution = 0, maximum_influences = 5,
+                           obey_maximum_influences = True, allow_multiple_bind_poses = True) -> str:
+        #bind_method: 0=Closest Distance, 1=Closest in Hierarchy, 2=Heat Map, 3=Geodesic Voxel
+        #skin_method: 0=Classic Linear, 1=Dual Quaternion, 2=Weight Blended
+        #normalize_weights: 0=None, 1=Interactive, 2=Post
+        #weight_distribution: 0=Distance, 1=Neighbors
+        #allow_multiple_bind_poses maps to skinCluster's -mbm/multipleBindPose flag -
+        #verify this against your Maya version's Python command reference the first
+        #time this is exercised for real, same caveat as exportDeformerWeights below
+        skin_cluster = cmds.skinCluster(
+            *joint_names, mesh_name, name=cluster_name, toSelectedBones=True,
+            bindMethod=bind_method, skinMethod=skin_method, normalizeWeights=normalize_weights,
+            weightDistribution=weight_distribution, maximumInfluences=maximum_influences,
+            obeyMaxInfluences=obey_maximum_influences, multipleBindPose=allow_multiple_bind_poses
+        )
         MC.clearSelection()
         return skin_cluster[0]
 
