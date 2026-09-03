@@ -1,5 +1,6 @@
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_StepNode import PipelineStepNode #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_conf import registerPipelineStep #type: ignore
+from MNRB.ROSE_UI.pipeline_Editor_UI.steps.output_path_step import OutputPathStep #type: ignore
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
 OPERATIONCODE_SKINNINGSTEP = 1
@@ -22,19 +23,25 @@ class SkinningStep(PipelineStepNode):
 
         failures = [skin_cluster.cluster_name for skin_cluster, (success, _) in results.items() if not success]
 
-        self.moveSkinnedMeshesUnderGeometryHierarchy(results.keys())
+        #the mesh reorganization only serves a clean export - skip it unless an
+        #enabled Output Path step is actually part of this run, so a plain
+        #Build Full Pipeline (no export intended) just runs each step's build
+        #like each tab's own "build all" would, nothing extra
+        if self.hasEnabledOutputPathStep():
+            self.moveSkinnedMeshesUnderGeometryHierarchy(results.keys())
 
         if failures:
             return False, "Failed: %s" % ", ".join(failures)
 
         return True, "Built %d skinCluster(s)" % len(results)
 
+    def hasEnabledOutputPathStep(self):
+        return any(
+            isinstance(node, OutputPathStep) and not node.properties.is_disabled
+            for node in self.scene.nodes
+        )
+
     def moveSkinnedMeshesUnderGeometryHierarchy(self, skin_clusters):
-        #the pipeline build is the only place this reorganization happens - it
-        #keeps the exported rig clean (guides/helpers live outside the rig
-        #hierarchy and are excluded from OutputPathStep's selection-based
-        #export) without disturbing the scene while artists iterate on binds
-        #directly from the Skinning tab
         node_editor_tab = self.scene.node_editor_tab
         if node_editor_tab is None:
             return

@@ -7,9 +7,20 @@ def open():
     def get_active_editor_window():
         #was previously isinstance(widget, QMainWindow), which matches ANY visible
         #top-level QMainWindow in the whole Qt application, not specifically ROSE's
-        #own editor - too loose to reliably prevent duplicate editor windows
+        #own editor - too loose to reliably prevent duplicate editor windows.
+        #
+        #also can't use isinstance(widget, rose_editor.rose_Editor) here - every
+        #shelf Reload does importlib.reload(rose_editor), which rebuilds rose_Editor
+        #as a NEW class object under the same name. A window opened before that
+        #reload is an instance of the OLD class object, so isinstance against the
+        #post-reload class silently returns False and the dedup check misses it -
+        #comparing by name/module string survives the reload since that identity
+        #doesn't change even when the class object does
         for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, rose_editor.rose_Editor) and widget.isVisible():
+            widget_class = type(widget)
+            if (widget_class.__name__ == "rose_Editor"
+                    and widget_class.__module__ == rose_editor.rose_Editor.__module__
+                    and widget.isVisible()):
                 return widget
         return None
 
@@ -133,11 +144,13 @@ def reloadROSEModules():
     import MNRB.ROSE_UI.pipeline_Editor_UI.steps.control_rig_step as ControlRigStep #type: ignore
     importlib.reload(ControlRigStep)
 
-    import MNRB.ROSE_UI.pipeline_Editor_UI.steps.skinning_step as SkinningStep #type: ignore
-    importlib.reload(SkinningStep)
-
+    #output_path_step must reload before skinning_step - skinning_step now
+    #imports OutputPathStep at module level to check whether it's enabled
     import MNRB.ROSE_UI.pipeline_Editor_UI.steps.output_path_step as OutputPathStep #type: ignore
     importlib.reload(OutputPathStep)
+
+    import MNRB.ROSE_UI.pipeline_Editor_UI.steps.skinning_step as SkinningStep #type: ignore
+    importlib.reload(SkinningStep)
 
     import MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_SceneProperties as PipelineEditorSceneProperties #type: ignore
     importlib.reload(PipelineEditorSceneProperties)
