@@ -166,7 +166,7 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         # Create IK Joint Chain
         # Create IK Hierarchy
 
-        ik_system_hierarchy = MC.createTransform("ik_system")
+        ik_system_hierarchy = MC.createTransform(self.getComponentFullPrefix() + "ik_system")
         MC.parentObject(ik_system_hierarchy, self.system_hierarchy)
 
         # Create Base Ik Joint
