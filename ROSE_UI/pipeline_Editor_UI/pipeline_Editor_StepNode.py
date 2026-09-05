@@ -48,6 +48,14 @@ class PipelineStepNode(NodeEditorNode):
     icon = ""
     Node_Properties_Class = PipelineStepProperties
     Graphics_Node_Class = PipelineStep_QGraphicNode
+    #a step draws no per-socket labels, so it needs no content widget. This has to
+    #be None rather than left inheriting NodeEditor_QGraphicContent: the content
+    #widget is created parentless with Qt.FramelessWindowHint and only ever gets a
+    #parent from NodeEditor_QGraphicNode.initUI()'s grScene.addWidget() call, which
+    #PipelineStep_QGraphicNode deliberately doesn't make. An inherited one therefore
+    #stayed a top-level window and popped up as a stray floating "In"/"Out" panel
+    #the first time NodeEditor_QGraphicView.wheelEvent() called show() on it.
+    Node_Content_Class = None
 
     def __init__(self, scene, inputs = [["In", SocketTypes.sequence, True]], outputs = [["Out", SocketTypes.sequence, True]]):
         super().__init__(scene, self.__class__.operation_title, inputs, outputs)

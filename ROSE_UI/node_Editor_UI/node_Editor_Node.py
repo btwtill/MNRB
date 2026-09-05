@@ -223,7 +223,10 @@ class NodeEditorNode(Serializable):
             if last_socket.hasEdge():
                 last_socket.removeAllEdges()
                 
-            self.content.removeLastLabel()
+            #node types with no content widget (Node_Content_Class = None) never
+            #had a label for this socket to begin with
+            if self.content is not None:
+                self.content.removeLastLabel()
             self.scene.grScene.removeItem(last_socket.grSocket)
             self.outputs.pop()
             self.grNode.wrapGrNodeToSockets()

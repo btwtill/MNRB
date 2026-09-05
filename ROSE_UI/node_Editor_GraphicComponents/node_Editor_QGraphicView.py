@@ -410,16 +410,22 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if not clamped or self.clamp_zoom is False:
             self.scale(zoomFactor, zoomFactor)
 
-        #Set Visibility of the nodes content depending on the zoom Level
+        #Set Visibility of the nodes content depending on the zoom Level.
+        #Node types that draw no per-socket labels have no content widget at all
+        #(Node_Content_Class = None, e.g. pipeline steps) - calling show() on those
+        #used to raise AttributeError, and before they opted out it floated their
+        #parentless content widget as a stray top-level window
         if self.zoom <= self.zoom_content_visibility_threshold:
             if self.is_content_visible:
                 for node in self.grScene.scene.nodes:
-                    node.content.hide()
+                    if node.content is not None:
+                        node.content.hide()
             self.is_content_visible = False
         else:
             if not self.is_content_visible:
                 for node in self.grScene.scene.nodes:
-                    node.content.show()
+                    if node.content is not None:
+                        node.content.show()
             self.is_content_visible = True
     
     def dragEnterEvent(self, event):
