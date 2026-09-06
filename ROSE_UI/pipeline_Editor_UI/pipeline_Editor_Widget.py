@@ -5,9 +5,6 @@ from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_Scene import PipelineEditor
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_StepNode import PipelineStepNode #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_conf import PIPELINE_STEPS, getClassFromOperationCode #type: ignore
 
-CLASS_DEBUG = False
-CONTEXT_DEBUG = False
-
 class PipelineEditorWidget(QtWidgets.QWidget):
     """Mirrors NodeEditorWidget's shape (node_Editor_UI/node_Editor_Widget.py) but
     wired to the pipeline-step registry instead of ROSE_NODES, and without the

@@ -3,8 +3,9 @@ from PySide6.QtCore import Qt #type: ignore
 from PySide6.QtGui import QColor, QPen, QPainterPath #type: ignore
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdgePath import  NodeEditor_QGaphicEdgePathDirect, NodeEditor_QGraphicEdgePathBezier #type: ignore
 
-SELECTION_DEBUG = False
-INTERSECT_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+selection_log = ROSE_Log.get("rose.node_editor.selection")
+view_log = ROSE_Log.get("rose.node_editor.view")
 
 class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
     def __init__(self, edge, parent = None):
@@ -57,17 +58,17 @@ class NodeEditor_QGraphicEdge(QtWidgets.QGraphicsPathItem):
         return self.edge_path_calculator.calculatePath()
 
     def intersectsWith(self, point1, point2):
-        if INTERSECT_DEBUG: print("GRAPHICEDGE:: --intersectsWith:: Checking for Intersection:: Edge: ", self, " with Point 1", point1, " and Point2 ", point2)
+        view_log.debug("GRAPHICEDGE:: --intersectsWith:: Checking for Intersection:: Edge: ", self, " with Point 1", point1, " and Point2 ", point2)
         cut_path = QPainterPath(point1)
         cut_path.lineTo(point2)
         path = self.calculatePath()
         result = cut_path.intersects(path)
-        if INTERSECT_DEBUG: print("GRAPHICEDGE:: --intersectsWith:: Intersection With Edge:: ", result)
+        view_log.debug("GRAPHICEDGE:: --intersectsWith:: Intersection With Edge:: ", result)
     
         return result
 
     def onSelected(self):
-        if SELECTION_DEBUG: print("GRAPHICEDGE:: --onSelected:: ")
+        selection_log.debug("GRAPHICEDGE:: --onSelected:: ")
         self.edge.scene.grScene.itemSelected.emit()
 
     def mouseReleaseEvent(self, event):

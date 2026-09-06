@@ -4,7 +4,8 @@ from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
-CLASS_DEBUG = True
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.components.guides")
 
 class Guide_Connector(Serializable):
     def __init__(self, start_guide, end_guide):
@@ -27,14 +28,14 @@ class Guide_Connector(Serializable):
     def start_guide(self): return self._start_guide
     @start_guide.setter
     def start_guide(self, value):
-        if CLASS_DEBUG: print("%s::setting start Guide to: " % self.__class__.__name__, value)
+        log.debug("%s::setting start Guide to: " % self.__class__.__name__, value)
         self._start_guide = value
 
     @property
     def end_guide(self): return self._end_guide
     @end_guide.setter
     def end_guide(self, value):
-        if CLASS_DEBUG: print("%s::setting end Guide to: " % self.__class__.__name__, value)
+        log.debug("%s::setting end Guide to: " % self.__class__.__name__, value)
         self._end_guide = value
 
     @property
@@ -44,14 +45,14 @@ class Guide_Connector(Serializable):
         self._name = value
 
     def initUI(self):
-        if CLASS_DEBUG: print("%s::initUI " % self.__class__.__name__)
+        log.debug("%s::initUI " % self.__class__.__name__)
 
     def initVariables(self):
         self.nodes = []
         self.aim_orient_node = None
 
     def build(self):
-        if CLASS_DEBUG: print("%s::build " % self.__class__.__name__)
+        log.debug("%s::build " % self.__class__.__name__)
         if self.exists():
             self.remove()
         self.name = MC.createTransform(self.name)
@@ -176,15 +177,15 @@ class Guide_Connector(Serializable):
                 target_01_index = 0
             target_02_index = target_01_index + 1
 
-            if CLASS_DEBUG: 
-                print("%s::Trying to Connect: " % self.__class__.__name__)
-                print("%s:: \t\t\t indecies: " % self.__class__.__name__, "source index: ", index, " target_01_index: ", target_01_index, " target_02_index", target_02_index)
-                print("%s:: \t\t\t " % self.__class__.__name__, direction_indecies[index], "to", mesh_nodes[target_01_index], "point 1")
-                print("%s:: \t\t\t " % self.__class__.__name__, start_decompose_node, "to", mesh_nodes[target_01_index], "point 2")
-                print("%s:: \t\t\t " % self.__class__.__name__, start_decompose_node, "to", mesh_nodes[target_01_index], "point 3")
-                print("%s:: \t\t\t " % self.__class__.__name__, direction_indecies[index], "to", mesh_nodes[target_02_index], "point 1")
-                print("%s:: \t\t\t " % self.__class__.__name__, end_decompose_node, "to", mesh_nodes[target_02_index], "point 2")
-                print("%s:: \t\t\t " % self.__class__.__name__, end_decompose_node, "to", mesh_nodes[target_02_index], "point 3")
+            if log.enabled:
+                log.debug("%s::Trying to Connect: " % self.__class__.__name__)
+                log.debug("%s:: \t\t\t indecies: " % self.__class__.__name__, "source index: ", index, " target_01_index: ", target_01_index, " target_02_index", target_02_index)
+                log.debug("%s:: \t\t\t " % self.__class__.__name__, direction_indecies[index], "to", mesh_nodes[target_01_index], "point 1")
+                log.debug("%s:: \t\t\t " % self.__class__.__name__, start_decompose_node, "to", mesh_nodes[target_01_index], "point 2")
+                log.debug("%s:: \t\t\t " % self.__class__.__name__, start_decompose_node, "to", mesh_nodes[target_01_index], "point 3")
+                log.debug("%s:: \t\t\t " % self.__class__.__name__, direction_indecies[index], "to", mesh_nodes[target_02_index], "point 1")
+                log.debug("%s:: \t\t\t " % self.__class__.__name__, end_decompose_node, "to", mesh_nodes[target_02_index], "point 2")
+                log.debug("%s:: \t\t\t " % self.__class__.__name__, end_decompose_node, "to", mesh_nodes[target_02_index], "point 3")
 
             MC.connectAttribute(direction_indecies[index], "outputTranslate", mesh_nodes[target_01_index], "pnts[1]")
             MC.connectAttribute(start_decompose_node, "outputTranslate", mesh_nodes[target_01_index], "pnts[2]")
@@ -195,7 +196,7 @@ class Guide_Connector(Serializable):
 
         #make connector unselectable
         MC.setDisplayType(self.name, "reference")
-        if CLASS_DEBUG: print("%s::Parent:: " % self.__class__.__name__, self.name, " ---> to:: ", self.guide.node.guide_visualization_hierarchy)
+        log.debug("%s::Parent:: " % self.__class__.__name__, self.name, " ---> to:: ", self.guide.node.guide_visualization_hierarchy)
         MC.parentObject(self.name, self.guide.node.guide_visualization_hierarchy)
 
         MC.connectAttribute(self.aim_orient_node, "outputMatrix", self.guide.guide_orientation_shape.auto_orient_input_node, "matrixIn[1]", force = True)
@@ -207,7 +208,7 @@ class Guide_Connector(Serializable):
         self.updateColor()
 
     def remove(self):
-        if CLASS_DEBUG: print("%s::remove " % self.__class__.__name__)
+        log.debug("%s::remove " % self.__class__.__name__)
         if self.exists():
             MC.deleteNode(self.name)
             while(self.nodes != []):
@@ -219,7 +220,7 @@ class Guide_Connector(Serializable):
 
     def updateColor(self):
         if MC.objectExists(self.name):
-            if CLASS_DEBUG: print("%s::updateColor " % self.__class__.__name__)
+            log.debug("%s::updateColor " % self.__class__.__name__)
             geometry_shape_nodes = MC.getHierarchyContent(self.name)
             for node in geometry_shape_nodes:
                 MC.assignObjectToShaderSet(self.name, self.guide.color.name + ROSE_Names.guide_shader_suffix)
@@ -228,27 +229,27 @@ class Guide_Connector(Serializable):
         if MC.objectExists(self.name):
             old_name = self.name
 
-            if CLASS_DEBUG: 
-                print("%s::updateName::" % self.__class__.__name__)
-                print("%s::updateName::From " % self.__class__.__name__, self.name)
-                print("%s::updateName::To " % self.__class__.__name__, new_name + ROSE_Names.guide_connector_suffix)
+            if log.enabled:
+                log.debug("%s::updateName::" % self.__class__.__name__)
+                log.debug("%s::updateName::From " % self.__class__.__name__, self.name)
+                log.debug("%s::updateName::To " % self.__class__.__name__, new_name + ROSE_Names.guide_connector_suffix)
             self.name = MC.renameObject(self.name, new_name + ROSE_Names.guide_connector_suffix)
 
-            if CLASS_DEBUG: 
-                print("%s::updateName::Nodes to be Updated::" % self.__class__.__name__)
+            if log.enabled:
+                log.debug("%s::updateName::Nodes to be Updated::" % self.__class__.__name__)
                 for node_name in self.nodes:
-                    print("%s::updateName:: \t node -> " % self.__class__.__name__, node_name)
+                    log.debug("%s::updateName:: \t node -> " % self.__class__.__name__, node_name)
 
             for index, node in enumerate(self.nodes):
-                if CLASS_DEBUG: 
-                    print("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
-                    print("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + ROSE_Names.guide_connector_suffix)
-                    print("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + ROSE_Names.guide_connector_suffix))
+                if log.enabled:
+                    log.debug("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
+                    log.debug("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + ROSE_Names.guide_connector_suffix)
+                    log.debug("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + ROSE_Names.guide_connector_suffix))
                 new_node_name = node.replace(old_name, new_name + ROSE_Names.guide_connector_suffix)
                 self.nodes[index] = MC.renameObject(node, new_node_name + ROSE_Names.guide_connector_suffix)
 
     def update(self):
-        if CLASS_DEBUG: print("%s::update " % self.__class__.__name__)
+        log.debug("%s::update " % self.__class__.__name__)
     
     def exists(self):
         if MC.objectExists(self.name): return True

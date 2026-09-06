@@ -10,11 +10,15 @@ from MNRB.ROSE_UI.preferences_UI.preferences_widget import ROSEPreferences #type
 from MNRB.ROSE_UI.rose_skinningEditorTab import rose_SkinningEditorTab #type: ignore
 from MNRB.ROSE_UI.rose_pipelineEditorTab import rose_PipelineEditorTab #type: ignore
 
-CLASS_DEBUG = True
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.editor")
 
 class rose_Editor(QtWidgets.QMainWindow):
     def __init__(self, parent = getMayaWindow()):
         super(rose_Editor, self).__init__(parent)
+
+        #restored first, so anything logged during startup already honours it
+        self.loadLogChannelSettings()
 
         self.project_settings_path = os.path.join(os.path.dirname(__file__), "project_settings.json")
         self.project_settings = self.loadProjectSettings()
@@ -66,22 +70,22 @@ class rose_Editor(QtWidgets.QMainWindow):
     def initProject(self):
         #Check if in the Current Working Directory + The Defined Subfolder for the ProjectDirectory is an ROSE Folder and how many Projects are in it
         if os.path.isdir(self.rose_path):
-            if CLASS_DEBUG: print("ROSE_EDITOR:: --initProject:: ROSE Directory found in current working Directory!")
+            log.debug("ROSE_EDITOR:: --initProject:: ROSE Directory found in current working Directory!")
             projects = os.listdir(self.rose_path)
-            if CLASS_DEBUG: print("ROSE_EDITR:: --initProject:: ROSE Content:: ", projects)
+            log.debug("ROSE_EDITR:: --initProject:: ROSE Content:: ", projects)
 
             if len(projects) == 1 and os.path.isdir(os.path.join(self.rose_path, projects[0])):
-                if CLASS_DEBUG: print("ROSE_EDITR:: --initProject:: found Only One ROSE Project, proceed opening Project Directly")
+                log.debug("ROSE_EDITR:: --initProject:: found Only One ROSE Project, proceed opening Project Directly")
                 self.project_path = os.path.join(self.rose_path, projects[0])
                 self.display_overlay = False
             else:
-                if CLASS_DEBUG: print("ROSE_EDITR:: --initProject:: Multiple or No Projcets found, Display Overlay")
+                log.debug("ROSE_EDITR:: --initProject:: Multiple or No Projcets found, Display Overlay")
                 self.display_overlay = True
         else:
-            if CLASS_DEBUG: 
-                print("ROSE_EDITOR:: --initProject:: No ROSE Directory Found. ")
+            if log.enabled:
+                log.debug("ROSE_EDITOR:: --initProject:: No ROSE Directory Found. ")
                 os.mkdir(self.rose_path)
-                print("ROSE_EDITOR:: --initProject:: Create ROSE Directory at path and Display Overlay")
+                log.debug("ROSE_EDITOR:: --initProject:: Create ROSE Directory at path and Display Overlay")
                 self.display_overlay = True
 
     def initUI(self):
@@ -396,7 +400,7 @@ class rose_Editor(QtWidgets.QMainWindow):
                 warningBox.exec_()
 
     def onOpenProjectFromMenuBar(self):
-        if CLASS_DEBUG : print("ROSE_EDITOR:: -onOpenProjectFromMenuBar::  Start Opening project from Menu Bar",)
+        log.debug("ROSE_EDITOR:: -onOpenProjectFromMenuBar::  Start Opening project from Menu Bar",)
 
         directory_name = QtWidgets.QFileDialog.getExistingDirectoryUrl(self, "Open graph from file")
         if directory_name != '':
@@ -412,15 +416,15 @@ class rose_Editor(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Choosen path: ", self.project_path, " cannot be Empty!")
 
     def onOpenProject(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onOpenProject:: Opening Project from Path:: ", self.project_path)
+        log.debug("ROSE_EDITOR:: --onOpenProject:: Opening Project from Path:: ", self.project_path)
 
         if self.display_overlay:
             self.setCentralWidget(self.tabs)
         self.display_overlay = False
 
-        if CLASS_DEBUG: 
-            print("ROSE_EDITOR:: dipslay Overlay:: ", self.display_overlay)
-            print("ROSE_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
+        if log.enabled:
+            log.debug("ROSE_EDITOR:: dipslay Overlay:: ", self.display_overlay)
+            log.debug("ROSE_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
 
         #back-compat: a project created before the Pipeline tab existed won't have
         #this subfolder yet
@@ -433,8 +437,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.statusBar().showMessage('Opened project from ' + str(self.project_path), 5000)
 
     def onSaveProject(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onSaveProject:: Start Saving Project")
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onSaveProject:: Saving To: ", self.project_path)
+        log.debug("ROSE_EDITOR:: --onSaveProject:: Start Saving Project")
+        log.debug("ROSE_EDITOR:: --onSaveProject:: Saving To: ", self.project_path)
 
         if self.project_path is not None:
 
@@ -449,7 +453,7 @@ class rose_Editor(QtWidgets.QMainWindow):
             return self.onSaveProjectAs()
 
     def onSaveProjectAs(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onSaveAsProject:: Start Saving As Project")
+        log.debug("ROSE_EDITOR:: --onSaveAsProject:: Start Saving As Project")
 
         directory_name = QtWidgets.QFileDialog.getExistingDirectoryUrl(self, "Save Project To Location")
         if directory_name != '':
@@ -472,7 +476,7 @@ class rose_Editor(QtWidgets.QMainWindow):
             return False
 
     def onLoadNodeEditorFile(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onLoadNodeEditorFile:: Load Node Editor File/Template")
+        log.debug("ROSE_EDITOR:: --onLoadNodeEditorFile:: Load Node Editor File/Template")
 
         file_name, filter = QtWidgets.QFileDialog.getOpenFileName(self, "Open graph from file")
         if file_name == '':
@@ -482,7 +486,7 @@ class rose_Editor(QtWidgets.QMainWindow):
             self.statusBar().showMessage(' Successfully loaded Template from ' + file_name, 5000)
         
     def onSaveNodeEditorTemplateAs(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onSaveNodeEditorTemplateAs:: Save Node Editor File/Template As")
+        log.debug("ROSE_EDITOR:: --onSaveNodeEditorTemplateAs:: Save Node Editor File/Template As")
         file_name, filter = QtWidgets.QFileDialog.getSaveFileName(self, "Save Template to File")
 
         if file_name == '':
@@ -492,18 +496,18 @@ class rose_Editor(QtWidgets.QMainWindow):
             self.statusBar().showMessage(' Successfully saved Template to ' + file_name, 5000)
 
     def onClearNodeEditor(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onClearNodeEditor:: Clearing Node Editor Space")
+        log.debug("ROSE_EDITOR:: --onClearNodeEditor:: Clearing Node Editor Space")
 
         self.getNodeEditorTab().clearScene()
         
     def onEditUndo(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onUndo:: Undo last operation!")
+        log.debug("ROSE_EDITOR:: --onUndo:: Undo last operation!")
         try: 
             self.getNodeEditorTab().onUndo()
         except Exception as e: print(e)
     
     def onEditRedo(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --onRedo:: Redo last operation!")
+        log.debug("ROSE_EDITOR:: --onRedo:: Redo last operation!")
         try: 
             self.getNodeEditorTab().onRedo()
         except Exception as e: print(e)
@@ -587,8 +591,23 @@ class rose_Editor(QtWidgets.QMainWindow):
         QSettings("tlpf", "ROSE").setValue('show_view_controls', self.show_view_controls)
 
     def onOpenPreferences(self):
-        self.preference_widget = ROSEPreferences()
+        self.preference_widget = ROSEPreferences(on_channels_changed = self.saveLogChannelSettings)
         self.preference_widget.show()
+
+    def loadLogChannelSettings(self):
+        stored_channels = QSettings("tlpf", "ROSE").value('log_channels', [])
+
+        #QSettings hands a list back as a bare string when it holds one entry, and
+        #as None when it was never written
+        if stored_channels is None:
+            stored_channels = []
+        elif isinstance(stored_channels, str):
+            stored_channels = [stored_channels]
+
+        ROSE_Log.setEnabledChannels(stored_channels)
+
+    def saveLogChannelSettings(self):
+        QSettings("tlpf", "ROSE").setValue('log_channels', ROSE_Log.getEnabledChannels())
 
     def isModified(self):
         return self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified() or self.getPipelineEditorTab().isModified()
@@ -637,7 +656,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.action_view_controls_visibility.setChecked(self.show_view_controls)
 
     def updateEditMenu(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --updateEditMenu:: Updating the edit menu functions!")
+        log.debug("ROSE_EDITOR:: --updateEditMenu:: Updating the edit menu functions!")
 
         if not self.display_overlay:
                 current_tab = self.getCurrentTabWidget()
@@ -645,7 +664,7 @@ class rose_Editor(QtWidgets.QMainWindow):
                 try:
                     self.action_edit_paste.setEnabled(True)
                 except Exception as e:
-                    print(e)
+                    log.error(e)
 
                 if current_tab != None:
                     self.action_edit_cut.setEnabled(current_tab.canCut())
@@ -686,7 +705,7 @@ class rose_Editor(QtWidgets.QMainWindow):
 
     def getCurrentTabWidget(self):
         widgets_in_tab_widget = self.tabs.currentWidget().children()
-        #if CLASS_DEBUG: print("ROSE_EDITOR:: --getCurrentTabWidget:: Widgets in Tab Widget:: ", widgets_in_tab_widget)
+        log.debug("ROSE_EDITOR:: --getCurrentTabWidget:: Widgets in Tab Widget:: ", widgets_in_tab_widget)
         tab_widget = None
         for widget in widgets_in_tab_widget:
             if hasattr(widget, "is_tab_widget"):
@@ -712,7 +731,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.action_save_project.setEnabled(state)
 
     def setTitleText(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR:: --setTitleText ")
+        log.debug("ROSE_EDITOR:: --setTitleText ")
 
         title = "ROSE Editor - "
 
@@ -735,7 +754,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         QTimer.singleShot(duration, lambda: self.statusBar().setStyleSheet(original_stylesheet))
 
     def readSettings(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR: Reading Settings...")
+        log.debug("ROSE_EDITOR: Reading Settings...")
         settings = QSettings("tlpf", "ROSE")
         pos = settings.value('pos', QPoint(200, 200))
         size = settings.value('size', QSize(400, 400))
@@ -743,7 +762,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.resize(size)
 
     def writeSettings(self):
-        if CLASS_DEBUG: print("ROSE_EDITOR: Writing Settings...")
+        log.debug("ROSE_EDITOR: Writing Settings...")
         settings = QSettings("tlpf", "ROSE")
         settings.setValue('pos', self.pos())
         settings.setValue('size', self.size())
@@ -752,10 +771,10 @@ class rose_Editor(QtWidgets.QMainWindow):
         project_path_content = os.listdir(path)
         feature_tab_directories = [self.rose_base_editor_path_name, self.rose_skinning_editor_path_name]
 
-        if CLASS_DEBUG:
-            print("ROSE_EDITOR:: -validateProjectDirectory:: Project Path", self.project_path)
-            print("ROSE_EDITOR:: -validateProjectDirectory:: Project Path Content", project_path_content)
-            print("ROSE_EDITOR:: -validateProjectDirectory:: feature_tab_directories: ", feature_tab_directories)
+        if log.enabled:
+            log.debug("ROSE_EDITOR:: -validateProjectDirectory:: Project Path", self.project_path)
+            log.debug("ROSE_EDITOR:: -validateProjectDirectory:: Project Path Content", project_path_content)
+            log.debug("ROSE_EDITOR:: -validateProjectDirectory:: feature_tab_directories: ", feature_tab_directories)
 
 
         for feature_tab_directory in feature_tab_directories:
@@ -775,8 +794,8 @@ class rose_Editor(QtWidgets.QMainWindow):
             return True
 
     def validateWorkingDirectory(self, directory):
-        if CLASS_DEBUG : print("ROSE_EDITOR:: -validateWorkingDirectory:: Full Directory Path: ", directory)
-        if CLASS_DEBUG : print("ROSE_EDITOR:: -validateWorkingDirectory:: WorkingDirectoryName: ", os.path.basename(os.path.dirname(directory)))
+        log.debug("ROSE_EDITOR:: -validateWorkingDirectory:: Full Directory Path: ", directory)
+        log.debug("ROSE_EDITOR:: -validateWorkingDirectory:: WorkingDirectoryName: ", os.path.basename(os.path.dirname(directory)))
 
         return not os.path.basename(os.path.dirname(directory)) == "default"
     

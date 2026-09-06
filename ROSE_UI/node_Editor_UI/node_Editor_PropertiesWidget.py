@@ -3,9 +3,9 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel #type: ignore
 from PySide6.QtCore import QSize  #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
-EVENT_DEBUG = False
-CLASS_DEBUG = False
-SERIALIZEATION_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.properties")
+serialize_log = ROSE_Log.get("rose.serialize")
 
 class NodeEditorPropertiesWidget(Serializable, QWidget):
     def __init__(self, parent=None) -> None:
@@ -49,7 +49,7 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
     @is_valid.setter
     def is_valid(self, value):
         self._is_valid = value
-        if CLASS_DEBUG: print("%s:: isValid Property being set:: Calling all callbacks:: " % self.__class__.__name__, self._is_valid_listeners)
+        log.debug("%s:: isValid Property being set:: Calling all callbacks:: " % self.__class__.__name__, self._is_valid_listeners)
         for callback in self._is_valid_listeners: callback()
 
     def initUI(self):
@@ -79,7 +79,7 @@ class NodeEditorPropertiesWidget(Serializable, QWidget):
     def deserialize(self, data, hashmap = {}, restore_id=True):
 
         if restore_id: self.id =  data['id']
-        if SERIALIZEATION_DEBUG: print("%s:: --deserialize:: _________________START DESERIALIZING PROPERTIES " % self.__class__.__name__)
+        serialize_log.debug("%s:: --deserialize:: _________________START DESERIALIZING PROPERTIES " % self.__class__.__name__)
         
         return True
     

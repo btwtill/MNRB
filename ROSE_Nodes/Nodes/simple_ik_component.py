@@ -15,8 +15,9 @@ from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_Controls.control import control #type: ignore
 from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
-GUIDE_DEBUG = True
-CLASS_DEBUG = True
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+guide_log = ROSE_Log.get("rose.components.guides")
+log = ROSE_Log.get("rose.components")
 
 #how far the pole control is pushed out from the joint chain. Was hardcoded at
 #the calculate_pole_vector_position() call site before this became a property
@@ -163,7 +164,7 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         if not super().guideBuild():    # Check if the basic guide Strucutre is successfully build and only then continue
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
+        guide_log.debug("%s:: Building Guides:: " % self.__class__.__name__, self)
         
         # Create Base Guide
         baseGuide = guide(self, "base")
@@ -195,7 +196,7 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         if not super().staticBuild():   # Check if the basic structure of the static build exists and only then continue building
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Static :: " % self.__class__.__name__, self)
+        guide_log.debug("%s:: Building Static :: " % self.__class__.__name__, self)
 
         for index, guide in enumerate(self.guides):
             guide_pos = guide.getPosition()
@@ -219,7 +220,7 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         if not super().componentBuild():  # If base component build setup is not working return false otherwise continue component build
             return False
         
-        if CLASS_DEBUG: print("%s:: Building Component :: " % self.__class__.__name__, self)
+        log.debug("%s:: Building Component :: " % self.__class__.__name__, self)
 
         # Get component guide positions
 

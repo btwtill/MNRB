@@ -1,6 +1,9 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QCheckBox, QComboBox, QSpinBox, QSizePolicy, QMessageBox #type: ignore
 from PySide6.QtCore import Qt #type: ignore
 
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.skinning.cluster")
+
 #Maya's own skinCluster bind-option choices - see MC.createSkinCluster for the
 #flags these map to
 BIND_METHOD_CHOICES = [("Closest Distance", 0), ("Closest in Hierarchy", 1), ("Heat Map", 2), ("Geodesic Voxel", 3)]
@@ -270,14 +273,14 @@ class SkinClusterComponentWidget(QWidget):
     def onSetTarget(self):
         success, message = self.skin_cluster.setTargetFromSelection()
         if not success:
-            print("SkinClusterComponentWidget:: --onSetTarget:: ", message)
+            log.debug("SkinClusterComponentWidget:: --onSetTarget:: ", message)
         else:
             self.tab.setModified(True)
         self.refresh()
 
     def getWeightsFolder(self):
         if not self.tab.weights_folder_path:
-            print("SkinClusterComponentWidget:: No project weights folder known yet - open or save the project first")
+            log.debug("SkinClusterComponentWidget:: No project weights folder known yet - open or save the project first")
             return None
         return self.tab.weights_folder_path
 
@@ -289,7 +292,7 @@ class SkinClusterComponentWidget(QWidget):
         success, result = self.skin_cluster.exportWeights(weights_folder)
         if success:
             self.tab.setModified(True)
-        print("SkinClusterComponentWidget:: --onStoreWeights:: ", success, result)
+        log.debug("SkinClusterComponentWidget:: --onStoreWeights:: ", success, result)
         self.refresh()
 
     def onApplyWeights(self):
@@ -298,7 +301,7 @@ class SkinClusterComponentWidget(QWidget):
             return
 
         success, result = self.skin_cluster.importWeights(weights_folder)
-        print("SkinClusterComponentWidget:: --onApplyWeights:: ", success, result)
+        log.debug("SkinClusterComponentWidget:: --onApplyWeights:: ", success, result)
 
     def onRemoveStoredWeights(self):
         weights_folder = self.getWeightsFolder()
@@ -318,7 +321,7 @@ class SkinClusterComponentWidget(QWidget):
         success, result = self.skin_cluster.removeStoredWeights(weights_folder)
         if success:
             self.tab.setModified(True)
-        print("SkinClusterComponentWidget:: --onRemoveStoredWeights:: ", success, result)
+        log.debug("SkinClusterComponentWidget:: --onRemoveStoredWeights:: ", success, result)
         self.refresh()
 
     def onRemoveDeform(self, deform_id):

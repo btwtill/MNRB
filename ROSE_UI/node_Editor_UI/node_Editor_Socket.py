@@ -4,11 +4,12 @@ from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket impor
 from MNRB.ROSE_UI.rose_ui_utils import findIndexByAttribute #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.socket")
+serialize_log = ROSE_Log.get("rose.serialize")
+
 LEFT = 1
 RIGHT = 2
-
-REMOVE_DEBUG = False
-SERIALIZE_DEBUG = False
 
 class NodeEditor_Socket(Serializable):
     def __init__(self, node, index=0, position=LEFT, socket_type=SocketTypes.srt, socket_value ="undefined", accept_multi_edges=True, index_on_drawn_node_side = 1, is_input = True ):
@@ -56,39 +57,39 @@ class NodeEditor_Socket(Serializable):
 
     def removeEdge(self, edge):
         
-        if REMOVE_DEBUG:
-            print("SOCKET:: --removeEdge:: Edge to be Removed from Socket: ", edge, " with ID:: ", edge.id)
-            print("SOCKET:: --removeEdge:: Currently Connected Edged to this Socket:: ")
+        if log.enabled:
+            log.debug("SOCKET:: --removeEdge:: Edge to be Removed from Socket: ", edge, " with ID:: ", edge.id)
+            log.debug("SOCKET:: --removeEdge:: Currently Connected Edged to this Socket:: ")
             for index, _edge in enumerate(self.edges):
-                print("SOCKET:: --removeEdge:: \t\t", _edge, " at Index:: ",  index, " with ID: ", _edge.id)
-            print("SOCKET:: --removeEdge:: \t Index of Edge to be removed from Socket:: ", findIndexByAttribute(self.edges, edge.id))
+                log.debug("SOCKET:: --removeEdge:: \t\t", _edge, " at Index:: ",  index, " with ID: ", _edge.id)
+            log.debug("SOCKET:: --removeEdge:: \t Index of Edge to be removed from Socket:: ", findIndexByAttribute(self.edges, edge.id))
 
         if edge in self.edges:
             index = findIndexByAttribute(self.edges, edge.id)
             del self.edges[index]
             #self.edges.remove(edge)
         else: 
-            if REMOVE_DEBUG: print("SOCKET:: --removeEdge:: Edge ", edge, "is not found in the currently connected Edges: ")
+            log.debug("SOCKET:: --removeEdge:: Edge ", edge, "is not found in the currently connected Edges: ")
             for edge in self.edges:
-                if REMOVE_DEBUG: print("SOCKET:: --removeEdge:: \t\t", edge)
+                log.debug("SOCKET:: --removeEdge:: \t\t", edge)
 
     def removeAllEdges(self):
 
-        if REMOVE_DEBUG:
-            print("SOCKET:: --removeAllEdges:: ")
-            print("SOCKET:: --removeAllEdges:: Edges To Be Removed from Socket:: ", self)
+        if log.enabled:
+            log.debug("SOCKET:: --removeAllEdges:: ")
+            log.debug("SOCKET:: --removeAllEdges:: Edges To Be Removed from Socket:: ", self)
             for index, edge in enumerate(self.edges):
-                print("SOCKET:: --removeAllEdges:: \t", edge, "at index:: ", index)
+                log.debug("SOCKET:: --removeAllEdges:: \t", edge, "at index:: ", index)
 
         counter = 1
         while len(self.edges) > 0:
-            if REMOVE_DEBUG: print("SOCKET:: --removeAllEdges::  Call:: ", counter)
+            log.debug("SOCKET:: --removeAllEdges::  Call:: ", counter)
             self.edges[0].remove()
             counter += 1
         
-        if REMOVE_DEBUG: print("SOCKET:: --removeAllEdges:: All Edges of Socket: ",self, " Before Reset:: ", self.edges)
+        log.debug("SOCKET:: --removeAllEdges:: All Edges of Socket: ",self, " Before Reset:: ", self.edges)
         self.edges = []
-        if REMOVE_DEBUG: print("SOCKET:: --removeAllEdges:: All Edges of Socket: ",self, " After Reset:: ", self.edges)
+        log.debug("SOCKET:: --removeAllEdges:: All Edges of Socket: ",self, " After Reset:: ", self.edges)
 
     def setPosition(self):
         self.grSocket.setPos(*self.node.getSocketPosition(self.index, self.position))
@@ -112,21 +113,21 @@ class NodeEditor_Socket(Serializable):
             ('is_input', self.is_input)
         ])
 
-        if SERIALIZE_DEBUG: print("SOCKET: --serialize:: Serialized Socket:: ", self, " to Data:: ", serialized_data)
+        serialize_log.debug("SOCKET: --serialize:: Serialized Socket:: ", self, " to Data:: ", serialized_data)
 
         return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
 
-        if SERIALIZE_DEBUG:
-            print("__________________")
-            print("SOCKET: --deserialize:: Starting to Deserialize Socket:: ", self, "with Data", data)
-            print("SOCKET: --deserialize:: Setting old id: ", self.id, "to new dataID: ", data['id'])
+        if serialize_log.enabled:
+            serialize_log.debug("__________________")
+            serialize_log.debug("SOCKET: --deserialize:: Starting to Deserialize Socket:: ", self, "with Data", data)
+            serialize_log.debug("SOCKET: --deserialize:: Setting old id: ", self.id, "to new dataID: ", data['id'])
             
         if restore_id: self.id = data['id']
         hashmap[data['id']] = self
 
-        if SERIALIZE_DEBUG: print("__________________SOCKET DESERIALIZED")
+        serialize_log.debug("__________________SOCKET DESERIALIZED")
         return True
     
     def __str__(self): return "ClassInstance::%s::  %s..%s" % (__class__.__name__, hex(id(self))[2:5], hex(id(self))[-3:])

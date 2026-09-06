@@ -1,6 +1,7 @@
 import uuid
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.serialize")
 
 #63 bit so an id still fits a signed 64-bit int - they go through
 #QDataStream.writeInt64() in the skinning tab's drag payload
@@ -17,7 +18,7 @@ def generateSerializableId() -> int:
 class Serializable():
     def __init__(self) -> None:
         self.id = generateSerializableId()
-        if CLASS_DEBUG : print("SERIALIZABLE:: -__init__:: Initialized a Serializable Class")
+        log.debug("SERIALIZABLE:: -__init__:: Initialized a Serializable Class")
 
     def serialize(self):
         raise NotImplemented

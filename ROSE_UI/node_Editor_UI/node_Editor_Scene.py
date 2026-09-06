@@ -14,10 +14,10 @@ from MNRB.ROSE_UI.node_Editor_Exceptions.node_Editor_FileException import Invali
 from MNRB.ROSE_Scene.virtual_hierarchy import ROSE_Virtual_Hierarchy #type: ignore
 from MNRB.ROSE_colors.colors import ROSESceneColors #type: ignore
 
-CLASS_DEBUG = False
-SERIALIZE_DEBUG = False
-SELECTION_DEBUG = False
-BUILD_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.scene")
+selection_log = ROSE_Log.get("rose.node_editor.selection")
+serialize_log = ROSE_Log.get("rose.serialize")
 
 class NodeEditorScene(Serializable):
     def __init__(self):
@@ -57,7 +57,7 @@ class NodeEditorScene(Serializable):
 
         self.history.connectHistoryModifiedListenersCallback(self.properties.validateProperties)
 
-        if CLASS_DEBUG : print("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
+        log.debug("NODE_EDITOR_SCENE:: -__init__:: Initialized Node Editor SCENE")
 
     @property
     def has_been_modified(self): return self._has_been_modified
@@ -137,42 +137,42 @@ class NodeEditorScene(Serializable):
             gr_node.node.setPosition(x + (total_width / len(selected_nodes)) * index, y)
 
     def removeNode(self, node):
-        if CLASS_DEBUG: 
-            print("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ")
-            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
+        if log.enabled:
+            log.debug("NODE_EDITOR_SCENE:: -removeNode:: Before:: Nodes:: ")
+            log.debug("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
             for index, _node in enumerate(self.nodes):
-                print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", _node, " at Index:: ", index, " with ID: ", _node.id)
-            print("NODE_EDITOR_SCENE:: -removeNode:: Index of node to be Removed:: ", findIndexByAttribute(self.nodes, node.id))
+                log.debug("NODE_EDITOR_SCENE:: -removeNode:: \t\t", _node, " at Index:: ", index, " with ID: ", _node.id)
+            log.debug("NODE_EDITOR_SCENE:: -removeNode:: Index of node to be Removed:: ", findIndexByAttribute(self.nodes, node.id))
         
         index_node_remove = findIndexByAttribute(self.nodes, node.id)
         #self.nodes.remove(node)
         del self.nodes[index_node_remove]
 
-        if CLASS_DEBUG: 
-            print("NODE_EDITOR_SCENE:: -removeNode:: After:: After:: ")
-            print("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
+        if log.enabled:
+            log.debug("NODE_EDITOR_SCENE:: -removeNode:: After:: After:: ")
+            log.debug("NODE_EDITOR_SCENE:: -removeNode:: \t\t Amount", len(self.nodes))
             for index, _node in enumerate(self.nodes):
-                print("NODE_EDITOR_SCENE:: -removeNode:: \t\t", _node, " at Index:: ", index, " with ID: ", _node.id)
+                log.debug("NODE_EDITOR_SCENE:: -removeNode:: \t\t", _node, " at Index:: ", index, " with ID: ", _node.id)
     
     def removeEdge(self, edge):
-        if CLASS_DEBUG: 
-            print("NODE_EDITOR_SCENE:: -removeEdge:: Before:: Edges:: ")
-            print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t Amount", len(self.edges))
+        if log.enabled:
+            log.debug("NODE_EDITOR_SCENE:: -removeEdge:: Before:: Edges:: ")
+            log.debug("NODE_EDITOR_SCENE:: -removeEdge:: \t\t Amount", len(self.edges))
             for index, _edge in enumerate(self.edges):
-                print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge, " at Index:: ", index, " with ID: ", _edge.id)
-            print("NODE_EDITOR_SCENE:: -removeNode:: Index of edge to be Removed:: ", findIndexByAttribute(self.edges, edge.id))
+                log.debug("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge, " at Index:: ", index, " with ID: ", _edge.id)
+            log.debug("NODE_EDITOR_SCENE:: -removeNode:: Index of edge to be Removed:: ", findIndexByAttribute(self.edges, edge.id))
 
         index_edge_remove = findIndexByAttribute(self.edges, edge.id)
         del self.edges[index_edge_remove]
 
-        if CLASS_DEBUG:
-            print("NODE_EDITOR_SCENE:: -removeEdge:: After:: Edges:: ")
-            print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t Amount", len(self.edges))
+        if log.enabled:
+            log.debug("NODE_EDITOR_SCENE:: -removeEdge:: After:: Edges:: ")
+            log.debug("NODE_EDITOR_SCENE:: -removeEdge:: \t\t Amount", len(self.edges))
             for index, _edge in enumerate(self.edges):
-                print("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge , " at Index:: ", index, " with ID: ", _edge.id)
+                log.debug("NODE_EDITOR_SCENE:: -removeEdge:: \t\t", _edge , " at Index:: ", index, " with ID: ", _edge.id)
 
     def onItemSelected(self):
-        if SELECTION_DEBUG: print("SCENE:: --onItemSelected:: Executing On Selection Callbacks ")
+        selection_log.debug("SCENE:: --onItemSelected:: Executing On Selection Callbacks ")
         current_selected_items = self.getSelectedItems()
         if current_selected_items != self._last_selected_items:
             self._last_selected_items = current_selected_items
@@ -180,7 +180,7 @@ class NodeEditorScene(Serializable):
             for callback in self._item_selected_listeners: callback()
 
     def onItemsDeselected(self):
-        if SELECTION_DEBUG: print("SCENE:: --onItemDeselect:: Executing On Deselection Selection Callbacks")
+        selection_log.debug("SCENE:: --onItemDeselect:: Executing On Deselection Selection Callbacks")
     
         current_selected_items = self.getSelectedItems()
         if self._last_selected_items == current_selected_items:
@@ -309,7 +309,7 @@ class NodeEditorScene(Serializable):
         
         self.has_been_modified = False
 
-        if SERIALIZE_DEBUG: print("SCENE: --saveSceneToFile:: Successfully stored Scene ", self, " to File: ", filename)
+        serialize_log.debug("SCENE: --saveSceneToFile:: Successfully stored Scene ", self, " to File: ", filename)
 
     def loadSceneFromFile(self, filename):
 
@@ -323,7 +323,7 @@ class NodeEditorScene(Serializable):
             # except Exception as e:
             #     print("SCENE:: --loadSceneFromFile:: Excepting while trying to load a file to the scene:: ", e)
             
-        if SERIALIZE_DEBUG: print("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
+        serialize_log.debug("SCENE: --loadSceneFromFile:: Successfully loaded Scene ", self, " from File: ", filename)
         self.history.storeHistory("Loaded From File.", set_modified = False)
 
     def clearScene(self):
@@ -350,7 +350,7 @@ class NodeEditorScene(Serializable):
             ('properties', properties)
             ])
 
-        if SERIALIZE_DEBUG: print("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
+        serialize_log.debug("SCENE: --serialize:: Serialized Scene:: ", self, " to Data:: ", serialized_data)
 
         return serialized_data
 
@@ -362,9 +362,9 @@ class NodeEditorScene(Serializable):
 
         all_current_nodes_in_scene = self.nodes.copy()
 
-        if SERIALIZE_DEBUG:
-            print("_______________________________________________________________")
-            print("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
+        if serialize_log.enabled:
+            serialize_log.debug("_______________________________________________________________")
+            serialize_log.debug("SCENE: --deserialize:: Starting to Deserialize Data:: ", data)
 
         self.properties.deserialize(data['properties'], hashmap, restore_id)
 
@@ -372,19 +372,19 @@ class NodeEditorScene(Serializable):
             found = None
             for node in all_current_nodes_in_scene:
                 if node.id == node_data['id']:
-                    if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Found Existing node", node, " with ID: ", node.id, " matching data ID: ", node_data['id'])
+                    serialize_log.debug("SCENE: --deserialize:: Found Existing node", node, " with ID: ", node.id, " matching data ID: ", node_data['id'])
                     found = node
                     break
             if not found:
-                if SERIALIZE_DEBUG: 
-                    print("SCENE: --deserialize:: Did not find existing node matching ID:: ", node_data['id'])
-                    print("SCENE: --deserialize:: Creating New Node:: ")
+                if serialize_log.enabled:
+                    serialize_log.debug("SCENE: --deserialize:: Did not find existing node matching ID:: ", node_data['id'])
+                    serialize_log.debug("SCENE: --deserialize:: Creating New Node:: ")
                 new_node = self.getNodeClassFromData(node_data)(self)
-                if SERIALIZE_DEBUG: print("SCENE: --deserialize:: Done Creating New Node:: ", new_node)
-                if SERIALIZE_DEBUG: print("SCENE: --deserialize:: deserializing new Node:: ", new_node)
+                serialize_log.debug("SCENE: --deserialize:: Done Creating New Node:: ", new_node)
+                serialize_log.debug("SCENE: --deserialize:: deserializing new Node:: ", new_node)
                 new_node.deserialize(node_data, hashmap, restore_id)
             else:
-                if SERIALIZE_DEBUG: print("SCENE:: --deserialize:: Deserializing Existing Node:: ", found, ":: with Data:: ", node_data)
+                serialize_log.debug("SCENE:: --deserialize:: Deserializing Existing Node:: ", found, ":: with Data:: ", node_data)
                 found.deserialize(node_data, hashmap, restore_id, exists = True)
                 index_to_remove = findIndexByAttribute(all_current_nodes_in_scene, found.id)
                 del all_current_nodes_in_scene[index_to_remove]
@@ -419,6 +419,6 @@ class NodeEditorScene(Serializable):
         for node in self.nodes:
             node.grNode.wrapGrNodeToSockets()
 
-        if SERIALIZE_DEBUG: print("_______________________________________________________________SCENE DESERIALIZED")
+        serialize_log.debug("_______________________________________________________________SCENE DESERIALIZED")
         
         return True

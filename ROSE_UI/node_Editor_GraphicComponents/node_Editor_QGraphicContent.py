@@ -2,8 +2,6 @@ from PySide6 import QtWidgets # type: ignore
 from PySide6.QtCore import Qt # type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 
-CLASS_DEBUG = False
-
 class NodeEditor_QGraphicContent(QtWidgets.QWidget):
     def __init__(self, node, parent=None):
         super().__init__(parent)

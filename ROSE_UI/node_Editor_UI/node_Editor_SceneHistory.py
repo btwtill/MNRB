@@ -1,8 +1,6 @@
 
-UNDO_DEBUG = False
-REDU_DEBUG = False
-RESTORE_DEBUG = False
-STORE_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+history_log = ROSE_Log.get("rose.node_editor.history")
 
 class NodeEditorSceneHistory():
     def __init__(self, scene) -> None:
@@ -37,26 +35,26 @@ class NodeEditorSceneHistory():
         return self.history_current_step +1 < len(self.history_stack)
 
     def undo(self):
-        if UNDO_DEBUG: print("NODESCENEHISTORY:: --undo:: ")
+        history_log.debug("NODESCENEHISTORY:: --undo:: ")
         if self.canUndo():
             self.history_current_step -= 1
             self.restoreHistory()
         
     def redo(self):
-        if REDU_DEBUG: print("NODESCENEHISTORY:: --redo:: ")
+        history_log.debug("NODESCENEHISTORY:: --redo:: ")
         if self.canRedo():
             self.history_current_step += 1
             self.restoreHistory()
 
     def restoreHistory(self):
-        if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistory:: Restoring ..... Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
+        history_log.debug("NODESCENEHISTORY:: --restoreHistory:: Restoring ..... Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
         self.restoreHistoryStamp(self.history_stack[self.history_current_step])
 
         for callback in self._history_restored_listeners: callback()
         for callback in self._history_modified_listeners: callback()
 
     def storeHistory(self, history_stamp_description, set_modified = False):
-        if STORE_DEBUG: print("NODESCENEHISTORY:: --storeHistory:: Storing ..... ", history_stamp_description, "Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
+        history_log.debug("NODESCENEHISTORY:: --storeHistory:: Storing ..... ", history_stamp_description, "Current History Step:: ", self.history_current_step, " History Stack Length:: ", len(self.history_stack))
 
         if set_modified:
             self.scene.has_been_modified = True
@@ -72,21 +70,21 @@ class NodeEditorSceneHistory():
         self.history_stack.append(history_stamp)
         self.history_current_step += 1
 
-        if STORE_DEBUG: print("NODESCENEHISTORY:: --storeHistory:: setting step:: ", self.history_current_step)
+        history_log.debug("NODESCENEHISTORY:: --storeHistory:: setting step:: ", self.history_current_step)
 
         for callback in self._history_stored_listeners: callback()
         for callback in self._history_modified_listeners: callback()
 
     def restoreHistoryStamp(self, history_stamp):
-        if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: ", history_stamp)
+        history_log.debug("NODESCENEHISTORY:: --restoreHistoryStamp:: ", history_stamp)
 
         self.undo_selection_has_changed = False
         previouse_selection = self.captureCurrentSceneSelection()
 
-        if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: Deserializing History Snapshot")
+        history_log.debug("NODESCENEHISTORY:: --restoreHistoryStamp:: Deserializing History Snapshot")
         self.scene.deserialize(history_stamp['snapshot'])
 
-        if RESTORE_DEBUG: print("NODESCENEHISTORY:: --restoreHistoryStamp:: Restoring Selection from History Stamp")
+        history_log.debug("NODESCENEHISTORY:: --restoreHistoryStamp:: Restoring Selection from History Stamp")
         for edge in self.scene.edges: edge.grEdge.setSelected(False)
 
         for edge_id in history_stamp['selection']['edges']:

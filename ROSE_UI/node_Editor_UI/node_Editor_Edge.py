@@ -3,9 +3,9 @@ from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_EdgeProperties import NodeEditorEdgeProperties #type: ignore
 
-CLASS_DEBUG = False
-REMOVE_DEBUG = False
-SERIALIZE_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.edge")
+serialize_log = ROSE_Log.get("rose.serialize")
 
 EDGE_TYPE_DIRECT = 1
 EDGE_TYPE_BEZIER = 2
@@ -89,23 +89,23 @@ class NodeEditorEdge(Serializable):
         else:
             self.grEdge.setDestinationSocketPosition(*source_position)
 
-        if CLASS_DEBUG: print("EDGE:: -updatePositions: sourcePositions: ", self.grEdge.source_position)
-        if CLASS_DEBUG: print("EDGE:: -updatePositions: destinationPosition: ", self.grEdge.destination_position)
+        log.debug("EDGE:: -updatePositions: sourcePositions: ", self.grEdge.source_position)
+        log.debug("EDGE:: -updatePositions: destinationPosition: ", self.grEdge.destination_position)
 
         self.grEdge.update()
 
     def removeFromSockets(self):
-        if REMOVE_DEBUG: print("EDGE:: --removeFromSockets:: Setting Start and End Socket of Edge:: ", self, " to None")
+        log.debug("EDGE:: --removeFromSockets:: Setting Start and End Socket of Edge:: ", self, " to None")
         self.start_socket = None
         self.end_socket = None
 
     def remove(self):
-        if REMOVE_DEBUG: print("EDGE:: --remove:: Start Removing Edge:: ", self)
+        log.debug("EDGE:: --remove:: Start Removing Edge:: ", self)
         old_sockets = [self.start_socket, self.end_socket]
 
         self.removeFromSockets()
 
-        if REMOVE_DEBUG: print("EDGE:: --remove:: Removing Edge from Scene and GrScene -  Edge", self)
+        log.debug("EDGE:: --remove:: Removing Edge from Scene and GrScene -  Edge", self)
         self.scene.grScene.removeItem(self.grEdge)
         self.scene.removeEdge(self)
         self.grEdge = None
@@ -129,21 +129,21 @@ class NodeEditorEdge(Serializable):
             ('properties', properties)
         ])
 
-        if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Serialized Edge:: ", self, " to Data:: ", serialized_data)
+        serialize_log.debug("EDGE:: --serialize:: Serialized Edge:: ", self, " to Data:: ", serialized_data)
 
         return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
 
-        if SERIALIZE_DEBUG: print("______________________________________")
-        if SERIALIZE_DEBUG: print("EDGE:: --serialize:: Start Serialized Edge:: ", self, " with Data:: ", data)
-        if SERIALIZE_DEBUG: print("EDGE:: --serialize::  Hasmap for Edge:: ", hashmap)
-        if self.start_socket is not None and SERIALIZE_DEBUG:
-            print("EDGE:: --serialize:: previouse Start Socket id: ", self.start_socket.id, " beeing object:: ", self.start_socket)
-            print("EDGE:: --serialize:: Hasmap matched start socket Id: ", data['start_socket'], " and therefore object:: ", hashmap[data['start_socket']])
-        if self.end_socket is not None and SERIALIZE_DEBUG:
-            print("EDGE:: --serialize:: previouse End Socket id: ", self.end_socket.id, " beeing object:: ", self.end_socket)
-            print("EDGE:: --serialize:: Hasmap matched End socket Id: ", data['end_socket'], " and therefore object:: ", hashmap[data['end_socket']])
+        serialize_log.debug("______________________________________")
+        serialize_log.debug("EDGE:: --serialize:: Start Serialized Edge:: ", self, " with Data:: ", data)
+        serialize_log.debug("EDGE:: --serialize::  Hasmap for Edge:: ", hashmap)
+        if self.start_socket is not None and serialize_log.enabled:
+            log.debug("EDGE:: --serialize:: previouse Start Socket id: ", self.start_socket.id, " beeing object:: ", self.start_socket)
+            log.debug("EDGE:: --serialize:: Hasmap matched start socket Id: ", data['start_socket'], " and therefore object:: ", hashmap[data['start_socket']])
+        if self.end_socket is not None and serialize_log.enabled:
+            log.debug("EDGE:: --serialize:: previouse End Socket id: ", self.end_socket.id, " beeing object:: ", self.end_socket)
+            log.debug("EDGE:: --serialize:: Hasmap matched End socket Id: ", data['end_socket'], " and therefore object:: ", hashmap[data['end_socket']])
 
         if restore_id: self.id = data['id']
         self.start_socket = hashmap[data['start_socket']]
@@ -154,7 +154,7 @@ class NodeEditorEdge(Serializable):
 
         self.updatePositions()
 
-        if SERIALIZE_DEBUG: print("______________________________________EDGE DESERIALIZED")
+        serialize_log.debug("______________________________________EDGE DESERIALIZED")
 
         return True
 

@@ -1,6 +1,9 @@
 from PySide6.QtWidgets import QWidget, QSizePolicy, QHBoxLayout, QPushButton # type: ignore
 from PySide6.QtCore import QSize, Qt # type: ignore
 
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.skinning")
+
 class SkinningEditorToolbar(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -86,7 +89,7 @@ class SkinningEditorToolbar(QWidget):
 
     def printBuildResults(self, results):
         for skin_cluster, (success, message) in results.items():
-            print("SkinningEditorToolbar:: build:: ", skin_cluster.cluster_name, "->", success, message)
+            log.debug("SkinningEditorToolbar:: build:: ", skin_cluster.cluster_name, "->", success, message)
 
     def onRemoveDeprecated(self):
         scene = self.tab.getScene()

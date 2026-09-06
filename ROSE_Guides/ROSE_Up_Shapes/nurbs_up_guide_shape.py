@@ -3,7 +3,8 @@ from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.components.guides")
 
 class NurbsShereUpGuideShape(Serializable):
     def __init__(self, guide) -> None:
@@ -18,14 +19,14 @@ class NurbsShereUpGuideShape(Serializable):
         self.nodes = []
 
     def draw(self):
-        if CLASS_DEBUG: print("%s::draw::UpShape Name::" % self.__class__.__name__, self.name)
+        log.debug("%s::draw::UpShape Name::" % self.__class__.__name__, self.name)
         guide_shape = MC.createNurbsSphere(self.name)
 
         MC.setNurbsSphereShapeDegree(guide_shape, 1)
         MC.setNurbsSphereShapeSections(guide_shape, 2)
         MC.setNurbsSphereShapeSpans(guide_shape, 2)
 
-        if CLASS_DEBUG: print("%s::draw::UpShape Name::After Creation::" % self.__class__.__name__, guide_shape)
+        log.debug("%s::draw::UpShape Name::After Creation::" % self.__class__.__name__, guide_shape)
         self.name = guide_shape
         MC.assignObjectToShaderSet(guide_shape, self.guide.color.name + ROSE_Names.guide_shader_suffix)
 
@@ -67,18 +68,18 @@ class NurbsShereUpGuideShape(Serializable):
 
     def updateName(self, new_name):
         if MC.objectExists(self.name):
-            if CLASS_DEBUG: 
-                print("%s::updateName::" % self.__class__.__name__)
-                print("%s::updateName::From " % self.__class__.__name__, self.name)
-                print("%s::updateName::To " % self.__class__.__name__, new_name + ROSE_Names.guide_up_suffix)
+            if log.enabled:
+                log.debug("%s::updateName::" % self.__class__.__name__)
+                log.debug("%s::updateName::From " % self.__class__.__name__, self.name)
+                log.debug("%s::updateName::To " % self.__class__.__name__, new_name + ROSE_Names.guide_up_suffix)
             old_name = self.name
             self.name = MC.renameObject(self.name, new_name + ROSE_Names.guide_up_suffix)
 
             for index, node in enumerate(self.nodes):
-                if CLASS_DEBUG: 
-                    print("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
-                    print("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + ROSE_Names.guide_up_suffix)
-                    print("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + ROSE_Names.guide_up_suffix))
+                if log.enabled:
+                    log.debug("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
+                    log.debug("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + ROSE_Names.guide_up_suffix)
+                    log.debug("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + ROSE_Names.guide_up_suffix))
                 new_node_name = node.replace(old_name, new_name + ROSE_Names.guide_up_suffix)
                 self.nodes[index] = MC.renameObject(node, new_node_name)
 

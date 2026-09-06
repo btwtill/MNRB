@@ -5,9 +5,10 @@ from PySide6.QtCore import Qt, QSize #type: ignore
 from PySide6.QtGui import QPixmap, QIcon #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
 
-EVENT_DEBUG = False
-VALIDATION_DEBUG = False
-SERIALIZATION_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+serialize_log = ROSE_Log.get("rose.serialize")
+validation_log = ROSE_Log.get("rose.components.validation")
+view_log = ROSE_Log.get("rose.node_editor.view")
 
 class ScenePropertyStateIcon(Enum):
     valid = os.path.join(os.path.dirname(__file__), "..", "icons", "valid.png")
@@ -82,7 +83,7 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.connectIsValidCallback(self.updateActionButtons)
 
     def validateProperties(self):
-        if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateProperties: Start Validation")
+        validation_log.debug("SCENE_PROPERTIES:: --validateProperties: Start Validation")
 
         if not self.validRigName():
             self.setInvalid("Invalid Component Name!!")
@@ -106,10 +107,10 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
             return False
 
     def validateNodes(self):
-        if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateNodes: Nodes to be checked:: ", self.scene.nodes)
+        validation_log.debug("SCENE_PROPERTIES:: --validateNodes: Nodes to be checked:: ", self.scene.nodes)
         is_one_node_valid = False
         for node in self.scene.nodes:
-            if VALIDATION_DEBUG: print("SCENE_PROPERTIES:: --validateNodes:: ", node.properties.is_valid)
+            validation_log.debug("SCENE_PROPERTIES:: --validateNodes:: ", node.properties.is_valid)
             if node.properties.is_valid:
                 is_one_node_valid = True
 
@@ -161,19 +162,19 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
         self.status_bar_icon_label.setPixmap(pixmap)
 
     def onBuildGuides(self):
-        if EVENT_DEBUG: print("PROPERTIES:: --onBuildGuides:: Building Guides!")
+        view_log.debug("PROPERTIES:: --onBuildGuides:: Building Guides!")
         self.scene.buildSceneGuides()
 
     def onBuildStatic(self):
-        if EVENT_DEBUG: print("PROPERTIES:: --onBuildStatic:: Building Static")
+        view_log.debug("PROPERTIES:: --onBuildStatic:: Building Static")
         self.scene.buildSceneStatic()
 
     def onBuildComponent(self):
-        if EVENT_DEBUG: print("PROPERTIES:: --onBuildComponent:: Building Component ")
+        view_log.debug("PROPERTIES:: --onBuildComponent:: Building Component ")
         self.scene.buildSceneComponents()
 
     def onConnectComponents(self):
-        if EVENT_DEBUG: print("PROPERTIES:: --onConnectComponents:: Connecting Components")
+        view_log.debug("PROPERTIES:: --onConnectComponents:: Connecting Components")
         self.scene.connectSceneComponents()
 
     def serialize(self):
@@ -184,14 +185,14 @@ class NodeEditorSceneProperties(NodeEditorPropertiesWidget):
     def deserialize(self, data, hashmap = {}, restore_id = True):
         result = super().deserialize(data, hashmap, restore_id)
 
-        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: --deserialize:: current rig_name:: ", self.rig_name)
+        serialize_log.debug("SCENE_PROPERTIES:: --deserialize:: current rig_name:: ", self.rig_name)
         self.rig_name_line_edit.setText(data['rig_name'])
-        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: --deserialize::  setting Line Edit Text to::", data['rig_name'])
+        serialize_log.debug("SCENE_PROPERTIES:: --deserialize::  setting Line Edit Text to::", data['rig_name'])
         self.setHasBeenModified()
         self.is_silent = False
 
-        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: --deserialize:: current rig_name:: ", self.rig_name)
+        serialize_log.debug("SCENE_PROPERTIES:: --deserialize:: current rig_name:: ", self.rig_name)
         self.validateProperties()
         
-        if SERIALIZATION_DEBUG: print("SCENE_PROPERTIES:: ___________END SCENE PROPERTIES DESERIALIZATION")
+        serialize_log.debug("SCENE_PROPERTIES:: ___________END SCENE PROPERTIES DESERIALIZATION")
         return True

@@ -7,10 +7,10 @@ from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #ty
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Socket import LEFT, RIGHT #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 
-CLASS_DEBUG = False
-EVENT_DEBUG = False
-SERIALIZE_DEBUG = False
-REMOVE_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.node")
+serialize_log = ROSE_Log.get("rose.serialize")
+view_log = ROSE_Log.get("rose.node_editor.view")
 
 class NodeEditorNode(Serializable):
 
@@ -43,20 +43,20 @@ class NodeEditorNode(Serializable):
 
         self.scene.addNode(self)
 
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: self.scene", self.scene)
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: self.scene.grScene", self.scene.grScene)
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: self.grNode", self.grNode)
+        log.debug("NODEEDITORNODE:: --__init__:: self.scene", self.scene)
+        log.debug("NODEEDITORNODE:: --__init__:: self.scene.grScene", self.scene.grScene)
+        log.debug("NODEEDITORNODE:: --__init__:: self.grNode", self.grNode)
 
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: grScene Items before adding:: ")
-        if CLASS_DEBUG: 
+        log.debug("NODEEDITORNODE:: --__init__:: grScene Items before adding:: ")
+        if log.enabled:
             for item in self.scene.grScene.items():
-                print("NODEEDITORNODE:: --__init__:: \t\t", item)
+                log.debug("NODEEDITORNODE:: --__init__:: \t\t", item)
         self.scene.grScene.addItem(self.grNode)
 
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --__init__:: grScene Items after adding:: ")
-        if CLASS_DEBUG: 
+        log.debug("NODEEDITORNODE:: --__init__:: grScene Items after adding:: ")
+        if log.enabled:
             for item in self.scene.grScene.items():
-                print("NODEEDITORNODE:: --__init__:: \t\t", item)
+                log.debug("NODEEDITORNODE:: --__init__:: \t\t", item)
 
     @property
     def position(self): return self.grNode.pos()
@@ -74,9 +74,9 @@ class NodeEditorNode(Serializable):
         graphic_node_class = self.getGraphicNodeClass()
         properties_class = self.getNodePropertiesClass()
 
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --initInnerClasses:: content Class::", content_class)
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --initInnerClasses:: graphicsNode Class::", graphic_node_class)
-        if CLASS_DEBUG: print("NODEEDITORNODE:: --initInnerClasses:: properties_Class:: ", properties_class)
+        log.debug("NODEEDITORNODE:: --initInnerClasses:: content Class::", content_class)
+        log.debug("NODEEDITORNODE:: --initInnerClasses:: graphicsNode Class::", graphic_node_class)
+        log.debug("NODEEDITORNODE:: --initInnerClasses:: properties_Class:: ", properties_class)
 
         if content_class is not None: self.content = content_class(self)
         if graphic_node_class is not None: self.grNode = graphic_node_class(self)
@@ -90,16 +90,16 @@ class NodeEditorNode(Serializable):
         inputSockets = []
         outputSockets = []
 
-        if CLASS_DEBUG: print("NODE:: -initSockets:: inputs: ", inputs)
-        if CLASS_DEBUG: print("NODE:: -initSockets:: outputs: ", outputs)
+        log.debug("NODE:: -initSockets:: inputs: ", inputs)
+        log.debug("NODE:: -initSockets:: outputs: ", outputs)
 
-        if CLASS_DEBUG: print("NODE:: -initSockets:: input Array Before:: ", self.inputs)
-        if CLASS_DEBUG: print("NODE:: -initSockets:: output Array Befroe:: ", self.outputs)
+        log.debug("NODE:: -initSockets:: input Array Before:: ", self.inputs)
+        log.debug("NODE:: -initSockets:: output Array Befroe:: ", self.outputs)
 
         index_counter = 0
         on_drawn_side_counter = 0
         for input in inputs:
-            if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing Input Sockets!")
+            log.debug("NODE:: --initSockets:: Initilizing Input Sockets!")
             socket = self.__class__.Socket_Class(self, index=index_counter, 
                                        position=1, 
                                        socket_type = input[1], 
@@ -114,7 +114,7 @@ class NodeEditorNode(Serializable):
 
         on_drawn_side_counter = 0
         for output in outputs:
-            if CLASS_DEBUG: print("NODE:: --initSockets:: Initilizing output Sockets!")
+            log.debug("NODE:: --initSockets:: Initilizing output Sockets!")
             socket = self.__class__.Socket_Class(self, index=index_counter, 
                                         position=2,
                                         socket_type = output[1], 
@@ -130,8 +130,8 @@ class NodeEditorNode(Serializable):
         self.inputs = inputSockets
         self.outputs = outputSockets
 
-        if CLASS_DEBUG: print("NODE:: -initSockets:: input Array After:: ", self.inputs)
-        if CLASS_DEBUG: print("NODE:: -initSockets:: output Array After:: ", self.outputs)
+        log.debug("NODE:: -initSockets:: input Array After:: ", self.inputs)
+        log.debug("NODE:: -initSockets:: output Array After:: ", self.outputs)
 
         #the graphics node's first wrap (during its own __init__) ran before the socket
         #labels above existed, so its width was only ever sized for the title. Re-wrap now
@@ -165,7 +165,7 @@ class NodeEditorNode(Serializable):
 
     def getSocketPosition(self, index, position):
 
-        if EVENT_DEBUG : print("NODE:: -getSocketPosition:: Calculating positions for Socket at Index: ", index, " Position: ", position)
+        view_log.debug("NODE:: -getSocketPosition:: Calculating positions for Socket at Index: ", index, " Position: ", position)
 
         all_sockets = self.inputs + self.outputs
         effective_index = index
@@ -191,31 +191,31 @@ class NodeEditorNode(Serializable):
 
         y = self.grNode.title_height + (socket_distance * effective_index) + self.grNode.socket_padding
 
-        if EVENT_DEBUG : print("NODE:: -getSocketPosition:: X Position of Socket: ", x)
-        if EVENT_DEBUG : print("NODE:: -getSocketPosition:: Y Position of Socket: ", y)
+        view_log.debug("NODE:: -getSocketPosition:: X Position of Socket: ", x)
+        view_log.debug("NODE:: -getSocketPosition:: Y Position of Socket: ", y)
         
         return [x, y]
     
     def remove(self):
-        if REMOVE_DEBUG: print("%s:: --remove:: start Removing Node:: " % self.__class__.__name__, self)
-        if REMOVE_DEBUG: print("NODE:: -remove:: Start Removing Node:: ", self)
-        if REMOVE_DEBUG: print("NODE:: -remove:: Removing all Edges from Sockets")
+        log.debug("%s:: --remove:: start Removing Node:: " % self.__class__.__name__, self)
+        log.debug("NODE:: -remove:: Start Removing Node:: ", self)
+        log.debug("NODE:: -remove:: Removing all Edges from Sockets")
         for socket in (self.inputs + self.outputs):
-            if REMOVE_DEBUG: print("NODE:: -remove:: Start to Remove Edges from::", socket)
+            log.debug("NODE:: -remove:: Start to Remove Edges from::", socket)
             if socket.hasEdge():
-                if REMOVE_DEBUG: 
-                    print("NODE:: -remove:: Edges to be Removed::")
+                if log.enabled:
+                    log.debug("NODE:: -remove:: Edges to be Removed::")
                     for edge in socket.edges:
-                        print("NODE:: -remove:: \t\t ", edge)
+                        log.debug("NODE:: -remove:: \t\t ", edge)
                 socket.removeAllEdges()
             else:
-                if REMOVE_DEBUG: print("NODE:: -remove:: \t\t None")
+                log.debug("NODE:: -remove:: \t\t None")
 
-        if REMOVE_DEBUG: print("NODE:: -remove:: Remove GrNode from the Scene")
+        log.debug("NODE:: -remove:: Remove GrNode from the Scene")
         self.scene.grScene.removeItem(self.grNode)
-        if REMOVE_DEBUG: print("NODE:: -remove:: Remove Node from the Scene")
+        log.debug("NODE:: -remove:: Remove Node from the Scene")
         self.scene.removeNode(self)
-        if REMOVE_DEBUG: print("NODE:: -remove:: Finished Removing Node ", self)
+        log.debug("NODE:: -remove:: Finished Removing Node ", self)
 
     def removeLastSocket(self):
         if self.outputs != []:
@@ -232,8 +232,8 @@ class NodeEditorNode(Serializable):
             self.grNode.wrapGrNodeToSockets()
 
     def onConnectionChanged(self, socket):
-        print("%s:: Connection Changed!" % self.__class__.__name__)
-        print("%s:: Changed on:: " % self.__class__.__name__, socket )
+        log.debug("%s:: Connection Changed!" % self.__class__.__name__)
+        log.debug("%s:: Changed on:: " % self.__class__.__name__, socket )
 
     def getInputNodesFromSocket(self, index):
         input_socket = self.inputs[index]
@@ -292,8 +292,8 @@ class NodeEditorNode(Serializable):
 
         inputs, outputs = [], []
 
-        if SERIALIZE_DEBUG: print("%s:: SERIALIZE:: Inputs:: " % self.__class__.__name__, self.inputs)
-        if SERIALIZE_DEBUG: print("%s:: SERIALIZE:: Outputs:: " % self.__class__.__name__, self.outputs)
+        serialize_log.debug("%s:: SERIALIZE:: Inputs:: " % self.__class__.__name__, self.inputs)
+        serialize_log.debug("%s:: SERIALIZE:: Outputs:: " % self.__class__.__name__, self.outputs)
 
         if self.inputs != []:
             for socket in self.inputs: inputs.append(socket.serialize())
@@ -316,16 +316,16 @@ class NodeEditorNode(Serializable):
             ('properties', properties)
         ])
 
-        if SERIALIZE_DEBUG: print("NODE: --serialize:: Serialized Node:: ", self, " to Data:: ", serialized_data)
+        serialize_log.debug("NODE: --serialize:: Serialized Node:: ", self, " to Data:: ", serialized_data)
 
         return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True, exists = False):
         
-        if SERIALIZE_DEBUG:
-            print("______________________________________")
-            print("NODE: --deserialize:: Starting to Deserialize Node:: ", self, "with Data", data)
-            print("NODE: --deserialize:: Setting old id: ", self.id, "to new dataID: ", data['id'])
+        if serialize_log.enabled:
+            serialize_log.debug("______________________________________")
+            serialize_log.debug("NODE: --deserialize:: Starting to Deserialize Node:: ", self, "with Data", data)
+            serialize_log.debug("NODE: --deserialize:: Setting old id: ", self.id, "to new dataID: ", data['id'])
 
         if restore_id: self.id = data['id']
         hashmap[data['id']] = self
@@ -351,51 +351,51 @@ class NodeEditorNode(Serializable):
 
         for index, socket_data in enumerate(data['inputs']):
             if not exists:
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: About to deserialize Input:: ", self.inputs[index])
+                serialize_log.debug("NODE: --deserialize:: About to deserialize Input:: ", self.inputs[index])
                 self.inputs[index].deserialize(socket_data, hashmap, restore_id)
             else:
                 for socket in self.inputs:
                     if socket.id  == socket_data['id']:
-                        if SERIALIZE_DEBUG: print("NODE: --deserialize:: There was an Input Socket detected:: ", socket, " with ID:: ", socket.id," matching the serialized Data ID:: ", socket_data['id'])
+                        serialize_log.debug("NODE: --deserialize:: There was an Input Socket detected:: ", socket, " with ID:: ", socket.id," matching the serialized Data ID:: ", socket_data['id'])
                         found = socket
                         break
 
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: Deserializing Found Socket:: ", found)
+                serialize_log.debug("NODE: --deserialize:: Deserializing Found Socket:: ", found)
 
                 found.deserialize(socket_data, hashmap, restore_id)
 
-        if SERIALIZE_DEBUG: print("NODE: --deserialize:: all default registered Output Sockets: ", self.outputs)
+        serialize_log.debug("NODE: --deserialize:: all default registered Output Sockets: ", self.outputs)
         for index, socket_data in enumerate(data['outputs']):
             if not exists:
 
-                if SERIALIZE_DEBUG: 
-                    print("NODE: --deserialize:: Full length of Output Sockets", len(data["outputs"])) 
-                    print("NODE: --deserialize:: Current Index", index) 
-                    print("NODE: --deserialize:: All Registered Outputs", len(self.outputs)) 
+                if serialize_log.enabled:
+                    serialize_log.debug("NODE: --deserialize:: Full length of Output Sockets", len(data["outputs"])) 
+                    serialize_log.debug("NODE: --deserialize:: Current Index", index) 
+                    serialize_log.debug("NODE: --deserialize:: All Registered Outputs", len(self.outputs)) 
 
                 if (index + 1) > len(self.outputs):
-                    if SERIALIZE_DEBUG: print("NODE: --deserialize:: an aditional Socket was detected", socket_data)
+                    serialize_log.debug("NODE: --deserialize:: an aditional Socket was detected", socket_data)
 
                     self.addOutputSocket(socket_data["socket_type"], socket_data["socket_value"], socket_data["accept_multi_edges"])
 
-                if SERIALIZE_DEBUG: 
-                    print("NODE: --deserialize:: 5")
-                    print("NODE: --deserialize:: About to deserialize outputs socket:: ", self.outputs[index])
+                if serialize_log.enabled:
+                    serialize_log.debug("NODE: --deserialize:: 5")
+                    serialize_log.debug("NODE: --deserialize:: About to deserialize outputs socket:: ", self.outputs[index])
 
                 self.outputs[index].deserialize(socket_data, hashmap, restore_id)
 
             else:
                 for socket in self.outputs:
                     if socket.id == socket_data['id']:
-                        if SERIALIZE_DEBUG: print("NODE: --deserialize:: There was an Output Socket detected:: ", socket, " with ID:: ", socket.id," matching the serialized Data ID:: ", socket_data['id'])
+                        serialize_log.debug("NODE: --deserialize:: There was an Output Socket detected:: ", socket, " with ID:: ", socket.id," matching the serialized Data ID:: ", socket_data['id'])
                         found = socket
                         break
-                if SERIALIZE_DEBUG: print("NODE: --deserialize:: Deserializing Found Socket:: ", found)
+                serialize_log.debug("NODE: --deserialize:: Deserializing Found Socket:: ", found)
                 found.deserialize(socket_data, hashmap, restore_id)
         
         self.properties.deserialize(data['properties'], hashmap, restore_id)
 
-        if SERIALIZE_DEBUG: print("______________________________________ NODE DESERIALIZED")
+        serialize_log.debug("______________________________________ NODE DESERIALIZED")
 
         return True
 

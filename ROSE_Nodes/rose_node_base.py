@@ -18,10 +18,11 @@ from MNRB.ROSE_Controls.control import control #type: ignore
 from MNRB.ROSE_Nodes.property_UI_GraphicComponents.seperator_widget import SeparatorWidget #type: ignore
 from MNRB.ROSE_Guides.ROSE_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 
-CLASS_DEBUG = True
-VALIDATE_DEBUG = False
-GUIDE_DEBUG = False
-DESERIALIZE_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+guide_log = ROSE_Log.get("rose.components.guides")
+log = ROSE_Log.get("rose.components")
+serialize_log = ROSE_Log.get("rose.serialize")
+validation_log = ROSE_Log.get("rose.components.validation")
 
 class ROSE_NodeProperties(NodeEditorNodeProperties):
     def __init__(self, node):
@@ -250,7 +251,7 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         self.connectIsValidCallback(self.updateActionButtons)
 
     def validateProperties(self):
-        if VALIDATE_DEBUG: print("%s:: --validateProperties:: Start Validating properties!" % self.__class__.__name__)
+        validation_log.debug("%s:: --validateProperties:: Start Validating properties!" % self.__class__.__name__)
 
         if not self.validateComponentName():
             self.setInvalid()
@@ -268,14 +269,14 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         return True
 
     def validateComponentName(self):
-        if VALIDATE_DEBUG: print("%s:: --validateComponentName:: Valid Component Name: " % self.__class__.__name__, self.component_name)
+        validation_log.debug("%s:: --validateComponentName:: Valid Component Name: " % self.__class__.__name__, self.component_name)
         if self.component_name_edit.text() != "" and self.component_name_edit.text() != "Undefined":
             return True
         else:
             return False
 
     def validateDisabled(self):
-        if VALIDATE_DEBUG: print("%s:: --validateDisabled:: Component is Disabled:  "% self.__class__.__name__ , self.is_disabled)
+        validation_log.debug("%s:: --validateDisabled:: Component is Disabled:  "% self.__class__.__name__ , self.is_disabled)
         if self.is_disabled:
             return True
         else:
@@ -347,7 +348,7 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
     #every selected node - so it never has to reach into another panel's widgets.
     def setGuideSizeValue(self, value):
         self.guide_size = value
-        if CLASS_DEBUG: print("%s:: --setGuideSizeValue:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size, " of Node:: ", self.node)
+        log.debug("%s:: --setGuideSizeValue:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size, " of Node:: ", self.node)
         self.node.setComponentGuideSize(self.guide_size)
         self.setHasBeenModified()
 
@@ -363,7 +364,7 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
 
     def setDeformSizeValue(self, value):
         self.deform_size = value
-        if CLASS_DEBUG: print("%s:: --setDeformSizeValue:: Setting Deform Size To: " % self.__class__.__name__, self.deform_size, " of Node:: ", self.node)
+        log.debug("%s:: --setDeformSizeValue:: Setting Deform Size To: " % self.__class__.__name__, self.deform_size, " of Node:: ", self.node)
         self.node.setComponentDeformRadius(self.deform_size)
         self.setHasBeenModified()
 
@@ -379,7 +380,7 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
 
     def setControlSizeValue(self, value):
         self.control_size = value
-        if CLASS_DEBUG: print("%s:: --setControlSizeValue:: Setting Control Size To: " % self.__class__.__name__, self.control_size, " of Node:: ", self.node)
+        log.debug("%s:: --setControlSizeValue:: Setting Control Size To: " % self.__class__.__name__, self.control_size, " of Node:: ", self.node)
         self.node.setComponentControlsSize(self.control_size)
         self.setHasBeenModified()
 
@@ -461,16 +462,16 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
 
     def updateComponentName(self):
         self.component_name = self.component_name_edit.text()
-        if CLASS_DEBUG: print("%s:: --updateComponentName:: self.component_name:: " % self.__class__.__name__, self.component_name)
+        log.debug("%s:: --updateComponentName:: self.component_name:: " % self.__class__.__name__, self.component_name)
         self.node.title = self.component_side_prefix + self.component_name
         self.node.updateNames()
 
     def updateComponentColor(self, index):
-        if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
-        if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, ROSESceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index)))
+        log.debug("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, self.component_color_dropdown.itemText(index))
+        log.debug("%s:: --updateComponentColor:: Setting Color To: " % self.__class__.__name__, ROSESceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index)))
         self.component_color = ROSESceneColors.mapColorNameToColor(self.component_color_dropdown.itemText(index))
         
-        if CLASS_DEBUG: print("%s:: --updateComponentColor:: Setting new Component Color:: " % self.__class__.__name__, self.component_color)
+        log.debug("%s:: --updateComponentColor:: Setting new Component Color:: " % self.__class__.__name__, self.component_color)
 
         if not self.is_silent:
             self.node.setGuideColors()
@@ -517,22 +518,22 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
             self.onConnectComponents()
 
     def onBuildGuides(self):
-        if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildGuides ", self.node)
+        log.debug("BaseNodeProperties:_ --onBuildGuides ", self.node)
         if not self.is_disabled:
             self.node.guideBuild()
 
     def onBuildStatic(self):
-        if CLASS_DEBUG: print("BaseNodeProperties:_ --onBuildStatic ", self.node)
+        log.debug("BaseNodeProperties:_ --onBuildStatic ", self.node)
         if not self.is_disabled:
             self.node.staticBuild()
 
     def onBuildComponent(self):
-        if CLASS_DEBUG:  print("BaseNodeProperties:: --onBuildComponent: ", self.node)
+        log.debug("BaseNodeProperties:: --onBuildComponent: ", self.node)
         if not self.is_disabled:
             self.node.componentBuild()
 
     def onConnectComponents(self):
-        if CLASS_DEBUG: print("BaseNodeProperties:: --onConnectComponent: ", self.node)
+        log.debug("BaseNodeProperties:: --onConnectComponent: ", self.node)
         if not self.is_disabled:
             self.node.connectComponent()
 
@@ -541,13 +542,13 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
             scaled_slider_value = round(value / 100, 2)
         else:
             scaled_slider_value = 0.01
-        if CLASS_DEBUG: print("%s:: --formatSliderValue:: new Slider Value:: " % self.__class__.__name__, scaled_slider_value)
+        log.debug("%s:: --formatSliderValue:: new Slider Value:: " % self.__class__.__name__, scaled_slider_value)
         return scaled_slider_value
 
     def formatSliderEditToSliderValue(self, text):
         slider_value_float = float(text)
         scaled_value = int(slider_value_float * 100)
-        if CLASS_DEBUG: print("%s:: --formatSliderEditTextToFloat:: new Slider Value as int" % self.__class__.__name__, scaled_value)
+        log.debug("%s:: --formatSliderEditTextToFloat:: new Slider Value as int" % self.__class__.__name__, scaled_value)
         return scaled_value
 
     def serialize(self):
@@ -569,13 +570,13 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         result = super().deserialize(data, hashmap, restore_id)
         self.is_silent = True
 
-        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing component_name:: " % self.__class__.__name__, data['component_name'])
+        log.debug("%s:: --deserialize:: deserializing component_name:: " % self.__class__.__name__, data['component_name'])
         self.component_name_edit.setText(data['component_name'])
-        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing component disabled:: "% self.__class__.__name__, data['is_disabled'])
+        log.debug("%s:: --deserialize:: deserializing component disabled:: "% self.__class__.__name__, data['is_disabled'])
         self.disabled_checkbox.setChecked(data['is_disabled'])
-        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing guide Size:: "% self.__class__.__name__, data['guide_size'])
+        log.debug("%s:: --deserialize:: deserializing guide Size:: "% self.__class__.__name__, data['guide_size'])
         self.guide_slider_size_edit.setText(str(data['guide_size']))
-        if CLASS_DEBUG: print("%s:: --deserialize:: deserializing deform Size:: "% self.__class__.__name__, data['deform_size'])
+        log.debug("%s:: --deserialize:: deserializing deform Size:: "% self.__class__.__name__, data['deform_size'])
         self.deform_slider_size_edit.setText(str(data['deform_size']))
 
         self.control_slider_size_edit.setText(str(data['control_size']))
@@ -591,14 +592,14 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         elif data['component_side_prefix'] == ROSE_Names.middle.prefix:
             self.mid_prefix_button.mark()
  
-        if CLASS_DEBUG: print("%s:: --deserialize:: updating guide Size Edit "% self.__class__.__name__)
+        log.debug("%s:: --deserialize:: updating guide Size Edit "% self.__class__.__name__)
         self.onGuideSizeEditChange()
         self.onDeformSizeEditChange()
         self.onControlSizeEditChange()
 
-        if CLASS_DEBUG: 
-            print("%s:: --deserialize:: updating guide Orientation Display "% self.__class__.__name__)
-            print("%s:: --deserialize:: deserializing displayGuideOrientation:: "% self.__class__.__name__, data['displayGuideOrientation'])
+        if log.enabled:
+            log.debug("%s:: --deserialize:: updating guide Orientation Display "% self.__class__.__name__)
+            log.debug("%s:: --deserialize:: deserializing displayGuideOrientation:: "% self.__class__.__name__, data['displayGuideOrientation'])
 
         self.displayGuideOrientation = data['displayGuideOrientation']
         self.display_guide_orientation_checkbox.setChecked(self.displayGuideOrientation)
@@ -611,11 +612,11 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
  
         self.is_silent = False
 
-        if CLASS_DEBUG: print("%s:: --deserialize:: updating component Name "% self.__class__.__name__)
+        log.debug("%s:: --deserialize:: updating component Name "% self.__class__.__name__)
         self.updateComponentName()
         self.node.setComponentGuideHiearchyName()
         
-        if CLASS_DEBUG: print("%s:: --deserialize:: validate Properties "% self.__class__.__name__)
+        log.debug("%s:: --deserialize:: validate Properties "% self.__class__.__name__)
         self.validateProperties()
         return True
 
@@ -664,17 +665,17 @@ class ROSE_Node(NodeEditorNode):
         if self.scene.virtual_rig_hierarchy.guide_hierarchy_object.ensureExistence():
             current_guide_hierarchy = self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name
         else:
-            if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
+            log.debug("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
 
         current_component_guide_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + ROSE_Names.guide_component_hierarchy_suffix
 
         if MC.objectExists(current_component_guide_hierarchy_name):
-            if CLASS_DEBUG: print("%s:: --guideBuild:: Guide Hierarchy Already Exists: " % self.__class__.__name__)
+            log.debug("%s:: --guideBuild:: Guide Hierarchy Already Exists: " % self.__class__.__name__)
             self.reconstruct_guides = True
             self.guide_positions = []
 
-            if CLASS_DEBUG: print("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
+            log.debug("%s:: --guideBuild:: Collecting guide Positions for: " % self.__class__.__name__, self.guides)
             for guide in self.guides:
                 if guide.exists():
                     self.guide_positions.append(guide.getPosition(reset_scale = True))
@@ -691,7 +692,7 @@ class ROSE_Node(NodeEditorNode):
         current_component_guide_hierarchy = MC.createTransform(current_component_guide_hierarchy_name)
         self.addComponentIdLink(current_component_guide_hierarchy)
 
-        if CLASS_DEBUG: print("%s:: --guideBuild:: Object to be parented: " % self.__class__.__name__, "Child:: ",current_component_guide_hierarchy, " Parent:: ", current_guide_hierarchy)
+        log.debug("%s:: --guideBuild:: Object to be parented: " % self.__class__.__name__, "Child:: ",current_component_guide_hierarchy, " Parent:: ", current_guide_hierarchy)
         MC.parentObject(current_component_guide_hierarchy, current_guide_hierarchy)
         self.guide_component_hierarchy = current_component_guide_hierarchy
 
@@ -714,7 +715,7 @@ class ROSE_Node(NodeEditorNode):
                     if deform.exists():
                         deform.remove()
         else:
-            if CLASS_DEBUG: print("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
+            log.debug("%s:: --guideBuild:: Error Ensuring the Guide Hierarchy: " % self.__class__.__name__)
             return False
         
         self.deforms = []
@@ -793,25 +794,25 @@ class ROSE_Node(NodeEditorNode):
             return False
 
     def updateNames(self):
-        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Calling Update Guide Component Hierarchy Name: " % self.__class__.__name__)
+        guide_log.debug("%s:: --updateComponentHierarchyName:: Calling Update Guide Component Hierarchy Name: " % self.__class__.__name__)
         
         if self.is_silent:
             return
         
-        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Current Guide Hierarchy Name: " % self.__class__.__name__, self.guide_component_hierarchy)
+        guide_log.debug("%s:: --updateComponentHierarchyName:: Current Guide Hierarchy Name: " % self.__class__.__name__, self.guide_component_hierarchy)
 
         #nothing built yet (or the hierarchy was deleted from under us): there are
         #no Maya objects to rename, but the deform objects still have to follow the
         #component name - they're listed in the Skinning tab whether or not they
         #have been built, and updateName() re-derives the stored name in that case
         if self.guide_component_hierarchy is None or not MC.objectExists(self.guide_component_hierarchy):
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: no built guide hierarchy - deriving names only" % self.__class__.__name__)
+            guide_log.debug("%s:: --updateComponentHierarchyName:: no built guide hierarchy - deriving names only" % self.__class__.__name__)
             self.setComponentGuideHiearchyName()
             self.refreshDeformNames()
             return
 
-        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
-        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Old Component Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
+        guide_log.debug("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
+        guide_log.debug("%s:: --updateComponentHierarchyName:: Old Component Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
 
         has_duplicate_name = False
 
@@ -823,20 +824,20 @@ class ROSE_Node(NodeEditorNode):
             return
 
         duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_guide_component_hierarchy_name)
-        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
+        guide_log.debug("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
 
         if duplicate_name != []:
             has_duplicate_name = True
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
+            guide_log.debug("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
             new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
 
-        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
+        guide_log.debug("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
 
         has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
 
         if has_valid_component_id:
             new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
+            guide_log.debug("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
             self.guide_component_hierarchy = new_name
 
             if self.component_hierarchy is not None:
@@ -845,7 +846,7 @@ class ROSE_Node(NodeEditorNode):
             if MC.objectExists(self.guide_visualization_hierarchy):
                 self.guide_visualization_hierarchy = MC.renameObject(self.guide_visualization_hierarchy, self.guide_component_hierarchy + "_visualization")
 
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
+            guide_log.debug("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
             for guide in self.guides:
                 guide.updateName(has_duplicate_name)
             for deform in self.deforms:
@@ -866,7 +867,7 @@ class ROSE_Node(NodeEditorNode):
 
     def reconstructGuides(self):
         if self.reconstruct_guides:
-            if CLASS_DEBUG: print("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
+            log.debug("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
             if self.guide_positions != []:
                 for index, guide in enumerate(self.guides):
                     guide.setPosition(self.guide_positions[index])
@@ -928,24 +929,24 @@ class ROSE_Node(NodeEditorNode):
             guide.guide_orientation_shape.setAutoOrient(value)
 
     def setGuideOrientationDisplay(self, value):
-        if CLASS_DEBUG: 
-            print("%s:: --setGuideOrientationShapeDisplay:: setting Guide Orientation Shape Display to: " % self.__class__.__name__, value)
+        if log.enabled:
+            log.debug("%s:: --setGuideOrientationShapeDisplay:: setting Guide Orientation Shape Display to: " % self.__class__.__name__, value)
             for guide in self.guides:
-                print("%s:: --setGuideOrientationShapeDisplay:: Guide: " % self.__class__.__name__, guide, " with name: ", guide.name)
+                log.debug("%s:: --setGuideOrientationShapeDisplay:: Guide: " % self.__class__.__name__, guide, " with name: ", guide.name)
         for guide in self.guides:
                 guide.setOrientationShapeDisplay(value)
 
     def setComponentGuideHiearchyName(self):
-        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + ROSE_Names.guide_component_hierarchy_suffix )
+        log.debug("%s:: --setComponentGuideHierarchyName:: guide Hierarchy name Old:: " % self.__class__.__name__, self.guide_component_hierarchy, " New:: ",self.properties.component_side_prefix + self.properties.component_name + ROSE_Names.guide_component_hierarchy_suffix )
         self.guide_component_hierarchy = self.getComponentPrefix() + self.getComponentName() + ROSE_Names.guide_component_hierarchy_suffix
-        if CLASS_DEBUG: print("%s:: --setComponentGuideHierarchyName:: New Guide Hierarchy Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
+        log.debug("%s:: --setComponentGuideHierarchyName:: New Guide Hierarchy Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
 
     def setComponentHierarchyName(self):
         self.component_hierarchy = self.getComponentPrefix() + self.getComponentName() + ROSE_Names.component_suffix
 
     def setComponentGuideSize(self, size):
         for guide in self.guides:
-            if CLASS_DEBUG: print("%s:: --setComponentGuideSize:: Setting Guide:: " % self.__class__.__name__, guide, " with object name: ", guide.name, " to Size:: ", size)
+            log.debug("%s:: --setComponentGuideSize:: Setting Guide:: " % self.__class__.__name__, guide, " with object name: ", guide.name, " to Size:: ", size)
             if MC.objectExists(guide.name):
                 guide.resize(size)
 
@@ -961,7 +962,7 @@ class ROSE_Node(NodeEditorNode):
             guide.setExtendedRotationControlDisplay(value)
 
     def setGuideColors(self):
-        if CLASS_DEBUG: print("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)
+        log.debug("%s:: --setGuideColors:: setting Guide Color for Guides:" % self.__class__.__name__, self.guides)
         for guide in self.guides:
             guide.color = self.properties.component_color
 
@@ -971,7 +972,7 @@ class ROSE_Node(NodeEditorNode):
                
     def remove(self):
         super().remove()
-        if CLASS_DEBUG: print("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
+        log.debug("%s:: --remove:: current Guide_component_hierarchy:: " % self.__class__.__name__, self.guide_component_hierarchy)
         self.removeGuideHierarchyFromViewport()
         self.removeDeformsFromViewport()
         self.removeComponentFromViewport()
@@ -1026,13 +1027,13 @@ class ROSE_Node(NodeEditorNode):
             new_guide = guide(self, deserialized=True)
             new_guide.deserialize(guide_data, hashmap, restore_id)
 
-        if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__,  "Looking trough Deserialized Guides: ")
+        serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__,  "Looking trough Deserialized Guides: ")
         for guide_object in self.guides:
-            if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object)
+            serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object)
 
             if guide_object.id in hashmap.keys():
-                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object, " with id:", guide_object.id, " has Parent guide with ID:: ", hashmap[guide_object.id])
-                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Selecting Parent Guide::")
+                serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, guide_object, " with id:", guide_object.id, " has Parent guide with ID:: ", hashmap[guide_object.id])
+                serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Selecting Parent Guide::")
                 for item in self.guides:
                     if item.id == hashmap[guide_object.id]:
                         parent_guide = item
@@ -1040,45 +1041,45 @@ class ROSE_Node(NodeEditorNode):
                     else:
                         parent_guide = None
 
-                if DESERIALIZE_DEBUG: 
-                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Getting Id of guide Connector Object::")
-                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Looking through Data::", data['guides'])
+                if serialize_log.enabled:
+                    serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Getting Id of guide Connector Object::")
+                    serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Looking through Data::", data['guides'])
 
                 for guide_data in data['guides']:
-                    if DESERIALIZE_DEBUG: 
-                        print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data ID:: ", guide_data['id'])
-                        print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data::", guide_data)
-                        print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Parent ID:: ", hashmap[guide_object.id])
+                    if serialize_log.enabled:
+                        serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data ID:: ", guide_data['id'])
+                        serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Data::", guide_data)
+                        serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Current Guide Parent ID:: ", hashmap[guide_object.id])
                     if guide_data['id'] == guide_object.id:
                         connector_id = guide_data['connector_id']
-                        if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Match Found::Setting Connector ID To:: ", guide_data['connector_id'])
+                        serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Match Found::Setting Connector ID To:: ", guide_data['connector_id'])
                         break
                     else:
                         connector_id = None
 
-                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Connector ID:: ", connector_id)
+                serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, " Connector ID:: ", connector_id)
 
-                if DESERIALIZE_DEBUG: 
-                    print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Looking for Connector Data::")
-                    print("%s::deserialize::GuideConnecterDataList:: " % self.__class__.__name__, data['guide_connectors'])
+                if serialize_log.enabled:
+                    serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Looking for Connector Data::")
+                    serialize_log.debug("%s::deserialize::GuideConnecterDataList:: " % self.__class__.__name__, data['guide_connectors'])
                 
                 for connector_data in data['guide_connectors']:
-                    if DESERIALIZE_DEBUG: 
-                        print("connecter id::", connector_id)
-                        print("connector Data id:: ", connector_data['id'])
+                    if serialize_log.enabled:
+                        serialize_log.debug("connecter id::", connector_id)
+                        serialize_log.debug("connector Data id:: ", connector_data['id'])
                     if connector_data['id'] == connector_id:
                         deserialize_connector_data = connector_data
                         break
                     else:
                         deserialize_connector_data = None
 
-                if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Create and deserialize new Connector Object width Data::", deserialize_connector_data)
+                serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Create and deserialize new Connector Object width Data::", deserialize_connector_data)
 
                 if deserialize_connector_data is not None:
                     guide_object.parent_connector = Guide_Connector(parent_guide, guide_object)
                     guide_object.parent_connector.deserialize(deserialize_connector_data, hashmap, restore_id)
 
-                    if DESERIALIZE_DEBUG: print("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Parent Connector:: ", guide_object.parent_connector)
+                    serialize_log.debug("%s:: --deserialize::Guide:: " % self.__class__.__name__, "Parent Connector:: ", guide_object.parent_connector)
                     guide_object.guide_parent = parent_guide
                 
         for deform_data  in data['deforms']:

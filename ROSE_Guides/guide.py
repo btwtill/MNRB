@@ -12,7 +12,8 @@ from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 from MNRB.ROSE_Guides.ROSE_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 
-CLASS_DEBUG = True
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.components.guides")
 
 class guideShapeType(Enum):
     locator = 1
@@ -62,7 +63,7 @@ class guide(Serializable):
     def color(self, value):
         if self._color != value:
             self._color = value
-            if CLASS_DEBUG: print("%s:: --component_color:: Setting new Guide Color:: " % self.__class__.__name__, self.color)
+            log.debug("%s:: --component_color:: Setting new Guide Color:: " % self.__class__.__name__, self.color)
             self.setColor()
         self._color = value
 
@@ -70,12 +71,12 @@ class guide(Serializable):
     def guide_parent(self): return self._guide_parent
     @guide_parent.setter
     def guide_parent(self, value):
-        if CLASS_DEBUG: print("%s::guide_parent::setter to: " % self.__class__.__name__, value)
+        log.debug("%s::guide_parent::setter to: " % self.__class__.__name__, value)
         if self.parent_connector is not None:
             self.parent_connector.update()
         elif self.parent_connector == None and value != None:
-            if CLASS_DEBUG: print("%s::guide_parent::setter: " % self.__class__.__name__, self.parent_connector)
-            if CLASS_DEBUG: print("%s::guide_parent::setter: " % self.__class__.__name__, self._guide_parent," ::trying to set to value:: ", value)
+            log.debug("%s::guide_parent::setter: " % self.__class__.__name__, self.parent_connector)
+            log.debug("%s::guide_parent::setter: " % self.__class__.__name__, self._guide_parent," ::trying to set to value:: ", value)
             self.parent_connector = Guide_Connector(value, self)
             self._guide_parent = value
             self.parent_connector.build()
@@ -121,30 +122,30 @@ class guide(Serializable):
             MC.selectObject(self.name)
 
     def determinGuideShape(self):
-        if CLASS_DEBUG: print("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)
+        log.debug("GUIDE:: --determinGuideShape:: guide Type: ", self.guide_type)
         if self.guide_type.value == guideShapeType.locator.value:
-            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", LocatorGuideShape)
+            log.debug("GUIDE:: --determinGuideShape::  Return Value:: ", LocatorGuideShape)
             return LocatorGuideShape
         if self.guide_type.value == guideShapeType.sphere.value:
-            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereGuideShape)
+            log.debug("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereGuideShape)
             return NurbsShereGuideShape
 
     def determinGuideUpShape(self):
-        if CLASS_DEBUG: print("GUIDE:: --determinGuideUpShape:: guide Type: ", self.guide_type)
+        log.debug("GUIDE:: --determinGuideUpShape:: guide Type: ", self.guide_type)
         if self.guide_type.value == guideShapeType.locator.value:
-            if CLASS_DEBUG: print("GUIDE:: --determinGuideUpShape::  Return Value:: ", LocatorGuideShape)
+            log.debug("GUIDE:: --determinGuideUpShape::  Return Value:: ", LocatorGuideShape)
             return LocatorUpGuideShape
         if self.guide_type.value == guideShapeType.sphere.value:
-            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereUpGuideShape)
+            log.debug("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereUpGuideShape)
             return NurbsShereUpGuideShape
     
     def determinGuideOrientationShape(self):
-        if CLASS_DEBUG: print("GUIDE:: --determinGuideOrientationShape:: guide Type: ", self.guide_type)
+        log.debug("GUIDE:: --determinGuideOrientationShape:: guide Type: ", self.guide_type)
         if self.guide_type.value == guideShapeType.locator.value:
-            if CLASS_DEBUG: print("GUIDE:: --determinGuideOrientationShape::  Return Value:: ", LocatorGuideShape)
+            log.debug("GUIDE:: --determinGuideOrientationShape::  Return Value:: ", LocatorGuideShape)
             return LocatorOrientGuideShape
         if self.guide_type.value == guideShapeType.sphere.value:
-            if CLASS_DEBUG: print("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereOrientGuideShape)
+            log.debug("GUIDE:: --determinGuideShape::  Return Value:: ", NurbsShereOrientGuideShape)
             return NurbsShereOrientGuideShape
 
     def createGuideShape(self):
@@ -152,12 +153,12 @@ class guide(Serializable):
         return self.guide_shape
 
     def createGuideUpShape(self):
-        if CLASS_DEBUG: print("%s::createGuideOrientationShape:: " % self.__class__.__name__)
+        log.debug("%s::createGuideOrientationShape:: " % self.__class__.__name__)
         self.guide_up_shape = self.determinGuideUpShape()(self)
         return self.guide_up_shape
 
     def createGuideOrientationShape(self):
-        if CLASS_DEBUG: print("%s::createGuideUpShape:: " % self.__class__.__name__)
+        log.debug("%s::createGuideUpShape:: " % self.__class__.__name__)
         self.guide_orientation_shape = self.determinGuideOrientationShape()(self)
         return self.guide_orientation_shape
 
@@ -180,30 +181,30 @@ class guide(Serializable):
 
     def updateName(self, has_duplicate_name):
         if self.exists():
-            if CLASS_DEBUG: print("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
+            log.debug("%s:: --updateName:: Old Guide Name:: " % self.__class__.__name__, self.name)
             new_name =  self.assembleFullName()
-            if CLASS_DEBUG: print("%s:: --updateName:: new Guide Name:: " % self.__class__.__name__, new_name)
+            log.debug("%s:: --updateName:: new Guide Name:: " % self.__class__.__name__, new_name)
 
             if new_name == self.name:
                 return
 
             if has_duplicate_name:
                 duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_name)
-                if CLASS_DEBUG: print("%s:: --updateName:: Duplicate:: " % self.__class__.__name__, duplicate_name)
+                log.debug("%s:: --updateName:: Duplicate:: " % self.__class__.__name__, duplicate_name)
                 if duplicate_name != []:
                     new_name = new_name + str(duplicate_name[1])
-            if CLASS_DEBUG: print("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
+            log.debug("%s:: --updateName:: Final Guide Name to Rename:: " % self.__class__.__name__, new_name)
             self.name = MC.renameObject(self.name, new_name)
             
-            if CLASS_DEBUG: print("%s::updateName::About to update orientShape and upShape::" % self.__class__.__name__)
+            log.debug("%s::updateName::About to update orientShape and upShape::" % self.__class__.__name__)
 
             self.guide_orientation_shape.updateName(new_name)
             self.guide_up_shape.updateName(new_name)
 
-            if CLASS_DEBUG: print("%s::updateName::parent_connector::" % self.__class__.__name__, self.parent_connector)
+            log.debug("%s::updateName::parent_connector::" % self.__class__.__name__, self.parent_connector)
 
             if self.parent_connector is not None:
-                if CLASS_DEBUG: print("%s::updateName::About to update connector::" % self.__class__.__name__)
+                log.debug("%s::updateName::About to update connector::" % self.__class__.__name__)
                 self.parent_connector.updateName(new_name)
 
     def remove(self):
@@ -217,7 +218,7 @@ class guide(Serializable):
             self.parent_connector.remove()
 
     def parentToGuide(self):
-        if CLASS_DEBUG: print("%s::parentToGuide::" % self.__class__.__name__)
+        log.debug("%s::parentToGuide::" % self.__class__.__name__)
 
     def serialize(self):
 
@@ -246,8 +247,8 @@ class guide(Serializable):
         if data['guide_parent_id'] is not None:
             hashmap[self.id] = data['guide_parent_id']
 
-        if CLASS_DEBUG: 
-            print("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.guide_up_shape.name)
-            print("%s::deserialize:: Guide Orient Name:: " % self.__class__.__name__, self.guide_orientation_shape.name)
+        if log.enabled:
+            log.debug("%s::deserialize:: Guide Name:: " % self.__class__.__name__, self.guide_up_shape.name)
+            log.debug("%s::deserialize:: Guide Orient Name:: " % self.__class__.__name__, self.guide_orientation_shape.name)
 
         return True

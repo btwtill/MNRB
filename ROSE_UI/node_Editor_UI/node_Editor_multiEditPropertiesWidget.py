@@ -2,7 +2,8 @@ from PySide6.QtCore import Qt #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_NodeProperties #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.properties")
 
 MIXED_PLACEHOLDER = "- mixed -"
 
@@ -39,10 +40,10 @@ class MultiEdit_PropertyWidget(ROSE_NodeProperties):
         self.showSharedState()
         self.validateProperties()
 
-        if CLASS_DEBUG:
-            print("%s:: __init__:: editing %d nodes" % (self.__class__.__name__, len(self.nodes)))
+        if log.enabled:
+            log.debug("%s:: __init__:: editing %d nodes" % (self.__class__.__name__, len(self.nodes)))
             for node in self.nodes:
-                print("%s:: \t" % self.__class__.__name__, node)
+                log.debug("%s:: \t" % self.__class__.__name__, node)
 
     def hasSelection(self):
         #inherited callbacks are connected during __init__ and can fire before

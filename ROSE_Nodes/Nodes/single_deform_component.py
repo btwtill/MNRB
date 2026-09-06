@@ -9,7 +9,8 @@ from MNRB.ROSE_Controls.control import control #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
-GUIDE_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+guide_log = ROSE_Log.get("rose.components.guides")
 
 class ROSE_Node_SingleDeformComponent_Properties(ROSE_NodeProperties): pass
 
@@ -29,7 +30,7 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
         if not super().guideBuild():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
+        guide_log.debug("%s:: Building Guides:: " % self.__class__.__name__, self)
 
         self.sinlge_deform_component_guide = guide(self, name = "single")
         MC.parentObject(self.sinlge_deform_component_guide.name, self.guide_component_hierarchy)
@@ -42,7 +43,7 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
         if not super().staticBuild():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Static:: " % self)
+        guide_log.debug("%s:: Building Static:: " % self)
 
         self.guide_pos = self.sinlge_deform_component_guide.getPosition()
 
@@ -57,7 +58,7 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
         if not super().componentBuild():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Component:: " % self)
+        guide_log.debug("%s:: Building Component:: " % self)
 
         #getting guides
         guide_pos = self.guides[0].getPosition(reset_scale = False)
@@ -83,7 +84,7 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
         if not super().connectComponent():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Connecting Component:: " % self)
+        guide_log.debug("%s:: Connecting Component:: " % self)
         
         srt_parent_name = self.getInputConnectionValueAt(0)
         if srt_parent_name == None:

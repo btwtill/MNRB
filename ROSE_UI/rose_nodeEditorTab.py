@@ -13,9 +13,9 @@ from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
-DRAGDROP_DEBUG = False
-CONTEXT_DEBUG = False
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+dragdrop_log = ROSE_Log.get("rose.node_editor.dragdrop")
+log = ROSE_Log.get("rose.node_editor")
 
 class rose_NodeEditorTab(QtWidgets.QMainWindow):
     def __init__(self):
@@ -173,11 +173,11 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
         try:    
             data = json.loads(raw_data)
         except ValueError as e:
-            print("Pasting of invalid Json Data!", e)
+            log.error("Pasting of invalid Json Data!", e)
             return
             
         if 'nodes' not in data: 
-            print("Json does not contain any nodes!!")
+            log.debug("Json does not contain any nodes!!")
             return
 
         self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)
@@ -189,7 +189,7 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
         self.central_widget.scene.alignSelectedNodesOnY()
 
     def onMirrorNode(self):
-        if CLASS_DEBUG: print("NODEEDITORTAB:: --onMirrorNode:: ")
+        log.debug("NODEEDITORTAB:: --onMirrorNode:: ")
 
         # Create new Component of the same type 
         if self.central_widget.scene.getSelectedNodes() == []:
@@ -220,11 +220,11 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
         try:    
             data = json.loads(raw_data)
         except ValueError as e:
-            print("Pasting of invalid Json Data!", e)
+            log.error("Pasting of invalid Json Data!", e)
             return
             
         if 'nodes' not in data: 
-            print("Json does not contain any nodes!!")
+            log.debug("Json does not contain any nodes!!")
             return
 
         mirrored_guide_Positions = []
@@ -248,7 +248,7 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
                 for guide in node_data['guides']:
                     current_guide_name = node_old_side_prefix + node_component_name + "_" + guide['name'] + ROSE_Names.guide_suffix
                     guide_pos = MC.getObjectWorldPositionMatrix(current_guide_name)
-                    print("node_data::", node_component_name, "::guide::", guide['orientation_shape']['name'], "::Original Position::", guide_pos)
+                    log.debug("node_data::", node_component_name, "::guide::", guide['orientation_shape']['name'], "::Original Position::", guide_pos)
 
                     # Logic to get the mirrored World Space Positions for each guide position
                     mirrored_guides.append(Matrix_functions.mirrorFlatMatrixInX(guide_pos))
@@ -268,7 +268,7 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
                     guide.setPosition(mirrored_guide_Positions[index][guide_index])
  
     def onDrop(self, event):
-        if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
+        dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
         if event.mimeData().hasFormat(NODELIST_MIMETYPE):
             event_data = event.mimeData().data(NODELIST_MIMETYPE)
             data_stream = QDataStream(event_data, QIODevice.ReadOnly)
@@ -277,35 +277,35 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
             operation_code = data_stream.readInt32()
             text = data_stream.readQString()
 
-            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Got Data:: OperationCode:: ", operation_code, " and Name:: ", text)
+            dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Got Data:: OperationCode:: ", operation_code, " and Name:: ", text)
 
             mouse_position = event.pos()
             scene_position = self.central_widget.scene.getView().mapToScene(mouse_position)
             
-            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Event ScenePosition:: ", scene_position)
+            dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Event ScenePosition:: ", scene_position)
 
-            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop: Class about to be dropped into the scene:: ", getClassFromOperationCode(operation_code))
+            dragdrop_log.debug("NODEEDITORTAB:: --onDrop: Class about to be dropped into the scene:: ", getClassFromOperationCode(operation_code))
 
             new_node = getClassFromOperationCode(operation_code)(self.central_widget.scene)
             new_node.setPosition(scene_position.x(), scene_position.y())
 
-            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop: New Node:: ",new_node)
+            dragdrop_log.debug("NODEEDITORTAB:: --onDrop: New Node:: ",new_node)
 
             self.central_widget.scene.history.storeHistory("Created New Node", set_modified=True)
 
             event.setDropAction(Qt.MoveAction)
             event.accept()
         else:
-            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDrop:: Not Requested Format:: ", NODELIST_MIMETYPE, " ignoring event")
+            dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Not Requested Format:: ", NODELIST_MIMETYPE, " ignoring event")
             event.ignore()
 
     def onDragEnter(self, event):
-        if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: Passport please, you are entering view Area!:: ", event)
-        if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: mimedata:: ", event.mimeData().hasFormat(NODELIST_MIMETYPE))
+        dragdrop_log.debug("NODEEDITORTAB:: --onDragEnter:: Passport please, you are entering view Area!:: ", event)
+        dragdrop_log.debug("NODEEDITORTAB:: --onDragEnter:: mimedata:: ", event.mimeData().hasFormat(NODELIST_MIMETYPE))
         if event.mimeData().hasFormat(NODELIST_MIMETYPE):
             event.acceptProposedAction()
         else:
-            if DRAGDROP_DEBUG: print("NODEEDITORTAB:: --onDragEnter:: Drag Enter Denied!")
+            dragdrop_log.debug("NODEEDITORTAB:: --onDragEnter:: Drag Enter Denied!")
 
     def isModified(self):
         return self.central_widget.scene.isModified()

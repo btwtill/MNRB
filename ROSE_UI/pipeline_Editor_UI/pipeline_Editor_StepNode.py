@@ -5,8 +5,6 @@ from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #typ
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Socket import LEFT #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_StepGraphicNode import PipelineStep_QGraphicNode #type: ignore
 
-CLASS_DEBUG = False
-
 class PipelineStepProperties(NodeEditorNodeProperties):
     def __init__(self, node):
         super().__init__(node)

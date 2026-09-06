@@ -1,4 +1,7 @@
 
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.editor.shelf")
+
 def open():
     """This function is to open the the tools UI"""
     from PySide6.QtWidgets import QApplication #type: ignore
@@ -34,7 +37,7 @@ def open():
     newEditor.show()
 
 def reloadROSEModules():
-    print("Reloading ROSE Shelf and Modules............")
+    log.debug("Reloading ROSE Shelf and Modules............")
     import importlib
 
     import MNRB.ROSE_Nodes.node_Editor_conf as NodeEditorConf #type: ignore

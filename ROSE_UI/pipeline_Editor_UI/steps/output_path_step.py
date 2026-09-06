@@ -5,6 +5,9 @@ from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_conf import registerPipelin
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.pipeline.steps")
+
 OPERATIONCODE_OUTPUTPATHSTEP = 2
 
 
@@ -68,7 +71,7 @@ class OutputPathStepProperties(PipelineStepProperties):
     def onSetGeometryRoot(self):
         selection = MC.getViewportSelection()
         if len(selection) != 1:
-            print("OutputPathStepProperties:: --onSetGeometryRoot:: Select exactly one node to use as the geometry root")
+            log.debug("OutputPathStepProperties:: --onSetGeometryRoot:: Select exactly one node to use as the geometry root")
             return
 
         self.geometry_root = selection[0]

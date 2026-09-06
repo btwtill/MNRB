@@ -2,9 +2,6 @@ from PySide6 import QtWidgets #type: ignore
 from PySide6.QtCore import Qt, QRectF #type: ignore
 from PySide6.QtGui import QFont, QFontMetrics, QBrush, QPen, QColor, QPainterPath #type: ignore
 
-SELECTION_DEBUG = False
-EVENT_DEBUG = False
-
 class PipelineStep_QGraphicNode(QtWidgets.QGraphicsItem):
     """Deliberately simple graphics node for pipeline steps - just a title and one
     big input/output dot each, no per-socket labels or dynamic sizing. This is a

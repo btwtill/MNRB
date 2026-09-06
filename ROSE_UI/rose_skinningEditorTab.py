@@ -7,6 +7,9 @@ from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_Cluster import SkinningEdit
 from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_ClusterList import SkinningEditorClusterList #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.skinning")
+
 class rose_SkinningEditorTab(QWidget, Serializable):
     def __init__(self, node_editor, parent=None):
         QWidget.__init__(self, parent)
@@ -136,7 +139,7 @@ class rose_SkinningEditorTab(QWidget, Serializable):
                         self.deserialize(data)
 
         except Exception as e:
-                print(f"Error loading file: {e}")
+                log.error(f"Error loading file: {e}")
                 return False
         return True
 
@@ -264,7 +267,7 @@ class rose_SkinningEditorTab(QWidget, Serializable):
 
     def deserialize(self, data, hashmap={}, restore_id = True):
         if restore_id: self.id = data['id']
-        print("SkinningEditorTab: Deserializing data: data['deformer_dict']")
+        log.debug("SkinningEditorTab: Deserializing data: data['deformer_dict']")
         if 'deformer_dict' in data:
             self.setComponentDeformerDict(data['deformer_dict'])
 

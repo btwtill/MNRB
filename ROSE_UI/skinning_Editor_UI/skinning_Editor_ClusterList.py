@@ -3,7 +3,8 @@ from PySide6.QtCore import Qt #type: ignore
 from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_ClusterComponentWidget import SkinClusterComponentWidget #type: ignore
 from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_DeformList import SKINDEFORM_MIMETYPE, decodeDeformPayload #type: ignore
 
-DRAGDROP_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+dragdrop_log = ROSE_Log.get("rose.skinning.dragdrop")
 
 class SkinningEditorClusterList(QListWidget):
     def __init__(self, tab, parent=None):
@@ -110,7 +111,7 @@ class SkinningEditorClusterList(QListWidget):
 
         target_item = self.itemAt(event.pos())
         if target_item is None:
-            if DRAGDROP_DEBUG: print("SKINNINGCLUSTERLIST:: --handleDeformDrop:: No cluster box under drop position")
+            dragdrop_log.debug("SKINNINGCLUSTERLIST:: --handleDeformDrop:: No cluster box under drop position")
             event.ignore()
             return
 
@@ -128,7 +129,7 @@ class SkinningEditorClusterList(QListWidget):
                 deform = scene.getDeformByName(deform_name)
 
             if deform is None:
-                if DRAGDROP_DEBUG: print("SKINNINGCLUSTERLIST:: --handleDeformDrop:: Could not resolve dropped deform:: ", deform_name)
+                dragdrop_log.debug("SKINNINGCLUSTERLIST:: --handleDeformDrop:: Could not resolve dropped deform:: ", deform_name)
                 continue
 
             #addDeform ignores one already in this container, so overlapping

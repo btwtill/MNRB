@@ -11,13 +11,14 @@ from MNRB.ROSE_Nodes.node_Editor_conf import ROSE_NODES #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_DragNodeList import ICONPATH #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_multiEditPropertiesWidget import MultiEdit_PropertyWidget #type: ignore
 
-CLASS_DEBUG = False
-CONTEXT_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor")
+view_log = ROSE_Log.get("rose.node_editor.view")
 
 class NodeEditorWidget(QtWidgets.QWidget):
     def __init__(self, property_widget = None, parent=None):
         super().__init__(parent)
-        if CLASS_DEBUG : print("NODE_EDITOR_WIDGET:: -__init__:: Initialized Node Editor Widget")
+        log.debug("NODE_EDITOR_WIDGET:: -__init__:: Initialized Node Editor Widget")
 
         self.property_widget = property_widget
 
@@ -79,7 +80,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         return getClassFromOperationCode(data['operation_code'])
 
     def updatePropertyWindow(self):
-        if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Updating Property Window!!")
+        log.debug("NODEEDITORWIDGET:: --updatePropertyWindow:: Updating Property Window!!")
         selected_items = self.getSelectedItems()
 
         previous_multi_edit_widget = self.multi_edit_property_widget
@@ -95,14 +96,14 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
     def setPropertyWindowContent(self, selected_items):
         if selected_items == []:
-            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Selected Items:: ", selected_items)
-            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to:: ", self.scene.properties)
+            log.debug("NODEEDITORWIDGET:: --updatePropertyWindow:: Selected Items:: ", selected_items)
+            log.debug("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to:: ", self.scene.properties)
             
             self.property_widget.setWidget(self.scene.properties)
             self.property_widget.setWindowTitle(self.scene.properties.title)
         elif len(selected_items) == 1:
             active_widget = selected_items[0]
-            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to First in Selection:: ", active_widget)
+            log.debug("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to First in Selection:: ", active_widget)
             if hasattr(active_widget, 'node'):
                 self.property_widget.setWidget(active_widget.node.properties)
                 self.property_widget.setWindowTitle(active_widget.node.properties.title)
@@ -110,7 +111,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
                 self.property_widget.setWidget(active_widget.edge.properties)
                 self.property_widget.setWindowTitle(active_widget.edge.properties.title)
         else:
-            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Multi Selection Properties Window!!")
+            log.debug("NODEEDITORWIDGET:: --updatePropertyWindow:: Multi Selection Properties Window!!")
 
             filtered_selection = []
             for item in selected_items:
@@ -130,7 +131,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
     def contextMenuEvent(self, event):
         item  = self.scene.getItemAt(event.pos())
-        if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --contextMenuEvent:: Item At Context Menu Event:: ", item)
+        view_log.debug("NODE_EDITOR_TAB:: --contextMenuEvent:: Item At Context Menu Event:: ", item)
         if type(item) == QtWidgets.QGraphicsProxyWidget:
             item = item.widget()
 
@@ -144,7 +145,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         return super().contextMenuEvent(event)
 
     def handleNodeContextMenu(self, event):
-        if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: Node Context Menu Open:: ")
+        view_log.debug("NODE_EDITOR_TAB:: --handleNodeContextMenu:: Node Context Menu Open:: ")
         context_menu = QtWidgets.QMenu(self)
 
         evaluate_properties = context_menu.addAction("validate")
@@ -169,7 +170,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         if hasattr(item, 'socket'):
             selected = item.socket.node
 
-        if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: got item:: ", selected)
+        view_log.debug("NODE_EDITOR_TAB:: --handleNodeContextMenu:: got item:: ", selected)
 
         if selected and action == evaluate_properties: selected.properties.validateProperties() if not selected.properties.is_disabled else print("Disabled")
         if selected and action == build_guides: selected.guideBuild() if not selected.properties.is_disabled else print("Disabled")
@@ -180,7 +181,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         if selected and action == select_deforms: selected.selectAllDeforms()
 
     def handleEdgeContextMenu(self, event):
-        if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: Edge Context Menu Open:: ")
+        view_log.debug("NODE_EDITOR_TAB:: --handleNodeContextMenu:: Edge Context Menu Open:: ")
 
         context_menu = QtWidgets.QMenu(self)
         bezier_action = context_menu.addAction("Bezier")
@@ -197,7 +198,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         if selected and action == direct_action: selected.edge_type = EDGE_TYPE_DIRECT
 
     def handleNewNodeContextMenu(self, event):
-        if CONTEXT_DEBUG: print("NODE_EDITOR_TAB:: --handleNodeContextMenu:: New Node Context Menu Open:: ")
+        view_log.debug("NODE_EDITOR_TAB:: --handleNodeContextMenu:: New Node Context Menu Open:: ")
         context_menu = self.initNodesContextMenu()
 
         action = context_menu.exec_(self.mapToGlobal(event.pos()))

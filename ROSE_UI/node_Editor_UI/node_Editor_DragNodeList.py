@@ -5,10 +5,11 @@ from PySide6.QtGui import QPixmap, QIcon, QDrag, QColor #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import NODELIST_MIMETYPE, ROSE_NODES, ROSE_NODE_GROUPS, getClassFromOperationCode #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
 
-ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+dragdrop_log = ROSE_Log.get("rose.node_editor.dragdrop")
+log = ROSE_Log.get("rose.node_editor.dragdrop")
 
-DRAGDROP_DEBUG = False
-CLASS_DEBUG = False
+ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
 class NodeEditorDragNodeList(QtWidgets.QListWidget):
     def __init__(self, parent = None):
@@ -27,7 +28,7 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         
     def addDragListItems(self):
 
-        if CLASS_DEBUG: print("DRAGNODELIST:: --addDragListItems:: Registered Items::", ROSE_NODES)
+        log.debug("DRAGNODELIST:: --addDragListItems:: Registered Items::", ROSE_NODES)
 
         node_groups = ROSE_NODE_GROUPS
 
@@ -63,19 +64,19 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         return item
 
     def addDragListGroupItem(self, group_name, node_ids):
-        print("DRAGNODELIST:: --addDragListGroupItem:: GroupName:: ", group_name, " NodeIDs:: ", node_ids)
+        log.debug("DRAGNODELIST:: --addDragListGroupItem:: GroupName:: ", group_name, " NodeIDs:: ", node_ids)
         item = List_Group_Item(group_name, node_ids, self)
 
         return item
 
     def startDrag(self, *args, **kwargs):
-        if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: ")
+        dragdrop_log.debug("NODEDRAGLIST:: --startDrag:: ")
 
         try:
             item = self.currentItem()
             operation_code = item.data(Qt.ItemDataRole.UserRole + 1)
 
-            if DRAGDROP_DEBUG: print("NODEDRAGLIST:: --startDrag:: Item:: OperationCode:: ", operation_code, " Class:: ", item)
+            dragdrop_log.debug("NODEDRAGLIST:: --startDrag:: Item:: OperationCode:: ", operation_code, " Class:: ", item)
 
             icon_pixmap = QPixmap(item.data(Qt.ItemDataRole.UserRole))
 
@@ -96,4 +97,4 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
             drag.exec_(Qt.MoveAction)
 
         except Exception as e:
-            print(e)
+            log.error(e)

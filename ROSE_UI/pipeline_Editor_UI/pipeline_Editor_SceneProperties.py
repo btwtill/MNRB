@@ -1,7 +1,8 @@
 from PySide6 import QtWidgets #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_PropertiesWidget import NodeEditorPropertiesWidget #type: ignore
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.pipeline")
 
 class PipelineEditorSceneProperties(NodeEditorPropertiesWidget):
     """Mirrors NodeEditorSceneProperties' role (node_Editor_UI/node_Editor_SceneProperties.py)
@@ -46,4 +47,4 @@ class PipelineEditorSceneProperties(NodeEditorPropertiesWidget):
 
         summary = " | ".join(lines) if lines else "No steps to run"
         self.status_label.setText(summary)
-        if CLASS_DEBUG: print("PIPELINE_EDITOR_SCENE_PROPERTIES:: --onBuildFullPipeline:: ", summary)
+        log.debug("PIPELINE_EDITOR_SCENE_PROPERTIES:: --onBuildFullPipeline:: ", summary)

@@ -1,6 +1,7 @@
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.scene")
 
 class VirtualHierarchyObject():
     def __init__(self, hierarchy, parent = None, suffix = ""):
@@ -34,7 +35,7 @@ class VirtualHierarchyObject():
         return MC.objectExists(self.rig_name + self.suffix)
 
     def ensureExistence(self):
-        if CLASS_DEBUG: print("%s:: --ensureExistence:: " % self.__class__.__name__, self.suffix, " Current Rig Name:: ", self.rig_name)
+        log.debug("%s:: --ensureExistence:: " % self.__class__.__name__, self.suffix, " Current Rig Name:: ", self.rig_name)
         if self.validateViewport():
             return True
         else:
@@ -42,21 +43,21 @@ class VirtualHierarchyObject():
             return True
 
     def updateRigName(self):
-        if CLASS_DEBUG: print("%s:: --updateRigName:: Setting Rig_name old:: " % self.__class__.__name__, self.rig_name, " To New:: ", self.hierarchy.hierarchy_name)
+        log.debug("%s:: --updateRigName:: Setting Rig_name old:: " % self.__class__.__name__, self.rig_name, " To New:: ", self.hierarchy.hierarchy_name)
         self.rig_name = self.hierarchy.hierarchy_name
 
     def updateName(self):
-        if CLASS_DEBUG: print("%s:: --updateName:: old Rig Name:: "% self.__class__.__name__, self.rig_name)
-        if CLASS_DEBUG: print("%s:: --updateName:: old Name:: "% self.__class__.__name__, self.name)
+        log.debug("%s:: --updateName:: old Rig Name:: "% self.__class__.__name__, self.rig_name)
+        log.debug("%s:: --updateName:: old Name:: "% self.__class__.__name__, self.name)
         
         if not self.exists():
-            if CLASS_DEBUG: print("SCENE_HIERARCHY:: --updateHierarchyObject:: ", self.name, " Object is Not in the Viewport!!")
+            log.debug("SCENE_HIERARCHY:: --updateHierarchyObject:: ", self.name, " Object is Not in the Viewport!!")
             self.updateRigName()
             self.name = self.rig_name + self.suffix
             return
 
         new_object_name = self.hierarchy.hierarchy_name + self.suffix
-        if CLASS_DEBUG: print("%s:: --updateName:: new Name:: "% self.__class__.__name__, new_object_name)
+        log.debug("%s:: --updateName:: new Name:: "% self.__class__.__name__, new_object_name)
 
         if self.name == new_object_name:
             return

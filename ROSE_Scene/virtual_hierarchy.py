@@ -1,7 +1,8 @@
 from MNRB.ROSE_Scene.virtual_hierarchy_object import VirtualHierarchyObject #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.scene")
 
 class ROSE_Virtual_Hierarchy():
     def __init__(self, scene) -> None:
@@ -43,5 +44,5 @@ class ROSE_Virtual_Hierarchy():
         self._hierarchy_name_changed_listeners.append(callback)
 
     def updateVirtualHierarchyName(self):
-        if CLASS_DEBUG: print("%s:: --updateVirtualHierarchyName:: Old Name:: " % self.__class__.__name__, self.hierarchy_name, " New Name:: ", self.scene.getSceneRigName())
+        log.debug("%s:: --updateVirtualHierarchyName:: Old Name:: " % self.__class__.__name__, self.hierarchy_name, " New Name:: ", self.scene.getSceneRigName())
         self.hierarchy_name = self.scene.getSceneRigName()

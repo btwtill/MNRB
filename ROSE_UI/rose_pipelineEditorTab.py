@@ -5,7 +5,8 @@ from PySide6.QtCore import Qt, QTimer #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_Widget import PipelineEditorWidget #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.scrollable_dock_widget import ScrollableDockWidget #type: ignore
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.pipeline")
 
 class rose_PipelineEditorTab(QtWidgets.QMainWindow):
     """Mirrors rose_nodeEditorTab.py's shape for the pipeline canvas - no left-dock
@@ -78,7 +79,7 @@ class rose_PipelineEditorTab(QtWidgets.QMainWindow):
             #a corrupted/truncated/empty graph file (e.g. left behind by a save
             #that failed partway through) shouldn't take down the whole project
             #open flow - fall back to a blank pipeline instead
-            print("rose_PipelineEditorTab:: --loadFile:: Failed to load '%s': %s - starting a blank pipeline instead" % (path, e))
+            log.error("rose_PipelineEditorTab:: --loadFile:: Failed to load '%s': %s - starting a blank pipeline instead" % (path, e))
             self.onNewFile()
 
         self.central_widget.scene.history.clear()
@@ -127,11 +128,11 @@ class rose_PipelineEditorTab(QtWidgets.QMainWindow):
         try:
             data = json.loads(raw_data)
         except ValueError as e:
-            print("Pasting of invalid Json Data!", e)
+            log.error("Pasting of invalid Json Data!", e)
             return
 
         if 'nodes' not in data:
-            print("Json does not contain any nodes!!")
+            log.debug("Json does not contain any nodes!!")
             return
 
         self.central_widget.scene.clipboard.deserializeFromClipboardToScene(data)

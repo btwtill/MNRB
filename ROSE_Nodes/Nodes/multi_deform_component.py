@@ -13,8 +13,9 @@ from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 
-GUIDE_DEBUG = True
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+guide_log = ROSE_Log.get("rose.components.guides")
+log = ROSE_Log.get("rose.components")
 
 class ROSE_Node_MultiDeformComponent_Properties(ROSE_NodeProperties): 
 
@@ -50,8 +51,8 @@ class ROSE_Node_MultiDeformComponent_Properties(ROSE_NodeProperties):
 
     def updateDeformCount(self, silent = False):
         if not self.is_silent:
-            if CLASS_DEBUG: print("%s::updateDeformCount:: Properties are Silent::" % self.__class__.__name__, self.is_silent)
-            if CLASS_DEBUG: print("%s::updateDeformCount:: About to update Deform Count" % self.__class__.__name__)
+            log.debug("%s::updateDeformCount:: Properties are Silent::" % self.__class__.__name__, self.is_silent)
+            log.debug("%s::updateDeformCount:: About to update Deform Count" % self.__class__.__name__)
             self.node.onDeformCountSliderChange()
 
     def serialize(self):
@@ -87,7 +88,7 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
         if not super().guideBuild(): # Check if the basic guide Strucutre is successfully build and only then continue
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
+        guide_log.debug("%s:: Building Guides:: " % self.__class__.__name__, self)
 
         self.multi_Def_Chain_start_guide = guide(self, name = "start")
         MC.parentObject(self.multi_Def_Chain_start_guide.name, self.guide_component_hierarchy)
@@ -106,7 +107,7 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
         if not super().staticBuild():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Static:: " % self)
+        guide_log.debug("%s:: Building Static:: " % self)
         
         for index, guide in enumerate(self.guides):
             guide_pos = guide.getPosition()
@@ -125,7 +126,7 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
         if not super().componentBuild():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Component:: " % self)
+        guide_log.debug("%s:: Building Component:: " % self)
 
         root_guide_position = self.guides[0].getPosition()
 
@@ -191,27 +192,27 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
             MC.resetJointOrientations(deform.name)
     
     def onDeformCountSliderChange(self):
-        if CLASS_DEBUG: 
-            print("%s ::onDeformCountSliderChange::current deform count from Slider::" % self.__class__.__name__, self.properties.current_deform_count)
-            print("%s ::onDeformCountSliderChange::actual registered deforms::" % self.__class__.__name__, len(self.outputs))
-            print("%s:: onDeformCountSliderChange:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
-            print("%s:: onDeformCountSliderChange:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
+        if log.enabled:
+            log.debug("%s ::onDeformCountSliderChange::current deform count from Slider::" % self.__class__.__name__, self.properties.current_deform_count)
+            log.debug("%s ::onDeformCountSliderChange::actual registered deforms::" % self.__class__.__name__, len(self.outputs))
+            log.debug("%s:: onDeformCountSliderChange:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
+            log.debug("%s:: onDeformCountSliderChange:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
 
         #get overall amount of deforms 
         current_deform_count = int((len(self.outputs) - 2) / 2)
 
         if self.properties.current_deform_count > self.properties.last_deform_count:
 
-            if GUIDE_DEBUG: 
-                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " current length of guides:: ", len(self.guides))
-                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " amount to be add ", current_deform_count - self.properties.current_deform_count)
-                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
-                    print("%s:: addGuideFromChain:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
+            if guide_log.enabled:
+                    guide_log.debug("%s:: addGuideFromChain:: " % self.__class__.__name__, " current length of guides:: ", len(self.guides))
+                    guide_log.debug("%s:: addGuideFromChain:: " % self.__class__.__name__, " amount to be add ", current_deform_count - self.properties.current_deform_count)
+                    guide_log.debug("%s:: addGuideFromChain:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
+                    guide_log.debug("%s:: addGuideFromChain:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
 
             for guide_amount in range(self.properties.current_deform_count - current_deform_count):
 
                 new_guide_name = str(current_deform_count + guide_amount)
-                if CLASS_DEBUG: print("%s::New Guide Name:: " % self.__class__.__name__, new_guide_name)
+                log.debug("%s::New Guide Name:: " % self.__class__.__name__, new_guide_name)
 
                 #create new output socket for chain
                 self.addOutputSocket(output_type = 1, output_socket_value = new_guide_name, is_output_multi_edged = True)
@@ -224,11 +225,11 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
 
             #remove the last two sockets
             if current_deform_count >= 1:
-                if GUIDE_DEBUG: 
-                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " current length of guides:: ", len(self.guides))
-                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " amount to be removed ", current_deform_count - self.properties.current_deform_count)
-                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
-                    print("%s:: removeGuideFromChain:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
+                if guide_log.enabled:
+                    guide_log.debug("%s:: removeGuideFromChain:: " % self.__class__.__name__, " current length of guides:: ", len(self.guides))
+                    guide_log.debug("%s:: removeGuideFromChain:: " % self.__class__.__name__, " amount to be removed ", current_deform_count - self.properties.current_deform_count)
+                    guide_log.debug("%s:: removeGuideFromChain:: " % self.__class__.__name__, " old deform count ", self.properties.last_deform_count)
+                    guide_log.debug("%s:: removeGuideFromChain:: " % self.__class__.__name__, " new deform count ", self.properties.current_deform_count)
 
                 for guide_amount in range(current_deform_count - self.properties.current_deform_count):
                     self.removeLastSocket()
@@ -238,16 +239,16 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
                         self.removeGuideFromChain()
 
     def addGuideToChain(self, new_guide_name):
-        if CLASS_DEBUG: 
-            print("%s:: addGuideToChain:: " % self.__class__.__name__)
-            print("%s:: addGuideToChain:: with name" % self.__class__.__name__, new_guide_name)
+        if log.enabled:
+            log.debug("%s:: addGuideToChain:: " % self.__class__.__name__)
+            log.debug("%s:: addGuideToChain:: with name" % self.__class__.__name__, new_guide_name)
 
         #parent guide
         parent_guide = self.guides[-1]
 
-        if CLASS_DEBUG: 
-            print("%s:: addGuideToChain:: parent guide:: " % self.__class__.__name__, parent_guide)
-            print("%s:: addGuideToChain:: parent guide Name:: " % self.__class__.__name__, parent_guide.name)
+        if log.enabled:
+            log.debug("%s:: addGuideToChain:: parent guide:: " % self.__class__.__name__, parent_guide)
+            log.debug("%s:: addGuideToChain:: parent guide Name:: " % self.__class__.__name__, parent_guide.name)
 
         #create new guide with that name
         new_guide = guide(self, new_guide_name, parent_guide)
@@ -265,7 +266,7 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
         MC.addTranslation(new_guide.name, 5.0, 0.0, 0.0)
 
     def removeGuideFromChain(self):
-        if GUIDE_DEBUG: print("%s:: removeGuideFromChain:: " % self.__class__.__name__)
+        guide_log.debug("%s:: removeGuideFromChain:: " % self.__class__.__name__)
         
         last_guide_in_chain = self.guides.pop()
         last_guide_in_chain.remove()

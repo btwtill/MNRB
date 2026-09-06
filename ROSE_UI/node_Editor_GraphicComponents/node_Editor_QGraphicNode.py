@@ -3,9 +3,10 @@ from PySide6.QtCore import Qt, QRectF # type: ignore
 from PySide6.QtGui import QFont, QFontMetrics, QBrush, QPen, QColor, QPainterPath # type: ignore
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicCollapsedSocket #type: ignore
 
-SELECTION_DEBUG = False
-EVENT_DEBUG = False
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.node")
+selection_log = ROSE_Log.get("rose.node_editor.selection")
+view_log = ROSE_Log.get("rose.node_editor.view")
 
 class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
@@ -146,13 +147,13 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         super().mouseMoveEvent(event)
 
         if event.buttons() & Qt.LeftButton:
-            if EVENT_DEBUG: 
-                print("GRAPHICSNODE:: -mouseMoveEvent:: Start")
-                print("GRAPHICSNODE:: -mouseMoveEvent:: Left Button Mouse Moved")
-                print("GRAPHICSNODE:: -mouseMoveEvent:: Nodes to be updated:: ")
+            if view_log.enabled:
+                view_log.debug("GRAPHICSNODE:: -mouseMoveEvent:: Start")
+                view_log.debug("GRAPHICSNODE:: -mouseMoveEvent:: Left Button Mouse Moved")
+                view_log.debug("GRAPHICSNODE:: -mouseMoveEvent:: Nodes to be updated:: ")
                 for node in self.node.scene.nodes:
-                    print("GRAPHICSNODE:: -mouseMoveEvent:: Node: ", node)
-                    print("GRAPHICSNODE:: -mouseMoveEvent:: \t with GrNode:: ", node.grNode)
+                    view_log.debug("GRAPHICSNODE:: -mouseMoveEvent:: Node: ", node)
+                    view_log.debug("GRAPHICSNODE:: -mouseMoveEvent:: \t with GrNode:: ", node.grNode)
 
             for node in self.node.scene.nodes:
                 if node.grNode.isSelected():
@@ -170,21 +171,21 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             self.doSelect()
             self.node.scene._last_selected_items = self.node.scene.getSelectedItems()
 
-        if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Last Scene Selection:: ", self.node.scene._last_selected_items)
-        if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Current Selected Items:: ", self.node.scene.getSelectedItems())
+        selection_log.debug("GRAPHICNODE:: --mouseReleaseEvent:: Last Scene Selection:: ", self.node.scene._last_selected_items)
+        selection_log.debug("GRAPHICNODE:: --mouseReleaseEvent:: Current Selected Items:: ", self.node.scene.getSelectedItems())
 
         if self._last_selected_state != self.isSelected() or self.node.scene._last_selected_items != self.node.scene.getSelectedItems():
             self.node.scene.reset_last_selected_states()
             self._last_selected_state = self.isSelected()
             self.onSelected()
-            if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Last Scene Selection after --onSelected()", self.node.scene._last_selected_items)
-            if SELECTION_DEBUG: print("GRAPHICNODE:: --mouseReleaseEvent:: Items Selected In Scene after --onSelected():: ", self.node.scene.getSelectedItems())
+            selection_log.debug("GRAPHICNODE:: --mouseReleaseEvent:: Last Scene Selection after --onSelected()", self.node.scene._last_selected_items)
+            selection_log.debug("GRAPHICNODE:: --mouseReleaseEvent:: Items Selected In Scene after --onSelected():: ", self.node.scene.getSelectedItems())
             
     def setIsDrawingBoundingBox(self, value=True):
         self.is_drawing_bounding_box = value
 
     def wrapGrNodeToSockets(self):
-        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: " % self.__class__.__name__)
+        log.debug("%s::wrapGRNodeToSockets:: " % self.__class__.__name__)
 
         all_sockets = self.node.inputs + self.node.outputs
         #the very first call happens before initSockets() has run, while inputs/outputs
@@ -210,7 +211,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             self.height = (socket_count_for_height * full_socket_height) + self.title_height + self.socket_padding
             self.width = self.computeRequiredWidth(visible_pairs if sockets_exist else None)
 
-        if CLASS_DEBUG: print("%s::wrapGRNodeToSockets:: new grNode Height/Width" % self.__class__.__name__, self.height, self.width)
+        log.debug("%s::wrapGRNodeToSockets:: new grNode Height/Width" % self.__class__.__name__, self.height, self.width)
 
         #show/hide each real socket dot + label to match the current display mode
         visible_sockets = set(socket for socket, _ in visible_pairs)
@@ -276,7 +277,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         return max(required_width, minimum_width)
 
     def onSelected(self):
-        if SELECTION_DEBUG: print("GRAPHICNODE:: --onSelected:: ")
+        selection_log.debug("GRAPHICNODE:: --onSelected:: ")
         self.node.scene.grScene.itemSelected.emit()
 
     def doSelect(self, new_selection_state = True):

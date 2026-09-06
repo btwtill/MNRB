@@ -8,9 +8,8 @@ from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Clipboard import NodeEditorSceneCli
 from MNRB.ROSE_UI.rose_ui_utils import findIndexByAttribute #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_SceneProperties import PipelineEditorSceneProperties #type: ignore
 
-CLASS_DEBUG = False
-SERIALIZE_DEBUG = False
-SELECTION_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.pipeline")
 
 class PipelineEditorScene(Serializable):
     """Logical scene for the Pipeline tab's canvas - mirrors NodeEditorScene
@@ -50,7 +49,7 @@ class PipelineEditorScene(Serializable):
         self.grScene.itemSelected.connect(self.onItemSelected)
         self.grScene.itemsDeselected.connect(self.onItemsDeselected)
 
-        if CLASS_DEBUG: print("PIPELINE_EDITOR_SCENE:: -__init__:: Initialized Pipeline Editor Scene")
+        log.debug("PIPELINE_EDITOR_SCENE:: -__init__:: Initialized Pipeline Editor Scene")
 
     @property
     def has_been_modified(self): return self._has_been_modified

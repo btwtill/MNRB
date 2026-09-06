@@ -2,8 +2,8 @@ from collections import OrderedDict
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Edge import NodeEditorEdge #type: ignore
 
-SERIALIZE_DEBUG = False
-DESERIALIZE_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+serialize_log = ROSE_Log.get("rose.serialize")
 
 class NodeEditorSceneClipboard():
     def __init__(self, scene) -> None:
@@ -11,7 +11,7 @@ class NodeEditorSceneClipboard():
 
 
     def serializeSceneToClipboard(self, delete=False):
-        if SERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: ________________________________START SERIALIZING TO CLIPBOAD")
+        serialize_log.debug("NODE_EDITOR_CLIPBOARD:: ________________________________START SERIALIZING TO CLIPBOAD")
 
         selected_nodes, selected_edges, selected_sockets = [], [], {}
         last_mouse_scene_position = OrderedDict([
@@ -23,7 +23,7 @@ class NodeEditorSceneClipboard():
 
         for item in self.scene.grScene.selectedItems():
             if hasattr(item, 'node'):
-                if SERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: I am a Node:: ", item)
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: I am a Node:: ", item)
                 selected_nodes.append(item.node.serialize())
                 for socket in (item.node.inputs + item.node.outputs):
                     selected_sockets[socket.id] = socket
@@ -40,12 +40,12 @@ class NodeEditorSceneClipboard():
                 self.scene.getView().deleteSelected()
                 self.scene.history.storeHistory("Cut Elements from Scene", set_modified = True)
         
-        if SERIALIZE_DEBUG: 
-            print("NODE_EDITOR_CLIPBOARD:: ClipboardContent:: ")
-            print("NODE_EDITOR_CLIPBOARD:: \t Nodes:: ", len(selected_nodes) ," Data:: ",selected_nodes)
-            print("NODE_EDITOR_CLIPBOARD:: \t Edges:: ", len(selected_edges) ," Data:: " ,final_edges)
-            print("NODE_EDITOR_CLIPBOARD:: \t Sockets:: ", len(selected_sockets) ," Data:: " ,selected_sockets)
-            print("NODE_EDITOR_CLIPBOARD:: ________________________________END SERIALIZING TO CLIPBOAD")
+        if serialize_log.enabled:
+            serialize_log.debug("NODE_EDITOR_CLIPBOARD:: ClipboardContent:: ")
+            serialize_log.debug("NODE_EDITOR_CLIPBOARD:: \t Nodes:: ", len(selected_nodes) ," Data:: ",selected_nodes)
+            serialize_log.debug("NODE_EDITOR_CLIPBOARD:: \t Edges:: ", len(selected_edges) ," Data:: " ,final_edges)
+            serialize_log.debug("NODE_EDITOR_CLIPBOARD:: \t Sockets:: ", len(selected_sockets) ," Data:: " ,selected_sockets)
+            serialize_log.debug("NODE_EDITOR_CLIPBOARD:: ________________________________END SERIALIZING TO CLIPBOAD")
 
         return OrderedDict ([
             ("nodes", selected_nodes),
@@ -54,9 +54,9 @@ class NodeEditorSceneClipboard():
         ])
 
     def deserializeFromClipboardToScene(self, data):
-        if DESERIALIZE_DEBUG: 
-            print("NODE_EDITOR_CLIPBOARD:: ________________________________START DESERIALIZING FROM CLIPBOARD")
-            print("NODE_EDITOR_CLIPBOARD:: Data to be deserialized:: ", data)
+        if serialize_log.enabled:
+            serialize_log.debug("NODE_EDITOR_CLIPBOARD:: ________________________________START DESERIALIZING FROM CLIPBOARD")
+            serialize_log.debug("NODE_EDITOR_CLIPBOARD:: Data to be deserialized:: ", data)
 
         hashmap = {}
 
@@ -75,16 +75,16 @@ class NodeEditorSceneClipboard():
             duplicate_title = False
             checked_nodes = set()
             for node in self.scene.nodes:
-                if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: checking for duplicate Node Title: Node Titles to check against:: ", checked_nodes, " Node Data Title:: ", node_data['title'])
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: checking for duplicate Node Title: Node Titles to check against:: ", checked_nodes, " Node Data Title:: ", node_data['title'])
                 if node_data['title'] in checked_nodes:
                     duplicate_title = True
                     break
                 checked_nodes.add(node.title)
 
             if duplicate_title:
-                if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: found duplicate Title:: adding 1 to title:: ", node_data['title'])
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: found duplicate Title:: adding 1 to title:: ", node_data['title'])
                 node_data['properties']['component_name'] = node_data['properties']['component_name'] + "1"
-                if DESERIALIZE_DEBUG: print("NODE_EDITOR_CLIPBOARD:: new node properties component name:: ", node_data['properties']['component_name'])
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: new node properties component name:: ", node_data['properties']['component_name'])
 
             new_node.deserialize(node_data, hashmap, restore_id = False)
 
@@ -94,12 +94,12 @@ class NodeEditorSceneClipboard():
             offest_vector = [old_mouse_scene_position["position_x"] - old_node_vector[0], old_mouse_scene_position["position_y"] - old_node_vector[1]]
             new_node_position = [new_mouse_scene_position.x() - offest_vector[0], new_mouse_scene_position.y() - offest_vector[1]]
 
-            if DESERIALIZE_DEBUG: 
-                print("NODE_EDITOR_CLIPBOARD:: Node:: ", node_data["title"])
-                print("NODE_EDITOR_CLIPBOARD:: Node:: Old Mouse Position:: x: ", old_mouse_scene_position["position_x"] ," y:",old_mouse_scene_position["position_y"] )
-                print("NODE_EDITOR_CLIPBOARD:: Node:: Old Position:: x: ", old_node_vector[0], " y:", old_node_vector[1] )
-                print("NODE_EDITOR_CLIPBOARD:: Node:: Offset Positions:: x: ", offest_vector[0], " y:", offest_vector[1] )
-                print("NODE_EDITOR_CLIPBOARD:: Node:: New Node Positions:: x: ", new_node_position[0], " y:", new_node_position[1] )
+            if serialize_log.enabled:
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: Node:: ", node_data["title"])
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: Node:: Old Mouse Position:: x: ", old_mouse_scene_position["position_x"] ," y:",old_mouse_scene_position["position_y"] )
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: Node:: Old Position:: x: ", old_node_vector[0], " y:", old_node_vector[1] )
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: Node:: Offset Positions:: x: ", offest_vector[0], " y:", offest_vector[1] )
+                serialize_log.debug("NODE_EDITOR_CLIPBOARD:: Node:: New Node Positions:: x: ", new_node_position[0], " y:", new_node_position[1] )
 
             new_node.setPosition(new_node_position[0], new_node_position[1])
 

@@ -4,13 +4,15 @@ from PySide6.QtGui import QColor, QPixmap, QIcon, QDrag #type: ignore
 from PySide6.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
 
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+dragdrop_log = ROSE_Log.get("rose.skinning.dragdrop")
+log = ROSE_Log.get("rose.skinning.deform_list")
+
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
 #dragging a deform from this list onto a skinCluster container box - mirrors
 #NODELIST_MIMETYPE's usage in node_Editor_DragNodeList.py
 SKINDEFORM_MIMETYPE = "application/x-rose-skindeform"
-
-DRAGDROP_DEBUG = False
 
 STATUS_NORMAL = "normal"
 STATUS_ADDED = "added"
@@ -131,7 +133,7 @@ class SkinningEditorDeformList(QListWidget):
         return item.data(DEFORM_STATUS_ROLE) != STATUS_REMOVED
 
     def startDrag(self, *args, **kwargs):
-        if DRAGDROP_DEBUG: print("SKINNINGDEFORMLIST:: --startDrag:: ")
+        dragdrop_log.debug("SKINNINGDEFORMLIST:: --startDrag:: ")
 
         #the whole selection, not just the row under the cursor - the list has
         #always run in ExtendedSelection, only the payload was single-item
@@ -147,14 +149,14 @@ class SkinningEditorDeformList(QListWidget):
     def startGroupDrag(self, list_group_item):
         #dragging a group header behaves as if every deform under it had been
         #selected and dragged
-        if DRAGDROP_DEBUG: print("SKINNINGDEFORMLIST:: --startGroupDrag:: ", list_group_item.name)
+        dragdrop_log.debug("SKINNINGDEFORMLIST:: --startGroupDrag:: ", list_group_item.name)
 
         draggable_items = [item for item in list_group_item.list_items if self.isItemDraggable(item)]
         self.startDragForItems(draggable_items)
 
     def startDragForItems(self, items):
         if items == []:
-            if DRAGDROP_DEBUG: print("SKINNINGDEFORMLIST:: --startDragForItems:: nothing draggable in this drag")
+            dragdrop_log.debug("SKINNINGDEFORMLIST:: --startDragForItems:: nothing draggable in this drag")
             return
 
         try:
@@ -170,7 +172,7 @@ class SkinningEditorDeformList(QListWidget):
             drag.exec_(Qt.MoveAction)
 
         except Exception as e:
-            print("SKINNINGDEFORMLIST:: --startDragForItems:: ", e)
+            log.error("SKINNINGDEFORMLIST:: --startDragForItems:: ", e)
 
     def rebuildRows(self):
         #every refresh rebuilds the whole list, which sends the scrollbar back to

@@ -9,13 +9,10 @@ from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import 
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.view_overlay_controls import ViewOverlayControls #type: ignore
 
-EVENT_DEBUG = False
-CLASS_DEBUG = False
-SCENE_DEBUG = False
-MOVE_DEBUG = False
-WHEEL_DEBUG = False
-REMOVE_DEBUG = False
-EDGE_CUT_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.node_editor.view")
+scene_log = ROSE_Log.get("rose.node_editor.scene")
+view_log = ROSE_Log.get("rose.node_editor.view")
 
 MODE_NOOP = 1
 MODE_EDGEDRAG = 2
@@ -182,7 +179,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.grScene.scene.history.storeHistory("Changed Node Display Mode", set_modified = True)
         
     def middleMouseButtonPress(self, event) -> None:
-        if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
+        view_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Middle Mouse Button Press Start")
 
         #fake the middle mouse button release
         fake_releaseEvent = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.MiddleButton, Qt.NoButton, event.modifiers())
@@ -195,7 +192,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         super().mousePressEvent(fake_leftMousePress_Event)
 
     def middleMouseButtonRelease(self, event):
-        if EVENT_DEBUG: print("GRAPHICSVIEW:: --middleMouseButtonRelease:: Middle Mouse Button Release Start")
+        view_log.debug("GRAPHICSVIEW:: --middleMouseButtonRelease:: Middle Mouse Button Release Start")
 
         #fake left mouse button Release
         fake_left_MouseRelease_Event = QMouseEvent(event.type(), event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | ~Qt.MouseButton.LeftButton, event.modifiers())
@@ -205,63 +202,63 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         item_on_relase_event = self.getItemAtEvent(event)
 
-        if SCENE_DEBUG: 
+        if scene_log.enabled:
             if isinstance(item_on_relase_event, NodeEditor_QGraphicSocket):
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event.socket)
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \thasEdges:: ")
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event.socket)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \thasEdges:: ")
                 for edge in item_on_relase_event.socket.edges:
-                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", edge)
+                    scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", edge)
             elif isinstance(item_on_relase_event, NodeEditor_QGraphicEdge):
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\tConnecting Socket:: ", item_on_relase_event.edge.start_socket,"<---->", item_on_relase_event.edge.end_socket)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\tConnecting Socket:: ", item_on_relase_event.edge.start_socket,"<---->", item_on_relase_event.edge.end_socket)
             elif isinstance(item_on_relase_event, QtWidgets.QGraphicsProxyWidget):
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Node has sockets:: ")
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Amount of Sockets:: ", len(item_on_relase_event.widget().node.inputs + item_on_relase_event.widget().node.outputs))
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Input Sockets:: " )
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Node has sockets:: ")
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Amount of Sockets:: ", len(item_on_relase_event.widget().node.inputs + item_on_relase_event.widget().node.outputs))
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Input Sockets:: " )
                 for socket in item_on_relase_event.widget().node.inputs:
-                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Output Sockets:: " )
+                    scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Output Sockets:: " )
                 for socket in item_on_relase_event.widget().node.outputs:
-                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
+                    scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
             elif isinstance(item_on_relase_event, NodeEditor_QGraphicNode) or isinstance(item_on_relase_event, QtWidgets.QGraphicsTextItem):
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Node has sockets:: ")
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Amount of Sockets:: ", len(item_on_relase_event.node.inputs + item_on_relase_event.node.outputs))
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Input Sockets:: " )
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Node has sockets:: ")
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Amount of Sockets:: ", len(item_on_relase_event.node.inputs + item_on_relase_event.node.outputs))
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Input Sockets:: " )
                 for socket in item_on_relase_event.node.inputs:
-                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Output Sockets:: " )
+                    scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t Output Sockets:: " )
                 for socket in item_on_relase_event.node.outputs:
-                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
+                    scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t ", socket)
             else:
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
+                scene_log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Item Clicked On:: ", item_on_relase_event)
 
-        if SCENE_DEBUG and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in Scene:: ")
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tNodes:: ")
+        if scene_log.enabled and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in Scene:: ")
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \tNodes:: ")
             for node in self.grScene.scene.nodes:
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", node)
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", len(self.grScene.scene.nodes)," Node")
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tEdges:: ")
+                log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", node)
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", len(self.grScene.scene.nodes)," Node")
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \tEdges:: ")
             for edge in self.grScene.scene.edges:
-                print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", edge)
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", len(self.grScene.scene.edges), " Edges")
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in GraphicScene:: ")
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicNodes")
+                log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t\t", edge)
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", len(self.grScene.scene.edges), " Edges")
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Items in GraphicScene:: ")
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicNodes")
             item_counter = 0
             for item in self.grScene.items():
                 if  issubclass(type(item), NodeEditor_QGraphicNode) or isinstance(item, NodeEditor_QGraphicNode):
-                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Node:: \t", item)
+                    log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Node:: \t", item)
                     item_counter += 1
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicNodes")
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicEdges")
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicNodes")
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \tGraphicEdges")
             item_counter = 0
             for item in self.grScene.items():
                 if isinstance(item, NodeEditor_QGraphicEdge):
-                    print("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Edge:: \t", item)
+                    log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: Graphic Edge:: \t", item)
                     item_counter += 1
-            print("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicEdges")
+            log.debug("GRAPHICSVIEW:: --middleMouseButtonPress:: \t", item_counter, " GraphicEdges")
             
     def isNodeRelatedItem(self, item) -> bool:
         #anything visually part of a node - not just the grNode/title item itself,
@@ -289,7 +286,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if self.isNodeRelatedItem(item_on_click):
 
             if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Shift Click On Node")
+                view_log.debug("GRAPHICSVIEW:: --leftMouseButtonPress:: Shift Click On Node")
 
                 event.ignore()
                 fake_mouse_event = QMouseEvent(QEvent.MouseButtonPress, event.localPos(), event.screenPos(), Qt.LeftButton, event.buttons() | Qt.LeftButton, event.modifiers() | Qt.KeyboardModifier.ControlModifier)
@@ -297,7 +294,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 return
 
         if isinstance(item_on_click, NodeEditor_QGraphicSocket):
-            if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Socket Detected")
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonPress:: Socket Detected")
             if self.mode == MODE_NOOP:
                 self.mode = MODE_EDGEDRAG
                 self.dragging_edge.startEdgeDrag(item_on_click)
@@ -308,20 +305,20 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             drag_result = self.dragging_edge.endEdgeDrag(item_on_click)
             if drag_result: return
 
-        if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Item:: ", item_on_click)
+        view_log.debug("GRAPHICSVIEW:: --leftMouseButtonPress:: Item:: ", item_on_click)
 
         if item_on_click is None:
             
             if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
                 self.mode = MODE_EDGE_CUT
-                if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonPress:: Setting Edge Cut Mode ", self.mode)
+                view_log.debug("GRAPHICSVIEW:: --leftMouseButtonPress:: Setting Edge Cut Mode ", self.mode)
 
                 fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers())
                 super().mouseReleaseEvent(fake_mouse_event)
                 return
             
             else:
-                if EVENT_DEBUG: print("NODEEDITORVIEW:: --leftMouseButtonRelease:: Rubber Band Dragging On")
+                view_log.debug("NODEEDITORVIEW:: --leftMouseButtonRelease:: Rubber Band Dragging On")
                 self.is_dragging_rubber_band_rectangle = True
 
         super().mousePressEvent(event)
@@ -336,9 +333,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         if self.isNodeRelatedItem(item_on_release):
 
             if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                if EVENT_DEBUG:
-                    print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Shift Release On Node")
-                    print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Adding ", item_on_release, " to selection")
+                if view_log.enabled:
+                    view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Shift Release On Node")
+                    view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Adding ", item_on_release, " to selection")
                 event.ignore()
                 fake_mouse_event = QMouseEvent(QEvent.MouseButtonRelease, event.localPos(), event.screenPos(), Qt.LeftButton, Qt.NoButton, event.modifiers() | Qt.KeyboardModifier.ControlModifier)
                 super().mouseReleaseEvent(fake_mouse_event)
@@ -350,37 +347,37 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
                 drag_result = self.dragging_edge.endEdgeDrag(item_on_release)
                 if drag_result: return
 
-        if EVENT_DEBUG: 
-            print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Mode:: ", self.mode)
-            print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Item:: ", item_on_release)
+        if view_log.enabled:
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Mode:: ", self.mode)
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Item:: ", item_on_release)
         
         if self.mode == MODE_EDGE_CUT:
-            if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Cutting Intersecting Edges")
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Cutting Intersecting Edges")
             self.cutIntersectingEdges()
 
-            if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Resetting Cut Line Points")
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Resetting Cut Line Points")
             self.cutting_edge.line_points = []
 
-            if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: update Cutline")
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: update Cutline")
             self.cutting_edge.update()
 
-            if EDGE_CUT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Reset Mode")
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Reset Mode")
             self.mode = MODE_NOOP
             return
 
         if self.is_dragging_rubber_band_rectangle:
-            if EVENT_DEBUG: print("NODEEDITORVIEW:: --leftMouseButtonRelease:: Rubber Band Dragging Off")
+            view_log.debug("NODEEDITORVIEW:: --leftMouseButtonRelease:: Rubber Band Dragging Off")
             self.is_dragging_rubber_band_rectangle = False
 
             current_selected_items = self.grScene.selectedItems()
-            if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Last Stored Selection:: ", self.grScene.scene._last_selected_items)
-            if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Currently Selected Items:: ", current_selected_items)
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Last Stored Selection:: ", self.grScene.scene._last_selected_items)
+            view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Currently Selected Items:: ", current_selected_items)
             if current_selected_items != self.grScene.scene._last_selected_items:
                 if current_selected_items == []:
                     self.grScene.itemsDeselected.emit()
                 else:
                     self.grScene.itemSelected.emit()
-                if EVENT_DEBUG: print("GRAPHICSVIEW:: --leftMouseButtonRelease:: Setting Scene Last Selected Items from:: ", self.grScene.scene._last_selected_items, " to:: ", current_selected_items)
+                view_log.debug("GRAPHICSVIEW:: --leftMouseButtonRelease:: Setting Scene Last Selected Items from:: ", self.grScene.scene._last_selected_items, " to:: ", current_selected_items)
                 self.grScene.scene._last_selected_items = current_selected_items
             return 
         
@@ -396,9 +393,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         scene_event_mouse_position = self.mapToScene(event.pos())
 
-        if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: ", self.mode)
-        if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: is EdgeDrag:: ", self.mode == MODE_EDGEDRAG)
-        if MOVE_DEBUG: print("GRAPHICSVIEW:: --mouseMoveEvent:: MODE_EDGE_DRAG ", MODE_EDGEDRAG)
+        view_log.debug("GRAPHICSVIEW:: --mouseMoveEvent:: ", self.mode)
+        view_log.debug("GRAPHICSVIEW:: --mouseMoveEvent:: is EdgeDrag:: ", self.mode == MODE_EDGEDRAG)
+        view_log.debug("GRAPHICSVIEW:: --mouseMoveEvent:: MODE_EDGE_DRAG ", MODE_EDGEDRAG)
 
         if self.mode == MODE_EDGEDRAG:
             self.dragging_edge.updateDestination(scene_event_mouse_position.x(), scene_event_mouse_position.y())
@@ -413,7 +410,7 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         super().mouseMoveEvent(event)
 
     def wheelEvent(self, event):
-        if WHEEL_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
+        view_log.debug("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
         self.applyZoomStep(zoom_in = event.angleDelta().y() > 0)
 
     def zoomIn(self):
@@ -500,8 +497,8 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
     def displayErrorMessage(self, message):
         parent_widget = self.parentWidget().parentWidget().parentWidget().parentWidget().parentWidget().parentWidget()
-        print("parent Widget:: ", parent_widget.__class__)
-        print(dir(parent_widget))
+        log.debug("parent Widget:: ", parent_widget.__class__)
+        log.debug(dir(parent_widget))
         parent_widget.statusBar().showMessage(message, 5000)
         parent_widget.set_statusBar_color("#FFc43721", 5000)
         
@@ -516,25 +513,25 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
             elif hasattr(item, 'node'):
                 selected_nodes.append(item)
 
-        if REMOVE_DEBUG: 
-            print("GRAPHICSVIEW:: --deleteSelected:: Selected Items to be Removed: ")
+        if log.enabled:
+            log.debug("GRAPHICSVIEW:: --deleteSelected:: Selected Items to be Removed: ")
             for item in selected_items:
-                print("GRAPHICSVIEW:: --deleteSelected:: Graphical Item:: \t", item)
-            print("GRAPHICSVIEW:: --deleteSelected:: Selected Nodes to be Removed:: ")
+                log.debug("GRAPHICSVIEW:: --deleteSelected:: Graphical Item:: \t", item)
+            log.debug("GRAPHICSVIEW:: --deleteSelected:: Selected Nodes to be Removed:: ")
             for node in selected_nodes:
-                print("GRAPHICSVIEW:: --deleteSelected:: \tGraphical Node \t", node)
-                print("GRAPHICSVIEW:: --deleteSelected:: \tLogical Node \t", node.node)
-            print("GRAPHICSVIEW:: --deleteSelected:: Selected Edges to be Removed:: ")
+                log.debug("GRAPHICSVIEW:: --deleteSelected:: \tGraphical Node \t", node)
+                log.debug("GRAPHICSVIEW:: --deleteSelected:: \tLogical Node \t", node.node)
+            log.debug("GRAPHICSVIEW:: --deleteSelected:: Selected Edges to be Removed:: ")
             for edge in selected_edges:
-                print("GRAPHICSVIEW:: --deleteSelected:: \tGraphical Edge\t", edge)
-                print("GRAPHICSVIEW:: --deleteSelected:: \tLogical Edge \t", edge.edge)
+                log.debug("GRAPHICSVIEW:: --deleteSelected:: \tGraphical Edge\t", edge)
+                log.debug("GRAPHICSVIEW:: --deleteSelected:: \tLogical Edge \t", edge.edge)
 
         for node in selected_nodes:
             if not getattr(node.node, 'is_deletable', True):
-                if REMOVE_DEBUG: print("GRAPHICSVIEW:: --deleteSelected:: skipping non-deletable node:: ", node.node)
+                log.debug("GRAPHICSVIEW:: --deleteSelected:: skipping non-deletable node:: ", node.node)
                 continue
             if node.node in node.node.scene.nodes:
-                if REMOVE_DEBUG: print("GRAPHICSVIEW:: --deleteSelected:: about to Remove Node")
+                log.debug("GRAPHICSVIEW:: --deleteSelected:: about to Remove Node")
                 node.node.remove()
 
         for edge in selected_edges:
@@ -564,9 +561,9 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
             self.centerOn(combined_bounding_rectangle.center())
         else:
-            if CLASS_DEBUG: print("node:: ", selected_items[0])
-            if CLASS_DEBUG: print("nodeWidth:: ", selected_items[0].width)
-            if CLASS_DEBUG: print("nodeHeight:: ", selected_items[0].height)
+            log.debug("node:: ", selected_items[0])
+            log.debug("nodeWidth:: ", selected_items[0].width)
+            log.debug("nodeHeight:: ", selected_items[0].height)
             view_position = QPointF(selected_items[0].pos().x() + (selected_items[0].width / 2), selected_items[0].pos().y() + (selected_items[0].height / 2))
             self.centerOn(view_position)
 

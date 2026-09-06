@@ -4,7 +4,8 @@ from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.ROSE_colors.colors import ROSEColor #type: ignore
 
-CLASS_DEBUG = False
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+log = ROSE_Log.get("rose.components.guides")
 
 class NurbsShereOrientGuideShape(Serializable):
     def __init__(self, guide) -> None:
@@ -20,9 +21,9 @@ class NurbsShereOrientGuideShape(Serializable):
         self.nodes = []
 
     def draw(self):
-        if CLASS_DEBUG: print("%s::draw::OrientShape Name::" % self.__class__.__name__, self.name)
+        log.debug("%s::draw::OrientShape Name::" % self.__class__.__name__, self.name)
         guide_shape = MC.createTransform(self.name)
-        if CLASS_DEBUG: print("%s::draw::OrientShape Name::After Creation::" % self.__class__.__name__, guide_shape)
+        log.debug("%s::draw::OrientShape Name::After Creation::" % self.__class__.__name__, guide_shape)
 
         self.name = guide_shape
 
@@ -93,20 +94,20 @@ class NurbsShereOrientGuideShape(Serializable):
             MC.deleteNode(self.name)
 
     def updateName(self, new_name):
-        if CLASS_DEBUG: print("%s::updateName::Check wether this orientation shape" % self.__class__.__name__, self.name, "exists or not" )
+        log.debug("%s::updateName::Check wether this orientation shape" % self.__class__.__name__, self.name, "exists or not" )
         if MC.objectExists(self.name):
-            if CLASS_DEBUG: 
-                print("%s::updateName::" % self.__class__.__name__)
-                print("%s::updateName::From " % self.__class__.__name__, self.name)
-                print("%s::updateName::To " % self.__class__.__name__, new_name + ROSE_Names.guide_orient_suffix)
+            if log.enabled:
+                log.debug("%s::updateName::" % self.__class__.__name__)
+                log.debug("%s::updateName::From " % self.__class__.__name__, self.name)
+                log.debug("%s::updateName::To " % self.__class__.__name__, new_name + ROSE_Names.guide_orient_suffix)
             old_name = self.name
             self.name = MC.renameObject(self.name, new_name + ROSE_Names.guide_orient_suffix)
 
             for index, node in enumerate(self.nodes):
-                if CLASS_DEBUG: 
-                    print("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
-                    print("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + ROSE_Names.guide_orient_suffix)
-                    print("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + ROSE_Names.guide_orient_suffix))
+                if log.enabled:
+                    log.debug("%s::updateName::Update Name of Node: " % self.__class__.__name__, node, " at index: ", index)
+                    log.debug("%s::updateName:: \t Try replacing: " % self.__class__.__name__, old_name, " with: ", new_name + ROSE_Names.guide_orient_suffix)
+                    log.debug("%s::updateName:: \t New Name: " % self.__class__.__name__, node.replace(old_name, new_name + ROSE_Names.guide_orient_suffix))
                 new_node_name = node.replace(old_name, new_name + ROSE_Names.guide_orient_suffix)
                 self.nodes[index] = MC.renameObject(node, new_node_name)
 
@@ -136,7 +137,7 @@ class NurbsShereOrientGuideShape(Serializable):
                 MC.setAttribute(self.name, "visibility", True)
 
     def serialize(self):
-        if CLASS_DEBUG: print("%s::serialize::" % self.__class__.__name__)
+        log.debug("%s::serialize::" % self.__class__.__name__)
         result_data = OrderedDict([('id', self.id),
                                   ('name', self.name),
                                   ('auto_orient_blend_node', self.auto_orient_blend_node),

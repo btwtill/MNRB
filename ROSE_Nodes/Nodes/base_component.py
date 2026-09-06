@@ -10,7 +10,8 @@ from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: igno
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_cmds_wrapper.transform_functions import Transform_functions #type: ignore
 
-GUIDE_DEBUG = True
+from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+guide_log = ROSE_Log.get("rose.components.guides")
 
 class ROSE_Node_BaseComponent_Properties(ROSE_NodeProperties):
         
@@ -37,7 +38,7 @@ class ROSE_Node_BaseComponent(ROSE_NodeTemplate):
         if not super().guideBuild():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Building Guides:: " % self.__class__.__name__, self)
+        guide_log.debug("%s:: Building Guides:: " % self.__class__.__name__, self)
 
         self.base_component_guide = guide(self, name = "global")
         MC.parentObject(self.base_component_guide.name, self.guide_component_hierarchy)
@@ -50,7 +51,7 @@ class ROSE_Node_BaseComponent(ROSE_NodeTemplate):
         if not super().staticBuild():
             return False
         
-        if GUIDE_DEBUG:  print("%s:: Building Static:: " % self.__class__.__name__, self)
+        guide_log.debug("%s:: Building Static:: " % self.__class__.__name__, self)
 
         guide_pos = self.guides[0].getPosition()
 
@@ -64,7 +65,7 @@ class ROSE_Node_BaseComponent(ROSE_NodeTemplate):
         if not super().componentBuild():
             return False
         
-        if GUIDE_DEBUG:  print("%s:: Building Component:: " % self.__class__.__name__, self)
+        guide_log.debug("%s:: Building Component:: " % self.__class__.__name__, self)
 
         self.guide_pos = self.guides[0].getPosition(reset_scale = False)
 
@@ -91,7 +92,7 @@ class ROSE_Node_BaseComponent(ROSE_NodeTemplate):
         if not super().connectComponent():
             return False
         
-        if GUIDE_DEBUG: print("%s:: Connecting Component:: " % self)
+        guide_log.debug("%s:: Connecting Component:: " % self)
 
         deform = self.deforms[0]
         Transform_functions.connectSrt(self.global_offset_output, deform.name)
