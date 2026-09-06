@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets # type:ignore
-from PySide6.QtCore import Qt, QRectF, QPointF # type: ignore
+from PySide6.QtCore import Qt, QRectF # type: ignore
 from PySide6.QtGui import QFont, QFontMetrics, QBrush, QPen, QColor, QPainterPath # type: ignore
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket import NodeEditor_QGraphicCollapsedSocket #type: ignore
 
@@ -82,6 +82,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.title_height = 20
         self.collapsed_width = 80
 
+        self._validity_bar_height = 1.5
+
         #initialize the variables for the Graphical Elements
         self._title_font = QFont("Verdana", 8)
         self._title_padding = 10
@@ -96,12 +98,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
 
         self._default_pen = QPen(self._default_color)
         self._selected_pen = QPen(self._selected_color)
-        self._valid_pen = QPen(self._valid_color)
-        self._valid_pen.setJoinStyle(Qt.MiterJoin)
-        self._valid_pen.setMiterLimit(5)
-        self._invalid_pen = QPen(self._invalid_color)
-        self._invalid_pen.setJoinStyle(Qt.MiterJoin)
-        self._invalid_pen.setMiterLimit(5)
+        #the mitred valid/invalid pens went with the old triangular corner glyph -
+        #the validity bar is a filled rectangle and needs no outline
 
         self._title_background_brush = QBrush(self._title_backgroundColor)
         self._content_brush = QBrush(self._content_color)
@@ -321,33 +319,21 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         painter.setBrush(Qt.NoBrush)
         painter.drawPath(path_outline.simplified())
 
-        path_valid_icon = QPainterPath()
-        path_valid_icon.setFillRule(Qt.WindingFill)
-        top_left = QPointF(self.width - self.title_height + 4.0, 0 + 1.0)
-        top_right = QPointF(self.width - 1.0, 0 + 1.0)
-        lower_left = QPointF(self.width - self.title_height - 1.0, self.title_height - 1.0)
-        lower_right = QPointF(self.width - 1.0, self.title_height - 6.0)
-        top_right_rounded_upper = QPointF(self.width - self._edge_roundness - 1.0 , 0 + 1.0)
-        top_right_rounded_lower = QPointF(self.width - 1.0, 0 + 1.0 + self._edge_roundness)
+        #validity bar, spanning the node directly under the title. Replaces the
+        #small triangular glyph this used to draw in the title bar's corner, which
+        #shrank to a few unreadable pixels once zoomed out or collapsed.
+        #Full width, edge to edge: the outline's rounding only affects the node's
+        #four corners, and this sits far enough down that the sides are straight
+        #there, so nothing overshoots the silhouette.
+        validity_bar_rectangle = QRectF(
+            0,
+            self.title_height,
+            self.width,
+            self._validity_bar_height)
 
-        path_valid_icon.moveTo(top_left)
-        path_valid_icon.lineTo(top_right_rounded_upper)
-        path_valid_icon.quadTo(top_right, top_right_rounded_lower)
-        path_valid_icon.lineTo(lower_right)
-        path_valid_icon.lineTo(lower_left)
-        path_valid_icon.lineTo(top_left)
-
-        subtraction_path = QPainterPath()
-        subtraction_path.moveTo(top_left)
-        subtraction_path.lineTo(lower_right)
-        subtraction_path.lineTo(lower_left)
-        subtraction_path.lineTo(top_left)
-
-        validation_icon_path = path_valid_icon.subtracted(subtraction_path)
-
-        painter.setPen(self._valid_pen if self.node.properties.is_valid else self._invalid_pen)
+        painter.setPen(Qt.NoPen)
         painter.setBrush(self._valid_brush if self.node.properties.is_valid else self._invalid_brush)
-        painter.drawPath(validation_icon_path.simplified())
+        painter.drawRect(validity_bar_rectangle)
 
         #paintBounding Rect
         if self.is_drawing_bounding_box:

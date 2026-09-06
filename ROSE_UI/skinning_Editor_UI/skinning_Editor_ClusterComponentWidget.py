@@ -77,9 +77,56 @@ class SkinClusterComponentWidget(QWidget):
         self.initSkinOptionsUI()
         self.initConstraintOptionsUI()
 
-        self.deform_list_layout = QVBoxLayout()
+        self.initDeformListUI()
+
+    def initDeformListUI(self):
+        #a container with many deforms makes its box tall enough to wreck the
+        #overview of the list, so the rows collapse behind a summary header
+        deform_header_row = QHBoxLayout()
+
+        self.deform_list_toggle_button = QPushButton()
+        self.deform_list_toggle_button.setFixedWidth(24)
+        self.deform_list_toggle_button.setFlat(True)
+        self.deform_list_toggle_button.clicked.connect(self.onToggleDeformList)
+        deform_header_row.addWidget(self.deform_list_toggle_button)
+
+        self.deform_summary_label = QLabel()
+        deform_header_row.addWidget(self.deform_summary_label)
+        deform_header_row.addStretch()
+
+        self.layout.addLayout(deform_header_row)
+
+        self.deform_list_widget = QWidget()
+        self.deform_list_layout = QVBoxLayout(self.deform_list_widget)
+        self.deform_list_layout.setContentsMargins(0, 0, 0, 0)
         self.deform_list_layout.setSpacing(2)
-        self.layout.addLayout(self.deform_list_layout)
+
+        self.layout.addWidget(self.deform_list_widget)
+
+    def onToggleDeformList(self):
+        self.skin_cluster.deform_list_collapsed = not self.skin_cluster.deform_list_collapsed
+        self.tab.setModified(True)
+        self.applyDeformListCollapsedState()
+        #the box just changed height, so its QListWidgetItem needs a new size hint.
+        #Deliberately not the list's full rebuild() that onRemoveDeform/onModeChanged
+        #use - that would delete this widget from inside its own click handler.
+        self.tab.skincluster_object_list.updateItemSizeForWidget(self)
+
+    def applyDeformListCollapsedState(self):
+        is_collapsed = self.skin_cluster.deform_list_collapsed
+        self.deform_list_widget.setVisible(not is_collapsed)
+        self.deform_list_toggle_button.setText("▶" if is_collapsed else "▼")
+
+    def updateDeformSummaryLabel(self, unresolved_count):
+        summary = "Deforms: %d" % len(self.skin_cluster.deform_refs)
+
+        #collapsing must not hide the fact that something in here needs attention -
+        #the red rows below are exactly what the list is there to surface
+        if unresolved_count > 0:
+            summary += "   %d unresolved" % unresolved_count
+
+        self.deform_summary_label.setText(summary)
+        self.deform_summary_label.setStyleSheet("color: #FFCC6666;" if unresolved_count > 0 else "")
 
     def initSkinOptionsUI(self):
         self.skin_options_widget = QWidget()
@@ -382,3 +429,6 @@ class SkinClusterComponentWidget(QWidget):
                 row_widget.setStyleSheet("background-color: #FF6B2E2E;")
 
             self.deform_list_layout.addWidget(row_widget)
+
+        self.updateDeformSummaryLabel(len(stale_ids))
+        self.applyDeformListCollapsedState()

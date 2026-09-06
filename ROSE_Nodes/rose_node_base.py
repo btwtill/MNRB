@@ -330,30 +330,100 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
                 self.display_extended_rotation_controls = False
                 self.node.setExtendedRotationControlDisplay(False)
 
-    def updateGuideSize(self):
-        self.guide_size = float(self.guide_slider_size_edit.text())
-        if CLASS_DEBUG: print("%s:: --updateGuideSize:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size, " of Node:: self.node")
+    def parseSizeEditValue(self, size_edit):
+        #a size field can legitimately hold something unparseable: the user typed
+        #it, or the multi edit widget blanked it to show that the selected nodes
+        #disagree on this value
+        try:
+            return float(size_edit.text())
+        except ValueError:
+            return None
+
+    #setValue/applyValue pairs below are the one write path for a component
+    #property. setValue* updates the model, the Maya scene and the modified flag,
+    #assuming the widgets already show the value (the single-edit case, where the
+    #user just typed/dragged it). apply* additionally pushes the value into this
+    #panel's own widgets first, which is what the multi edit widget uses to drive
+    #every selected node - so it never has to reach into another panel's widgets.
+    def setGuideSizeValue(self, value):
+        self.guide_size = value
+        if CLASS_DEBUG: print("%s:: --setGuideSizeValue:: Setting Guide Size To: " % self.__class__.__name__, self.guide_size, " of Node:: ", self.node)
         self.node.setComponentGuideSize(self.guide_size)
         self.setHasBeenModified()
 
-    def updateDeformSize(self):
-        self.deform_size = float(self.deform_slider_size_edit.text())
-        if CLASS_DEBUG: print("%s:: --updateDeformSize:: Setting Deform Size To: " % self.__class__.__name__, self.deform_size)
-        if CLASS_DEBUG: print("%s:: --updateDeformSize:: of Node::  " % self.__class__.__name__, self.node)
+    def applyGuideSize(self, value):
+        self.guide_slider_size_edit.setText(str(value))
+        self.updateGuideSlider()
+        self.setGuideSizeValue(value)
+
+    def updateGuideSize(self):
+        value = self.parseSizeEditValue(self.guide_slider_size_edit)
+        if value is None: return
+        self.setGuideSizeValue(value)
+
+    def setDeformSizeValue(self, value):
+        self.deform_size = value
+        if CLASS_DEBUG: print("%s:: --setDeformSizeValue:: Setting Deform Size To: " % self.__class__.__name__, self.deform_size, " of Node:: ", self.node)
         self.node.setComponentDeformRadius(self.deform_size)
         self.setHasBeenModified()
 
-    def updateControlSize(self):
-        self.control_size = float(self.control_slider_size_edit.text())
-        if CLASS_DEBUG: print("%s:: --updatecontrolSize:: Setting control Size To: " % self.__class__.__name__, self.control_size)
-        if CLASS_DEBUG: print("%s:: --updatecontrolSize:: of Node::  " % self.__class__.__name__, self.node)
+    def applyDeformSize(self, value):
+        self.deform_slider_size_edit.setText(str(value))
+        self.updateDeformSlider()
+        self.setDeformSizeValue(value)
+
+    def updateDeformSize(self):
+        value = self.parseSizeEditValue(self.deform_slider_size_edit)
+        if value is None: return
+        self.setDeformSizeValue(value)
+
+    def setControlSizeValue(self, value):
+        self.control_size = value
+        if CLASS_DEBUG: print("%s:: --setControlSizeValue:: Setting Control Size To: " % self.__class__.__name__, self.control_size, " of Node:: ", self.node)
         self.node.setComponentControlsSize(self.control_size)
+        self.setHasBeenModified()
+
+    def applyControlSize(self, value):
+        self.control_slider_size_edit.setText(str(value))
+        self.updateControlSlider()
+        self.setControlSizeValue(value)
+
+    def updateControlSize(self):
+        value = self.parseSizeEditValue(self.control_slider_size_edit)
+        if value is None: return
+        self.setControlSizeValue(value)
+
+    def applyComponentColor(self, index):
+        #setCurrentIndex fires updateComponentColor, which does the model/scene work
+        self.component_color_dropdown.setCurrentIndex(index)
+
+    def applyDisabled(self, value):
+        self.disabled_checkbox.setChecked(value)
+
+    def applyDisplayGuideOrientation(self, value):
+        self.display_guide_orientation_checkbox.setChecked(value)
+
+    def applyAutoOrientGuide(self, value):
+        self.auto_orient_guide_checkbox.setChecked(value)
+
+    def applyExtendedRotationControlDisplay(self, value):
+        self.extended_rotation_control_checkbox.setChecked(value)
+
+    def applySidePrefix(self, prefix):
+        if prefix == ROSE_Names.left.prefix:
+            self.left_prefix_button.mark()
+        elif prefix == ROSE_Names.right.prefix:
+            self.right_prefix_button.mark()
+        else:
+            self.mid_prefix_button.mark()
+        self.updateComponentName()
         self.setHasBeenModified()
 
     def updateDisabledState(self):
         self.is_disabled = self.disabled_checkbox.isChecked()
 
     def updateGuideSlider(self):
+        if self.parseSizeEditValue(self.guide_slider_size_edit) is None: return
         self.is_guide_slider_silent = True
         self.guide_size_slider.setValue(self.formatSliderEditToSliderValue(self.guide_slider_size_edit.text()))
         self.is_guide_slider_silent = False
@@ -364,6 +434,7 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         self.is_guide_slider_edit_silent = False
 
     def updateDeformSlider(self):
+        if self.parseSizeEditValue(self.deform_slider_size_edit) is None: return
         self.is_deform_slider_silent = True
         self.deform_size_slider.setValue(self.formatSliderEditToSliderValue(self.deform_slider_size_edit.text()))
         self.is_deform_slider_silent = False
@@ -374,6 +445,7 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         self.is_deform_slider_edit_silent = False
 
     def updateControlSlider(self):
+        if self.parseSizeEditValue(self.control_slider_size_edit) is None: return
         self.is_control_slider_silent = True
         self.control_size_slider.setValue(self.formatSliderEditToSliderValue(self.control_slider_size_edit.text()))
         self.is_control_slider_silent = False
@@ -728,54 +800,69 @@ class ROSE_Node(NodeEditorNode):
         
         if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Current Guide Hierarchy Name: " % self.__class__.__name__, self.guide_component_hierarchy)
 
-        if self.guide_component_hierarchy is not None:
-            if not MC.objectExists(self.guide_component_hierarchy):
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: ERROR:: trying to rename Component Hierarchy" % self.__class__.__name__)
-                self.setComponentGuideHiearchyName()
-                return
+        #nothing built yet (or the hierarchy was deleted from under us): there are
+        #no Maya objects to rename, but the deform objects still have to follow the
+        #component name - they're listed in the Skinning tab whether or not they
+        #have been built, and updateName() re-derives the stored name in that case
+        if self.guide_component_hierarchy is None or not MC.objectExists(self.guide_component_hierarchy):
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: no built guide hierarchy - deriving names only" % self.__class__.__name__)
+            self.setComponentGuideHiearchyName()
+            self.refreshDeformNames()
+            return
 
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Old Component Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
+        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Component Name Variable:: " % self.__class__.__name__, self.properties.component_name)
+        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: Old Component Name:: " % self.__class__.__name__, self.guide_component_hierarchy)
 
-            has_duplicate_name = False
+        has_duplicate_name = False
 
-            new_guide_component_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + ROSE_Names.guide_component_hierarchy_suffix
+        new_guide_component_hierarchy_name = self.properties.component_side_prefix + self.properties.component_name + ROSE_Names.guide_component_hierarchy_suffix
 
-            is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
-            if is_same_name:
-                return
+        is_same_name = new_guide_component_hierarchy_name == self.guide_component_hierarchy
+        if is_same_name:
+            self.refreshDeformNames()
+            return
 
-            duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_guide_component_hierarchy_name)
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
+        duplicate_name = MC.findDuplicatesInNodeHiearchyByName(self.scene.virtual_rig_hierarchy.guide_hierarchy_object.name, new_guide_component_hierarchy_name)
+        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: found Duplicate Names:: " % self.__class__.__name__, duplicate_name)
 
-            if duplicate_name != []:
-                has_duplicate_name = True
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
-                new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
+        if duplicate_name != []:
+            has_duplicate_name = True
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: setting has_duplicate_names to:: " % self.__class__.__name__, has_duplicate_name)
+            new_guide_component_hierarchy_name = new_guide_component_hierarchy_name + str(duplicate_name[1])
 
-            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
+        if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: new Name:: " % self.__class__.__name__, new_guide_component_hierarchy_name)
 
-            has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
+        has_valid_component_id = self.validateComponentIdLink(self.guide_component_hierarchy)
 
-            if has_valid_component_id:
-                new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
-                self.guide_component_hierarchy = new_name
+        if has_valid_component_id:
+            new_name = MC.renameObject(self.guide_component_hierarchy, new_guide_component_hierarchy_name)
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName:: has been renamed to:: " % self.__class__.__name__, new_name)
+            self.guide_component_hierarchy = new_name
 
-                if self.component_hierarchy is not None:
-                    if MC.objectExists(self.component_hierarchy):
-                        self.component_hierarchy = MC.renameObject(self.component_hierarchy, self.getComponentPrefix() + self.getComponentName() + "_" + ROSE_Names.component_suffix)
-                if MC.objectExists(self.guide_visualization_hierarchy):
-                    self.guide_visualization_hierarchy = MC.renameObject(self.guide_visualization_hierarchy, self.guide_component_hierarchy + "_visualization")
+            if self.component_hierarchy is not None:
+                if MC.objectExists(self.component_hierarchy):
+                    self.component_hierarchy = MC.renameObject(self.component_hierarchy, self.getComponentPrefix() + self.getComponentName() + "_" + ROSE_Names.component_suffix)
+            if MC.objectExists(self.guide_visualization_hierarchy):
+                self.guide_visualization_hierarchy = MC.renameObject(self.guide_visualization_hierarchy, self.guide_component_hierarchy + "_visualization")
 
-                if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
-                for guide in self.guides:
-                    guide.updateName(has_duplicate_name)
-                for deform in self.deforms:
-                    deform.updateName(has_duplicate_name)
+            if GUIDE_DEBUG: print("%s:: --updateComponentHierarchyName::  updating Names for guides:: " % self.__class__.__name__, self.guides)
+            for guide in self.guides:
+                guide.updateName(has_duplicate_name)
+            for deform in self.deforms:
+                deform.updateName(has_duplicate_name)
 
-            else:
-                self.setComponentGuideHiearchyName()
+        else:
+            #the scene objects aren't ours (no matching component id), so leave
+            #them alone - but the deform objects still follow the component name
+            self.setComponentGuideHiearchyName()
+            self.refreshDeformNames()
+
+    def refreshDeformNames(self):
+        #re-derive every deform's stored name from the current component name.
+        #updateName() renames the Maya joint where there is one and only updates
+        #the stored name where there isn't.
+        for deform in self.deforms:
+            deform.updateName(False)
 
     def reconstructGuides(self):
         if self.reconstruct_guides:

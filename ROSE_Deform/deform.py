@@ -54,17 +54,24 @@ class deform(Serializable):
         return int.from_bytes(hashlib.sha1(key.encode()).digest()[:8], "big") >> 1
     
     def updateName(self, has_duplicate_names):
-        if self.exists():
-            new_name = self.assembleFullName()
+        new_name = self.assembleFullName()
 
-            if self.name == new_name:
-                return
+        if self.name == new_name:
+            return
 
-            if has_duplicate_names:
-                duplicates = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name, new_name)
-                if duplicates != []:
-                    new_name = new_name + str(duplicates[1])
-            self.name = MC.renameObject(self.name, new_name)
+        #no joint in the scene to rename - the stored name is derived from the
+        #component name, so just re-derive it. The Skinning tab lists deforms
+        #whether or not they have been built, and leaving this stale is what made
+        #a renamed component show its new prefix over its old deform names.
+        if not self.exists():
+            self.name = new_name
+            return
+
+        if has_duplicate_names:
+            duplicates = MC.findDuplicatesInNodeHiearchyByName(self.node.scene.virtual_rig_hierarchy.skeleton_hierarchy_object.name, new_name)
+            if duplicates != []:
+                new_name = new_name + str(duplicates[1])
+        self.name = MC.renameObject(self.name, new_name)
 
     def select(self):
         if self.exists():

@@ -3,6 +3,7 @@ import json
 from PySide6 import QtWidgets #type: ignore
 from PySide6.QtCore import Qt, QTimer #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_Widget import PipelineEditorWidget #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.scrollable_dock_widget import ScrollableDockWidget #type: ignore
 
 CLASS_DEBUG = False
 
@@ -32,7 +33,9 @@ class rose_PipelineEditorTab(QtWidgets.QMainWindow):
 
     def add_dock_widgets(self):
         self.right_dock_title = "Pipeline Properties"
-        self.right_dock = QtWidgets.QDockWidget(self.right_dock_title, self)
+        #same reasoning as the node editor's properties dock - the Output Path
+        #step's panel already outgrows it
+        self.right_dock = ScrollableDockWidget(self.right_dock_title, self)
         self.right_dock.title = self.right_dock_title
         self.right_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.right_dock.setMinimumWidth(250)

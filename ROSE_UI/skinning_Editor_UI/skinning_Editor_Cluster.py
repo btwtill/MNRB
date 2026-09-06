@@ -46,6 +46,10 @@ class SkinningEditorCluster(Serializable):
         #ROSE-tab-internal selection state, unrelated to Maya's viewport selection
         self.is_selected = False
 
+        #display state, kept here rather than on the widget so it survives the
+        #cluster list rebuilding its boxes and persists across save/reload
+        self.deform_list_collapsed = False
+
         #set once build() actually creates a skinCluster node, so a rebuild deletes
         #and replaces it instead of accumulating duplicates
         self.maya_skin_cluster_node = None
@@ -97,10 +101,13 @@ class SkinningEditorCluster(Serializable):
 
             if deform is None:
                 deform = scene.getDeformByName(ref["name"])
-                if deform is not None:
-                    ref["id"] = deform.id
 
             if deform is not None:
+                #both fields re-synced from whatever resolved, so a renamed
+                #component's containers show its current deform names instead of
+                #the ones they were dropped in under
+                ref["id"] = deform.id
+                ref["name"] = deform.name
                 resolved_deforms.append(deform)
             else:
                 unresolved_refs.append(ref)
@@ -264,6 +271,7 @@ class SkinningEditorCluster(Serializable):
             ('maya_skin_cluster_node', self.maya_skin_cluster_node),
             ('maya_constraint_nodes', self.maya_constraint_nodes),
             ('exported_influence_names', list(self._exported_influence_names)),
+            ('deform_list_collapsed', self.deform_list_collapsed),
         ])
         return serialize_data
 
@@ -286,5 +294,6 @@ class SkinningEditorCluster(Serializable):
         self.maya_skin_cluster_node = data.get('maya_skin_cluster_node', None)
         self.maya_constraint_nodes = data.get('maya_constraint_nodes', [])
         self._exported_influence_names = set(data.get('exported_influence_names', []))
+        self.deform_list_collapsed = data.get('deform_list_collapsed', False)
 
         return True

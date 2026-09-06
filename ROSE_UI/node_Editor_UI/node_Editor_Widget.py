@@ -21,6 +21,11 @@ class NodeEditorWidget(QtWidgets.QWidget):
 
         self.property_widget = property_widget
 
+        #a fresh multi edit panel is built for every multi selection; the previous
+        #one stays a child of the dock after setWidget() replaces it, so it's kept
+        #here to be discarded once its replacement is in place
+        self.multi_edit_property_widget = None
+
         self.initUI()
         self.initNewNodeActions()
         self.initCallbacks()
@@ -77,6 +82,18 @@ class NodeEditorWidget(QtWidgets.QWidget):
         if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Updating Property Window!!")
         selected_items = self.getSelectedItems()
 
+        previous_multi_edit_widget = self.multi_edit_property_widget
+        self.multi_edit_property_widget = None
+
+        self.setPropertyWindowContent(selected_items)
+
+        #deleted only after its replacement is installed, and left parented until
+        #Qt destroys it - unparenting a widget makes it a top-level window, which
+        #is exactly how the stray pipeline "In/Out" panels used to appear
+        if previous_multi_edit_widget is not None:
+            previous_multi_edit_widget.deleteLater()
+
+    def setPropertyWindowContent(self, selected_items):
         if selected_items == []:
             if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Selected Items:: ", selected_items)
             if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: setting Dock Widget to:: ", self.scene.properties)
@@ -93,16 +110,23 @@ class NodeEditorWidget(QtWidgets.QWidget):
                 self.property_widget.setWidget(active_widget.edge.properties)
                 self.property_widget.setWindowTitle(active_widget.edge.properties.title)
         else:
-            print("NODEEDITORWIDGET:: --updatePropertyWindow:: Multi Selection Properties Window!!")
+            if CLASS_DEBUG: print("NODEEDITORWIDGET:: --updatePropertyWindow:: Multi Selection Properties Window!!")
 
             filtered_selection = []
             for item in selected_items:
                 if hasattr(item, 'node'): filtered_selection.append(item)
 
-            if filtered_selection != []:
-                multi_edit_property_widget = MultiEdit_PropertyWidget(filtered_selection)
-                self.property_widget.setWidget(multi_edit_property_widget)
-                self.property_widget.setWindowTitle(multi_edit_property_widget.title)
+            if filtered_selection == []:
+                #a multi selection of nothing but edges - there's no multi edit
+                #panel for those, and leaving the previous panel up would show
+                #properties for something that isn't selected any more
+                self.property_widget.setWidget(self.scene.properties)
+                self.property_widget.setWindowTitle(self.scene.properties.title)
+                return
+
+            self.multi_edit_property_widget = MultiEdit_PropertyWidget(filtered_selection)
+            self.property_widget.setWidget(self.multi_edit_property_widget)
+            self.property_widget.setWindowTitle(self.multi_edit_property_widget.title)
 
     def contextMenuEvent(self, event):
         item  = self.scene.getItemAt(event.pos())

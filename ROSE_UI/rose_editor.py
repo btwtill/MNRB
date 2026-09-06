@@ -35,9 +35,15 @@ class rose_Editor(QtWidgets.QMainWindow):
 
         self.display_overlay = True
 
+        #user preference, not project data - kept in the same QSettings store as
+        #the window position rather than project_settings.json, which travels with
+        #the project
+        self.show_view_controls = QSettings("tlpf", "ROSE").value('show_view_controls', True, type=bool)
+
         self.initProject()
         self.initTabs()
         self.initUI()
+        self.applyViewControlsVisibility()
        
     @property
     def project_path(self): return self._project_path
@@ -314,6 +320,10 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.action_nodes_properties_dock_visibility.setCheckable(True)
         self.action_nodes_properties_dock_visibility.triggered.connect(self.onPropertiesDockWidget)
 
+        self.action_view_controls_visibility = self.node_editor_menu.addAction("On-Screen View Controls")
+        self.action_view_controls_visibility.setCheckable(True)
+        self.action_view_controls_visibility.triggered.connect(self.onToggleViewControls)
+
         self.node_editor_menu.addSeparator()
 
         self.node_editor_menu.addAction(self.action_align_on_x)
@@ -561,6 +571,21 @@ class rose_Editor(QtWidgets.QMainWindow):
         else:
             self.getNodeEditorTab().left_dock.show()
 
+    def getCanvasViews(self):
+        #the node editor and the pipeline editor share NodeEditor_QGraphicView, so
+        #the overlay setting covers both canvases
+        return [self.getNodeEditorTab().central_widget.view,
+                self.getPipelineEditorTab().central_widget.view]
+
+    def applyViewControlsVisibility(self):
+        for view in self.getCanvasViews():
+            view.setOverlayControlsVisible(self.show_view_controls)
+
+    def onToggleViewControls(self):
+        self.show_view_controls = not self.show_view_controls
+        self.applyViewControlsVisibility()
+        QSettings("tlpf", "ROSE").setValue('show_view_controls', self.show_view_controls)
+
     def onOpenPreferences(self):
         self.preference_widget = ROSEPreferences()
         self.preference_widget.show()
@@ -609,6 +634,7 @@ class rose_Editor(QtWidgets.QMainWindow):
 
         self.action_nodes_list_dock_visibility.setChecked(self.getNodeEditorTab().left_dock.isVisible())
         self.action_nodes_properties_dock_visibility.setChecked(self.getNodeEditorTab().right_dock.isVisible())
+        self.action_view_controls_visibility.setChecked(self.show_view_controls)
 
     def updateEditMenu(self):
         if CLASS_DEBUG: print("ROSE_EDITOR:: --updateEditMenu:: Updating the edit menu functions!")

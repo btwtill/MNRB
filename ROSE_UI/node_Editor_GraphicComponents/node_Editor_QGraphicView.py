@@ -7,6 +7,7 @@ from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicSocket impor
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicNode import NodeEditor_QGraphicNode #type: ignore
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Cutline import NodeEditorCutLine #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.view_overlay_controls import ViewOverlayControls #type: ignore
 
 EVENT_DEBUG = False
 CLASS_DEBUG = False
@@ -74,6 +75,26 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
         self.is_content_visible = False if self.zoom <= self.zoom_content_visibility_threshold else True
 
         self.last_mouse_position = None
+
+        #on-screen zoom/pan cluster. Tracked with an explicit flag rather than
+        #isVisible(), which is False until the whole editor is shown and would
+        #make the menu's checkmark lie on startup.
+        self.overlay_controls = ViewOverlayControls(self)
+        self.overlay_controls_visible = True
+        self.overlay_controls.reposition()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.overlay_controls.reposition()
+
+    def setOverlayControlsVisible(self, is_visible):
+        self.overlay_controls_visible = is_visible
+        self.overlay_controls.setVisible(is_visible)
+        if is_visible:
+            self.overlay_controls.reposition()
+
+    def areOverlayControlsVisible(self):
+        return self.overlay_controls_visible
 
     def mousePressEvent(self, event) -> None:
         #decide what button has been pressed and execute the according action
@@ -393,22 +414,47 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
     def wheelEvent(self, event):
         if WHEEL_DEBUG : print("GRAPHICSVIEW:: --wheelEvent:: Starting WheelEvent")
+        self.applyZoomStep(zoom_in = event.angleDelta().y() > 0)
 
+    def zoomIn(self):
+        self.applyZoomStep(zoom_in = True, anchor_to_center = True)
+
+    def zoomOut(self):
+        self.applyZoomStep(zoom_in = False, anchor_to_center = True)
+
+    def panBy(self, horizontal_amount, vertical_amount):
+        """Shift the view by a number of pixels. Used by the on-screen controls -
+        dragging with the middle mouse button goes through Qt's own ScrollHandDrag
+        instead, so both end up moving the same scrollbars."""
+        self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + horizontal_amount)
+        self.verticalScrollBar().setValue(self.verticalScrollBar().value() + vertical_amount)
+
+    def applyZoomStep(self, zoom_in = True, anchor_to_center = False):
+        #shared by the wheel and the on-screen zoom buttons, so both keep
+        #self.zoom, the clamping and the content-visibility threshold in step
         zoomOutFactor = 1 / self.zoom_in_factor
 
-        if event.angleDelta().y() > 0:
+        if zoom_in:
             zoomFactor = self.zoom_in_factor
             self.zoom += self.zoom_step
         else:
             zoomFactor = zoomOutFactor
             self.zoom -= self.zoom_step
-        
+
         clamped = False
         if self.zoom < self.zoom_range[0]:  self.zoom, clamped = self.zoom_range[0], True
         if self.zoom > self.zoom_range[1]:  self.zoom, clamped = self.zoom_range[1], True
 
         if not clamped or self.clamp_zoom is False:
-            self.scale(zoomFactor, zoomFactor)
+            if anchor_to_center:
+                #the view anchors zoom under the cursor, which for a button press
+                #is the button itself - zoom around the middle of the view instead
+                previous_anchor = self.transformationAnchor()
+                self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
+                self.scale(zoomFactor, zoomFactor)
+                self.setTransformationAnchor(previous_anchor)
+            else:
+                self.scale(zoomFactor, zoomFactor)
 
         #Set Visibility of the nodes content depending on the zoom Level.
         #Node types that draw no per-socket labels have no content widget at all

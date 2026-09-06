@@ -240,13 +240,17 @@ class NodeEditorScene(Serializable):
         return self.properties.getRigName()
 
     def getDeformerDict(self):
+        #keyed by node id, not by component prefix: the prefix changes when the
+        #component is renamed, which used to split the group in the Skinning tab
+        #and report every deform in it as removed-and-re-added. The prefix rides
+        #along as the display label instead.
         deformer_list = {}
 
         for node in self.nodes:
             deformer_entries = []
             for deform in node.deforms:
                 deformer_entries.append({"id": deform.id, "name": deform.name})
-            deformer_list[node.getComponentFullPrefix()] = deformer_entries
+            deformer_list[str(node.id)] = {"label": node.getComponentFullPrefix(), "deforms": deformer_entries}
 
         return deformer_list
 

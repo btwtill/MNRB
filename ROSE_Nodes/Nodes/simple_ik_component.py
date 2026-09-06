@@ -1,4 +1,6 @@
 import math
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSlider #type: ignore
+from PySide6.QtCore import Qt #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_Node #type: ignore
 from MNRB.ROSE_colors.colors import ROSEColor #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
@@ -16,13 +18,107 @@ from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: igno
 GUIDE_DEBUG = True
 CLASS_DEBUG = True
 
-class ROSE_Node_SimpleIKComponent_Properties(ROSE_NodeProperties): 
+#how far the pole control is pushed out from the joint chain. Was hardcoded at
+#the calculate_pole_vector_position() call site before this became a property
+DEFAULT_POLE_DISTANCE = 5.0
+
+class ROSE_Node_SimpleIKComponent_Properties(ROSE_NodeProperties):
 
     def __init__(self, node):
         super().__init__(node)
 
         self.last_deform_count = 0
         self.current_deform_count  = 0
+
+        self.pole_distance = DEFAULT_POLE_DISTANCE
+
+        self.is_pole_distance_edit_silent = False
+        self.is_pole_distance_slider_silent = False
+
+    def initUI(self):
+        super().initUI()
+
+        pole_distance_layout = QVBoxLayout()
+
+        pole_distance_label_layout = QHBoxLayout()
+        pole_distance_label = QLabel("Pole Distance:")
+        pole_distance_label.setAlignment(Qt.AlignCenter)
+        pole_distance_label_layout.addWidget(pole_distance_label)
+
+        self.pole_distance_edit = QLineEdit()
+        self.pole_distance_edit.setText(str(DEFAULT_POLE_DISTANCE))
+        self.pole_distance_edit.editingFinished.connect(self.onPoleDistanceEditChange)
+        pole_distance_label_layout.addWidget(self.pole_distance_edit)
+
+        pole_distance_layout.addLayout(pole_distance_label_layout)
+
+        #same 1/100 edit-to-slider scaling as the component size sliders, so
+        #formatSliderValueToEditValue/formatSliderEditToSliderValue apply as-is
+        self.pole_distance_slider = QSlider(Qt.Horizontal)
+        self.pole_distance_slider.setMinimum(0)
+        self.pole_distance_slider.setMaximum(5000)
+        self.pole_distance_slider.setValue(int(DEFAULT_POLE_DISTANCE * 100))
+        self.pole_distance_slider.setTickPosition(QSlider.TicksBelow)
+        self.pole_distance_slider.setTickInterval(20)
+        self.pole_distance_slider.sliderReleased.connect(self.onPoleDistanceSliderChange)
+
+        pole_distance_layout.addWidget(self.pole_distance_slider)
+
+        self.layout.addLayout(pole_distance_layout)
+
+    def onPoleDistanceEditChange(self):
+        if not self.is_pole_distance_edit_silent:
+            self.updatePoleDistanceSlider()
+            self.updatePoleDistance()
+
+    def onPoleDistanceSliderChange(self):
+        if not self.is_pole_distance_slider_silent:
+            self.updatePoleDistanceSliderEdit()
+            self.updatePoleDistance()
+
+    def updatePoleDistanceSlider(self):
+        if self.parseSizeEditValue(self.pole_distance_edit) is None: return
+        self.is_pole_distance_slider_silent = True
+        self.pole_distance_slider.setValue(self.formatSliderEditToSliderValue(self.pole_distance_edit.text()))
+        self.is_pole_distance_slider_silent = False
+
+    def updatePoleDistanceSliderEdit(self):
+        self.is_pole_distance_edit_silent = True
+        self.pole_distance_edit.setText(str(self.formatSliderValueToEditValue(self.pole_distance_slider.value())))
+        self.is_pole_distance_edit_silent = False
+
+    #setValue/apply pair, matching the size properties on ROSE_NodeProperties
+    def setPoleDistanceValue(self, value):
+        self.pole_distance = value
+        self.node.setPoleDistance(value)
+        self.setHasBeenModified()
+
+    def applyPoleDistance(self, value):
+        self.pole_distance_edit.setText(str(value))
+        self.updatePoleDistanceSlider()
+        self.setPoleDistanceValue(value)
+
+    def updatePoleDistance(self):
+        value = self.parseSizeEditValue(self.pole_distance_edit)
+        if value is None: return
+        self.setPoleDistanceValue(value)
+
+    def serialize(self):
+        result_data = super().serialize()
+        result_data['pole_distance'] = self.pole_distance
+        return result_data
+
+    def deserialize(self, data, hashmap = {}, restore_id=True):
+        result = super().deserialize(data, hashmap, restore_id)
+
+        self.is_silent = True
+        #older files predate this property - they were built with the hardcoded value
+        self.pole_distance = data.get('pole_distance', DEFAULT_POLE_DISTANCE)
+        self.pole_distance_edit.setText(str(self.pole_distance))
+        self.updatePoleDistanceSlider()
+        self.is_silent = False
+
+        return True
 
 @registerNode(OPERATIONCODE_SIMPLEIKCOMPONENT)
 class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
@@ -50,7 +146,11 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
 
                 color=ROSEColor.yellow):
 
-        super().__init__(scene, inputs, outputs, color)  # Initilize 
+        super().__init__(scene, inputs, outputs, color)  # Initilize
+
+        #set by componentBuild - held here so setPoleDistance() can tell whether
+        #there is a built component to move before it tries to
+        self.pole_input = None
 
     def guideBuild(self):
         '''
@@ -134,7 +234,8 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         MC.setObjectWorldPositionMatrix(self.base_input, base_guide_position)
         MC.applyTransformScale(self.base_input)
 
-        pole_position = self.calculate_pole_vector_position(base_guide_position, pole_guide_position, end_guide_position, 5)
+        pole_position = self.calculate_pole_vector_position(base_guide_position, pole_guide_position, end_guide_position,
+                                                            self.properties.pole_distance)
 
         # Pole Input -> Created here because it needs the pole control position for correct placement
         self.pole_input = MC.createTransform(self.getComponentFullPrefix() + "pole" + ROSE_Names.input_suffix)
@@ -274,6 +375,27 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         end_parent_offset_compose_node, end_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.end_input, ik_srt_parent_name)
 
         return True
+
+    def setPoleDistance(self, distance):
+        """Re-place the pole input at the new distance without a full rebuild.
+
+        The pole control is matrix-parented to pole_input, so moving that moves
+        the control with it. No-op until the component has actually been built -
+        componentBuild reads properties.pole_distance and places it correctly.
+        """
+        if self.pole_input is None or not MC.objectExists(self.pole_input):
+            return
+
+        if not self.isAllGuidesExistend() or len(self.guides) < 3:
+            return
+
+        pole_position = self.calculate_pole_vector_position(
+            self.guides[0].getPosition(),
+            self.guides[1].getPosition(),
+            self.guides[2].getPosition(),
+            distance)
+
+        MC.setTranslation(self.pole_input, *pole_position)
 
     def calculate_pole_vector_position(self, start_matrix, mid_matrix, end_matrix, multiplier=1.0):
         """

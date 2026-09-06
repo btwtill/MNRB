@@ -5,6 +5,7 @@ from PySide6.QtCore import QIODevice, QDataStream, Qt, QTimer #type: ignore
 from PySide6.QtGui  import QPixmap #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.scrollable_dock_widget import ScrollableDockWidget #type: ignore
 from MNRB.ROSE_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
@@ -75,7 +76,9 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
 
         # Right dock widget
         self.right_dock_title = "Node Properties"
-        self.right_dock = QtWidgets.QDockWidget(self.right_dock_title, self)
+        #scrollable: a component's property panel is taller than the dock as soon
+        #as it has a few fields, and the rest was simply unreachable before
+        self.right_dock = ScrollableDockWidget(self.right_dock_title, self)
         self.right_dock.title = self.right_dock_title
 
         self.right_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
