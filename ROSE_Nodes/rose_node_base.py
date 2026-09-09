@@ -17,6 +17,8 @@ from MNRB.ROSE_Deform.deform import deform #type: ignore
 from MNRB.ROSE_Controls.control import control #type: ignore
 from MNRB.ROSE_Nodes.property_UI_GraphicComponents.seperator_widget import SeparatorWidget #type: ignore
 from MNRB.ROSE_Guides.ROSE_Guide_Connector.guide_connector import Guide_Connector #type: ignore
+from MNRB.ROSE_Attributes.attribute import attribute #type: ignore
+from MNRB.ROSE_Attributes.attribute_types import AttributeType #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 guide_log = ROSE_Log.get("rose.components.guides")
@@ -641,6 +643,11 @@ class ROSE_Node(NodeEditorNode):
         self.controls = []
         self.deforms = []
 
+        #attributes this component deliberately exposes - see initAttributes().
+        #Declared here at construction rather than at build time, so the Attribute
+        #Editor can list them before the rig has ever been built.
+        self.attributes = []
+
         self.is_guide_build = False
         self.is_static_build = False
         self.is_comonent_build = False
@@ -648,6 +655,48 @@ class ROSE_Node(NodeEditorNode):
 
         self.is_silent =  False
         self.reconstruct_guides = False
+
+        self.initAttributes()
+
+    def initAttributes(self):
+        """Declare the attributes this component exposes.
+
+        Override in a component and call super() first to keep the visibility
+        attributes. Because this is a method rather than a static list, a
+        component can derive its attributes from its own properties - a chain
+        component can expose one per segment, for instance - and because it runs
+        at construction rather than at build time, the Attribute Editor can list
+        them without the rig having been built.
+
+        Anything a component needs purely for internal wiring should NOT be
+        declared here; create it directly with MC instead and it stays private.
+        """
+        self.attributes = []
+
+        self.exposeAttribute("Input_Visibility", AttributeType.BOOL, default_value = False, keyable = False)
+        self.exposeAttribute("Output_Visibility", AttributeType.BOOL, default_value = False, keyable = False)
+        self.exposeAttribute("Control_Visibility", AttributeType.BOOL, default_value = True, keyable = False)
+        self.exposeAttribute("Systems_Visibility", AttributeType.BOOL, default_value = False, keyable = False)
+
+    def exposeAttribute(self, name, attribute_type = AttributeType.FLOAT, default_value = 0,
+                        minimum = None, maximum = None, options = None, keyable = True):
+        return attribute(self, name, attribute_type, default_value, minimum, maximum, options, keyable)
+
+    def refreshAttributes(self):
+        #re-run the declaration - needed after the properties it derives from
+        #change (deserialization, or a slider that alters how many attributes
+        #a component exposes)
+        self.initAttributes()
+
+    def buildAttributes(self):
+        for component_attribute in self.attributes:
+            component_attribute.create()
+
+    def getAttributeByName(self, name):
+        for component_attribute in self.attributes:
+            if component_attribute.attribute_name == name:
+                return component_attribute
+        return None
 
     @property
     def guide_component_hierarchy(self): return self._guide_component_hierarchy
@@ -744,14 +793,15 @@ class ROSE_Node(NodeEditorNode):
         new_component_hierarchy = MC.createTransform(component_hierarchy)
         MC.lockAndHideAllAttributes(component_hierarchy)
 
-        MC.addBoolAttribute(new_component_hierarchy, "Input_Visibility", False, False)
-        MC.addBoolAttribute(new_component_hierarchy, "Output_Visibility", False, False)
-        MC.addBoolAttribute(new_component_hierarchy, "Control_Visibility", True, False)
-        MC.addBoolAttribute(new_component_hierarchy, "Systems_Visibility", False, False)
-
         self.addComponentIdLink(new_component_hierarchy)
         MC.parentObject(new_component_hierarchy, components_hierarchy)
         self.component_hierarchy = new_component_hierarchy
+
+        #the four visibility attributes used to be added by hand right here - they
+        #are now the first citizens of the exposed-attribute list (initAttributes),
+        #so they can be proxied onto a control like any other. component_hierarchy
+        #has to be set first: that's the host these get created on.
+        self.buildAttributes()
 
         self.input_hierarchy = MC.createTransform(self.getComponentPrefix() + self.getComponentName() + ROSE_Names.input_hierarchy_suffix)
         MC.parentObject(self.input_hierarchy, self.component_hierarchy)
@@ -1018,6 +1068,22 @@ class ROSE_Node(NodeEditorNode):
     
     def deserialize(self, data, hashmap={}, restore_id = True, exists=False):
         result = super().deserialize(data, hashmap, restore_id, exists)
+
+        #super() restored this node's id and its properties, both of which the
+        #declaration reads: the id because attribute ids derive from it, the
+        #properties because a component may expose attributes based on them
+        self.refreshAttributes()
+
+        #cleared before rebuilding them from the data: guide(), deform() and
+        #control() each append themselves to these lists, so deserializing a node
+        #that already exists used to add a whole extra set every time. Undo/redo
+        #re-deserializes every node in the scene, so the lists grew with each step
+        #and the Skinning and Attribute tabs listed the same deform or control
+        #over and over. The Maya objects are untouched - the replacements resolve
+        #to the same names and derived ids.
+        self.guides = []
+        self.deforms = []
+        self.controls = []
 
         self.setComponentGuideHiearchyName()
         self.setComponentHierarchyName()

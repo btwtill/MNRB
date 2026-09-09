@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 from collections import OrderedDict
@@ -14,6 +15,7 @@ class control(Serializable):
         self.node.controls.append(self)
          
         self.control_name  = name
+        self.id = self.assembleStableId()
         self.name = self.assembleFullName()
 
         self._control_type = control_type
@@ -33,6 +35,16 @@ class control(Serializable):
 
     def assembleFullName(self):
         return self.node.getComponentPrefix() + self.node.getComponentName() + "_" + self.control_name + ROSE_Names.control_suffix
+
+    def assembleStableId(self):
+        #derived, not generated - same reasoning as deform.assembleStableId().
+        #componentBuild drops every control and recreates it, so a generated id
+        #would change on every build, and anything holding a reference to a
+        #control (the Attribute Editor's control-to-attribute assignments) would
+        #lose it. control_name is the slot ("base", "pole", "chain_2") - unique
+        #within a node and unaffected by renaming the component, unlike self.name.
+        key = "%s:%s" % (self.node.id, self.control_name)
+        return int.from_bytes(hashlib.sha1(key.encode()).digest()[:8], "big") >> 1
 
     def draw(self):
         self.control_shape.draw()
@@ -76,11 +88,12 @@ class control(Serializable):
         return serialized_data
     
     def deserialize(self, data, hashmap = {}, restore_id = True):
-        if restore_id: self.id = data['id']
-
         self.control_name = data['control_name']
         self.control_type = data['control_type']
 
+        #stored id ignored on purpose: this id is derived, so recomputing it keeps
+        #a project saved before this change from losing its control references
+        self.id = self.assembleStableId()
         self.name = self.assembleFullName()
 
         return True

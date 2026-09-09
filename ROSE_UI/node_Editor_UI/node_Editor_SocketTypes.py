@@ -6,3 +6,6 @@ class SocketTypes():
     #pipeline-step sequencing socket (pipeline_Editor_UI) - not a rig data type,
     #just expresses "runs after" / "runs before" between build steps
     sequence = 4
+    #attribute-graph socket (attribute_Editor_UI) - carries one attribute value
+    #from whatever produces it to whatever consumes it
+    attribute = 5

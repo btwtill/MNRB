@@ -1,8 +1,9 @@
 import os
 from PySide6.QtWidgets import QListWidget, QSizePolicy, QListWidgetItem, QAbstractItemView #type: ignore
 from PySide6.QtGui import QColor, QPixmap, QIcon, QDrag #type: ignore
-from PySide6.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
+from PySide6.QtCore import QSize, Qt, QMimeData, QPoint #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.drag_payload import encodeIdNamePayload, decodeIdNamePayload #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 dragdrop_log = ROSE_Log.get("rose.skinning.dragdrop")
@@ -39,32 +40,10 @@ def getGroupLabel(key, group):
         return group.get("label", key)
     return key
 
-def encodeDeformPayload(deform_entries):
-    """deform_entries: a list of (deform_id, deform_name).
-
-    Count-prefixed, so one drag carries a whole multi selection or a whole group
-    just as easily as a single row.
-    """
-    payload = QByteArray()
-    data_stream = QDataStream(payload, QIODevice.WriteOnly)
-
-    data_stream.writeInt32(len(deform_entries))
-    for deform_id, deform_name in deform_entries:
-        data_stream.writeInt64(deform_id)
-        data_stream.writeQString(deform_name)
-
-    return payload
-
-def decodeDeformPayload(payload):
-    data_stream = QDataStream(payload, QIODevice.ReadOnly)
-
-    deform_entries = []
-    for _ in range(data_stream.readInt32()):
-        deform_id = data_stream.readInt64()
-        deform_name = data_stream.readQString()
-        deform_entries.append((deform_id, deform_name))
-
-    return deform_entries
+#kept as names local to this module so the call sites read as deform-specific,
+#but the layout is the shared one every ROSE list drag uses
+encodeDeformPayload = encodeIdNamePayload
+decodeDeformPayload = decodeIdNamePayload
 
 class SkinningEditorDeformList(QListWidget):
     def __init__(self, deformer_dict = {}, parent=None):

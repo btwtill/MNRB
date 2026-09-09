@@ -131,8 +131,14 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self.merged_output_socket.setVisible(False)
 
     def initContent(self):
-        if self.content is not None:
-            self.content.setGeometry(self._edge_padding, self.title_height + self._edge_padding, self.width - 2 * self._edge_padding, self.height - 2 *  self._edge_padding - self.title_height )
+        #a node type can opt out of per-socket labels with Node_Content_Class = None;
+        #addWidget(None) used to be called regardless, so any such subclass of this
+        #graphics node broke on construction
+        if self.content is None:
+            self.grContent = None
+            return
+
+        self.content.setGeometry(self._edge_padding, self.title_height + self._edge_padding, self.width - 2 * self._edge_padding, self.height - 2 *  self._edge_padding - self.title_height )
 
         self.grContent = self.node.scene.grScene.addWidget(self.content)
         self.grContent.setParentItem(self)

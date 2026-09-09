@@ -258,20 +258,108 @@ class MC:
         cmds.setAttr(f"{node_name}.{target_attribute}", value, type="string")
 
     @staticmethod
-    def addFloatAttribute(node_name, attribute_name, default_value = 0, min = None, max = None):
-        if min == None and max == None:
-            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value)
-        elif min != None and max==None:
-            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value, minValue=min)
-        elif min == None and max!=None:
-            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value, maxValue=max)
-        else:
-            cmds.addAttr(node_name, longName=attribute_name, attributeType="float", defaultValue=default_value, maxValue=max, minValue=min)
+    def addFloatAttribute(node_name, attribute_name, default_value = 0, min = None, max = None, keyable = True):
+        limits = {}
+        if min is not None: limits["minValue"] = min
+        if max is not None: limits["maxValue"] = max
+        cmds.addAttr(node_name, longName=attribute_name, attributeType="float",
+                     defaultValue=default_value, keyable=keyable, **limits)
+        if not keyable:
+            cmds.setAttr(f"{node_name}.{attribute_name}", cb = True)
 
     @staticmethod
     def addBoolAttribute(node_name, attribute_name, default_state = False, keyable = True):
         cmds.addAttr(node_name, attributeType="bool", ln=attribute_name, defaultValue = default_state, keyable=keyable)
         if keyable == False:
+            cmds.setAttr(f"{node_name}.{attribute_name}", cb = True)
+
+    @staticmethod
+    def addIntAttribute(node_name, attribute_name, default_value = 0, min = None, max = None, keyable = True):
+        limits = {}
+        if min is not None: limits["minValue"] = min
+        if max is not None: limits["maxValue"] = max
+        cmds.addAttr(node_name, longName=attribute_name, attributeType="long",
+                     defaultValue=default_value, keyable=keyable, **limits)
+        if not keyable:
+            cmds.setAttr(f"{node_name}.{attribute_name}", cb = True)
+
+    @staticmethod
+    def addEnumAttribute(node_name, attribute_name, option_names, default_index = 0, keyable = True):
+        #Maya takes the options as one colon-separated string
+        cmds.addAttr(node_name, longName=attribute_name, attributeType="enum",
+                     enumName=":".join(option_names), defaultValue=default_index, keyable=keyable)
+        if not keyable:
+            cmds.setAttr(f"{node_name}.{attribute_name}", cb = True)
+
+    @staticmethod
+    def addProxyAttribute(node_name, attribute_name, source_node, source_attribute) -> None:
+        """Add an attribute that *is* another node's attribute, not a copy of it.
+
+        This is how the Attribute Editor puts a component's attribute onto a
+        control: editing either side changes the same value. Only works for the
+        proxyable types (bool/int/float/enum/angle/distance/time) - a string,
+        matrix or message attribute has to be connected instead.
+        """
+        cmds.addAttr(node_name, longName=attribute_name, proxy="%s.%s" % (source_node, source_attribute))
+
+    @staticmethod
+    def deleteAttribute(node_name, attribute_name) -> None:
+        cmds.deleteAttr("%s.%s" % (node_name, attribute_name))
+
+    @staticmethod
+    def attributeExists(node_name, attribute_name) -> bool:
+        return cmds.attributeQuery(attribute_name, node=node_name, exists=True)
+
+    @staticmethod
+    def getAttributeDefault(node_name, attribute_name):
+        defaults = cmds.attributeQuery(attribute_name, node=node_name, listDefault=True) or []
+        if not defaults:
+            return None
+        value = defaults[0]
+        #Maya reports every default as a float; hand it back in the type the
+        #definition holds, so comparisons are like for like
+        attribute_type = cmds.getAttr("%s.%s" % (node_name, attribute_name), type=True)
+        if attribute_type == "bool":
+            return bool(value)
+        if attribute_type in ("long", "short", "byte") or cmds.attributeQuery(attribute_name, node=node_name, listEnum=True):
+            return int(value)
+        return value
+
+    @staticmethod
+    def getAttributeMinimum(node_name, attribute_name):
+        #None means "no minimum set", which is different from a minimum of 0
+        if not cmds.attributeQuery(attribute_name, node=node_name, minExists=True):
+            return None
+        values = cmds.attributeQuery(attribute_name, node=node_name, minimum=True) or []
+        return values[0] if values else None
+
+    @staticmethod
+    def getAttributeMaximum(node_name, attribute_name):
+        if not cmds.attributeQuery(attribute_name, node=node_name, maxExists=True):
+            return None
+        values = cmds.attributeQuery(attribute_name, node=node_name, maximum=True) or []
+        return values[0] if values else None
+
+    @staticmethod
+    def getAttributeEnumOptions(node_name, attribute_name) -> list:
+        #Maya hands the options back as one colon-separated string inside a list
+        enum_strings = cmds.attributeQuery(attribute_name, node=node_name, listEnum=True) or []
+        if not enum_strings:
+            return []
+        return [option for option in enum_strings[0].split(":") if option]
+
+    @staticmethod
+    def listUserDefinedAttributes(node_name) -> list:
+        #only attributes added by us/the user, never Maya's own - returns [] rather
+        #than None when a node has none, which cmds.listAttr does not
+        return cmds.listAttr(node_name, userDefined=True) or []
+
+    @staticmethod
+    def setAttributeKeyable(node_name, attribute_name, keyable = True) -> None:
+        cmds.setAttr(f"{node_name}.{attribute_name}", keyable=keyable)
+        if not keyable:
+            #non-keyable but still visible in the channel box, matching how the
+            #component visibility attributes are set up
             cmds.setAttr(f"{node_name}.{attribute_name}", cb = True)
 
     @staticmethod
@@ -522,6 +610,27 @@ class MC:
         else:
             return cmds.createNode("distanceBetween", name = name + "_dist_fNode")
         
+    @staticmethod
+    def createReverseNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("reverse", name = name + "_rev_fNode_UW")
+        else:
+            return cmds.createNode("reverse", name = name + "_rev_fNode")
+
+    @staticmethod
+    def createConditionNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("condition", name = name + "_cond_fNode_UW")
+        else:
+            return cmds.createNode("condition", name = name + "_cond_fNode")
+
+    @staticmethod
+    def createClampNode(name, underworld = False) -> str:
+        if underworld:
+            return cmds.createNode("clamp", name = name + "_clamp_fNode_UW")
+        else:
+            return cmds.createNode("clamp", name = name + "_clamp_fNode")
+
     @staticmethod
     def createMultiplyDivideNode(name, underworld = False) -> str:
         if underworld:

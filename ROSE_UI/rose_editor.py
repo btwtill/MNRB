@@ -9,6 +9,7 @@ from MNRB.ROSE_UI.rose_nodeEditorTab import rose_NodeEditorTab # type: ignore
 from MNRB.ROSE_UI.preferences_UI.preferences_widget import ROSEPreferences #type: ignore
 from MNRB.ROSE_UI.rose_skinningEditorTab import rose_SkinningEditorTab #type: ignore
 from MNRB.ROSE_UI.rose_pipelineEditorTab import rose_PipelineEditorTab #type: ignore
+from MNRB.ROSE_UI.rose_attributeEditorTab import rose_AttributeEditorTab #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 log = ROSE_Log.get("rose.editor")
@@ -36,6 +37,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.rose_skinning_editor_path = None
         self.rose_pipeline_editor_path_name = "rose_pipeline_editor"
         self.rose_pipeline_editor_path = None
+        self.rose_attribute_editor_path_name = "rose_attribute_editor"
+        self.rose_attribute_editor_path = None
 
         self.display_overlay = True
 
@@ -59,6 +62,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.rose_base_editor_path = os.path.join(self._project_path, self.rose_base_editor_path_name)
         self.rose_skinning_editor_path = os.path.join(self._project_path, self.rose_skinning_editor_path_name)
         self.rose_pipeline_editor_path = os.path.join(self._project_path, self.rose_pipeline_editor_path_name)
+        self.rose_attribute_editor_path = os.path.join(self._project_path, self.rose_attribute_editor_path_name)
 
     @property
     def project_name(self): return self._project_name
@@ -100,13 +104,14 @@ class rose_Editor(QtWidgets.QMainWindow):
 
         self.setupNodeEditorTab()
         self.setupSkinEditorTab()
-        self.setupPipelineEditorTab()
         self.setupControlEditorTab()
+        self.setupPipelineEditorTab()
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getSkinningEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getPipelineEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
+        self.getAttributeEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
 
 
         if self.display_overlay:
@@ -118,6 +123,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.getNodeEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
         self.getNodeEditorTab().central_widget.scene.connectBuildHasBeenTriggeredListenerCallback(self.getSkinningEditorTab().pullDeformerDictFromNodeEditor)
         self.getSkinningEditorTab().connectSelectionChangedListenerCallback(self.updateEditMenu)
+        self.getAttributeEditorTab().connectSelectionChangedListenerCallback(self.updateEditMenu)
         #same fix as the Skinning tab needed earlier - selecting a node fires
         #PipelineEditorScene.onItemSelected() -> history.storeHistory(), but nothing
         #was telling the Edit menu (and therefore action_delete's enabled state) to
@@ -155,6 +161,8 @@ class rose_Editor(QtWidgets.QMainWindow):
 
     def setupPipelineEditorTab(self):
         self.pipelineEditorTabWindow = rose_PipelineEditorTab(self.nodeEditorTabWindow, self.skinningEditorTabWindow)
+        #the Attribute tab is built before this one now, so its step can reach it
+        self.pipelineEditorTabWindow.central_widget.scene.attribute_tab = self.attributeEditorTabWindow
 
         third_tab_container = QtWidgets.QWidget()
         third_tab_layout = QtWidgets.QVBoxLayout(third_tab_container)
@@ -165,20 +173,15 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.tabs.addTab(third_tab_container, "Pipeline")
 
     def setupControlEditorTab(self):
-        # Third tab PlaceHolder Widget
-        second_tab_widget = QtWidgets.QWidget()
-        second_tab_layout = QtWidgets.QHBoxLayout(second_tab_widget)
+        self.attributeEditorTabWindow = rose_AttributeEditorTab(self.nodeEditorTabWindow)
 
-        second_tab_widget.is_tab_widget = True
+        fourth_tab_container = QtWidgets.QWidget()
+        fourth_tab_layout = QtWidgets.QVBoxLayout(fourth_tab_container)
+        fourth_tab_container.is_tab_widget = True
 
-        # Add widgets or controls in the box layout
-        label1 = QtWidgets.QLabel("Box 1")
-        label2 = QtWidgets.QLabel("Box 2")
-        second_tab_layout.addWidget(label1)
-        second_tab_layout.addWidget(label2)
+        fourth_tab_layout.addWidget(self.attributeEditorTabWindow)
 
-        # Add the second tab to the QTabWidget
-        self.tabs.addTab(second_tab_widget, "Tab 2")
+        self.tabs.addTab(fourth_tab_container, "Attributes")
 
     def setupProjectOverlay(self):
         #create and fill the widget that is displayed when there are multiple projects or no project found in the workdirectory
@@ -383,6 +386,8 @@ class rose_Editor(QtWidgets.QMainWindow):
                     os.mkdir(self.rose_skinning_editor_path)
                 if self.rose_pipeline_editor_path:
                     os.mkdir(self.rose_pipeline_editor_path)
+                if self.rose_attribute_editor_path:
+                    os.mkdir(self.rose_attribute_editor_path)
 
                 if self.display_overlay:
                     self.setCentralWidget(self.tabs)
@@ -426,14 +431,17 @@ class rose_Editor(QtWidgets.QMainWindow):
             log.debug("ROSE_EDITOR:: dipslay Overlay:: ", self.display_overlay)
             log.debug("ROSE_EDITOR:: QMain Windows in first tab widget::", self.getMainWindowWidgetsFromTab(0)[0])
 
-        #back-compat: a project created before the Pipeline tab existed won't have
-        #this subfolder yet
+        #back-compat: a project created before the Pipeline or Attribute tabs
+        #existed won't have those subfolders yet
         if not os.path.isdir(self.rose_pipeline_editor_path):
             os.mkdir(self.rose_pipeline_editor_path)
+        if not os.path.isdir(self.rose_attribute_editor_path):
+            os.mkdir(self.rose_attribute_editor_path)
 
         self.getNodeEditorTab().onOpenFile(self.rose_base_editor_path)
         self.getSkinningEditorTab().onOpenFile(self.rose_skinning_editor_path)
         self.getPipelineEditorTab().onOpenFile(self.rose_pipeline_editor_path)
+        self.getAttributeEditorTab().onOpenFile(self.rose_attribute_editor_path)
         self.statusBar().showMessage('Opened project from ' + str(self.project_path), 5000)
 
     def onSaveProject(self):
@@ -445,6 +453,7 @@ class rose_Editor(QtWidgets.QMainWindow):
             self.getNodeEditorTab().onSaveFile(os.path.join(self.rose_base_editor_path, self.project_name + "_graph.json")) # type: ignore
             self.getSkinningEditorTab().onSaveFile(os.path.join(self.rose_skinning_editor_path, self.project_name + "_graph.json")) # type: ignore
             self.getPipelineEditorTab().onSaveFile(os.path.join(self.rose_pipeline_editor_path, self.project_name + "_graph.json")) # type: ignore
+            self.getAttributeEditorTab().onSaveFile(os.path.join(self.rose_attribute_editor_path, self.project_name + "_graph.json")) # type: ignore
 
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
@@ -610,7 +619,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         QSettings("tlpf", "ROSE").setValue('log_channels', ROSE_Log.getEnabledChannels())
 
     def isModified(self):
-        return self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified() or self.getPipelineEditorTab().isModified()
+        return (self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified()
+                or self.getPipelineEditorTab().isModified() or self.getAttributeEditorTab().isModified())
 
     def closeEvent(self, event):
         if self.projectNeedsSaving():
@@ -695,7 +705,13 @@ class rose_Editor(QtWidgets.QMainWindow):
         return self.tabs.widget(1).findChildren(QtWidgets.QWidget)[0]
 
     def getPipelineEditorTab(self):
-        return self.tabs.widget(2).findChildren(QtWidgets.QMainWindow)[0]
+        #index 3: the Attributes tab sits between Skin and Pipeline
+        return self.tabs.widget(3).findChildren(QtWidgets.QMainWindow)[0]
+
+    def getAttributeEditorTab(self):
+        #the direct reference rather than findChildren() - the tab is a plain
+        #QWidget, so a child search would depend on construction order
+        return self.attributeEditorTabWindow
 
     def getMainWindowWidgetsFromTab(self, tab_index):
         return self.tabs.widget(tab_index).findChildren(QtWidgets.QMainWindow)

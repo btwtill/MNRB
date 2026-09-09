@@ -23,6 +23,9 @@ class PipelineEditorScene(Serializable):
         #the tabs step nodes actually call into to run their build
         self.node_editor_tab = node_editor_tab
         self.skinning_tab = skinning_tab
+        #assigned after construction rather than passed in: the Attribute tab is
+        #built after this one, so it doesn't exist yet at this point
+        self.attribute_tab = None
 
         self.grScene = NodeEditor_QGraphicScene(self)
         self.properties = PipelineEditorSceneProperties(self)

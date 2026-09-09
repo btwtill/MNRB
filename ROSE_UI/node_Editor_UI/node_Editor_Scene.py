@@ -254,6 +254,58 @@ class NodeEditorScene(Serializable):
 
         return deformer_list
 
+    def getControlDict(self):
+        #same node-id-keyed shape as getDeformerDict, so a component rename
+        #relabels the group instead of splitting it
+        control_list = {}
+
+        for node in self.nodes:
+            control_entries = []
+            for control in node.controls:
+                control_entries.append({"id": control.id, "name": control.name})
+            control_list[str(node.id)] = {"label": node.getComponentFullPrefix(), "controls": control_entries}
+
+        return control_list
+
+    def getAttributeDict(self):
+        attribute_list = {}
+
+        for node in self.nodes:
+            attribute_entries = []
+            for component_attribute in node.attributes:
+                attribute_entries.append({"id": component_attribute.id, "name": component_attribute.attribute_name})
+            attribute_list[str(node.id)] = {"label": node.getComponentFullPrefix(), "attributes": attribute_entries}
+
+        return attribute_list
+
+    def getControlById(self, control_id):
+        for node in self.nodes:
+            for control in node.controls:
+                if control.id == control_id:
+                    return control
+        return None
+
+    def getControlByName(self, name):
+        for node in self.nodes:
+            for control in node.controls:
+                if control.name == name:
+                    return control
+        return None
+
+    def getAttributeById(self, attribute_id):
+        for node in self.nodes:
+            for component_attribute in node.attributes:
+                if component_attribute.id == attribute_id:
+                    return component_attribute
+        return None
+
+    def getAttributeByName(self, name):
+        for node in self.nodes:
+            for component_attribute in node.attributes:
+                if component_attribute.attribute_name == name:
+                    return component_attribute
+        return None
+
     def getDeformById(self, deform_id):
         for node in self.nodes:
             for deform in node.deforms:

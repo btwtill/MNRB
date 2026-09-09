@@ -103,8 +103,35 @@ def reloadROSEModules():
     import MNRB.ROSE_UI.rose_ui_utils as utils #type: ignore
     importlib.reload(utils)
 
+    import MNRB.ROSE_Debug.rose_log_channels as ROSELogChannels #type: ignore
+    importlib.reload(ROSELogChannels)
+
+    import MNRB.ROSE_Debug.rose_log as ROSELog #type: ignore
+    importlib.reload(ROSELog)
+
     import MNRB.ROSE_UI.UI_GraphicComponents.triangleWidget as TriangleWidget #type: ignore
     importlib.reload(TriangleWidget)
+
+    import MNRB.ROSE_UI.UI_GraphicComponents.list_group_item as ROSEListGroupItem #type: ignore
+    importlib.reload(ROSEListGroupItem)
+
+    import MNRB.ROSE_UI.UI_GraphicComponents.drag_payload as ROSEDragPayload #type: ignore
+    importlib.reload(ROSEDragPayload)
+
+    import MNRB.ROSE_UI.UI_GraphicComponents.scrollable_dock_widget as ROSEScrollableDock #type: ignore
+    importlib.reload(ROSEScrollableDock)
+
+    import MNRB.ROSE_UI.UI_GraphicComponents.view_overlay_controls as ROSEViewOverlayControls #type: ignore
+    importlib.reload(ROSEViewOverlayControls)
+
+    import MNRB.ROSE_Attributes.attribute_types as ROSEAttributeTypes #type: ignore
+    importlib.reload(ROSEAttributeTypes)
+
+    import MNRB.ROSE_Attributes.attribute as ROSEAttribute #type: ignore
+    importlib.reload(ROSEAttribute)
+
+    import MNRB.ROSE_Attributes.rig_root_attribute_host as ROSERigRootAttributeHost #type: ignore
+    importlib.reload(ROSERigRootAttributeHost)
 
     import MNRB.ROSE_Guides.ROSE_Guide_Connector.guide_connector as ROSEGuideConnector #type: ignore
     importlib.reload(ROSEGuideConnector)
@@ -153,6 +180,9 @@ def reloadROSEModules():
     import MNRB.ROSE_UI.pipeline_Editor_UI.steps.skinning_step as SkinningStep #type: ignore
     importlib.reload(SkinningStep)
 
+    import MNRB.ROSE_UI.pipeline_Editor_UI.steps.attribute_step as AttributeStep #type: ignore
+    importlib.reload(AttributeStep)
+
     import MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_SceneProperties as PipelineEditorSceneProperties #type: ignore
     importlib.reload(PipelineEditorSceneProperties)
 
@@ -164,6 +194,48 @@ def reloadROSEModules():
 
     import MNRB.ROSE_UI.rose_pipelineEditorTab as PipelineEditorTab #type: ignore
     importlib.reload(PipelineEditorTab)
+
+    #Attribute Editor - same reload-order requirement as the blocks above. The
+    #graph_nodes modules must reload after attribute_Editor_conf, since reloading
+    #conf empties ATTRIBUTE_NODES and only a re-executed node module re-registers.
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_categories as AttributeEditorCategories #type: ignore
+    importlib.reload(AttributeEditorCategories)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_GraphicNode as AttributeEditorGraphicNode #type: ignore
+    importlib.reload(AttributeEditorGraphicNode)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_Node as AttributeEditorNode #type: ignore
+    importlib.reload(AttributeEditorNode)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_conf as AttributeEditorConf #type: ignore
+    importlib.reload(AttributeEditorConf)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.graph_nodes.attribute_node as AttributeGraphAttributeNode #type: ignore
+    importlib.reload(AttributeGraphAttributeNode)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.graph_nodes.control_node as AttributeGraphControlNode #type: ignore
+    importlib.reload(AttributeGraphControlNode)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.graph_nodes.operator_nodes as AttributeGraphOperatorNodes #type: ignore
+    importlib.reload(AttributeGraphOperatorNodes)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.graph_nodes.scene_target_node as AttributeGraphSceneTargetNode #type: ignore
+    importlib.reload(AttributeGraphSceneTargetNode)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_SourceList as AttributeEditorSourceList #type: ignore
+    importlib.reload(AttributeEditorSourceList)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_Scene as AttributeEditorScene #type: ignore
+    importlib.reload(AttributeEditorScene)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_Widget as AttributeEditorWidget #type: ignore
+    importlib.reload(AttributeEditorWidget)
+
+    import MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_Toolbar as AttributeEditorToolbar #type: ignore
+    importlib.reload(AttributeEditorToolbar)
+
+    import MNRB.ROSE_UI.rose_attributeEditorTab as AttributeEditorTab #type: ignore
+    importlib.reload(AttributeEditorTab)
 
     import MNRB.ROSE_UI.node_Editor_UI.node_Editor_multiEditPropertiesWidget as ROSEMultiEditWidget  #type: ignore
     importlib.reload(ROSEMultiEditWidget)
