@@ -15,7 +15,13 @@ from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 log = ROSE_Log.get("rose.editor")
 
 class rose_Editor(QtWidgets.QMainWindow):
-    def __init__(self, parent = getMayaWindow()):
+    def __init__(self, parent = None):
+        #resolved per instance rather than as a default argument: a default is
+        #evaluated once when the class is created, so the editor captured
+        #whichever main window existed at import time and reused it forever
+        if parent is None:
+            parent = getMayaWindow()
+
         super(rose_Editor, self).__init__(parent)
 
         #restored first, so anything logged during startup already honours it
@@ -86,11 +92,14 @@ class rose_Editor(QtWidgets.QMainWindow):
                 log.debug("ROSE_EDITR:: --initProject:: Multiple or No Projcets found, Display Overlay")
                 self.display_overlay = True
         else:
-            if log.enabled:
-                log.debug("ROSE_EDITOR:: --initProject:: No ROSE Directory Found. ")
-                os.mkdir(self.rose_path)
-                log.debug("ROSE_EDITOR:: --initProject:: Create ROSE Directory at path and Display Overlay")
-                self.display_overlay = True
+            log.debug("ROSE_EDITOR:: --initProject:: No ROSE Directory Found. ")
+            #deliberately outside any `if log.enabled:` guard - creating the
+            #directory and choosing the overlay are what this branch is for, and
+            #wrapping them in a logging check meant a fresh project only worked
+            #while debug logging happened to be on
+            os.makedirs(self.rose_path, exist_ok = True)
+            log.debug("ROSE_EDITOR:: --initProject:: Create ROSE Directory at path and Display Overlay")
+            self.display_overlay = True
 
     def initUI(self):
         self.setGeometry(200, 200, 1200, 700)

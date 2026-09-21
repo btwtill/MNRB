@@ -3,7 +3,12 @@ from shiboken6 import wrapInstance # type: ignore
 import maya.OpenMayaUI as omui # type: ignore
 
 def getMayaWindow():
-    main_window_pointer =  omui.MQtUtil.mainWindow()
+    main_window_pointer = omui.MQtUtil.mainWindow()
+
+    #None outside a Maya UI session (mayapy, batch) - returning None lets callers
+    #parent to nothing instead of raising on int(None)
+    if main_window_pointer is None:
+        return None
 
     return wrapInstance(int(main_window_pointer), QtWidgets.QWidget)
 

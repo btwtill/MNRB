@@ -225,17 +225,27 @@ class rose_AttributeEditorTab(QtWidgets.QMainWindow, Serializable):
         return True
 
     def loadFile(self, file_path):
+        self.failed_load_path = None
         try:
             with open(file_path, "r") as file:
                 self.deserialize(json.loads(file.read()))
         except Exception as e:
             #a corrupted graph file shouldn't take down the whole project open
             log.error("ATTRIBUTEEDITORTAB:: --loadFile:: could not load '%s': %s - starting empty" % (file_path, e))
+            self.failed_load_path = file_path
             self.onNewFile()
             return False
         return True
 
     def onSaveFile(self, file_name):
+        #see rose_skinningEditorTab.saveFileToPath: a load that failed quietly
+        #leaves this tab empty while the real data is still on disk, and a save
+        #that runs unconditionally then makes the loss permanent
+        if getattr(self, "failed_load_path", None) is not None:
+            log.error("ATTRIBUTEEDITORTAB:: --onSaveFile:: Not saving: '%s' could not be read earlier, so this tab is empty and "
+                      "saving would overwrite the project's real data." % self.failed_load_path)
+            return False
+
         with open(file_name, "w") as file:
             file.write(json.dumps(self.serialize(), indent=4))
         self.setModified(False)

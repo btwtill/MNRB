@@ -74,6 +74,7 @@ class rose_PipelineEditorTab(QtWidgets.QMainWindow):
         return False
 
     def loadFile(self, path):
+        self.failed_load_path = None
         try:
             self.central_widget.scene.loadSceneFromFile(path)
         except Exception as e:
@@ -81,6 +82,7 @@ class rose_PipelineEditorTab(QtWidgets.QMainWindow):
             #that failed partway through) shouldn't take down the whole project
             #open flow - fall back to a blank pipeline instead
             log.error("rose_PipelineEditorTab:: --loadFile:: Failed to load '%s': %s - starting a blank pipeline instead" % (path, e))
+            self.failed_load_path = path
             self.onNewFile()
 
         self.central_widget.scene.history.clear()
@@ -97,6 +99,14 @@ class rose_PipelineEditorTab(QtWidgets.QMainWindow):
             self.loadFile(path)
 
     def onSaveFile(self, file_name):
+        #see rose_skinningEditorTab.saveFileToPath: a load that failed quietly
+        #leaves this tab empty while the real data is still on disk, and a save
+        #that runs unconditionally then makes the loss permanent
+        if getattr(self, "failed_load_path", None) is not None:
+            log.error("rose_PipelineEditorTab:: --onSaveFile:: Not saving: '%s' could not be read earlier, so this tab is empty and "
+                      "saving would overwrite the project's real data." % self.failed_load_path)
+            return False
+
         self.central_widget.scene.saveSceneToFile(file_name)
 
     def onNewFile(self):
