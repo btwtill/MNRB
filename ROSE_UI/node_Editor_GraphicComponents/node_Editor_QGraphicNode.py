@@ -96,6 +96,8 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._content_color = QColor("#EF1F1F1F")
         self._valid_color = QColor("#FF336600")
         self._invalid_color = QColor("#FFc43721")
+        #amber, not red: the node is fine, it just no longer matches what is built
+        self._needs_rebuild_color = QColor("#FFE0A030")
 
         self._default_pen = QPen(self._default_color)
         self._selected_pen = QPen(self._selected_color)
@@ -106,6 +108,7 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
         self._content_brush = QBrush(self._content_color)
         self._valid_brush = QBrush(self._valid_color)
         self._invalid_brush = QBrush(self._invalid_color)
+        self._needs_rebuild_brush = QBrush(self._needs_rebuild_color)
 
         #initialize the node title
         self.title_item = QtWidgets.QGraphicsTextItem(self)
@@ -339,7 +342,12 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
             self._validity_bar_height)
 
         painter.setPen(Qt.NoPen)
-        painter.setBrush(self._valid_brush if self.node.properties.is_valid else self._invalid_brush)
+        if getattr(self.node.properties, "needs_rebuild", False):
+            #takes precedence over the valid colour: a component whose settings no
+            #longer match what is in the scene should say so, and it is still valid
+            painter.setBrush(self._needs_rebuild_brush)
+        else:
+            painter.setBrush(self._valid_brush if self.node.properties.is_valid else self._invalid_brush)
         painter.drawRect(validity_bar_rectangle)
 
         #paintBounding Rect

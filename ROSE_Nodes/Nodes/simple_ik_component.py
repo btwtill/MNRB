@@ -2,6 +2,7 @@ import math
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSlider #type: ignore
 from PySide6.QtCore import Qt #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_Node #type: ignore
+from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_colors.colors import ROSEColor #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_SIMPLEIKCOMPONENT, registerNode #type: ignore
@@ -252,17 +253,25 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         # Create Controls
         # IK Base (start) Control
         base_control = control(self, "base")
-        Matrix_functions.setMatrixParentNoOffset(base_control.name, self.base_input)
+        #forced to matrix regardless of the component's flag: parenting an
+        #animator-facing control has to go through offsetParentMatrix so the
+        #channels stay free. A native constraint drives translate/rotate, which
+        #means the control cannot be posed - it snaps back to its driver the next
+        #time anything upstream re-evaluates.
+        self.constrain(base_control.name, self.base_input,
+                       maintain_offset = False, constraint_type = ConstraintType.MATRIX)
         MC.parentObject(base_control.name, self.control_hierarchy)
 
         # IK Pole (polevector) control
         pole_control = control(self, "pole")
         MC.parentObject(pole_control.name, self.control_hierarchy)
-        Matrix_functions.setMatrixParentNoOffset(pole_control.name, self.pole_input)
+        self.constrain(pole_control.name, self.pole_input,
+                       maintain_offset = False, constraint_type = ConstraintType.MATRIX)
 
         # IK end control
         end_control = control(self, "end")
-        Matrix_functions.setMatrixParentNoOffset(end_control.name, self.end_input)
+        self.constrain(end_control.name, self.end_input,
+                       maintain_offset = False, constraint_type = ConstraintType.MATRIX)
         MC.parentObject(end_control.name, self.control_hierarchy)
 
         # Create IK Joint Chain
@@ -327,11 +336,11 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         # Constraint Base and end
         Ik_end_anchor = MC.createTransform(end_control.name + "_ik_anchor")
         MC.parentObject(Ik_end_anchor, ik_system_hierarchy)
-        Matrix_functions.setMatrixParentNoOffset(Ik_end_anchor, end_control.name)
+        self.constrain(Ik_end_anchor, end_control.name, maintain_offset = False)
 
         MC.parentObject(ik_objects[0], Ik_end_anchor)
 
-        Matrix_functions.setMatrixParentNoOffset(base_ik_joint, base_control.name)
+        self.constrain(base_ik_joint, base_control.name, maintain_offset = False)
         MC.createOrientConstraint(end_control.name, end_ik_joint)
 
         return True
@@ -350,7 +359,7 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         
         base_srt_parent_name = base_srt_parent + ROSE_Names.output_suffix
 
-        base_parent_offset_compose_node, base_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.base_input, base_srt_parent_name)
+        self.constrain(self.base_input, base_srt_parent_name)
 
         # Get Name of second input socket (connected deform srt name)
         deform_parent_name = self.getInputConnectionValueAt(1)
@@ -361,9 +370,12 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         # Connect deform part of the component
         MC.parentObject(self.deforms[0].name, deform_parent)
 
-        Matrix_functions.setLiveMatrixParentNoOffset(self.deforms[0].name, self.deform_outputs[0], deform_parent)
-        Matrix_functions.setLiveMatrixParentNoOffset(self.deforms[1].name, self.deform_outputs[1], self.deforms[0].name)
-        Matrix_functions.setLiveMatrixParentNoOffset(self.deforms[2].name, self.deform_outputs[2], self.deforms[1].name)
+        #the deform chain is already parented, so the constraint derives the
+        #parent space itself - and cancels each joint's jointOrient, which the
+        #old live-link did not (these joints keep their orientation, unlike the
+        #other components' deforms, so it landed them rotated by it)
+        for index, deform in enumerate(self.deforms):
+            self.constrain(deform.name, self.deform_outputs[index], maintain_offset = False)
         
         # Get Name of ik srt input parent
         ik_srt_parent = self.getInputConnectionValueAt(2)
@@ -372,8 +384,8 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         
         ik_srt_parent_name = ik_srt_parent + ROSE_Names.output_suffix
 
-        pole_parent_offset_compose_node, pole_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.pole_input, ik_srt_parent_name)
-        end_parent_offset_compose_node, end_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.end_input, ik_srt_parent_name)
+        self.constrain(self.pole_input, ik_srt_parent_name)
+        self.constrain(self.end_input, ik_srt_parent_name)
 
         return True
 

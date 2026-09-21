@@ -3,7 +3,8 @@ from collections import OrderedDict
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
+from MNRB.ROSE_Constraints.constraint import constraint #type: ignore
+from MNRB.ROSE_Constraints.constraint_types import ConstraintType, ConstraintKind, mapNameToConstraintType #type: ignore
 
 class SkinningEditorCluster(Serializable):
     """
@@ -30,8 +31,8 @@ class SkinningEditorCluster(Serializable):
         #should follow one driver instead of being smoothly skinned
         self.connection_type = "skin"
         #only meaningful when connection_type == "constraint": "native" (Maya's
-        #own parentConstraint) or "matrix" (this codebase's existing live
-        #matrix-offset link, Matrix_functions.setMatrixParentWithOffset)
+        #own parentConstraint) or "matrix" (the multMatrix network), both built
+        #through ROSE_Constraints.constraint
         self.constraint_type = "native"
 
         #skinCluster bind options - see MC.createSkinCluster for what each maps to
@@ -54,8 +55,11 @@ class SkinningEditorCluster(Serializable):
         #and replaces it instead of accumulating duplicates
         self.maya_skin_cluster_node = None
         #same idea for constraint mode - a list since the matrix constraint type
-        #creates more than one node (compose + mult matrix, see build())
+        #creates more than one node (see build())
         self.maya_constraint_nodes = []
+        #constraint objects built this session. The container duck-types the small
+        #part of a component node that `constraint` needs: an id and this list.
+        self.constraints = []
 
         #name-set snapshot of the influences at the time weights were last exported -
         #compared against the current influence set to decide if a stored weights
@@ -178,17 +182,20 @@ class SkinningEditorCluster(Serializable):
 
         driver = existing_deforms[0].name
 
-        if self.constraint_type == "matrix":
-            #decompose_result=False - same idiom already used elsewhere in this
-            #codebase (multi_deform_component.py's control-chain parenting) for a
-            #live matrix-offset link via offsetParentMatrix, only 2 nodes created
-            compose_node, mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(
-                self.target_mesh, driver, decompose_result = False
-            )
-            self.maya_constraint_nodes = [compose_node, mult_matrix_node]
-        else:
-            constraint_node = MC.createParentConstraint(driver, self.target_mesh)
-            self.maya_constraint_nodes = [constraint_node]
+        #built through the shared constraint class rather than a parallel
+        #implementation, so this tab gets the same jointOrient and parent-space
+        #handling every component does. The type is passed explicitly: a container
+        #has its own native/matrix choice rather than a component's.
+        self.constraints = []
+        new_constraint = constraint(self, self.target_mesh, driver,
+                                    kind = ConstraintKind.PARENT,
+                                    constraint_type = mapNameToConstraintType(self.constraint_type))
+
+        success, detail = new_constraint.build()
+        if not success:
+            return False, detail
+
+        self.maya_constraint_nodes = list(new_constraint.built_maya_nodes)
 
         return True, skipped
 
@@ -202,6 +209,7 @@ class SkinningEditorCluster(Serializable):
             if MC.objectExists(node):
                 MC.deleteNode(node)
         self.maya_constraint_nodes = []
+        self.constraints = []
 
     def getWeightsFilePath(self, folder_path):
         #keyed by this container's stable id rather than its display name, so

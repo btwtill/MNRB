@@ -1,4 +1,5 @@
 from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, registerNode #type: ignore
+from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_NodeProperties #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
 from MNRB.ROSE_Guides.guide import guide #type: ignore
@@ -79,7 +80,13 @@ class ROSE_Node_BaseComponent(ROSE_NodeTemplate):
         self.global_offset_control = control(self, "globalOffset")
         self.global_offset_control.setPosition(self.guide_pos)
         MC.parentObject(self.global_offset_control.name, self.control_hierarchy)
-        Matrix_functions.setMatrixParentNoOffset(self.global_offset_control.name, self.global_control.name)
+        #forced to matrix regardless of the component's flag: parenting an
+        #animator-facing control has to go through offsetParentMatrix so the
+        #channels stay free. A native constraint drives translate/rotate, which
+        #means the control cannot be posed - it snaps back to its driver the next
+        #time anything upstream re-evaluates.
+        self.constrain(self.global_offset_control.name, self.global_control.name,
+                       maintain_offset = False, constraint_type = ConstraintType.MATRIX)
 
         #create Outputs
         self.global_offset_output = MC.createTransform(self.getComponentFullPrefix() + "globalOffset" + ROSE_Names.output_suffix)

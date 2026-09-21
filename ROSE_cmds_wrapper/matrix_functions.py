@@ -86,7 +86,12 @@ class Matrix_functions():
                 MC.connectAttribute(decompose_node, "outputScale" + channel, target_srt, "scale" + channel)
 
         if rotate_order:
-                MC.connectAttribute(decompose_node, "inputRotateOrder", target_srt, "rotateOrder")
+                #the decompose reads the target's rotate order - the other way round
+                #drove the target's rotateOrder from the decompose's own unset input,
+                #pinning every object connected this way to xyz
+                #forced: these decompose nodes are DG nodes that survive a rebuild
+                #of the hierarchy, so the connection gets remade onto a live one
+                MC.connectAttribute(target_srt, "rotateOrder", decompose_node, "inputRotateOrder", force = True)
 
     @staticmethod
     def decomposeTransformWorldMatrix(source, rotate_order = True):

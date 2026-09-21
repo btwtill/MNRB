@@ -76,6 +76,33 @@ def reloadROSEModules():
     import MNRB.ROSE_Nodes.rose_node_template as ROSENodeTemplate #type: ignore
     importlib.reload(ROSENodeTemplate)
 
+    import MNRB.ROSE_Data.rose_enum as ROSEEnum #type: ignore
+    importlib.reload(ROSEEnum)
+
+    #reloaded before anything that imports them. importlib.reload rebuilds a
+    #module's classes as new objects, so a module reloaded BEFORE its
+    #dependency keeps holding the dependency's old classes - which for an Enum
+    #means members that compare unequal and miss dict lookups against the new
+    #class. The types below all guard against that themselves, but the order
+    #is what keeps it from arising in the first place.
+    import MNRB.ROSE_Data.rose_Editor_Serializable as NodeEditorSerializable #type: ignore
+    importlib.reload(NodeEditorSerializable)
+
+    import MNRB.ROSE_Constraints.constraint_types as ROSEConstraintTypes #type: ignore
+    importlib.reload(ROSEConstraintTypes)
+
+    import MNRB.ROSE_Constraints.constraint as ROSEConstraint #type: ignore
+    importlib.reload(ROSEConstraint)
+
+    import MNRB.ROSE_Attributes.attribute_types as ROSEAttributeTypes #type: ignore
+    importlib.reload(ROSEAttributeTypes)
+
+    import MNRB.ROSE_Attributes.attribute as ROSEAttribute #type: ignore
+    importlib.reload(ROSEAttribute)
+
+    import MNRB.ROSE_Attributes.rig_root_attribute_host as ROSERigRootAttributeHost #type: ignore
+    importlib.reload(ROSERigRootAttributeHost)
+
     import MNRB.ROSE_Nodes.Nodes.base_component as ROSE_Base_Component_Node #type: ignore
     importlib.reload(ROSE_Base_Component_Node)
 
@@ -123,15 +150,6 @@ def reloadROSEModules():
 
     import MNRB.ROSE_UI.UI_GraphicComponents.view_overlay_controls as ROSEViewOverlayControls #type: ignore
     importlib.reload(ROSEViewOverlayControls)
-
-    import MNRB.ROSE_Attributes.attribute_types as ROSEAttributeTypes #type: ignore
-    importlib.reload(ROSEAttributeTypes)
-
-    import MNRB.ROSE_Attributes.attribute as ROSEAttribute #type: ignore
-    importlib.reload(ROSEAttribute)
-
-    import MNRB.ROSE_Attributes.rig_root_attribute_host as ROSERigRootAttributeHost #type: ignore
-    importlib.reload(ROSERigRootAttributeHost)
 
     import MNRB.ROSE_Guides.ROSE_Guide_Connector.guide_connector as ROSEGuideConnector #type: ignore
     importlib.reload(ROSEGuideConnector)
@@ -242,9 +260,6 @@ def reloadROSEModules():
 
     import MNRB.ROSE_UI.node_Editor_UI.node_Editor_Widget as NodeEditorWidget #type: ignore
     importlib.reload(NodeEditorWidget)
-
-    import MNRB.ROSE_Data.rose_Editor_Serializable as NodeEditorSerializable #type: ignore
-    importlib.reload(NodeEditorSerializable)
 
     import MNRB.ROSE_UI.node_Editor_UI.node_Editor_Scene as NodeEditorScene #type: ignore
     importlib.reload(NodeEditorScene)

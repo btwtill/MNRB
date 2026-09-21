@@ -2,7 +2,7 @@ import hashlib
 from collections import OrderedDict
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
-from MNRB.ROSE_Attributes.attribute_types import AttributeType, mapNameToAttributeType #type: ignore
+from MNRB.ROSE_Attributes.attribute_types import AttributeType, mapNameToAttributeType, enumValue #type: ignore
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 
 log = ROSE_Log.get("rose.components")
@@ -27,8 +27,7 @@ class attribute(Serializable):
 
         self.node = node
         self.attribute_name = name
-        self.attribute_type = attribute_type
-
+        self.attribute_type = mapNameToAttributeType(attribute_type)
         self.default_value = default_value
         self.minimum = minimum
         self.maximum = maximum
@@ -78,12 +77,17 @@ class attribute(Serializable):
         if MC.attributeExists(host_node, self.attribute_name):
             return True
 
-        if self.attribute_type == AttributeType.BOOL:
+        #by value, not by member: a type handed over by a module the shelf
+        #reloaded at a different time belongs to a different class object and
+        #would silently fail every branch here, landing on float
+        attribute_type = enumValue(self.attribute_type)
+
+        if attribute_type == AttributeType.BOOL.value:
             MC.addBoolAttribute(host_node, self.attribute_name, self.default_value, self.keyable)
-        elif self.attribute_type == AttributeType.INT:
+        elif attribute_type == AttributeType.INT.value:
             MC.addIntAttribute(host_node, self.attribute_name, self.default_value,
                                self.minimum, self.maximum, self.keyable)
-        elif self.attribute_type == AttributeType.ENUM:
+        elif attribute_type == AttributeType.ENUM.value:
             MC.addEnumAttribute(host_node, self.attribute_name, self.options,
                                 self.default_value, self.keyable)
         else:

@@ -19,6 +19,9 @@ from MNRB.ROSE_Nodes.property_UI_GraphicComponents.seperator_widget import Separ
 from MNRB.ROSE_Guides.ROSE_Guide_Connector.guide_connector import Guide_Connector #type: ignore
 from MNRB.ROSE_Attributes.attribute import attribute #type: ignore
 from MNRB.ROSE_Attributes.attribute_types import AttributeType #type: ignore
+from MNRB.ROSE_Constraints.constraint import constraint #type: ignore
+from MNRB.ROSE_Constraints.constraint_types import (ConstraintType, ConstraintKind, #type: ignore
+                                                    mapNameToConstraintType)
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 guide_log = ROSE_Log.get("rose.components.guides")
@@ -39,6 +42,13 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         self.guide_size = 1.0
         self.deform_size = 1.0
         self.control_size = 5.0
+
+        #how this component's constraints are realised. Per-constraint overrides
+        #exist but are code-only - see ROSE_Node.constrain()
+        self.constraint_type = ConstraintType.MATRIX
+        #set when something changes that only a rebuild can apply, so the node can
+        #say so without being marked invalid, which would disable the build buttons
+        self.needs_rebuild = False
 
         self.displayGuideOrientation = False
         self.autoOrientGuide = False
@@ -219,6 +229,23 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
 
         component_settings_label = QLabel("Component Settings")
         self.layout.addWidget(component_settings_label)
+
+        constraint_type_layout = QHBoxLayout()
+        constraint_type_layout.addWidget(QLabel("Constraint Type:"))
+
+        self.constraint_type_dropdown = QComboBox()
+        for constraint_type in ConstraintType:
+            self.constraint_type_dropdown.addItem(constraint_type.value, constraint_type)
+        self.constraint_type_dropdown.currentIndexChanged.connect(self.updateConstraintType)
+        constraint_type_layout.addWidget(self.constraint_type_dropdown)
+
+        self.layout.addLayout(constraint_type_layout)
+
+        self.needs_rebuild_label = QLabel("Constraint type changed - rebuild this component to apply it.")
+        self.needs_rebuild_label.setWordWrap(True)
+        self.needs_rebuild_label.setStyleSheet("color: #FFE0A030;")
+        self.needs_rebuild_label.setVisible(False)
+        self.layout.addWidget(self.needs_rebuild_label)
 
         self.layout.addStretch()
         self.connectHasBeenModifiedCallback(self.updateDisabledState)
@@ -425,6 +452,30 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
     def updateDisabledState(self):
         self.is_disabled = self.disabled_checkbox.isChecked()
 
+    def updateConstraintType(self, index):
+        new_type = self.constraint_type_dropdown.itemData(index)
+        if new_type is None or new_type == self.constraint_type:
+            return
+
+        self.constraint_type = new_type
+        #deliberately not rebuilt here: swapping the technique means tearing down
+        #and remaking the network on a rig that is probably mid-pose. The node is
+        #flagged instead and the user rebuilds when ready.
+        self.setNeedsRebuild(True)
+        self.setHasBeenModified()
+
+    def setNeedsRebuild(self, value):
+        self.needs_rebuild = value
+        if hasattr(self, "needs_rebuild_label"):
+            self.needs_rebuild_label.setVisible(value)
+        if self.node is not None and self.node.grNode is not None:
+            self.node.grNode.update()
+
+    def applyConstraintType(self, constraint_type):
+        index = self.constraint_type_dropdown.findData(constraint_type)
+        if index >= 0:
+            self.constraint_type_dropdown.setCurrentIndex(index)
+
     def updateGuideSlider(self):
         if self.parseSizeEditValue(self.guide_slider_size_edit) is None: return
         self.is_guide_slider_silent = True
@@ -565,7 +616,8 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         result_data['displayGuideOrientation'] = self.displayGuideOrientation
         result_data['autoOrientGuide'] = self.autoOrientGuide
         result_data['extended_rotation_control'] = self.display_extended_rotation_controls
-        
+        result_data['constraint_type'] = self.constraint_type.value
+
         return result_data
     
     def deserialize(self, data, hashmap = {}, restore_id=True):
@@ -611,6 +663,11 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
 
         self.autoOrientGuide = data['autoOrientGuide']
         self.auto_orient_guide_checkbox.setChecked(self.autoOrientGuide)
+
+        #projects predating the constraint system built everything the matrix way
+        self.constraint_type = mapNameToConstraintType(data.get('constraint_type', ConstraintType.MATRIX.value))
+        self.constraint_type_dropdown.setCurrentText(self.constraint_type.value)
+        self.needs_rebuild = False
  
         self.is_silent = False
 
@@ -642,6 +699,11 @@ class ROSE_Node(NodeEditorNode):
 
         self.controls = []
         self.deforms = []
+
+        #every constraint this component built, so a rebuild clears the previous
+        #network first. The matrix form is made of DG nodes, which deleting the
+        #component's transform hierarchy does not take with it.
+        self.constraints = []
 
         #attributes this component deliberately exposes - see initAttributes().
         #Declared here at construction rather than at build time, so the Attribute
@@ -677,6 +739,27 @@ class ROSE_Node(NodeEditorNode):
         self.exposeAttribute("Output_Visibility", AttributeType.BOOL, default_value = False, keyable = False)
         self.exposeAttribute("Control_Visibility", AttributeType.BOOL, default_value = True, keyable = False)
         self.exposeAttribute("Systems_Visibility", AttributeType.BOOL, default_value = False, keyable = False)
+
+    def constrain(self, child, parent, kind = ConstraintKind.PARENT,
+                  constraint_type = None, maintain_offset = True):
+        """Constrain child to parent, however this component is set to.
+
+        Pass constraint_type only to override that for this one constraint - a
+        rigging decision made in the component's own code, deliberately not a user
+        option in the properties panel.
+        """
+        new_constraint = constraint(self, child, parent, kind, constraint_type, maintain_offset)
+        success, detail = new_constraint.build()
+
+        if not success:
+            log.warning("%s:: --constrain:: " % self.__class__.__name__, detail)
+
+        return new_constraint
+
+    def removeConstraints(self):
+        for existing_constraint in self.constraints:
+            existing_constraint.remove()
+        self.constraints = []
 
     def exposeAttribute(self, name, attribute_type = AttributeType.FLOAT, default_value = 0,
                         minimum = None, maximum = None, options = None, keyable = True):
@@ -785,6 +868,10 @@ class ROSE_Node(NodeEditorNode):
         else:
             return False
         
+        #the matrix network's DG nodes are not under the hierarchy about to be
+        #deleted, so they have to go explicitly or they pile up every rebuild
+        self.removeConstraints()
+
         if self.component_hierarchy is not None:
             if MC.objectExists(self.component_hierarchy):
                 MC.deleteObjectWithHierarchy(self.component_hierarchy)
@@ -824,6 +911,9 @@ class ROSE_Node(NodeEditorNode):
         MC.lockAndHideAllAttributes(self.control_hierarchy)
 
         self.controls = []
+
+        #whatever needed a rebuild has just had one
+        self.properties.setNeedsRebuild(False)
 
         return True
 
@@ -1038,6 +1128,10 @@ class ROSE_Node(NodeEditorNode):
                 deform.remove()
 
     def removeComponentFromViewport(self):
+        #the matrix network's DG nodes are not under the hierarchy about to be
+        #deleted, so they have to go explicitly or they pile up every rebuild
+        self.removeConstraints()
+
         if self.component_hierarchy is not None:
             if MC.objectExists(self.component_hierarchy):
                 MC.deleteObjectWithHierarchy(self.component_hierarchy)
@@ -1084,6 +1178,7 @@ class ROSE_Node(NodeEditorNode):
         self.guides = []
         self.deforms = []
         self.controls = []
+        self.constraints = []
 
         self.setComponentGuideHiearchyName()
         self.setComponentHierarchyName()

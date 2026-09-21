@@ -379,6 +379,36 @@ class MC:
         cmds.setAttr(f"{object}.{attribute_name}", value)
 
     @staticmethod
+    def setMatrixAttribute(object, attribute_name, matrix) -> None:
+        #a matrix set whole, rather than decomposed into translate/rotate/scale and
+        #recomposed: that round trip silently drops shear and forces a rotate order
+        cmds.setAttr(f"{object}.{attribute_name}", list(matrix), type="matrix")
+
+    @staticmethod
+    def getJointOrient(object):
+        #None for anything that isn't a joint - only joints carry this, and it is
+        #applied on top of rotate, so a matrix constraint has to cancel it
+        if not cmds.attributeQuery("jointOrient", node=object, exists=True):
+            return None
+        return cmds.getAttr(f"{object}.jointOrient")[0]
+
+    @staticmethod
+    def getObjectLocalMatrix(object) -> list:
+        return cmds.getAttr(f"{object}.matrix")
+
+    @staticmethod
+    def getObjectParentWorldMatrix(object) -> list:
+        #identity when the object sits at the world root, so callers can always
+        #treat the result as a matrix to divide out
+        parent = MC.getObjectParentNode(object)
+        if not parent:
+            return [1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0]
+        return cmds.xform(parent[0], query=True, matrix=True, worldSpace=True)
+
+    @staticmethod
     def setAttributeDouble3(object, attribute_name, value1, value2, value3):
         cmds.setAttr(f"{object}.{attribute_name}", value1, value2, value3, type="double3")
 
@@ -447,8 +477,20 @@ class MC:
 
 # Maya Constraints
     @staticmethod
-    def createOrientConstraint(source_object, target_object) -> str:
-        return cmds.orientConstraint(source_object, target_object)
+    def createOrientConstraint(source_object, target_object, maintain_offset = True) -> str:
+        return cmds.orientConstraint(source_object, target_object, maintainOffset = maintain_offset)[0]
+
+    @staticmethod
+    def createPointConstraint(driver, driven, maintain_offset = True) -> str:
+        return cmds.pointConstraint(driver, driven, maintainOffset = maintain_offset)[0]
+
+    @staticmethod
+    def createScaleConstraint(driver, driven, maintain_offset = True) -> str:
+        return cmds.scaleConstraint(driver, driven, maintainOffset = maintain_offset)[0]
+
+    @staticmethod
+    def createAimConstraint(driver, driven, maintain_offset = True) -> str:
+        return cmds.aimConstraint(driver, driven, maintainOffset = maintain_offset)[0]
 
     @staticmethod
     def createParentConstraint(driver, driven, maintain_offset = True) -> str:

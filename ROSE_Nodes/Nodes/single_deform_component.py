@@ -1,4 +1,5 @@
 from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_SINGLEDEFORMCOMPONENT, registerNode #type: ignore
+from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_NodeProperties #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
 from MNRB.ROSE_Guides.guide import guide #type: ignore
@@ -71,7 +72,13 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
 
         #create controls
         self.single_control = control(self, "singleCtrl")
-        Matrix_functions.setMatrixParentNoOffset(self.single_control.name, self.root_input)
+        #forced to matrix regardless of the component's flag: parenting an
+        #animator-facing control has to go through offsetParentMatrix so the
+        #channels stay free. A native constraint drives translate/rotate, which
+        #means the control cannot be posed - it snaps back to its driver the next
+        #time anything upstream re-evaluates.
+        self.constrain(self.single_control.name, self.root_input,
+                       maintain_offset = False, constraint_type = ConstraintType.MATRIX)
         MC.parentObject(self.single_control.name, self.control_hierarchy)
 
         #create Outputs
@@ -99,13 +106,13 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
         deform_joint = self.deforms[0]
 
         #matrix parent with underworld Offset
-        srt_parent_offset_compose_node, srt_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.root_input, srt_parent)
+        self.constrain(self.root_input, srt_parent)
 
         #parent deform to deform parent
         MC.parentObject(deform_joint.name, deform_parent)
-        deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform_joint.name, self.deform_output, deform_parent)
-
+        #cleared before constraining - see multi_deform_component
         MC.resetJointOrientations(deform_joint.name)
+        self.constrain(deform_joint.name, self.deform_output, maintain_offset = False)
         return True
 
         

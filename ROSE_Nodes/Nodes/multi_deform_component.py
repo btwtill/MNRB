@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton, QCheckBox, QSlider, QComboBox #type: ignore
 from PySide6.QtCore import Qt #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_Node #type: ignore
+from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_colors.colors import ROSEColor #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_MULTIDEFORMCOMPONENT, registerNode #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
@@ -144,7 +145,13 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
         for index, guide in enumerate(self.guides):
             if index == 0:
                 new_control = control(self, "chain_start")
-                Matrix_functions.setMatrixParentNoOffset(new_control.name, self.root_input)
+                #forced to matrix regardless of the component's flag: parenting an
+                #animator-facing control has to go through offsetParentMatrix so the
+                #channels stay free. A native constraint drives translate/rotate, which
+                #means the control cannot be posed - it snaps back to its driver the next
+                #time anything upstream re-evaluates.
+                self.constrain(new_control.name, self.root_input,
+                               maintain_offset = False, constraint_type = ConstraintType.MATRIX)
                 # Create Outputs
                 output = MC.createTransform(self.getComponentFullPrefix() + "start" + ROSE_Names.output_suffix)
                 Matrix_functions.decomposeTransformWorldMatrixTo(new_control.name, output)
@@ -153,7 +160,9 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
                 new_control = control(self, f"chain_{index}")
                 control_position = self.guides[index].getPosition()
                 new_control.setPosition(control_position)
-                Matrix_functions.setMatrixParentWithOffset(new_control.name, self.controls[index - 1].name, decompose_result=False)
+                #same reason as above - this control has to stay posable
+                self.constrain(new_control.name, self.controls[index - 1].name,
+                               constraint_type = ConstraintType.MATRIX)
                 # Create Outputs
                 output = MC.createTransform(self.getComponentFullPrefix() + str(index - 1) + ROSE_Names.output_suffix)
                 Matrix_functions.decomposeTransformWorldMatrixTo(new_control.name, output)
@@ -177,19 +186,18 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
         deform_parent = deform_parent_name + ROSE_Names.deform_suffix
 
         #Contect connected output to component input
-        srt_parent_offset_compose_node, srt_parent_offset_mult_matrix_node = Matrix_functions.setMatrixParentWithOffset(self.root_input, srt_parent)
+        self.constrain(self.root_input, srt_parent)
 
         #Connect control deform outputs to deforms 
         # Parent deform to connected deform
         MC.parentObject(self.deforms[0].name, deform_parent)
 
         for index, deform in enumerate(self.deforms):
-            if index == 0:
-                deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform.name, self.deform_outputs[index], deform_parent)
-            else:
-                deform_parent_mult_matrix_node = Matrix_functions.setLiveMatrixParentNoOffset(deform.name, self.deform_outputs[index], self.deforms[index - 1].name)
-
+            #cleared before constraining, not after: the constraint bakes the
+            #joint's orientation into its offset, so wiping it afterwards would
+            #leave that offset compensating for an orient that is no longer there
             MC.resetJointOrientations(deform.name)
+            self.constrain(deform.name, self.deform_outputs[index], maintain_offset = False)
     
     def onDeformCountSliderChange(self):
         if log.enabled:
