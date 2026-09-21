@@ -13,6 +13,7 @@ from MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_conf import (OPERATIONCOD
                                                                     OPERATIONCODE_CONTROL_NODE)
 from MNRB.ROSE_UI.UI_GraphicComponents.scrollable_dock_widget import ScrollableDockWidget #type: ignore
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+from MNRB.ROSE_UI.rose_ui_utils import findProjectGraphFile #type: ignore
 
 log = ROSE_Log.get("rose.components")
 
@@ -214,9 +215,9 @@ class rose_AttributeEditorTab(QtWidgets.QMainWindow, Serializable):
 
     def onOpenFile(self, file_path):
         if os.path.isdir(file_path):
-            items = os.listdir(file_path)
-            if len(items) >= 1:
-                self.loadFile(os.path.join(file_path, items[0]))
+            graph_file = findProjectGraphFile(file_path)
+            if graph_file is not None:
+                self.loadFile(graph_file)
             else:
                 self.onNewFile()
         elif os.path.isfile(file_path):

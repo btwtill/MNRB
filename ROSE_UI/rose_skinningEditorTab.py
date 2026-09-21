@@ -8,6 +8,7 @@ from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_ClusterList import Skinning
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+from MNRB.ROSE_UI.rose_ui_utils import findProjectGraphFile #type: ignore
 log = ROSE_Log.get("rose.skinning")
 
 class rose_SkinningEditorTab(QWidget, Serializable):
@@ -96,17 +97,25 @@ class rose_SkinningEditorTab(QWidget, Serializable):
     
     def loadFileFromPath(self, file_Path):
         if os.path.isdir(file_Path):
-            graph_items = os.listdir(file_Path)
-
             #check if there is a graph in the current project directory if not create a new one
-            if len(graph_items) >= 1:
-                self.loadFile(os.path.join(file_Path, graph_items[0]))
+            graph_file = findProjectGraphFile(file_Path)
+            if graph_file is not None:
+                self.loadFile(graph_file)
             else:
                 self.onNewFile()
         elif os.path.isfile(file_Path):
             self.loadFile(file_Path)
             
     def saveFileToPath(self, file_name):
+        #a failed load leaves this tab empty while the real data is still on disk,
+        #so writing that empty state out is how a display problem turns into lost
+        #work. Refuse instead, and say why.
+        if getattr(self, "failed_load_path", None) is not None:
+            log.error("Not saving skinning data: '%s' could not be read earlier, so this tab is "
+                      "empty and saving would overwrite the project's real data. Fix or move that "
+                      "file and reopen the project." % self.failed_load_path)
+            return
+
         with open(file_name, "w") as file:
             file.write(json.dumps(self.serialize(), indent=4))
         self.setModified(False)
@@ -140,7 +149,12 @@ class rose_SkinningEditorTab(QWidget, Serializable):
 
         except Exception as e:
                 log.error(f"Error loading file: {e}")
+                #remembered so a later save cannot quietly replace a project whose
+                #data could not be read with the empty tab that failure produced
+                self.failed_load_path = file_Path
                 return False
+
+        self.failed_load_path = None
         return True
 
     def setComponentDeformerDict(self, value):

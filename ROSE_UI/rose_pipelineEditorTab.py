@@ -6,6 +6,7 @@ from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_Widget import PipelineEdito
 from MNRB.ROSE_UI.UI_GraphicComponents.scrollable_dock_widget import ScrollableDockWidget #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+from MNRB.ROSE_UI.rose_ui_utils import findProjectGraphFile #type: ignore
 log = ROSE_Log.get("rose.pipeline")
 
 class rose_PipelineEditorTab(QtWidgets.QMainWindow):
@@ -87,9 +88,9 @@ class rose_PipelineEditorTab(QtWidgets.QMainWindow):
 
     def onOpenFile(self, path):
         if os.path.isdir(path):
-            graph_items = os.listdir(path)
-            if len(graph_items) >= 1:
-                self.loadFile(os.path.join(path, graph_items[0]))
+            graph_file = findProjectGraphFile(path)
+            if graph_file is not None:
+                self.loadFile(graph_file)
             else:
                 self.onNewFile()
         elif os.path.isfile(path):

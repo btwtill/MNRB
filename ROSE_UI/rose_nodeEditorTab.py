@@ -14,6 +14,7 @@ from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+from MNRB.ROSE_UI.rose_ui_utils import findProjectGraphFile #type: ignore
 dragdrop_log = ROSE_Log.get("rose.node_editor.dragdrop")
 log = ROSE_Log.get("rose.node_editor")
 
@@ -131,14 +132,13 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
 
     def onOpenFile(self, path):
         if os.path.isdir(path):
-            graph_items = os.listdir(path)
-
             #check if there is a graph in the current project directory if not create a new one
-            if len(graph_items) >= 1:
-                self.loadFile(os.path.join(path, graph_items[0]))
+            graph_file = findProjectGraphFile(path)
+            if graph_file is not None:
+                self.loadFile(graph_file)
             else:
                 self.onNewFile()
-                
+
         elif os.path.isfile(path):
             self.loadFile(path)
 
