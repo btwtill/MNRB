@@ -2,7 +2,8 @@ import os
 from PySide6 import QtWidgets #type: ignore
 from PySide6.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODevice, QPoint #type: ignore
 from PySide6.QtGui import QPixmap, QIcon, QDrag, QColor #type: ignore
-from MNRB.ROSE_Nodes.node_Editor_conf import NODELIST_MIMETYPE, ROSE_NODES, ROSE_NODE_GROUPS, getClassFromOperationCode #type: ignore
+from MNRB.ROSE_Nodes.node_Editor_conf import (NODELIST_MIMETYPE, ROSE_NODES, #type: ignore
+                                              getNodeCategories, getNodeClassesInCategory)
 from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
@@ -30,25 +31,26 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
         log.debug("DRAGNODELIST:: --addDragListItems:: Registered Items::", ROSE_NODES)
 
-        node_groups = ROSE_NODE_GROUPS
+        #categories come from the registry rather than a central membership list -
+        #a node names its own, so adding one touches only the node
+        for category_id, category_label in getNodeCategories():
+            node_classes = getNodeClassesInCategory(category_id)
+            if not node_classes:
+                continue
 
-        for group_id in node_groups.keys():
-            # add group item
             base_item = QtWidgets.QListWidgetItem(self)
-            group_widget = self.addDragListGroupItem(node_groups[group_id][0], node_groups[group_id][1])
+            group_widget = self.addDragListGroupItem(category_label, [c.type_id for c in node_classes])
             group_widget.adjustSize()
             base_item.setSizeHint(group_widget.sizeHint())
             base_item.setBackground(QColor(50, 50, 50))
 
             self.setItemWidget(base_item, group_widget)
 
-            # add nodes associated with the group
-            for node_id in node_groups[group_id][1]:
-                node = getClassFromOperationCode(node_id)
-                item = self.addDragListItem(node.operation_title, node.icon, node.operation_code)
+            for node_class in sorted(node_classes, key = lambda c: c.operation_title):
+                item = self.addDragListItem(node_class.operation_title, node_class.icon, node_class.type_id)
                 group_widget.addListItem(item)
 
-    def addDragListItem(self, name, icon=None, operation_code=0):
+    def addDragListItem(self, name, icon=None, type_id=""):
         item = QtWidgets.QListWidgetItem(name, self)
 
         icon_path = os.path.join(ICONPATH, icon) #type: ignore
@@ -59,7 +61,7 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsDragEnabled)
 
         item.setData(Qt.ItemDataRole.UserRole, icon_pixmap)
-        item.setData(Qt.ItemDataRole.UserRole + 1, operation_code)
+        item.setData(Qt.ItemDataRole.UserRole + 1, type_id)
 
         return item
 
@@ -74,16 +76,17 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
         try:
             item = self.currentItem()
-            operation_code = item.data(Qt.ItemDataRole.UserRole + 1)
+            type_id = item.data(Qt.ItemDataRole.UserRole + 1)
 
-            dragdrop_log.debug("NODEDRAGLIST:: --startDrag:: Item:: OperationCode:: ", operation_code, " Class:: ", item)
+            dragdrop_log.debug("NODEDRAGLIST:: --startDrag:: Item:: TypeId:: ", type_id, " Class:: ", item)
 
             icon_pixmap = QPixmap(item.data(Qt.ItemDataRole.UserRole))
 
             item_data = QByteArray()
             data_stream = QDataStream(item_data, QIODevice.WriteOnly)
             data_stream << icon_pixmap
-            data_stream.writeInt32(operation_code)
+            #a string, matching the type id - readInt32 on the drop side moved too
+            data_stream.writeQString(type_id)
             data_stream.writeQString(item.text())
 
             mime_data = QMimeData()

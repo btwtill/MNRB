@@ -5,7 +5,9 @@ from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicView import 
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Scene import NodeEditorScene # type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.ROSE_UI.node_Editor_GraphicComponents.node_Editor_QGraphicEdge import NodeEditor_QGraphicEdge #type: ignore
-from MNRB.ROSE_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
+from MNRB.ROSE_Nodes.node_Editor_conf import getClassFromTypeId #type: ignore
+from MNRB.ROSE_UI.node_Editor_Exceptions.node_Editor_RegistrationException import OperationCodeNotRegistered #type: ignore
+from MNRB.ROSE_Nodes.Nodes.unresolved_component import UnresolvedComponentNode #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Edge import EDGE_TYPE_BEZIER, EDGE_TYPE_DIRECT #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import ROSE_NODES #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_DragNodeList import ICONPATH #type: ignore
@@ -63,8 +65,8 @@ class NodeEditorWidget(QtWidgets.QWidget):
         for key in keys:
             node = ROSE_NODES[key]
             icon_path = os.path.join(ICONPATH, node.icon) if node.icon != "" else os.path.join(ICONPATH, "default_node.png")
-            self.node_actions[node.operation_code] = QAction(QIcon(icon_path), node.operation_title)
-            self.node_actions[node.operation_code].setData(node.operation_code)
+            self.node_actions[node.type_id] = QAction(QIcon(icon_path), node.operation_title)
+            self.node_actions[node.type_id].setData(node.type_id)
 
     def centerView(self):
         self.view.centerView()
@@ -76,8 +78,22 @@ class NodeEditorWidget(QtWidgets.QWidget):
         return self.scene.getSelectedItems()
 
     def getNodeClassFromData(self, data):
-        if 'operation_code' not in data: return NodeEditorNode
-        return getClassFromOperationCode(data['operation_code'])
+        #'type_id' is what is written now; 'operation_code' is the pre-type-id key,
+        #whose value getClassFromTypeId maps through the legacy table
+        stored_type = data.get('type_id', data.get('operation_code'))
+        if stored_type is None: return NodeEditorNode
+
+        try:
+            return getClassFromTypeId(stored_type)
+        except OperationCodeNotRegistered:
+            #an unknown type on the palette or a drop is a programming error and
+            #still raises. Here it means the file references a node this install
+            #does not have - a rig-specific pack that was not added - and dropping
+            #the node would let the next save delete it for good
+            log.warning("NODEEDITORWIDGET:: --getNodeClassFromData:: node type '%s' is not "
+                        "registered - loading it as an unresolved placeholder so its data "
+                        "is preserved" % stored_type)
+            return UnresolvedComponentNode
 
     def updatePropertyWindow(self):
         log.debug("NODEEDITORWIDGET:: --updatePropertyWindow:: Updating Property Window!!")
@@ -204,7 +220,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         action = context_menu.exec_(self.mapToGlobal(event.pos()))
 
         if action is not None:
-            new_node = getClassFromOperationCode(action.data())(self.scene)
+            new_node = getClassFromTypeId(action.data())(self.scene)
             scene_position = self.scene.getView().mapToScene(event.pos())
             new_node.setPosition(scene_position.x(), scene_position.y())
 

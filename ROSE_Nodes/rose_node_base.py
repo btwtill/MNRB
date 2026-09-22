@@ -680,7 +680,9 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         return True
 
 class ROSE_Node(NodeEditorNode):
-    operation_code = 0
+    #namespaced "<pack>.<name>" - see node_Editor_conf
+    type_id = "rose.node"
+    category = "rose.base_components"
     operation_title = "ROSE_Node"
     icon = None
     Node_Properties_Class = ROSE_NodeProperties
@@ -1138,7 +1140,10 @@ class ROSE_Node(NodeEditorNode):
 
     def serialize(self):
         result_data = super().serialize()
-        result_data['operation_code'] = self.__class__.operation_code
+        result_data['type_id'] = self.__class__.type_id
+        #still written so a graph saved now stays readable by a build from before
+        #type ids landed; drop it once nothing needs to roll back
+        result_data['operation_code'] = self.__class__.type_id
 
         guides = []
         connectors = []

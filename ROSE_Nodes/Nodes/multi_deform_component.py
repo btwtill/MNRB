@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_Node #type: ignore
 from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_colors.colors import ROSEColor #type: ignore
-from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_MULTIDEFORMCOMPONENT, registerNode #type: ignore
+from MNRB.ROSE_Nodes.node_Editor_conf import TYPEID_MULTIDEFORMCOMPONENT, registerNode #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_NodeProperties #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
@@ -68,9 +68,10 @@ class ROSE_Node_MultiDeformComponent_Properties(ROSE_NodeProperties):
         self.is_silent = False
         return True
 
-@registerNode(OPERATIONCODE_MULTIDEFORMCOMPONENT)
+@registerNode(TYPEID_MULTIDEFORMCOMPONENT)
 class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
-    operation_code = OPERATIONCODE_MULTIDEFORMCOMPONENT
+    type_id = TYPEID_MULTIDEFORMCOMPONENT
+    category = "rose.base_components"
     operation_title = "Multi_Def"
     icon = ""
 

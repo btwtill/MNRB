@@ -1,4 +1,4 @@
-from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_SINGLEDEFORMCOMPONENT, registerNode #type: ignore
+from MNRB.ROSE_Nodes.node_Editor_conf import TYPEID_SINGLEDEFORMCOMPONENT, registerNode #type: ignore
 from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_NodeProperties #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
@@ -16,9 +16,10 @@ guide_log = ROSE_Log.get("rose.components.guides")
 class ROSE_Node_SingleDeformComponent_Properties(ROSE_NodeProperties): pass
 
 
-@registerNode(OPERATIONCODE_SINGLEDEFORMCOMPONENT)
+@registerNode(TYPEID_SINGLEDEFORMCOMPONENT)
 class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
-    operation_code = OPERATIONCODE_SINGLEDEFORMCOMPONENT
+    type_id = TYPEID_SINGLEDEFORMCOMPONENT
+    category = "rose.base_components"
     operation_title = "Single_Def"
     icon = ""
 

@@ -179,5 +179,20 @@ def reloadROSEModules():
         for module_name, error in failed_modules:
             log.warning("   %s -> %s: %s" % (module_name, type(error).__name__, error))
 
-    log.debug("Reloaded", reloaded_count, "ROSE modules")
+    #packs live outside MNRB, so the walk above never sees them - without this a
+    #pack's node classes would keep running last session's code, which is the
+    #hand-maintained-list trap re-created in a new place. After the core reload,
+    #because pack modules subclass what it just rebuilt.
+    pack_count = 0
+    try:
+        from MNRB.ROSE_Packs.pack_loader import loadAllPacks #type: ignore
+        loaded_packs, failed_packs = loadAllPacks()
+        pack_count = len(loaded_packs)
+        if failed_packs:
+            log.warning("ROSE reload: %d node pack(s) failed to load" % len(failed_packs))
+    except Exception as error:
+        log.warning("ROSE reload: node packs could not be loaded: %s: %s"
+                    % (type(error).__name__, error))
+
+    log.debug("Reloaded", reloaded_count, "ROSE modules and", pack_count, "pack(s)")
     return reloaded_count, failed_modules

@@ -5,10 +5,11 @@ from PySide6.QtCore import QIODevice, QDataStream, Qt, QTimer #type: ignore
 from PySide6.QtGui  import QPixmap #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Widget import NodeEditorWidget # type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_DragNodeList import NodeEditorDragNodeList #type: ignore
+from MNRB.ROSE_UI.pack_UI.pack_dialogs import PackManagerDialog, NewComponentTypeDialog #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.scrollable_dock_widget import ScrollableDockWidget #type: ignore
 from MNRB.ROSE_UI.node_Editor_Exceptions.node_Editor_FileException import InvalidFile #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import NODELIST_MIMETYPE #type: ignore
-from MNRB.ROSE_Nodes.node_Editor_conf import getClassFromOperationCode #type: ignore
+from MNRB.ROSE_Nodes.node_Editor_conf import getClassFromTypeId #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.ROSE_cmds_wrapper.matrix_functions import Matrix_functions #type: ignore
@@ -70,7 +71,27 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
         # Left dock widget
         self.left_dock = QtWidgets.QDockWidget("Node List", self)
         self.left_dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        self.left_dock.setWidget(self.node_list_widget)
+
+        #pack management sits here rather than in Preferences: adding a pack or
+        #scaffolding a component type is something done while authoring, next to
+        #the list those node types appear in
+        node_list_contents = QtWidgets.QWidget()
+        node_list_layout = QtWidgets.QVBoxLayout(node_list_contents)
+        node_list_layout.setContentsMargins(0, 0, 0, 0)
+        node_list_layout.setSpacing(2)
+
+        pack_button_row = QtWidgets.QHBoxLayout()
+        self.node_packs_button = QtWidgets.QPushButton("Node Packs...")
+        self.node_packs_button.clicked.connect(self.onManageNodePacks)
+        self.new_component_button = QtWidgets.QPushButton("New Component Type...")
+        self.new_component_button.clicked.connect(self.onNewComponentType)
+        pack_button_row.addWidget(self.node_packs_button)
+        pack_button_row.addWidget(self.new_component_button)
+
+        node_list_layout.addLayout(pack_button_row)
+        node_list_layout.addWidget(self.node_list_widget)
+
+        self.left_dock.setWidget(node_list_contents)
 
         # Add the left dock widget to the secondary main window
         self.addDockWidget(Qt.LeftDockWidgetArea, self.left_dock)
@@ -267,6 +288,21 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
                 for guide_index, guide in enumerate(new_node.guides):
                     guide.setPosition(mirrored_guide_Positions[index][guide_index])
  
+    def refreshNodeList(self):
+        """Rebuild the palette after the registry changed."""
+        self.node_list_widget.clear()
+        self.node_list_widget.addDragListItems()
+
+    def onManageNodePacks(self):
+        dialog = PackManagerDialog(self)
+        dialog.exec()
+        self.refreshNodeList()
+
+    def onNewComponentType(self):
+        dialog = NewComponentTypeDialog(self)
+        if dialog.exec() and dialog.created_type_id:
+            self.refreshNodeList()
+
     def onDrop(self, event):
         dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Drop it like its hot!:: ", event)
         if event.mimeData().hasFormat(NODELIST_MIMETYPE):
@@ -274,19 +310,19 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
             data_stream = QDataStream(event_data, QIODevice.ReadOnly)
             pixmap = QPixmap()
             data_stream >> pixmap
-            operation_code = data_stream.readInt32()
+            type_id = data_stream.readQString()
             text = data_stream.readQString()
 
-            dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Got Data:: OperationCode:: ", operation_code, " and Name:: ", text)
+            dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Got Data:: TypeId:: ", type_id, " and Name:: ", text)
 
             mouse_position = event.pos()
             scene_position = self.central_widget.scene.getView().mapToScene(mouse_position)
             
             dragdrop_log.debug("NODEEDITORTAB:: --onDrop:: Event ScenePosition:: ", scene_position)
 
-            dragdrop_log.debug("NODEEDITORTAB:: --onDrop: Class about to be dropped into the scene:: ", getClassFromOperationCode(operation_code))
+            dragdrop_log.debug("NODEEDITORTAB:: --onDrop: Class about to be dropped into the scene:: ", getClassFromTypeId(type_id))
 
-            new_node = getClassFromOperationCode(operation_code)(self.central_widget.scene)
+            new_node = getClassFromTypeId(type_id)(self.central_widget.scene)
             new_node.setPosition(scene_position.x(), scene_position.y())
 
             dragdrop_log.debug("NODEEDITORTAB:: --onDrop: New Node:: ",new_node)

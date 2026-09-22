@@ -5,7 +5,7 @@ from MNRB.ROSE_Nodes.rose_node_base import ROSE_Node #type: ignore
 from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_colors.colors import ROSEColor #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
-from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_SIMPLEIKCOMPONENT, registerNode #type: ignore
+from MNRB.ROSE_Nodes.node_Editor_conf import TYPEID_SIMPLEIKCOMPONENT, registerNode #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_NodeProperties #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Socket import NodeEditor_Socket #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
@@ -122,9 +122,10 @@ class ROSE_Node_SimpleIKComponent_Properties(ROSE_NodeProperties):
 
         return True
 
-@registerNode(OPERATIONCODE_SIMPLEIKCOMPONENT)
+@registerNode(TYPEID_SIMPLEIKCOMPONENT)
 class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
-    operation_code = OPERATIONCODE_SIMPLEIKCOMPONENT
+    type_id = TYPEID_SIMPLEIKCOMPONENT
+    category = "rose.simple_components"
     operation_title = "Simple_IK"
     icon = ""
 

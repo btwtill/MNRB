@@ -1,4 +1,4 @@
-from MNRB.ROSE_Nodes.node_Editor_conf import OPERATIONCODE_BASECOMPONENT, registerNode #type: ignore
+from MNRB.ROSE_Nodes.node_Editor_conf import TYPEID_BASECOMPONENT, registerNode #type: ignore
 from MNRB.ROSE_Constraints.constraint_types import ConstraintType #type: ignore
 from MNRB.ROSE_Nodes.rose_node_base import ROSE_NodeProperties #type: ignore
 from MNRB.ROSE_Nodes.rose_node_template import ROSE_NodeTemplate #type: ignore
@@ -24,9 +24,10 @@ class ROSE_Node_BaseComponent_Properties(ROSE_NodeProperties):
         result = super().deserialize(data, hashmap, restore_id)
         return True
 
-@registerNode(OPERATIONCODE_BASECOMPONENT)
+@registerNode(TYPEID_BASECOMPONENT)
 class ROSE_Node_BaseComponent(ROSE_NodeTemplate):
-    operation_code = OPERATIONCODE_BASECOMPONENT
+    type_id = TYPEID_BASECOMPONENT
+    category = "rose.base_components"
     operation_title = "Base"
     icon = ""
 
