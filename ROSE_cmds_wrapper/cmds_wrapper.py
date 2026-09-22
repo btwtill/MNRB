@@ -496,6 +496,63 @@ class MC:
     def createParentConstraint(driver, driven, maintain_offset = True) -> str:
         return cmds.parentConstraint(driver, driven, maintainOffset=maintain_offset)[0]
 
+# Plugin Functions
+
+    @staticmethod
+    def isPluginLoaded(plugin_name) -> bool:
+        try:
+            return bool(cmds.pluginInfo(plugin_name, query = True, loaded = True))
+        except Exception:
+            return False
+
+    @staticmethod
+    def loadPluginIfAvailable(plugin_name) -> bool:
+        if MC.isPluginLoaded(plugin_name):
+            return True
+        try:
+            cmds.loadPlugin(plugin_name, quiet = True)
+            return MC.isPluginLoaded(plugin_name)
+        except Exception:
+            return False
+
+    @staticmethod
+    def getPluginNodeTypeMap() -> dict:
+        """node type -> the plugin providing it, for every loaded plugin."""
+        provided = {}
+
+        for plugin_name in cmds.pluginInfo(query = True, listPlugins = True) or []:
+            try:
+                node_types = cmds.pluginInfo(plugin_name, query = True, dependNode = True) or []
+            except Exception:
+                node_types = []
+
+            for node_type in node_types:
+                provided[node_type] = plugin_name
+
+        return provided
+
+    @staticmethod
+    def getRequiredPluginsForNodes(nodes) -> list:
+        """Which plugins these nodes need in order to evaluate.
+
+        Determined by inspecting the node types actually present rather than by
+        what a component declared it might build - a component can declare a
+        plugin and then not use it on a given rig, and only what ends up in the
+        exported hierarchy matters to whoever opens it.
+        """
+        provided = MC.getPluginNodeTypeMap()
+        required = set()
+
+        for node in nodes or []:
+            try:
+                node_type = cmds.nodeType(node)
+            except Exception:
+                continue
+            if node_type in provided:
+                required.add(provided[node_type])
+
+        return sorted(required)
+
 # Maya Org Functios
     @staticmethod
     def importBinaryFile(path, namespace = "import"):

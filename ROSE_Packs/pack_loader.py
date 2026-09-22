@@ -22,6 +22,7 @@ from PySide6.QtCore import QSettings #type: ignore
 
 from MNRB.ROSE_Nodes.node_Editor_conf import (ROSE_NODES, ROSE_NODE_CATEGORIES, #type: ignore
                                               registerNodeCategory)
+from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 
 log = ROSE_Log.get("rose.packs")
@@ -174,8 +175,14 @@ def getPackForTypeId(type_id):
     prefix = str(type_id).split(".")[0]
     return LOADED_PACKS.get(prefix)
 
-def describeRequirements(type_ids):
-    """Which packs and plugins a set of node types needs, and what is missing."""
+def describeAuthoringRequirements(type_ids):
+    """What is needed to OPEN and BUILD a graph made of these node types.
+
+    Node packs are an authoring dependency only: they supply the component
+    classes that build the rig, and nothing of them survives into the published
+    file. An animator opening the built rig needs none of this - see
+    describeRuntimePlugins for what they do need.
+    """
     required_packs = {}
     missing_packs = set()
 
@@ -188,9 +195,24 @@ def describeRequirements(type_ids):
         else:
             missing_packs.add(prefix)
 
-    required_plugins = sorted({plugin for pack in required_packs.values()
-                               for plugin in pack.get("requires_plugins", [])})
+    #what the packs say they may create. A declaration, so it is the right answer
+    #for "can this machine build the rig" and the wrong one for "what does the
+    #published rig need" - a component can declare a plugin and not use it here.
+    build_plugins = sorted({plugin for pack in required_packs.values()
+                            for plugin in pack.get("requires_plugins", [])})
 
     return {"packs": required_packs,
             "missing_packs": sorted(missing_packs),
-            "plugins": required_plugins}
+            "build_plugins": build_plugins,
+            "missing_build_plugins": [plugin for plugin in build_plugins
+                                      if not MC.isPluginLoaded(plugin)]}
+
+def describeRuntimePlugins(nodes):
+    """What an animator needs installed to open the BUILT rig.
+
+    Inspected from the nodes that are actually in the hierarchy being published,
+    not declared, because only what was really created matters to whoever opens
+    the file. Maya records these as `requires` lines itself, which makes the rig
+    fail loudly without them - this is so the publish can ship them instead.
+    """
+    return MC.getRequiredPluginsForNodes(nodes)

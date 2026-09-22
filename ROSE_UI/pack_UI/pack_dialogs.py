@@ -103,6 +103,22 @@ def toModuleName(name):
     return (cleaned or "new_component") + "_component"
 
 
+def setPathPreview(label, summary, full_path):
+    """Short, readable preview text with the full path on hover.
+
+    An absolute path in a form row wraps to several lines and then gets clipped,
+    because a word-wrapped QLabel does not report the height it actually needs to
+    the form layout. Keeping the visible text to one or two short lines avoids the
+    problem rather than fighting the layout for space.
+    """
+    label.setText(summary)
+    label.setToolTip(full_path)
+
+    window = label.window()
+    if window is not None:
+        window.adjustSize()
+
+
 class NewPackDialog(QtWidgets.QDialog):
     """Create a pack folder and its manifest, so there is something to add nodes to."""
 
@@ -148,6 +164,7 @@ class NewPackDialog(QtWidgets.QDialog):
 
         self.preview_label = QtWidgets.QLabel("")
         self.preview_label.setWordWrap(True)
+        self.preview_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         layout.addRow("Creates:", self.preview_label)
 
         self.label_edit.textChanged.connect(self.onLabelChanged)
@@ -179,7 +196,14 @@ class NewPackDialog(QtWidgets.QDialog):
 
     def updatePreview(self):
         folder = self.packFolder()
-        self.preview_label.setText(os.path.join(folder, pack_loader.MANIFEST_NAME) if folder else "")
+
+        if not folder:
+            setPathPreview(self.preview_label, "", "")
+            return
+
+        setPathPreview(self.preview_label,
+                       os.path.join(os.path.basename(folder), pack_loader.MANIFEST_NAME),
+                       os.path.join(folder, pack_loader.MANIFEST_NAME))
 
     def onCreate(self):
         import json
@@ -360,6 +384,7 @@ class NewComponentTypeDialog(QtWidgets.QDialog):
 
     def initUI(self):
         layout = QtWidgets.QFormLayout(self)
+        layout.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
 
         self.pack_combo = QtWidgets.QComboBox()
         for pack_id, pack in sorted(pack_loader.LOADED_PACKS.items()):
@@ -378,6 +403,7 @@ class NewComponentTypeDialog(QtWidgets.QDialog):
 
         self.preview_label = QtWidgets.QLabel("")
         self.preview_label.setWordWrap(True)
+        self.preview_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         layout.addRow("Creates:", self.preview_label)
 
         self.name_edit.textChanged.connect(self.updatePreview)
@@ -438,9 +464,13 @@ class NewComponentTypeDialog(QtWidgets.QDialog):
             return
 
         pack = pack_loader.LOADED_PACKS.get(pack_id, {})
-        self.preview_label.setText("%s\ntype id: %s.%s" % (
-            os.path.join(pack.get("path", "?"), toModuleName(name) + ".py"),
-            pack_id, re.sub(r"[^0-9a-zA-Z]+", "_", name).strip("_").lower()))
+        module_file = toModuleName(name) + ".py"
+        pack_path = pack.get("path", "")
+        type_id = "%s.%s" % (pack_id, re.sub(r"[^0-9a-zA-Z]+", "_", name).strip("_").lower())
+
+        setPathPreview(self.preview_label,
+                       "%s  in  %s\ntype id:  %s" % (module_file, os.path.basename(pack_path) or "?", type_id),
+                       os.path.join(pack_path, module_file))
 
     def onCreate(self):
         import json
