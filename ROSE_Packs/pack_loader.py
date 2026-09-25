@@ -169,6 +169,55 @@ def loadAllPacks():
 
     return dict(LOADED_PACKS), dict(FAILED_PACKS)
 
+def getPackNodeEntries(pack_path):
+    """The node entries a pack's manifest declares, as written."""
+    try:
+        return readManifest(pack_path).get("nodes", [])
+    except Exception:
+        return []
+
+def removeNodeTypeFromPack(pack_path, type_id, delete_module_file = False):
+    """Drop one node type from a pack.
+
+    Removes it from the manifest and unregisters it, so it stops appearing in the
+    palette. The module file is left alone unless explicitly asked for - it is the
+    user's own code, and an orphan module is harmless because the loader only
+    imports what the manifest lists.
+
+    Returns the module path, so a caller can say where the file was left.
+    """
+    manifest_path = os.path.join(pack_path, MANIFEST_NAME)
+
+    with open(manifest_path, "r") as manifest_file:
+        manifest = json.load(manifest_file)
+
+    remaining = []
+    removed_entry = None
+    for entry in manifest.get("nodes", []):
+        if entry.get("type_id") == type_id:
+            removed_entry = entry
+        else:
+            remaining.append(entry)
+
+    if removed_entry is None:
+        raise ValueError("'%s' is not declared in %s" % (type_id, manifest_path))
+
+    manifest["nodes"] = remaining
+    with open(manifest_path, "w") as manifest_file:
+        json.dump(manifest, manifest_file, indent=4)
+
+    module_path = os.path.join(pack_path, removed_entry.get("module", "") + ".py")
+
+    if delete_module_file and os.path.isfile(module_path):
+        os.remove(module_path)
+
+    #reloading drops the whole pack and re-registers what the manifest still lists,
+    #which is what actually takes the type out of ROSE_NODES
+    loadPack(pack_path)
+
+    log.debug("PACKS:: --removeNodeTypeFromPack:: removed '%s' from '%s'" % (type_id, pack_path))
+    return module_path
+
 # What a graph depends on
 
 def getPackForTypeId(type_id):

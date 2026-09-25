@@ -1,7 +1,13 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem, QPushButton #type: ignore
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem, QPushButton, QCheckBox, QFrame, QDoubleSpinBox #type: ignore
 from PySide6.QtCore import Qt #type: ignore
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 from MNRB.ROSE_Debug.rose_log_channels import ROSE_LOG_CHANNELS #type: ignore
+from MNRB.ROSE_Constraints.constraint_preferences import (isDeformConnectionNative, #type: ignore
+                                                          setDeformConnectionNative)
+from MNRB.ROSE_Guides.guide_preferences import (getConnectorThicknessMultiplier, #type: ignore
+                                                setConnectorThicknessMultiplier,
+                                                getConnectorThicknessOverride,
+                                                setConnectorThicknessOverride)
 
 CHANNEL_ROLE = Qt.ItemDataRole.UserRole
 
@@ -37,6 +43,57 @@ class ROSEPreferences(QWidget):
         self.channel_tree.setHeaderHidden(True)
         self.channel_tree.itemChanged.connect(self.onItemChanged)
         self.layout.addWidget(self.channel_tree)
+
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        self.layout.addWidget(separator)
+
+        self.layout.addWidget(QLabel("Rig Building"))
+
+        self.native_deform_checkbox = QCheckBox("Drive deform joints with native Maya constraints")
+        self.native_deform_checkbox.setChecked(isDeformConnectionNative())
+        self.native_deform_checkbox.stateChanged.connect(self.onNativeDeformChanged)
+        self.layout.addWidget(self.native_deform_checkbox)
+
+        native_deform_hint = QLabel(
+            "Overrides every component's own constraint type, but only for the connections "
+            "that drive deform joints. A matrix network is cheaper and keeps the channel box "
+            "clean; native constraints are what survives baking the skeleton out to another "
+            "application. Takes effect on the next build.")
+        native_deform_hint.setWordWrap(True)
+        self.layout.addWidget(native_deform_hint)
+
+        self.layout.addWidget(QLabel("Guide Connectors"))
+
+        multiplier_row = QHBoxLayout()
+        multiplier_row.addWidget(QLabel("Thickness x distance:"))
+        self.connector_multiplier_spinbox = QDoubleSpinBox()
+        self.connector_multiplier_spinbox.setDecimals(4)
+        self.connector_multiplier_spinbox.setMinimum(0.0001)
+        self.connector_multiplier_spinbox.setMaximum(10.0)
+        self.connector_multiplier_spinbox.setSingleStep(0.01)
+        self.connector_multiplier_spinbox.setValue(getConnectorThicknessMultiplier())
+        self.connector_multiplier_spinbox.valueChanged.connect(setConnectorThicknessMultiplier)
+        multiplier_row.addWidget(self.connector_multiplier_spinbox)
+        self.layout.addLayout(multiplier_row)
+
+        override_row = QHBoxLayout()
+        override_row.addWidget(QLabel("Fixed thickness (0 = off):"))
+        self.connector_override_spinbox = QDoubleSpinBox()
+        self.connector_override_spinbox.setDecimals(4)
+        self.connector_override_spinbox.setMinimum(0.0)
+        self.connector_override_spinbox.setMaximum(1000.0)
+        self.connector_override_spinbox.setSingleStep(0.1)
+        self.connector_override_spinbox.setValue(getConnectorThicknessOverride())
+        self.connector_override_spinbox.valueChanged.connect(setConnectorThicknessOverride)
+        override_row.addWidget(self.connector_override_spinbox)
+        self.layout.addLayout(override_row)
+
+        connector_hint = QLabel("Connector thickness is a fraction of the distance between the two "
+                                "guides it joins. Set a fixed thickness to ignore that distance "
+                                "entirely. Takes effect the next time guides are built.")
+        connector_hint.setWordWrap(True)
+        self.layout.addWidget(connector_hint)
 
         button_row = QHBoxLayout()
 
@@ -92,6 +149,9 @@ class ROSEPreferences(QWidget):
         self.is_applying = False
 
         self.refreshParentCheckStates()
+
+    def onNativeDeformChanged(self, state):
+        setDeformConnectionNative(self.native_deform_checkbox.isChecked())
 
     def onItemChanged(self, item, column):
         if self.is_applying:

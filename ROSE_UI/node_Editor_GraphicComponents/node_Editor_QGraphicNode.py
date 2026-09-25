@@ -253,6 +253,13 @@ class NodeEditor_QGraphicNode(QtWidgets.QGraphicsItem):
                 socket.setPosition()
             self.node.updateConnectedEdges()
 
+            #labels are placed against the sockets, so this has to run after the
+            #sockets have their final positions for this size/display mode
+            if self.content is not None:
+                self.content.alignLabelsToSockets(visible_pairs, self.title_height,
+                                                  self._edge_padding,
+                                                  self.width - 2 * self._edge_padding)
+
         #the two merge-point dots only ever show in collapsed mode
         is_collapsed = self.display_mode == self.DISPLAY_MODE_COLLAPSED
         self.merged_input_socket.setVisible(is_collapsed)

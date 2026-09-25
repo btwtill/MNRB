@@ -27,6 +27,12 @@ class rose_Editor(QtWidgets.QMainWindow):
         #restored first, so anything logged during startup already honours it
         self.loadLogChannelSettings()
 
+        #before initUI(), because the Node Editor tab builds its palette from the
+        #registry as it constructs. Configured packs were only ever loaded by the
+        #shelf Reload button, so opening the editor on a fresh Maya remembered the
+        #pack path but never registered its node types - the pack looked lost
+        self.loadNodePacks()
+
         self.project_settings_path = os.path.join(os.path.dirname(__file__), "project_settings.json")
         self.project_settings = self.loadProjectSettings()
 
@@ -611,6 +617,22 @@ class rose_Editor(QtWidgets.QMainWindow):
     def onOpenPreferences(self):
         self.preference_widget = ROSEPreferences(on_channels_changed = self.saveLogChannelSettings)
         self.preference_widget.show()
+
+    def loadNodePacks(self):
+        """Register every configured node pack. Safe to call more than once."""
+        try:
+            from MNRB.ROSE_Packs.pack_loader import loadAllPacks #type: ignore
+            loaded_packs, failed_packs = loadAllPacks()
+        except Exception as error:
+            log.warning("ROSE_EDITOR:: --loadNodePacks:: could not load node packs: %s: %s"
+                        % (type(error).__name__, error))
+            return
+
+        if failed_packs:
+            for pack_path, error in failed_packs.items():
+                log.warning("ROSE_EDITOR:: --loadNodePacks:: pack at '%s' failed: %s" % (pack_path, error))
+
+        log.debug("ROSE_EDITOR:: --loadNodePacks:: %d pack(s) loaded" % len(loaded_packs))
 
     def loadLogChannelSettings(self):
         stored_channels = QSettings("tlpf", "ROSE").value('log_channels', [])

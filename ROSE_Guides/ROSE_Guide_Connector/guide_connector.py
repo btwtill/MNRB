@@ -5,6 +5,8 @@ from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
+from MNRB.ROSE_Guides.guide_preferences import (getConnectorThicknessMultiplier, #type: ignore
+                                                getConnectorThicknessOverride)
 log = ROSE_Log.get("rose.components.guides")
 
 class Guide_Connector(Serializable):
@@ -123,8 +125,19 @@ class Guide_Connector(Serializable):
 
         adjust_distance_node = MC.createMultiplyDivideNode(self.name + "_adjustDist")
         self.nodes.append(adjust_distance_node)
-        MC.connectAttribute(connection_distance_node, "distance", adjust_distance_node, "input1X")
-        MC.setAttribute(adjust_distance_node, "input2X", 0.1)
+
+        #Thickness used to be a hardcoded tenth of the distance between the two
+        #guides, which reads as a slab when they are far apart and vanishes when
+        #they are close. An override pins it to a fixed width instead - in which
+        #case the distance is left unconnected, since it no longer has a say.
+        thickness_override = getConnectorThicknessOverride()
+
+        if thickness_override > 0.0:
+            MC.setAttribute(adjust_distance_node, "input1X", thickness_override)
+            MC.setAttribute(adjust_distance_node, "input2X", 1.0)
+        else:
+            MC.connectAttribute(connection_distance_node, "distance", adjust_distance_node, "input1X")
+            MC.setAttribute(adjust_distance_node, "input2X", getConnectorThicknessMultiplier())
 
         adjust_distance_negate_node = MC.createMultiplyDivideNode(self.name + "_adjustDist_Neg")
         self.nodes.append(adjust_distance_negate_node)

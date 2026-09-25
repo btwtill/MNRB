@@ -198,7 +198,7 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
             #joint's orientation into its offset, so wiping it afterwards would
             #leave that offset compensating for an orient that is no longer there
             MC.resetJointOrientations(deform.name)
-            self.constrain(deform.name, self.deform_outputs[index], maintain_offset = False)
+            self.constrainDeform(deform.name, self.deform_outputs[index], maintain_offset = False)
     
     def onDeformCountSliderChange(self):
         if log.enabled:

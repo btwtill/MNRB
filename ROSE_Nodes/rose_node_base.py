@@ -20,6 +20,7 @@ from MNRB.ROSE_Guides.ROSE_Guide_Connector.guide_connector import Guide_Connecto
 from MNRB.ROSE_Attributes.attribute import attribute #type: ignore
 from MNRB.ROSE_Attributes.attribute_types import AttributeType #type: ignore
 from MNRB.ROSE_Constraints.constraint import constraint #type: ignore
+from MNRB.ROSE_Constraints.constraint_preferences import getDeformConstraintType #type: ignore
 from MNRB.ROSE_Constraints.constraint_types import (ConstraintType, ConstraintKind, #type: ignore
                                                     mapNameToConstraintType)
 
@@ -30,6 +31,9 @@ serialize_log = ROSE_Log.get("rose.serialize")
 validation_log = ROSE_Log.get("rose.components.validation")
 
 class ROSE_NodeProperties(NodeEditorNodeProperties):
+
+    DEFAULT_NEEDS_REBUILD_MESSAGE = "Settings changed - rebuild this component to apply them."
+
     def __init__(self, node):
         super().__init__(node)
 
@@ -241,7 +245,9 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
 
         self.layout.addLayout(constraint_type_layout)
 
-        self.needs_rebuild_label = QLabel("Constraint type changed - rebuild this component to apply it.")
+        #text is set per reason by setNeedsRebuild - it started out hardcoded to
+        #the constraint type, which then lied about every other cause
+        self.needs_rebuild_label = QLabel(self.DEFAULT_NEEDS_REBUILD_MESSAGE)
         self.needs_rebuild_label.setWordWrap(True)
         self.needs_rebuild_label.setStyleSheet("color: #FFE0A030;")
         self.needs_rebuild_label.setVisible(False)
@@ -461,13 +467,25 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         #deliberately not rebuilt here: swapping the technique means tearing down
         #and remaking the network on a rig that is probably mid-pose. The node is
         #flagged instead and the user rebuilds when ready.
-        self.setNeedsRebuild(True)
+        self.setNeedsRebuild(True, "Constraint type changed")
         self.setHasBeenModified()
 
-    def setNeedsRebuild(self, value):
+    def setNeedsRebuild(self, value, reason = None):
+        """Flag that something changed which only a rebuild can apply.
+
+        `reason` is the part of the message before the instruction, e.g.
+        "Constraint type changed". Callers should pass one: the label used to be
+        hardcoded to the constraint type and so misreported every other cause.
+        """
         self.needs_rebuild = value
+
         if hasattr(self, "needs_rebuild_label"):
+            if value:
+                message = ("%s - rebuild this component to apply it." % reason) if reason \
+                    else self.DEFAULT_NEEDS_REBUILD_MESSAGE
+                self.needs_rebuild_label.setText(message)
             self.needs_rebuild_label.setVisible(value)
+
         if self.node is not None and self.node.grNode is not None:
             self.node.grNode.update()
 
@@ -706,6 +724,7 @@ class ROSE_Node(NodeEditorNode):
         #network first. The matrix form is made of DG nodes, which deleting the
         #component's transform hierarchy does not take with it.
         self.constraints = []
+        self.built_expressions = []
 
         #attributes this component deliberately exposes - see initAttributes().
         #Declared here at construction rather than at build time, so the Attribute
@@ -758,10 +777,106 @@ class ROSE_Node(NodeEditorNode):
 
         return new_constraint
 
+    def createExpression(self, name, expression_string, attached_object = None):
+        """Create an expression and track it, so a rebuild clears it.
+
+        The tracking is the point. An expression is a DG node and deleting the
+        component's transform hierarchy does not take it with it - the leftover
+        keeps evaluating against objects that no longer exist, which reads as
+        "No object matches name" every frame, while the rebuild quietly adds
+        another one beside it.
+        """
+        expression_node = MC.createExpression(name, expression_string, attached_object)
+        self.built_expressions.append(expression_node)
+        return expression_node
+
+    def removeExpressions(self):
+        for expression_node in self.built_expressions:
+            if MC.objectExists(expression_node):
+                MC.deleteNode(expression_node)
+        self.built_expressions = []
+
+    def constrainDeform(self, child, parent, kind = ConstraintKind.PARENT,
+                        constraint_type = None, maintain_offset = True):
+        """Constrain a deform joint, honouring the global deform-connection switch.
+
+        Components should use this rather than constrain() for anything that
+        drives a deform joint. It is the one place the "native constraints for
+        deform connections" preference takes effect, which is what makes a built
+        skeleton safe to bake out to another application.
+        """
+        resolved_type = constraint_type
+        if resolved_type is None:
+            resolved_type = getDeformConstraintType()
+
+        return self.constrain(child, parent, kind, resolved_type, maintain_offset)
+
     def removeConstraints(self):
         for existing_constraint in self.constraints:
             existing_constraint.remove()
         self.constraints = []
+
+# Component-to-component values
+#
+#A component sometimes needs a *number* from the component upstream of it, not a
+#transform to be parented or constrained to - the wheel takes its roll angle from
+#the heading, for instance. The two socket types both resolve to an object name
+#and are then parented or constrained, so there is nowhere in the graph for a
+#scalar to travel.
+#
+#The convention, chosen over adding a socket type: the value rides as an
+#attribute on the srt output transform the consumer already resolves. That makes
+#the dependency invisible in the graph and visible only in code, so these two
+#helpers exist to keep the naming in one place rather than re-derived, slightly
+#differently, in every component that uses it.
+
+    def addOutputValue(self, output_transform, value_name, default_value = 0.0,
+                       minimum = None, maximum = None, keyable = False):
+        """Publish a value on one of this component's output transforms."""
+        if not MC.objectExists(output_transform):
+            log.warning("%s:: --addOutputValue:: output '%s' does not exist"
+                        % (self.__class__.__name__, output_transform))
+            return None
+
+        if not MC.attributeExists(output_transform, value_name):
+            MC.addFloatAttribute(output_transform, value_name, default_value,
+                                 minimum, maximum, keyable)
+
+        return "%s.%s" % (output_transform, value_name)
+
+    def getInputValueSource(self, index, value_name):
+        """(node, attribute) for a value published by the component at this input.
+
+        Returns (None, None) when the input is unconnected or the upstream
+        component did not publish that value - a component reading an optional
+        value can carry on, one that needs it should say so and bail.
+        """
+        connection = self.getInputConnectionValueAt(index)
+        if connection is None:
+            return None, None
+
+        source_node = connection + ROSE_Names.output_suffix
+
+        if not MC.objectExists(source_node):
+            log.warning("%s:: --getInputValueSource:: '%s' does not exist"
+                        % (self.__class__.__name__, source_node))
+            return None, None
+
+        if not MC.attributeExists(source_node, value_name):
+            log.warning("%s:: --getInputValueSource:: '%s' publishes no value '%s'"
+                        % (self.__class__.__name__, source_node, value_name))
+            return None, None
+
+        return source_node, value_name
+
+    def connectInputValue(self, index, value_name, target_node, target_attribute, force = True):
+        """Wire a value published upstream straight into a plug on this component."""
+        source_node, source_attribute = self.getInputValueSource(index, value_name)
+        if source_node is None:
+            return False
+
+        MC.connectAttribute(source_node, source_attribute, target_node, target_attribute, force = force)
+        return True
 
     def exposeAttribute(self, name, attribute_type = AttributeType.FLOAT, default_value = 0,
                         minimum = None, maximum = None, options = None, keyable = True):
@@ -873,6 +988,7 @@ class ROSE_Node(NodeEditorNode):
         #the matrix network's DG nodes are not under the hierarchy about to be
         #deleted, so they have to go explicitly or they pile up every rebuild
         self.removeConstraints()
+        self.removeExpressions()
 
         if self.component_hierarchy is not None:
             if MC.objectExists(self.component_hierarchy):
@@ -1008,11 +1124,28 @@ class ROSE_Node(NodeEditorNode):
             deform.updateName(False)
 
     def reconstructGuides(self):
-        if self.reconstruct_guides:
-            log.debug("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
-            if self.guide_positions != []:
-                for index, guide in enumerate(self.guides):
-                    guide.setPosition(self.guide_positions[index])
+        if not self.reconstruct_guides:
+            return
+
+        log.debug("%s:: --reconstructGuides:: Guide Positions to be reconstructed::" % self.__class__.__name__, self.guide_positions)
+
+        if self.guide_positions == []:
+            return
+
+        #A component's guide count is part of its code, and code changes - a
+        #component that grew from three guides to five meets saved positions for
+        #only three. The extras keep the position their guideBuild() just placed
+        #them at, which is the sensible default for a guide the file has never
+        #seen. Indexing blindly raised IndexError and took the whole build with it.
+        if len(self.guide_positions) != len(self.guides):
+            log.warning("%s:: --reconstructGuides:: %d stored guide position(s) for %d guide(s) - "
+                        "the rest keep their default placement"
+                        % (self.__class__.__name__, len(self.guide_positions), len(self.guides)))
+
+        for index, guide in enumerate(self.guides):
+            if index >= len(self.guide_positions):
+                break
+            guide.setPosition(self.guide_positions[index])
 
     def selectAllGuides(self):
         MC.clearSelection()
@@ -1037,6 +1170,19 @@ class ROSE_Node(NodeEditorNode):
     
     def getComponentFullPrefix(self):
         return self.getComponentPrefix() + self.getComponentName() + "_"
+
+    def isInputSocketConnected(self, index):
+        """Whether anything is wired into this input.
+
+        getInputConnectionValueAt() raises an error dialog when nothing is, which
+        makes it the wrong thing to ask with when an input is genuinely optional -
+        it reports a problem that is not one, and it needs a live view to do it.
+        """
+        if index >= len(self.inputs):
+            return False
+
+        socket = self.inputs[index]
+        return bool(socket.hasEdge())
 
     def getInputConnectionValueAt(self, index):
         value, node = self.getInputSocketValueWithNode(index)
@@ -1133,6 +1279,7 @@ class ROSE_Node(NodeEditorNode):
         #the matrix network's DG nodes are not under the hierarchy about to be
         #deleted, so they have to go explicitly or they pile up every rebuild
         self.removeConstraints()
+        self.removeExpressions()
 
         if self.component_hierarchy is not None:
             if MC.objectExists(self.component_hierarchy):
@@ -1184,6 +1331,7 @@ class ROSE_Node(NodeEditorNode):
         self.deforms = []
         self.controls = []
         self.constraints = []
+        self.built_expressions = []
 
         self.setComponentGuideHiearchyName()
         self.setComponentHierarchyName()

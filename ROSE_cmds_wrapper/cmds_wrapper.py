@@ -496,6 +496,131 @@ class MC:
     def createParentConstraint(driver, driven, maintain_offset = True) -> str:
         return cmds.parentConstraint(driver, driven, maintainOffset=maintain_offset)[0]
 
+# Math nodes
+#
+#Maya's newer single-purpose math nodes. They read far better in a graph than
+#multiplyDivide/plusMinusAverage doing everything, and they carry angle units
+#properly, which matters when trigonometry is involved.
+
+    @staticmethod
+    def createAtan2Node(name) -> str:
+        return cmds.createNode("atan2", name = name + "_atan2_fNode")
+
+    @staticmethod
+    def createCosNode(name) -> str:
+        return cmds.createNode("cos", name = name + "_cos_fNode")
+
+    @staticmethod
+    def createMathMultiplyNode(name) -> str:
+        return cmds.createNode("multiply", name = name + "_mult_fNode")
+
+    @staticmethod
+    def createSumNode(name) -> str:
+        return cmds.createNode("sum", name = name + "_sum_fNode")
+
+    @staticmethod
+    def createSubtractNode(name) -> str:
+        return cmds.createNode("subtract", name = name + "_sub_fNode")
+
+    @staticmethod
+    def createDivideNode(name) -> str:
+        return cmds.createNode("divide", name = name + "_div_fNode")
+
+    @staticmethod
+    def createPowerNode(name) -> str:
+        return cmds.createNode("power", name = name + "_pow_fNode")
+
+# Transform limits
+
+    @staticmethod
+    def setRotationLimit(object_name, axis, minimum = None, maximum = None) -> None:
+        """Clamp one rotation axis. None leaves that end unlimited.
+
+        Limits are attributes (`minRotZLimit` / `maxRotZLimit`), so the value can
+        be connected afterwards and driven live - see getRotationLimitAttribute.
+        """
+        axis = axis.upper()
+
+        #Maya takes both ends of an axis together, as (min, max) pairs - and the
+        #flags are enableRotationZ / rotationZ, not the ...Limit spelling the
+        #attribute names use
+        enable_minimum = minimum is not None
+        enable_maximum = maximum is not None
+
+        cmds.transformLimits(object_name, **{
+            "enableRotation%s" % axis: (enable_minimum, enable_maximum),
+            "rotation%s" % axis: (minimum if enable_minimum else -360.0,
+                                  maximum if enable_maximum else 360.0),
+        })
+
+    @staticmethod
+    def getRotationLimitAttribute(axis, is_maximum) -> str:
+        """The attribute name holding a rotation limit, for connecting to."""
+        return "%sRot%sLimit" % ("max" if is_maximum else "min", axis.upper())
+
+    @staticmethod
+    def getRotationLimits(object_name, axis) -> list:
+        axis = axis.upper()
+        enabled = cmds.transformLimits(object_name, query=True, **{"enableRotation%s" % axis: True})
+        values = cmds.transformLimits(object_name, query=True, **{"rotation%s" % axis: True})
+        return [enabled, values]
+
+# Expressions
+
+    @staticmethod
+    def createExpression(name, expression_string, attached_object = None) -> str:
+        """Create a Maya expression node.
+
+        Left unattached by default. An expression created with `object=` is
+        deleted along with that object, which sounds convenient but hides the
+        node's lifetime from the component that made it - the same trap the
+        matrix constraint networks had, where DG nodes survived deleting the
+        transform hierarchy and quietly accumulated. A component should track
+        what it creates and clear it on rebuild instead.
+        """
+        keyword_arguments = {
+            "string": expression_string,
+            "name": name,
+            #the expression reads world positions with xform, which the DG does
+            #not see as inputs, so it has to be told to run every frame
+            "alwaysEvaluate": True,
+            "unitConversion": "all",
+        }
+
+        if attached_object is not None:
+            keyword_arguments["object"] = attached_object
+
+        return cmds.expression(**keyword_arguments)
+
+    @staticmethod
+    def setExpressionString(expression_node, expression_string) -> None:
+        cmds.expression(expression_node, edit=True, string=expression_string)
+
+    @staticmethod
+    def getExpressionString(expression_node) -> str:
+        return cmds.expression(expression_node, query=True, string=True)
+
+    @staticmethod
+    def createLocator(name) -> str:
+        return cmds.spaceLocator(name=name)[0]
+
+    @staticmethod
+    def createAimConstraintWithUpObject(driver, driven, up_object,
+                                        aim_vector = (1, 0, 0), up_vector = (0, 1, 0),
+                                        maintain_offset = False) -> str:
+        """Aim `driven` at `driver`, with a specific object defining up.
+
+        The plain aimConstraint wrapper uses Maya's default world up, which flips
+        as soon as the aim direction lines up with it. An explicit up object that
+        travels with the rig removes that.
+        """
+        return cmds.aimConstraint(driver, driven,
+                                  maintainOffset = maintain_offset,
+                                  aimVector = aim_vector,
+                                  upVector = up_vector,
+                                  worldUpType = "object",
+                                  worldUpObject = up_object)[0]
+
 # Plugin Functions
 
     @staticmethod

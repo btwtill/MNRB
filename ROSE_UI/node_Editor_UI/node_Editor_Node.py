@@ -138,6 +138,19 @@ class NodeEditorNode(Serializable):
         #that the initial socket set - and its labels - actually exist.
         self.grNode.wrapGrNodeToSockets()
 
+    def addInputSocket(self, input_type = 1, input_socket_value = "undefined", is_input_multi_edged = False):
+        input_index = len(self.inputs)
+        new_input_socket = self.__class__.Socket_Class(self, index=input_index,
+                                       position=1,
+                                       socket_type = input_type,
+                                       socket_value = input_socket_value,
+                                       accept_multi_edges=is_input_multi_edged,
+                                       index_on_drawn_node_side=input_index,
+                                       is_input = True)
+        self.inputs.append(new_input_socket)
+        self.grNode.wrapGrNodeToSockets()
+        return new_input_socket
+
     def addOutputSocket(self, output_type = 1, output_socket_value = "undefined", is_output_multi_edged = True):
         output_index = len(self.inputs) + len(self.outputs) 
         new_output_socket = self.__class__.Socket_Class(self, index=output_index, 
@@ -351,6 +364,17 @@ class NodeEditorNode(Serializable):
 
         for index, socket_data in enumerate(data['inputs']):
             if not exists:
+                #a saved graph can hold more inputs than the class declares now,
+                #because a component's socket layout is part of its code and that
+                #code changes. Recreated rather than skipped, the same way a
+                #surplus output is below: dropping the socket would silently take
+                #any edge into it with it, and a stale socket the component
+                #ignores is the recoverable failure of the two
+                if (index + 1) > len(self.inputs):
+                    serialize_log.debug("NODE: --deserialize:: an additional Input Socket was detected", socket_data)
+                    self.addInputSocket(socket_data["socket_type"], socket_data["socket_value"],
+                                        socket_data.get("accept_multi_edges", False))
+
                 serialize_log.debug("NODE: --deserialize:: About to deserialize Input:: ", self.inputs[index])
                 self.inputs[index].deserialize(socket_data, hashmap, restore_id)
             else:

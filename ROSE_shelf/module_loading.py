@@ -107,6 +107,70 @@ def sortRegistryModulesFirst(module_names):
 
     return sorted(module_names, key = lambda name: (not isRegistryModule(name), name))
 
+def reloadROSEEditor():
+    """Reload the code and bring the editor back, without reopening it by hand.
+
+    There is no way to hot-swap a window that is already open: `importlib.reload`
+    rebuilds each class as a new object, but every widget already on screen is an
+    instance of the OLD class and stays that way. Nothing short of recreating the
+    window picks up a UI change.
+
+    So this does the recreating. It remembers which project was open and where the
+    window sat, reloads, and opens a fresh editor on the same project.
+
+    It will not close an editor with unsaved changes - reloading is a convenience
+    and silently discarding work to provide it is not a trade worth making. In
+    that case the modules are still reloaded and the caller is told to reopen when
+    ready.
+    """
+    from PySide6.QtWidgets import QApplication #type: ignore
+
+    editor = None
+    for widget in QApplication.topLevelWidgets():
+        widget_class = type(widget)
+        if widget_class.__name__ == "rose_Editor" and widget.isVisible():
+            editor = widget
+            break
+
+    if editor is None:
+        return reloadROSEModules()
+
+    try:
+        has_unsaved_changes = editor.isModified()
+    except Exception:
+        #a half-built editor should not block a reload
+        has_unsaved_changes = False
+
+    if has_unsaved_changes:
+        log.warning("ROSE reload: the editor has unsaved changes, so it was left open. "
+                    "Save, then reload again to pick up the new code in the UI.")
+        return reloadROSEModules()
+
+    project_path = getattr(editor, "project_path", None)
+    geometry = editor.saveGeometry()
+
+    editor.close()
+
+    result = reloadROSEModules()
+
+    import MNRB.ROSE_UI.rose_editor as rose_editor #type: ignore
+    new_editor = rose_editor.rose_Editor()
+
+    if geometry is not None:
+        new_editor.restoreGeometry(geometry)
+
+    new_editor.show()
+
+    if project_path:
+        try:
+            new_editor.project_path = project_path
+            new_editor.onOpenProject()
+        except Exception as error:
+            log.warning("ROSE reload: reopened the editor but could not restore '%s': %s: %s"
+                        % (project_path, type(error).__name__, error))
+
+    return result
+
 def reloadROSEModules():
     """Reload every ROSE module, in whatever order their own imports require.
 

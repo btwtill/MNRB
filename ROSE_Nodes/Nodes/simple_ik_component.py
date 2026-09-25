@@ -376,7 +376,7 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
         #old live-link did not (these joints keep their orientation, unlike the
         #other components' deforms, so it landed them rotated by it)
         for index, deform in enumerate(self.deforms):
-            self.constrain(deform.name, self.deform_outputs[index], maintain_offset = False)
+            self.constrainDeform(deform.name, self.deform_outputs[index], maintain_offset = False)
         
         # Get Name of ik srt input parent
         ik_srt_parent = self.getInputConnectionValueAt(2)

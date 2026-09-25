@@ -118,6 +118,16 @@ class constraint(Serializable):
 
         constraint_node = builders[self.getKindValue()](self.parent, self.child, self.maintain_offset)
         self.built_maya_nodes = [constraint_node]
+
+        #A parentConstraint carries translate and rotate ONLY - scale needs its own
+        #node. Matrix mode passes the whole matrix, so the two techniques otherwise
+        #disagree in a way that is easy to miss: everything looks right until
+        #something upstream is scaled, and then the scale silently never arrives.
+        if self.getKindValue() == ConstraintKind.PARENT.value:
+            scale_constraint_node = MC.createScaleConstraint(
+                self.parent, self.child, self.maintain_offset)
+            self.built_maya_nodes.append(scale_constraint_node)
+
         return True, ""
 
     def buildMatrix(self):
