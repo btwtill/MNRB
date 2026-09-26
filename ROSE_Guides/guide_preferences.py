@@ -1,20 +1,22 @@
 """Application-level guide display preferences.
 
-Guide *size* is already a per-component property. This is the connector mesh that
-is drawn between two guides, whose thickness was a hardcoded tenth of the distance
-between them - fine until a component has guides far enough apart that the
-connector reads as a slab, or close enough that it disappears.
+Guide *size* is a per-component property. The connector mesh drawn between two
+guides follows it: its thickness is the component's guide size times the factor
+kept here, so resizing a component's guides resizes its connectors with them.
+
+It used to be a fraction of the distance between the two guides, with an
+optional fixed override - which made far-apart guides draw a slab, near ones a
+hairline, and ignored the guide size slider entirely.
 """
 
 from PySide6.QtCore import QSettings #type: ignore
 
-MULTIPLIER_KEY = "guide_connector_thickness_multiplier"
-OVERRIDE_KEY = "guide_connector_thickness_override"
+#a new key rather than the old multiplier's: that value was a fraction of the
+#guide distance and means something else entirely as a fraction of guide size
+FACTOR_KEY = "guide_connector_thickness_factor"
 
-#what the connector thickness was fixed at before this was configurable
-DEFAULT_MULTIPLIER = 0.1
-#0 means "no override" - fall back to the distance-based multiplier
-DEFAULT_OVERRIDE = 0.0
+#half the guide's radius: clearly thinner than the guide, still easy to see
+DEFAULT_FACTOR = 0.5
 
 
 def getSettingsStore():
@@ -29,18 +31,10 @@ def readFloat(key, default_value):
         return default_value
 
 
-def getConnectorThicknessMultiplier():
-    return readFloat(MULTIPLIER_KEY, DEFAULT_MULTIPLIER)
+def getConnectorThicknessFactor():
+    """Connector thickness as a multiple of the guide size."""
+    return readFloat(FACTOR_KEY, DEFAULT_FACTOR)
 
 
-def setConnectorThicknessMultiplier(value):
-    getSettingsStore().setValue(MULTIPLIER_KEY, float(value))
-
-
-def getConnectorThicknessOverride():
-    """A fixed thickness in world units, or 0 to keep it distance-relative."""
-    return readFloat(OVERRIDE_KEY, DEFAULT_OVERRIDE)
-
-
-def setConnectorThicknessOverride(value):
-    getSettingsStore().setValue(OVERRIDE_KEY, float(value))
+def setConnectorThicknessFactor(value):
+    getSettingsStore().setValue(FACTOR_KEY, float(value))

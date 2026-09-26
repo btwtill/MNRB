@@ -113,7 +113,11 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
         MC.parentObject(deform_joint.name, deform_parent)
         #cleared before constraining - see multi_deform_component
         MC.resetJointOrientations(deform_joint.name)
-        self.constrainDeform(deform_joint.name, self.deform_output, maintain_offset = False)
+        self.constrainDeformJoint(deform_joint.name)
         return True
+
+    def constrainDeformJoint(self, deform_joint_name):
+        #split out so a variant can change only how the joint follows
+        return self.constrainDeform(deform_joint_name, self.deform_output, maintain_offset = False)
 
         

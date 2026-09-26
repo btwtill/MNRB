@@ -3,10 +3,27 @@ from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
 from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 
 class ROSEColor(Enum):
+    #Saved by name, so members can be added and reordered freely but never
+    #renamed. Every value has to be unique: Enum turns a member with a repeated
+    #value into an alias of the first, and it would vanish from the dropdown.
     yellow = (1,1,0)
     red = (1,0,0)
     green = (0,1,0)
     blue = (0,0,1)
+
+    orange = (1.0, 0.5, 0.0)
+    gold = (1.0, 0.8, 0.2)
+    darkRed = (0.6, 0.0, 0.0)
+    pink = (1.0, 0.45, 0.7)
+    magenta = (1.0, 0.0, 1.0)
+    purple = (0.55, 0.2, 1.0)
+    lightBlue = (0.35, 0.65, 1.0)
+    cyan = (0.0, 1.0, 1.0)
+    teal = (0.0, 0.6, 0.55)
+    lime = (0.6, 1.0, 0.1)
+    brown = (0.55, 0.3, 0.1)
+    white = (1.0, 1.0, 1.0)
+    grey = (0.5, 0.5, 0.5)
 
 class ROSESceneColors():
     def __init__(self, scene) -> None:

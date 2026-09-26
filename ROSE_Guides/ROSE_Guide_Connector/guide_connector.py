@@ -5,11 +5,15 @@ from MNRB.ROSE_naming.ROSE_names import ROSE_Names #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
-from MNRB.ROSE_Guides.guide_preferences import (getConnectorThicknessMultiplier, #type: ignore
-                                                getConnectorThicknessOverride)
+from MNRB.ROSE_Guides.guide_preferences import getConnectorThicknessFactor #type: ignore
 log = ROSE_Log.get("rose.components.guides")
 
 class Guide_Connector(Serializable):
+    #on the connector transform, driving the mesh's width. An attribute there
+    #rather than a remembered node name: the connector's helper nodes are
+    #renamed along with the component, the transform's name is kept current.
+    thickness_attribute_name = "thickness"
+
     def __init__(self, start_guide, end_guide):
         super().__init__()
         self.guide = end_guide
@@ -118,26 +122,17 @@ class Guide_Connector(Serializable):
             MC.connectAttribute(aim_matrix_decompose_node, "outputRotate" + channel, connector_guide_point_matrix_node, "inputRotate" + channel)
             MC.connectAttribute(position_blend_decompose_node, "outputTranslate" + channel, connector_guide_point_matrix_node, "inputTranslate" + channel)
 
-        connection_distance_node = MC.createDistanceNode(self.name)
-        self.nodes.append(connection_distance_node)
-        MC.connectAttribute(self.start_guide.name, "worldMatrix[0]", connection_distance_node, "inMatrix1")
-        MC.connectAttribute(self.end_guide.name, "worldMatrix[0]", connection_distance_node, "inMatrix2")
-
         adjust_distance_node = MC.createMultiplyDivideNode(self.name + "_adjustDist")
         self.nodes.append(adjust_distance_node)
 
-        #Thickness used to be a hardcoded tenth of the distance between the two
-        #guides, which reads as a slab when they are far apart and vanishes when
-        #they are close. An override pins it to a fixed width instead - in which
-        #case the distance is left unconnected, since it no longer has a say.
-        thickness_override = getConnectorThicknessOverride()
-
-        if thickness_override > 0.0:
-            MC.setAttribute(adjust_distance_node, "input1X", thickness_override)
-            MC.setAttribute(adjust_distance_node, "input2X", 1.0)
-        else:
-            MC.connectAttribute(connection_distance_node, "distance", adjust_distance_node, "input1X")
-            MC.setAttribute(adjust_distance_node, "input2X", getConnectorThicknessMultiplier())
+        #Thickness follows the guide size, not the distance between the guides:
+        #distance-based it read as a slab when they were far apart and vanished
+        #when they were close. resize() keeps it in step when the size changes.
+        MC.addFloatAttribute(self.name, self.thickness_attribute_name,
+                             self.getThicknessForSize(self.guide.node.properties.guide_size),
+                             keyable = False)
+        MC.connectAttribute(self.name, self.thickness_attribute_name, adjust_distance_node, "input1X")
+        MC.setAttribute(adjust_distance_node, "input2X", 1.0)
 
         adjust_distance_negate_node = MC.createMultiplyDivideNode(self.name + "_adjustDist_Neg")
         self.nodes.append(adjust_distance_negate_node)
@@ -230,6 +225,15 @@ class Guide_Connector(Serializable):
                     self.nodes.pop()
                 else:
                     self.nodes.pop()
+
+    def getThicknessForSize(self, guide_size):
+        return guide_size * getConnectorThicknessFactor()
+
+    def resize(self, guide_size):
+        #a connector built before thickness followed the guide size has no such
+        #attribute; it picks it up the next time guides are built
+        if self.exists() and MC.attributeExists(self.name, self.thickness_attribute_name):
+            MC.setAttribute(self.name, self.thickness_attribute_name, self.getThicknessForSize(guide_size))
 
     def updateColor(self):
         if MC.objectExists(self.name):

@@ -17,6 +17,17 @@ class ROSE_Names():
     build_step = ROSE_buildSteps()
 
     component_id_attribute_name = "ROSE_Component_ID"
+    #Tag names - the attribute is <name>_<id>, see MC.addTag.
+    #
+    #on every loose DG node a component builds (utility nodes, constraint
+    #networks, expressions): the id of the component that owns it, so a rebuild
+    #finds and clears them from the scene itself - even after a reload, which
+    #forgets every in-memory list. Separate from the ID above, which marks the
+    #component's own hierarchy groups and must never be swept up with them.
+    built_by_attribute_name = "ROSE_Built_By"
+    #on constraint network nodes: the constraint's stable id, so re-running a
+    #connect replaces that one constraint's previous network
+    built_for_attribute_name = "ROSE_Built_For"
 
     guide_suffix = "_guide"
     rig_suffix = "_rig"

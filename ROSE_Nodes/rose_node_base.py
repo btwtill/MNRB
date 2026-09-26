@@ -725,6 +725,8 @@ class ROSE_Node(NodeEditorNode):
         #component's transform hierarchy does not take with it.
         self.constraints = []
         self.built_expressions = []
+        #loose utility nodes a component builds itself - see trackBuiltNode()
+        self.built_utility_nodes = []
 
         #attributes this component deliberately exposes - see initAttributes().
         #Declared here at construction rather than at build time, so the Attribute
@@ -762,14 +764,22 @@ class ROSE_Node(NodeEditorNode):
         self.exposeAttribute("Systems_Visibility", AttributeType.BOOL, default_value = False, keyable = False)
 
     def constrain(self, child, parent, kind = ConstraintKind.PARENT,
-                  constraint_type = None, maintain_offset = True):
+                  constraint_type = None, maintain_offset = True, channels = None):
         """Constrain child to parent, however this component is set to.
 
         Pass constraint_type only to override that for this one constraint - a
         rigging decision made in the component's own code, deliberately not a user
         option in the properties panel.
+
+        channels, a ConstraintChannels, narrows which axes are driven. None
+        drives everything the kind owns.
         """
-        new_constraint = constraint(self, child, parent, kind, constraint_type, maintain_offset)
+        new_constraint = constraint(self, child, parent, kind, constraint_type, maintain_offset,
+                                    channels)
+        #the same constraint made again - a connect run twice - replaces the
+        #earlier one: build() clears its network, and the list keeps one entry
+        self.constraints = [existing for existing in self.constraints
+                            if existing is new_constraint or existing.id != new_constraint.id]
         success, detail = new_constraint.build()
 
         if not success:
@@ -788,6 +798,7 @@ class ROSE_Node(NodeEditorNode):
         """
         expression_node = MC.createExpression(name, expression_string, attached_object)
         self.built_expressions.append(expression_node)
+        self.tagBuiltNode(expression_node)
         return expression_node
 
     def removeExpressions(self):
@@ -796,8 +807,46 @@ class ROSE_Node(NodeEditorNode):
                 MC.deleteNode(expression_node)
         self.built_expressions = []
 
+    def trackBuiltNode(self, maya_node):
+        """Register a utility node so a rebuild removes it.
+
+        For DG nodes a component wires up itself (multMatrix, blendMatrix,
+        condition...). Like the constraint networks, they are not under the
+        component's hierarchy, so deleting that leaves them behind. Returns the
+        node so creation and tracking can be one line.
+
+        Tagged in the scene as well as listed here: the list is gone after a
+        reload, the tag is not - see removeTaggedNodes().
+        """
+        self.built_utility_nodes.append(maya_node)
+        self.tagBuiltNode(maya_node)
+        return maya_node
+
+    def tagBuiltNode(self, maya_node):
+        MC.addTag(maya_node, ROSE_Names.built_by_attribute_name, self.id)
+
+    def removeTaggedNodes(self):
+        """Delete every node in the scene tagged as built by this component -
+        utility nodes, constraint networks and expressions, including ones from
+        builds this session never saw."""
+        for maya_node in MC.getNodesWithTag(ROSE_Names.built_by_attribute_name, self.id):
+            #checked each time: deleting one node can take others with it
+            if MC.objectExists(maya_node):
+                MC.deleteNode(maya_node)
+
+    def removeBuiltNodes(self, maya_nodes = None):
+        """Delete tracked utility nodes - all of them, or just the ones given."""
+        to_remove = self.built_utility_nodes if maya_nodes is None else list(maya_nodes)
+
+        for maya_node in to_remove:
+            if MC.objectExists(maya_node):
+                MC.deleteNode(maya_node)
+
+        self.built_utility_nodes = [maya_node for maya_node in self.built_utility_nodes
+                                    if maya_node not in to_remove]
+
     def constrainDeform(self, child, parent, kind = ConstraintKind.PARENT,
-                        constraint_type = None, maintain_offset = True):
+                        constraint_type = None, maintain_offset = True, channels = None):
         """Constrain a deform joint, honouring the global deform-connection switch.
 
         Components should use this rather than constrain() for anything that
@@ -809,11 +858,11 @@ class ROSE_Node(NodeEditorNode):
         if resolved_type is None:
             resolved_type = getDeformConstraintType()
 
-        return self.constrain(child, parent, kind, resolved_type, maintain_offset)
+        return self.constrain(child, parent, kind, resolved_type, maintain_offset, channels)
 
-    def removeConstraints(self):
+    def removeConstraints(self, sweep_scene = True):
         for existing_constraint in self.constraints:
-            existing_constraint.remove()
+            existing_constraint.remove(sweep_scene)
         self.constraints = []
 
 # Component-to-component values
@@ -987,8 +1036,12 @@ class ROSE_Node(NodeEditorNode):
         
         #the matrix network's DG nodes are not under the hierarchy about to be
         #deleted, so they have to go explicitly or they pile up every rebuild
-        self.removeConstraints()
+        #no per-constraint scene query: the tag sweep right after covers them
+        self.removeConstraints(sweep_scene = False)
         self.removeExpressions()
+        self.removeBuiltNodes()
+        #whatever the lists above no longer know about, e.g. after a reload
+        self.removeTaggedNodes()
 
         if self.component_hierarchy is not None:
             if MC.objectExists(self.component_hierarchy):
@@ -1194,7 +1247,8 @@ class ROSE_Node(NodeEditorNode):
 
     def getAllInputConnectionValuesAt(self, index):
         values, nodes = self.getAllInputValuesFromSocketWithNodes(index)
-        if values == [] and nodes == []:
+        #an unconnected socket comes back as (None, None), not empty lists
+        if not values or not nodes:
             self.scene.displayErrorMessage(f"Unable to get Connection from Node: {self.__class__.__name__} at Input Socket Index: {index}")
             return None
         input_objects = []
@@ -1278,8 +1332,12 @@ class ROSE_Node(NodeEditorNode):
     def removeComponentFromViewport(self):
         #the matrix network's DG nodes are not under the hierarchy about to be
         #deleted, so they have to go explicitly or they pile up every rebuild
-        self.removeConstraints()
+        #no per-constraint scene query: the tag sweep right after covers them
+        self.removeConstraints(sweep_scene = False)
         self.removeExpressions()
+        self.removeBuiltNodes()
+        #whatever the lists above no longer know about, e.g. after a reload
+        self.removeTaggedNodes()
 
         if self.component_hierarchy is not None:
             if MC.objectExists(self.component_hierarchy):
@@ -1332,6 +1390,7 @@ class ROSE_Node(NodeEditorNode):
         self.controls = []
         self.constraints = []
         self.built_expressions = []
+        self.built_utility_nodes = []
 
         self.setComponentGuideHiearchyName()
         self.setComponentHierarchyName()

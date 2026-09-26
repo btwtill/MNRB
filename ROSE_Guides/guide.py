@@ -98,6 +98,10 @@ class guide(Serializable):
         self.guide_up_shape.resize(size)
         self.guide_orientation_shape.resize(size)
 
+        #the connector into this guide is sized from the guide size too
+        if self.parent_connector is not None:
+            self.parent_connector.resize(size)
+
     def exists(self) -> bool:
         return MC.objectExists(self.name)
 
