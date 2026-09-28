@@ -268,7 +268,11 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         button_layout.addWidget(self.build_guides_action_button)
 
         self.build_step_dropdown = QComboBox()
-        self.build_step_dropdown.addItems([ROSE_Names.build_step.static, ROSE_Names.build_step.component])
+        #no full "Build Connected" here: wiring into other components only works
+        #when they are built too, which is the scene-wide Connect's job. Per
+        #component, connecting means its own joints onto its own outputs.
+        self.build_step_dropdown.addItems([ROSE_Names.build_step.static, ROSE_Names.build_step.component,
+                                           ROSE_Names.build_step.connected_isolated])
         self.build_step_dropdown.setCurrentIndex(1)
         self.build_step_dropdown.setStyleSheet("background-color: #2B2B2B;")
         button_layout.addWidget(self.build_step_dropdown)
@@ -587,6 +591,8 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
             self.onBuildComponent()
         elif build_stage == ROSE_Names.build_step.connected:
             self.onConnectComponents()
+        elif build_stage == ROSE_Names.build_step.connected_isolated:
+            self.onConnectComponentIsolated()
 
     def onBuildGuides(self):
         log.debug("BaseNodeProperties:_ --onBuildGuides ", self.node)
@@ -607,6 +613,11 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         log.debug("BaseNodeProperties:: --onConnectComponent: ", self.node)
         if not self.is_disabled:
             self.node.connectComponent()
+
+    def onConnectComponentIsolated(self):
+        log.debug("BaseNodeProperties:: --onConnectComponentIsolated: ", self.node)
+        if not self.is_disabled:
+            self.node.connectComponentIsolated()
 
     def formatSliderValueToEditValue(self, value):
         if value != 0:
@@ -1088,8 +1099,72 @@ class ROSE_Node(NodeEditorNode):
 
         return True
 
-    def connectComponent(self) -> bool:
+    def connectComponent(self, isolated = False) -> bool:
+        """Wire the built component up, in two halves.
+
+        connectInputs() - everything that reaches OUTSIDE the component: its
+        inputs constrained to the components wired into its sockets, its first
+        deform parented under the upstream joint, space switches attached.
+
+        connectDeforms() - its own deform joints driven by its own outputs,
+        which needs nothing but the component itself.
+
+        isolated skips the first half, so one component can be connected on its
+        own - its joints following its controls - whatever it is or is not wired
+        to. The deforms are connected either way, even when an input is missing:
+        they depend on nothing outside the component, and a missing input
+        stopping them only hid a working component behind an unrelated problem.
+
+        Components override the two halves, not this. One that still overrides
+        connectComponent itself works exactly as before for a full connect - see
+        connectComponentIsolated for the isolated one.
+        """
+        inputs_connected = True
+        if not isolated:
+            inputs_connected = self.connectInputs()
+            if not inputs_connected:
+                log.warning("%s:: --connectComponent:: '%s' could not connect all of its inputs - "
+                            "its deforms are connected anyway" % (self.__class__.__name__,
+                                                                  self.getComponentFullPrefix()))
+
+        deforms_connected = self.connectDeforms()
+        return inputs_connected and deforms_connected
+
+    def connectInputs(self) -> bool:
+        """The half of the connect that reaches other components. Override it."""
         return True
+
+    def connectDeforms(self) -> bool:
+        """The half of the connect that stays inside the component. Override it."""
+        return True
+
+    def supportsIsolatedConnect(self):
+        #a component still written the old way does everything inside its own
+        #connectComponent override, so there is no deform-only half to call
+        return type(self).connectDeforms is not ROSE_Node.connectDeforms
+
+    def connectComponentIsolated(self) -> bool:
+        """Connect only this component's own deforms - see connectComponent."""
+        if not self.supportsIsolatedConnect():
+            log.warning("%s:: --connectComponentIsolated:: this component does not split its connect "
+                        "into connectInputs/connectDeforms yet, so it cannot connect on its own"
+                        % self.__class__.__name__)
+            return False
+
+        #Connecting reads what componentBuild left on this object - its outputs,
+        #its inputs. The whole-rig connect always runs componentBuild first, so it
+        #never met a component without them; connected on its own, one can be:
+        #reopened since it was built, or built by an older version of its code
+        #that did not make everything the current connect expects. Then it is
+        #built now and connected again - once, so a genuine bug still surfaces.
+        try:
+            return self.connectComponent(isolated = True)
+        except AttributeError as error:
+            log.info("%s:: --connectComponentIsolated:: not built with the current code in this session "
+                     "(%s) - building the component first" % (self.__class__.__name__, error))
+            if not self.componentBuild():
+                return False
+            return self.connectComponent(isolated = True)
 
     def addComponentIdLink(self, object):
         MC.addStringAttribute(object, ROSE_Names.component_id_attribute_name, str(self.id), True)

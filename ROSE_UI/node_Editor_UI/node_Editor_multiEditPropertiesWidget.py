@@ -281,3 +281,9 @@ class MultiEdit_PropertyWidget(ROSE_NodeProperties):
         for node in self.nodes:
             if not node.properties.is_disabled:
                 node.connectComponent()
+
+    def onConnectComponentIsolated(self):
+        if not self.hasSelection(): return
+        for node in self.nodes:
+            if not node.properties.is_disabled:
+                node.connectComponentIsolated()

@@ -88,29 +88,27 @@ class ROSE_Node_SingleDeformComponent(ROSE_NodeTemplate):
         Matrix_functions.decomposeTransformWorldMatrixTo(self.single_control.name, self.deform_output)
         return True
         
-    def connectComponent(self):
-        if not super().connectComponent():
-            return False
-        
-        guide_log.debug("%s:: Connecting Component:: " % self)
-        
+    def connectInputs(self):
+        guide_log.debug("%s:: Connecting Inputs:: " % self)
+        connected = True
+
         srt_parent_name = self.getInputConnectionValueAt(0)
-        if srt_parent_name == None:
-            return False
-        srt_parent =  srt_parent_name + ROSE_Names.output_suffix
+        if srt_parent_name is not None:
+            #matrix parent with underworld Offset
+            self.constrain(self.root_input, srt_parent_name + ROSE_Names.output_suffix)
+        else:
+            connected = False
 
         deform_parent_name = self.getInputConnectionValueAt(1)
-        if deform_parent_name == None:
-            return False
-        deform_parent = deform_parent_name + ROSE_Names.deform_suffix
+        if deform_parent_name is not None:
+            MC.parentObject(self.deforms[0].name, deform_parent_name + ROSE_Names.deform_suffix)
+        else:
+            connected = False
 
+        return connected
+
+    def connectDeforms(self):
         deform_joint = self.deforms[0]
-
-        #matrix parent with underworld Offset
-        self.constrain(self.root_input, srt_parent)
-
-        #parent deform to deform parent
-        MC.parentObject(deform_joint.name, deform_parent)
         #cleared before constraining - see multi_deform_component
         MC.resetJointOrientations(deform_joint.name)
         self.constrainDeformJoint(deform_joint.name)

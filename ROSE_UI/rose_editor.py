@@ -10,6 +10,9 @@ from MNRB.ROSE_UI.preferences_UI.preferences_widget import ROSEPreferences #type
 from MNRB.ROSE_UI.rose_skinningEditorTab import rose_SkinningEditorTab #type: ignore
 from MNRB.ROSE_UI.rose_pipelineEditorTab import rose_PipelineEditorTab #type: ignore
 from MNRB.ROSE_UI.rose_attributeEditorTab import rose_AttributeEditorTab #type: ignore
+from MNRB.ROSE_UI.rose_controlShapeEditorTab import rose_ControlShapeEditorTab #type: ignore
+from MNRB.ROSE_UI.pipeline_Editor_UI.control_shape_switch import areControlShapesEnabled #type: ignore
+from MNRB.ROSE_Controls import control_shape_library #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 log = ROSE_Log.get("rose.editor")
@@ -51,6 +54,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.rose_pipeline_editor_path = None
         self.rose_attribute_editor_path_name = "rose_attribute_editor"
         self.rose_attribute_editor_path = None
+        self.rose_control_shape_editor_path_name = "rose_control_shape_editor"
+        self.rose_control_shape_editor_path = None
 
         self.display_overlay = True
 
@@ -75,6 +80,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.rose_skinning_editor_path = os.path.join(self._project_path, self.rose_skinning_editor_path_name)
         self.rose_pipeline_editor_path = os.path.join(self._project_path, self.rose_pipeline_editor_path_name)
         self.rose_attribute_editor_path = os.path.join(self._project_path, self.rose_attribute_editor_path_name)
+        self.rose_control_shape_editor_path = os.path.join(self._project_path, self.rose_control_shape_editor_path_name)
 
     @property
     def project_name(self): return self._project_name
@@ -121,12 +127,16 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.setupSkinEditorTab()
         self.setupControlEditorTab()
         self.setupPipelineEditorTab()
+        #built after Pipeline, whose scene it needs for the on/off switch, but
+        #inserted as the second tab - see setupControlShapeEditorTab
+        self.setupControlShapeEditorTab()
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getSkinningEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getPipelineEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getAttributeEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
+        self.getControlShapeEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
 
 
         if self.display_overlay:
@@ -186,6 +196,27 @@ class rose_Editor(QtWidgets.QMainWindow):
         third_tab_layout.addWidget(self.pipelineEditorTabWindow)
 
         self.tabs.addTab(third_tab_container, "Pipeline")
+
+    def setupControlShapeEditorTab(self):
+        self.controlShapeEditorTabWindow = rose_ControlShapeEditorTab(self.nodeEditorTabWindow)
+
+        pipeline_scene = self.pipelineEditorTabWindow.central_widget.scene
+        pipeline_scene.control_shape_tab = self.controlShapeEditorTabWindow
+
+        #Asked every time a control is drawn, from wherever the build started - so
+        #disabling the Control Shapes step in the pipeline turns the shapes off for
+        #builds from this editor too, not only for pipeline runs
+        control_shape_library.setEnabledProvider(lambda: areControlShapesEnabled(pipeline_scene))
+
+        fifth_tab_container = QtWidgets.QWidget()
+        fifth_tab_layout = QtWidgets.QVBoxLayout(fifth_tab_container)
+        fifth_tab_container.is_tab_widget = True
+
+        fifth_tab_layout.addWidget(self.controlShapeEditorTabWindow)
+
+        #right after the ROSE tab: shapes are set up while building the rig, before
+        #skinning and the rest
+        self.tabs.insertTab(1, fifth_tab_container, "Control Shapes")
 
     def setupControlEditorTab(self):
         self.attributeEditorTabWindow = rose_AttributeEditorTab(self.nodeEditorTabWindow)
@@ -403,6 +434,8 @@ class rose_Editor(QtWidgets.QMainWindow):
                     os.mkdir(self.rose_pipeline_editor_path)
                 if self.rose_attribute_editor_path:
                     os.mkdir(self.rose_attribute_editor_path)
+                if self.rose_control_shape_editor_path:
+                    os.mkdir(self.rose_control_shape_editor_path)
 
                 if self.display_overlay:
                     self.setCentralWidget(self.tabs)
@@ -452,11 +485,15 @@ class rose_Editor(QtWidgets.QMainWindow):
             os.mkdir(self.rose_pipeline_editor_path)
         if not os.path.isdir(self.rose_attribute_editor_path):
             os.mkdir(self.rose_attribute_editor_path)
+        if not os.path.isdir(self.rose_control_shape_editor_path):
+            os.mkdir(self.rose_control_shape_editor_path)
 
         self.getNodeEditorTab().onOpenFile(self.rose_base_editor_path)
         self.getSkinningEditorTab().onOpenFile(self.rose_skinning_editor_path)
         self.getPipelineEditorTab().onOpenFile(self.rose_pipeline_editor_path)
         self.getAttributeEditorTab().onOpenFile(self.rose_attribute_editor_path)
+        #after the rig graph, whose controls its tree lists
+        self.getControlShapeEditorTab().onOpenFile(self.rose_control_shape_editor_path)
         self.statusBar().showMessage('Opened project from ' + str(self.project_path), 5000)
 
     def onSaveProject(self):
@@ -469,6 +506,7 @@ class rose_Editor(QtWidgets.QMainWindow):
             self.getSkinningEditorTab().onSaveFile(os.path.join(self.rose_skinning_editor_path, self.project_name + "_graph.json")) # type: ignore
             self.getPipelineEditorTab().onSaveFile(os.path.join(self.rose_pipeline_editor_path, self.project_name + "_graph.json")) # type: ignore
             self.getAttributeEditorTab().onSaveFile(os.path.join(self.rose_attribute_editor_path, self.project_name + "_graph.json")) # type: ignore
+            self.getControlShapeEditorTab().onSaveFile(os.path.join(self.rose_control_shape_editor_path, self.project_name + "_graph.json")) # type: ignore
 
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
@@ -651,7 +689,8 @@ class rose_Editor(QtWidgets.QMainWindow):
 
     def isModified(self):
         return (self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified()
-                or self.getPipelineEditorTab().isModified() or self.getAttributeEditorTab().isModified())
+                or self.getPipelineEditorTab().isModified() or self.getAttributeEditorTab().isModified()
+                or self.getControlShapeEditorTab().isModified())
 
     def closeEvent(self, event):
         if self.projectNeedsSaving():
@@ -732,17 +771,21 @@ class rose_Editor(QtWidgets.QMainWindow):
     def getNodeEditorTab(self):
         return self.tabs.widget(0).findChildren(QtWidgets.QMainWindow)[0]
 
+    #direct references rather than looking tabs up by position, which broke every
+    #time a tab was added or moved
     def getSkinningEditorTab(self):
-        return self.tabs.widget(1).findChildren(QtWidgets.QWidget)[0]
+        return self.skinningEditorTabWindow
 
     def getPipelineEditorTab(self):
-        #index 3: the Attributes tab sits between Skin and Pipeline
-        return self.tabs.widget(3).findChildren(QtWidgets.QMainWindow)[0]
+        return self.pipelineEditorTabWindow
 
     def getAttributeEditorTab(self):
         #the direct reference rather than findChildren() - the tab is a plain
         #QWidget, so a child search would depend on construction order
         return self.attributeEditorTabWindow
+
+    def getControlShapeEditorTab(self):
+        return self.controlShapeEditorTabWindow
 
     def getMainWindowWidgetsFromTab(self, tab_index):
         return self.tabs.widget(tab_index).findChildren(QtWidgets.QMainWindow)

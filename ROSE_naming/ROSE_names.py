@@ -8,6 +8,8 @@ class ROSE_buildSteps():
     static = "Build Static"
     component = "Build Component"
     connected = "Build Connected"
+    #this component's joints onto its own outputs only - see ROSE_Node.connectComponent
+    connected_isolated = "Build Connected (Deforms Only)"
 
 class ROSE_Names():
     left = ROSE_Side("left", "L_")

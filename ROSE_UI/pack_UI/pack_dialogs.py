@@ -151,20 +151,27 @@ class {class_name}(ROSE_Node):
 
         return True
 
-    def connectComponent(self):
-        if not super().connectComponent():
-            return False
+    #The connect comes in two halves. connectInputs reaches other components;
+    #connectDeforms only drives this component's own joints, and is all that
+    #runs when the component is connected on its own ("deforms only").
+    def connectInputs(self):
+        connected = True
 
         srt_parent = self.getInputConnectionValueAt(0)
-        if srt_parent is None:
-            return False
-        self.constrain(self.root_input, srt_parent + ROSE_Names.output_suffix)
+        if srt_parent is not None:
+            self.constrain(self.root_input, srt_parent + ROSE_Names.output_suffix)
+        else:
+            connected = False
 
         deform_parent = self.getInputConnectionValueAt(1)
-        if deform_parent is None:
-            return False
-        MC.parentObject(self.deforms[0].name, deform_parent + ROSE_Names.deform_suffix)
+        if deform_parent is not None:
+            MC.parentObject(self.deforms[0].name, deform_parent + ROSE_Names.deform_suffix)
+        else:
+            connected = False
 
+        return connected
+
+    def connectDeforms(self):
         for index, component_deform in enumerate(self.deforms):
             #cleared before constraining: the constraint bakes the joint's
             #orientation into its offset, so wiping it afterwards would leave that

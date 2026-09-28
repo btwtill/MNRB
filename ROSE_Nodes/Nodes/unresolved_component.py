@@ -103,5 +103,5 @@ class UnresolvedComponentNode(ROSE_Node):
     def componentBuild(self):
         return False
 
-    def connectComponent(self):
+    def connectComponent(self, isolated = False):
         return False

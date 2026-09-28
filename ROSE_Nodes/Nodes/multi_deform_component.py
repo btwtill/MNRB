@@ -172,33 +172,34 @@ class ROSE_Node_MultiDeformComponent(ROSE_NodeTemplate):
             MC.parentObject(new_control.name, self.control_hierarchy)
             self.deform_outputs.append(output)
         
-    def connectComponent(self):
-        if not super().connectComponent():
-            return False
-        
-        srt_parent_name = self.getInputConnectionValueAt(0)
-        if srt_parent_name == None:
-            return False
-        srt_parent =  srt_parent_name + ROSE_Names.output_suffix
-
-        deform_parent_name = self.getInputConnectionValueAt(1)
-        if deform_parent_name == None:
-            return False
-        deform_parent = deform_parent_name + ROSE_Names.deform_suffix
+    def connectInputs(self):
+        connected = True
 
         #Contect connected output to component input
-        self.constrain(self.root_input, srt_parent)
+        srt_parent_name = self.getInputConnectionValueAt(0)
+        if srt_parent_name is not None:
+            self.constrain(self.root_input, srt_parent_name + ROSE_Names.output_suffix)
+        else:
+            connected = False
 
-        #Connect control deform outputs to deforms 
         # Parent deform to connected deform
-        MC.parentObject(self.deforms[0].name, deform_parent)
+        deform_parent_name = self.getInputConnectionValueAt(1)
+        if deform_parent_name is not None:
+            MC.parentObject(self.deforms[0].name, deform_parent_name + ROSE_Names.deform_suffix)
+        else:
+            connected = False
 
+        return connected
+
+    def connectDeforms(self):
+        #Connect control deform outputs to deforms
         for index, deform in enumerate(self.deforms):
             #cleared before constraining, not after: the constraint bakes the
             #joint's orientation into its offset, so wiping it afterwards would
             #leave that offset compensating for an orient that is no longer there
             MC.resetJointOrientations(deform.name)
             self.constrainDeform(deform.name, self.deform_outputs[index], maintain_offset = False)
+        return True
     
     def onDeformCountSliderChange(self):
         if log.enabled:

@@ -14,5 +14,8 @@ class ROSE_NodeTemplate(ROSE_Node):
     def componentBuild(self):
         return super().componentBuild()
 
-    def connectComponent(self):
-        return super().connectComponent()
+    #connectInputs/connectDeforms are deliberately not passed through here: a
+    #component counts as able to connect on its own by overriding connectDeforms,
+    #and one here would make every template-based component look like it does
+    def connectComponent(self, isolated = False):
+        return super().connectComponent(isolated)

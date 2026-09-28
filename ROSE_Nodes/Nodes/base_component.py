@@ -96,10 +96,8 @@ class ROSE_Node_BaseComponent(ROSE_NodeTemplate):
 
         return True
 
-    def connectComponent(self):
-        if not super().connectComponent():
-            return False
-        
+    #the rig root: no inputs, so its whole connect is its own deform
+    def connectDeforms(self):
         guide_log.debug("%s:: Connecting Component:: " % self)
 
         deform = self.deforms[0]

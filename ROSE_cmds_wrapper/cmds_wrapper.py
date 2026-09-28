@@ -435,6 +435,12 @@ class MC:
         cmds.setAttr(f"{object}.{attribute_name}", value1, value2, value3, type="double3")
 
     @staticmethod
+    def lockAndHideAttributes(node_name, attribute_names):
+        """Lock and hide just these channels, e.g. ["translateX", "rotateY"]."""
+        for attribute_name in attribute_names:
+            cmds.setAttr(f"{node_name}.{attribute_name}", lock=True, keyable=False, cb=False)
+
+    @staticmethod
     def lockAndHideAllAttributes(node_name):
         for axis in "XYZ":
             cmds.setAttr(f"{node_name}.translate{axis}", keyable=False, cb=False)

@@ -169,6 +169,9 @@ class NodeEditorWidget(QtWidgets.QWidget):
         build_static = context_menu.addAction("build static")
         build_component = context_menu.addAction("build component")
         build_connected = context_menu.addAction("build connected")
+        #just this component's joints onto its own outputs, ignoring whatever it
+        #is wired to - see ROSE_Node.connectComponent
+        build_connected_isolated = context_menu.addAction("build connected (deforms only)")
         context_menu.addSeparator()
         select_guides = context_menu.addAction("Select Guides")
         select_deforms = context_menu.addAction("Select Deforms")
@@ -193,6 +196,7 @@ class NodeEditorWidget(QtWidgets.QWidget):
         if selected and action == build_static: selected.staticBuild() if not selected.properties.is_disabled else print("Disabled")
         if selected and action == build_component: selected.componentBuild() if not selected.properties.is_disabled else print("Disabled")
         if selected and action == build_connected: selected.connectComponent() if not selected.properties.is_disabled else print("Disabled")
+        if selected and action == build_connected_isolated: selected.connectComponentIsolated() if not selected.properties.is_disabled else print("Disabled")
         if selected and action == select_guides: selected.selectAllGuides()
         if selected and action == select_deforms: selected.selectAllDeforms()
 

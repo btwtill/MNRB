@@ -346,48 +346,45 @@ class ROSE_Node_SimpleIKComponent(ROSE_NodeTemplate):
 
         return True
 
-    def connectComponent(self):
+    def connectInputs(self):
         '''
-        Component Function that takes all the input connections from other components and connects them into the component structure
+        Takes all the input connections from other components and connects them into the component structure
         '''
-        if not super().connectComponent():
-            return False
+        connected = True
 
         # Get Name of base srt input parent
         base_srt_parent = self.getInputConnectionValueAt(0)
-        if base_srt_parent == None:
-            return False
-        
-        base_srt_parent_name = base_srt_parent + ROSE_Names.output_suffix
-
-        self.constrain(self.base_input, base_srt_parent_name)
+        if base_srt_parent is not None:
+            self.constrain(self.base_input, base_srt_parent + ROSE_Names.output_suffix)
+        else:
+            connected = False
 
         # Get Name of second input socket (connected deform srt name)
         deform_parent_name = self.getInputConnectionValueAt(1)
-        if deform_parent_name == None:
-            return False
-        deform_parent = deform_parent_name + ROSE_Names.deform_suffix
+        if deform_parent_name is not None:
+            MC.parentObject(self.deforms[0].name, deform_parent_name + ROSE_Names.deform_suffix)
+        else:
+            connected = False
 
-        # Connect deform part of the component
-        MC.parentObject(self.deforms[0].name, deform_parent)
-
-        #the deform chain is already parented, so the constraint derives the
-        #parent space itself - and cancels each joint's jointOrient, which the
-        #old live-link did not (these joints keep their orientation, unlike the
-        #other components' deforms, so it landed them rotated by it)
-        for index, deform in enumerate(self.deforms):
-            self.constrainDeform(deform.name, self.deform_outputs[index], maintain_offset = False)
-        
         # Get Name of ik srt input parent
         ik_srt_parent = self.getInputConnectionValueAt(2)
-        if ik_srt_parent == None:
-            return False
-        
-        ik_srt_parent_name = ik_srt_parent + ROSE_Names.output_suffix
+        if ik_srt_parent is not None:
+            ik_srt_parent_name = ik_srt_parent + ROSE_Names.output_suffix
+            self.constrain(self.pole_input, ik_srt_parent_name)
+            self.constrain(self.end_input, ik_srt_parent_name)
+        else:
+            connected = False
 
-        self.constrain(self.pole_input, ik_srt_parent_name)
-        self.constrain(self.end_input, ik_srt_parent_name)
+        return connected
 
+    def connectDeforms(self):
+        #runs after connectInputs, so the chain is already under its parent and
+        #the constraint derives the parent space itself - and cancels each
+        #joint's jointOrient, which the old live-link did not (these joints keep
+        #their orientation, unlike the other components' deforms, so it landed
+        #them rotated by it)
+        for index, deform in enumerate(self.deforms):
+            self.constrainDeform(deform.name, self.deform_outputs[index], maintain_offset = False)
         return True
 
     def setPoleDistance(self, distance):
