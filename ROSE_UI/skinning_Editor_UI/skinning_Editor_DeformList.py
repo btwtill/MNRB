@@ -2,7 +2,7 @@ import os
 from PySide6.QtWidgets import QListWidget, QSizePolicy, QListWidgetItem, QAbstractItemView #type: ignore
 from PySide6.QtGui import QColor, QPixmap, QIcon, QDrag #type: ignore
 from PySide6.QtCore import QSize, Qt, QMimeData, QPoint #type: ignore
-from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import ExpandableGroupsMixin #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.drag_payload import encodeIdNamePayload, decodeIdNamePayload #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
@@ -45,7 +45,7 @@ def getGroupLabel(key, group):
 encodeDeformPayload = encodeIdNamePayload
 decodeDeformPayload = decodeIdNamePayload
 
-class SkinningEditorDeformList(QListWidget):
+class SkinningEditorDeformList(ExpandableGroupsMixin, QListWidget):
     def __init__(self, deformer_dict = {}, parent=None):
         super().__init__(parent)
         self.tab = parent
@@ -67,12 +67,11 @@ class SkinningEditorDeformList(QListWidget):
             group_entries = getGroupEntries(group)
 
             base_item = QListWidgetItem(self)
-            list_group_item = List_Group_Item(getGroupLabel(key, group), group_entries, self)
+            list_group_item = self.createGroupItem(getGroupLabel(key, group), group_entries)
             #dragging the group header drags everything under it
             list_group_item.setDragCallback(self.startGroupDrag)
             list_group_item.adjustSize()
             base_item.setSizeHint(list_group_item.sizeHint())
-            base_item.setBackground(QColor(50, 50, 50))
 
             self.setItemWidget(base_item, list_group_item)
             base_item.setFlags(base_item.flags() & ~Qt.ItemIsSelectable)

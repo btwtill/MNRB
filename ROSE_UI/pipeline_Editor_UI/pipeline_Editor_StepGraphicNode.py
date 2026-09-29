@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets #type: ignore
 from PySide6.QtCore import Qt, QRectF #type: ignore
-from PySide6.QtGui import QFont, QFontMetrics, QBrush, QPen, QColor, QPainterPath #type: ignore
+from PySide6.QtGui import QFont, QFontMetrics, QBrush, QPen, QColor, QPainterPath, QTextOption #type: ignore
 
 class PipelineStep_QGraphicNode(QtWidgets.QGraphicsItem):
     """Deliberately simple graphics node for pipeline steps - just a title and one
@@ -19,27 +19,36 @@ class PipelineStep_QGraphicNode(QtWidgets.QGraphicsItem):
         self._last_selected_state = False
         self._raw_title = ""
 
-        #fixed size - no dynamic content to size around
-        self.width = 160
-        self.height = 56
-        self.title_height = 32
+        #fixed size - no dynamic content to size around. Compact rather than a
+        #long bar: the title wraps onto two lines instead of stretching the card
+        self.width = 124
+        self.height = 64
+        self.title_height = self.height
 
         #bigger than the rig-node default (5.0) - "one big in and one big output"
-        self.socket_radius = 9.0
+        self.socket_radius = 8.0
         self.socket_padding = 12.0
+        #round, not the rig graph's squared multi-edge socket
+        self.multi_socket_roundness = self.socket_radius
 
-        self._edge_roundness = 6
-        self._title_font = QFont("Verdana", 9)
-        self._title_padding = 10
+        self._edge_roundness = 14
+        self._title_font = QFont("Verdana", 8, QFont.Bold)
+        self._title_padding = 14
+        self._max_title_lines = 2
 
         self._default_color = QColor("#7F000000")
         self._selected_color = QColor("#FFFFA637")
         self._title_color = Qt.white
-        self._background_color = QColor("#FF333333")
+        self._background_color = QColor("#FF34363A")
+        #a thin band along the top, in the socket green, so a step reads as a
+        #pipeline step at any zoom
+        self._accent_color = QColor("#FF5FBF6A")
+        self._accent_height = 4
         self._disabled_line_color = QColor("#FFCC4444")
 
         self._default_pen = QPen(self._default_color)
         self._selected_pen = QPen(self._selected_color)
+        self._selected_pen.setWidthF(2.0)
         self._background_brush = QBrush(self._background_color)
 
         #no content widget at all - pipeline steps have no per-socket labels to show
@@ -52,6 +61,9 @@ class PipelineStep_QGraphicNode(QtWidgets.QGraphicsItem):
         self.title_item.setFont(self._title_font)
         self.title_item.document().setDocumentMargin(0)
         self.title_item.setTextWidth(self.width - 2 * self._title_padding)
+        title_option = QTextOption(Qt.AlignHCenter)
+        title_option.setWrapMode(QTextOption.WrapAtWordBoundaryOrAnywhere)
+        self.title_item.document().setDefaultTextOption(title_option)
         self.title = self.node.title
 
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
@@ -66,12 +78,16 @@ class PipelineStep_QGraphicNode(QtWidgets.QGraphicsItem):
     def title(self, value):
         self._raw_title = value
         available_width = max(self.width - 2 * self._title_padding, 0)
-        self._title = QFontMetrics(self._title_font).elidedText(value, Qt.ElideRight, int(available_width))
+        #wraps over up to _max_title_lines, eliding only what still does not fit
+        self._title = QFontMetrics(self._title_font).elidedText(
+            value, Qt.ElideRight, int(available_width * self._max_title_lines))
         self.title_item.setPlainText(self._title)
 
-        #vertically center the (single-line) title within the title band
+        #centred in the card, below the accent band
         text_height = self.title_item.boundingRect().height()
-        self.title_item.setPos(self._title_padding, max((self.title_height - text_height) / 2, 0))
+        free_height = self.height - self._accent_height
+        self.title_item.setPos(self._title_padding,
+                               self._accent_height + max((free_height - text_height) / 2, 0))
 
     def wrapGrNodeToSockets(self):
         #fixed size regardless of socket count - every step has exactly one input
@@ -132,6 +148,12 @@ class PipelineStep_QGraphicNode(QtWidgets.QGraphicsItem):
         painter.setPen(Qt.NoPen)
         painter.setBrush(self._background_brush)
         painter.drawPath(path_outline)
+
+        painter.save()
+        painter.setClipPath(path_outline)
+        painter.setBrush(QBrush(self._accent_color))
+        painter.drawRect(QRectF(0, 0, self.width, self._accent_height))
+        painter.restore()
 
         painter.setPen(self._default_pen if not self.isSelected() else self._selected_pen)
         painter.setBrush(Qt.NoBrush)

@@ -27,7 +27,10 @@ class AttributeEditor_QGraphicNode(NodeEditor_QGraphicNode):
     def initGraphicElements(self):
         super().initGraphicElements()
 
-        self.width = 200
+        #narrow enough that a graph of a dozen nodes fits without zooming out;
+        #titles and subtitles elide, socket labels are short
+        self.expanded_width = 150
+        self.width = self.expanded_width
         self.title_height = 22
         #where the owning component's name goes - without it, two components'
         #Control_Visibility attributes are indistinguishable on the canvas
@@ -84,6 +87,8 @@ class AttributeEditor_QGraphicNode(NodeEditor_QGraphicNode):
             self._height = self.title_height + self.socket_padding
             self.width = self.collapsed_width
         else:
+            #collapsing narrowed it - without this it stayed narrow once reopened
+            self.width = self.expanded_width
             #inputs and outputs stack independently, so the taller side decides
             rows = max(len(self.node.inputs), len(self.node.outputs), 1)
             self._height = max(self.title_height + self._subtitle_height

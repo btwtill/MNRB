@@ -7,6 +7,8 @@ from MNRB.ROSE_Constraints.constraint_preferences import (isDeformConnectionNati
 from MNRB.ROSE_Guides.guide_preferences import (getConnectorThicknessFactor, #type: ignore
                                                 setConnectorThicknessFactor)
 
+from MNRB.ROSE_UI.rose_style import applyROSEStyle #type: ignore
+
 CHANNEL_ROLE = Qt.ItemDataRole.UserRole
 
 class ROSEPreferences(QWidget):
@@ -29,6 +31,8 @@ class ROSEPreferences(QWidget):
 
     def initUI(self):
         self.setWindowTitle("ROSE Preferences")
+        #opened without a parent, so the editor's sheet does not reach it
+        applyROSEStyle(self)
         self.setGeometry(150, 150, 380, 480)
 
         self.layout = QVBoxLayout()

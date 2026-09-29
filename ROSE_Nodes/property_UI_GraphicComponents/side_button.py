@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QPushButton #type: ignore
+from MNRB.ROSE_UI.rose_style import setButtonMarked #type: ignore
 
 class MirroringSidePrefixButton(QPushButton):
     def __init__(self, properties_widget, text = "", value = "M_", marked = False, parent = None):
@@ -18,14 +19,14 @@ class MirroringSidePrefixButton(QPushButton):
         self.is_marked = True
         self.propertie_widget.component_side_prefix = self.value
         
-        self.setStyleSheet("background-color: #FF336600;")
+        setButtonMarked(self, True)
 
         for button in self.buttons_to_deselect:
             button.markDeselected()
 
     def markDeselected(self):
         self.is_marked = False
-        self.setStyleSheet("")
+        setButtonMarked(self, False)
 
     def addButtonForDeselection(self, button):
         self.buttons_to_deselect.append(button)

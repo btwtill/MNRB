@@ -13,6 +13,7 @@ from MNRB.ROSE_UI.rose_attributeEditorTab import rose_AttributeEditorTab #type: 
 from MNRB.ROSE_UI.rose_controlShapeEditorTab import rose_ControlShapeEditorTab #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.control_shape_switch import areControlShapesEnabled #type: ignore
 from MNRB.ROSE_Controls import control_shape_library #type: ignore
+from MNRB.ROSE_UI.rose_style import applyROSEStyle, setButtonCompact #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 log = ROSE_Log.get("rose.editor")
@@ -26,6 +27,13 @@ class rose_Editor(QtWidgets.QMainWindow):
             parent = getMayaWindow()
 
         super(rose_Editor, self).__init__(parent)
+
+        #one sheet for the whole window - it cascades to every tab and dialog
+        applyROSEStyle(self)
+
+        #set by reloadROSE when the user already chose to discard unsaved work, so
+        #closing for the reload does not ask the same question a second time
+        self.discard_changes_on_close = False
 
         #restored first, so anything logged during startup already honours it
         self.loadLogChannelSettings()
@@ -122,6 +130,7 @@ class rose_Editor(QtWidgets.QMainWindow):
 
     def initTabs(self):
         self.tabs = QtWidgets.QTabWidget()
+        self.setupReloadButton()
 
         self.setupNodeEditorTab()
         self.setupSkinEditorTab()
@@ -156,6 +165,21 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.getPipelineEditorTab().central_widget.scene.history.connectHistoryModifiedListenersCallback(self.updateEditMenu)
 
         self.tabs.currentChanged.connect(self.updateCurrentTab)
+
+    def setupReloadButton(self):
+        #in the tab bar's corner, so it is reachable from every tab - the same
+        #reload the shelf button runs
+        self.reload_button = QtWidgets.QPushButton("⟳ Reload")
+        self.reload_button.setToolTip("Reload ROSE's code and node packs, and reopen the editor on this project "
+                                      "(Ctrl+Shift+R)")
+        setButtonCompact(self.reload_button)
+        self.reload_button.clicked.connect(self.onReloadROSE)
+
+        corner = QtWidgets.QWidget()
+        corner_layout = QtWidgets.QHBoxLayout(corner)
+        corner_layout.setContentsMargins(0, 2, 6, 2)
+        corner_layout.addWidget(self.reload_button)
+        self.tabs.setCornerWidget(corner, Qt.TopRightCorner)
 
     def setupNodeEditorTab(self):
         #Set Up the NodeEditor Tab Object
@@ -297,6 +321,9 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.action_save_project = QAction('&Save', self, shortcut='Ctrl+S', statusTip='save project', triggered=self.onSaveProject)
         #self.action_save_project_as = QAction('Save&As', self, shortcut='Ctrl+Shift+S', statusTip='save project as', triggered=self.onSaveProjectAs)
         self.action_exit = QAction('E&xit', self, shortcut='Ctrl+Q', statusTip='exit tool', triggered=self.close)
+        self.action_reload = QAction('&Reload ROSE', self, shortcut='Ctrl+Shift+R',
+                                     statusTip='reload the code and node packs and reopen this project',
+                                     triggered=self.onReloadROSE)
 
         self.action_load_template = QAction('&Load Template', self, shortcut='Ctrl+L', statusTip='load template', triggered=self.onLoadNodeEditorFile)
         self.actionSaveTemplateAs = QAction('Save &Template As', self, shortcut='Ctrl+Shift+Alt+S', statusTip='save template as', triggered=self.onSaveNodeEditorTemplateAs)
@@ -333,6 +360,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.project_menu.addSeparator()
         self.project_menu.addAction(self.action_save_project)
         #self.project_menu.addAction(self.action_save_project_as)
+        self.project_menu.addSeparator()
+        self.project_menu.addAction(self.action_reload)
         self.project_menu.addSeparator()
         self.project_menu.addAction(self.action_exit)
 
@@ -625,6 +654,28 @@ class rose_Editor(QtWidgets.QMainWindow):
 
         about_menu_messageBox.exec()
 
+    def onReloadROSE(self):
+        """The shelf's Reload, from inside the editor.
+
+        Unlike the shelf button, this can ask about unsaved work first - the
+        editor is right here to ask from - so a modified project is not a dead end.
+        """
+        if not self.projectNeedsSaving():
+            return
+        #Save leaves the project clean; Discard does not, and the reload would
+        #otherwise refuse to close a modified editor
+        self.discard_changes_on_close = True
+
+        #deferred: the reload closes and deletes this window, which must not
+        #happen while it is still inside the button's click handler
+        #reloaded first: the module reload skips ROSE_shelf (it is what performs
+        #the reload), so without this a running session would keep whichever
+        #version the shelf imported at Maya startup
+        import importlib
+        from MNRB.ROSE_shelf import module_loading #type: ignore
+        module_loading = importlib.reload(module_loading)
+        QTimer.singleShot(0, lambda: module_loading.reloadROSEEditor(discard_unsaved = True))
+
     def onPropertiesDockWidget(self):
         if self.getNodeEditorTab().right_dock.isVisible():
             self.getNodeEditorTab().right_dock.hide()
@@ -693,7 +744,7 @@ class rose_Editor(QtWidgets.QMainWindow):
                 or self.getControlShapeEditorTab().isModified())
 
     def closeEvent(self, event):
-        if self.projectNeedsSaving():
+        if self.discard_changes_on_close or self.projectNeedsSaving():
             self.writeSettings()
             event.accept()
         else:

@@ -107,7 +107,7 @@ def sortRegistryModulesFirst(module_names):
 
     return sorted(module_names, key = lambda name: (not isRegistryModule(name), name))
 
-def reloadROSEEditor():
+def reloadROSEEditor(discard_unsaved = False):
     """Reload the code and bring the editor back, without reopening it by hand.
 
     There is no way to hot-swap a window that is already open: `importlib.reload`
@@ -122,6 +122,9 @@ def reloadROSEEditor():
     and silently discarding work to provide it is not a trade worth making. In
     that case the modules are still reloaded and the caller is told to reopen when
     ready.
+
+    discard_unsaved: the caller already asked the user and they chose to throw
+    the changes away (the editor's own Reload button does this).
     """
     from PySide6.QtWidgets import QApplication #type: ignore
 
@@ -141,7 +144,7 @@ def reloadROSEEditor():
         #a half-built editor should not block a reload
         has_unsaved_changes = False
 
-    if has_unsaved_changes:
+    if has_unsaved_changes and not discard_unsaved:
         log.warning("ROSE reload: the editor has unsaved changes, so it was left open. "
                     "Save, then reload again to pick up the new code in the UI.")
         return reloadROSEModules()
@@ -149,7 +152,12 @@ def reloadROSEEditor():
     project_path = getattr(editor, "project_path", None)
     geometry = editor.saveGeometry()
 
+    if discard_unsaved:
+        editor.discard_changes_on_close = True
     editor.close()
+    #a closed editor is only hidden - left alive it keeps the old classes and
+    #every scene object reachable for the rest of the session
+    editor.deleteLater()
 
     result = reloadROSEModules()
 

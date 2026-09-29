@@ -7,7 +7,9 @@ SOCKET_COLOR = [
     QColor("#FF528220"),
     QColor("#FF0056a6"),
     QColor("#FFa86db1"),
-    QColor("#FFb54747"),
+    #sequence - the pipeline's "runs after" link. Green: a step handing on to
+    #the next reads as go, where the old red read as an error
+    QColor("#FF5FBF6A"),
     QColor("#FFdbe220")
 ]
 
@@ -53,7 +55,9 @@ class NodeEditor_QGraphicSocket(QtWidgets.QGraphicsItem):
         
         multi_edge_shape = QPainterPath()
         multi_edge_shape.setFillRule(Qt.WindingFill)
-        multi_edge_shape.addRoundedRect(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius, 2, 2)
+        #a node can ask for rounder multi-edge sockets (the pipeline steps do)
+        corner = getattr(self.socket.node.grNode, "multi_socket_roundness", 2)
+        multi_edge_shape.addRoundedRect(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius, corner, corner)
 
         painter.setPen(self._pen)
         painter.setBrush(self._brush)

@@ -479,8 +479,16 @@ class MC:
 
     @staticmethod
     def resetJointOrientations(name):
+        #a reset on something that is not there is a no-op, not a failure - and
+        #crashing here buries the real problem (the joint is missing) under a
+        #setAttr error about an attribute
+        if not MC.objectExists(name):
+            return False
+
         for channel in "XYZ":
             MC.setAttribute(name, "jointOrient" + channel, 0)
+
+        return True
 
 # IK Functions
     @staticmethod

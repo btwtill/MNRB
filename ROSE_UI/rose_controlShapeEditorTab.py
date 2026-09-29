@@ -8,6 +8,7 @@ from MNRB.ROSE_Controls import control_shape_library #type: ignore
 from MNRB.ROSE_Controls.control_shape_library import GENERAL_LIBRARY_ID #type: ignore
 from MNRB.ROSE_UI.control_shape_Editor_UI.control_shape_preview import buildShapePreviewPixmap, LINE_COLOR #type: ignore
 from MNRB.ROSE_UI.rose_ui_utils import findProjectGraphFile #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import ExpandableGroupsMixin #type: ignore
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 
 log = ROSE_Log.get("rose.components")
@@ -15,13 +16,14 @@ log = ROSE_Log.get("rose.components")
 DEFAULT_SHAPE_LABEL = "Default"
 PREVIEW_SIZE = 96
 
-#tree columns
-COLUMN_CONTROL = 0
-COLUMN_SHAPE = 1
-COLUMN_SCALE = 2
-
-#on each control row, which control it is
+#on each control row, which control it is and what it is called
 CONTROL_ID_ROLE = Qt.ItemDataRole.UserRole
+CONTROL_NAME_ROLE = Qt.ItemDataRole.UserRole + 1
+
+#the two editors on a row, and the header above them, share these
+SHAPE_COLUMN_WIDTH = 170
+SCALE_COLUMN_WIDTH = 72
+ROW_HEIGHT = 30
 
 #rig library shapes are drawn in their own colour, so the two kinds tell apart
 RIG_LINE_COLOR = QColor("#60C8E0")
@@ -71,6 +73,80 @@ class AddShapeDialog(QtWidgets.QDialog):
         return self.library_combo.currentData()
 
 
+class ControlShapeRow(QtWidgets.QWidget):
+    """One control: its name, then the shape and scale editors."""
+
+    def __init__(self, control_name, shape_combo, scale_spinbox, parent = None):
+        super().__init__(parent)
+        #the list's own selection highlight shows through
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(22, 2, 6, 2)
+        layout.setSpacing(6)
+
+        name_label = QtWidgets.QLabel(control_name)
+        name_label.setToolTip(control_name)
+        name_label.setMinimumWidth(60)
+        layout.addWidget(name_label, 1)
+
+        shape_combo.setFixedWidth(SHAPE_COLUMN_WIDTH)
+        scale_spinbox.setFixedWidth(SCALE_COLUMN_WIDTH)
+        layout.addWidget(shape_combo)
+        layout.addWidget(scale_spinbox)
+
+
+class ControlShapeList(ExpandableGroupsMixin, QtWidgets.QListWidget):
+    """The controls, grouped by component like the Skin and Attributes tabs'
+    lists - collapsible headers, rows underneath."""
+
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
+        #always there, so the column header above lines up with the row editors
+        #whether or not the list is long enough to scroll
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
+    def addGroup(self, label, entry_ids):
+        header_item = QtWidgets.QListWidgetItem(self)
+        group_item = self.createGroupItem(label, entry_ids)
+        group_item.adjustSize()
+        header_item.setSizeHint(group_item.sizeHint())
+        header_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
+        self.setItemWidget(header_item, group_item)
+        return group_item
+
+    def addControlRow(self, group_item, control_id, control_name, row_widget):
+        item = QtWidgets.QListWidgetItem(self)
+        item.setData(CONTROL_ID_ROLE, control_id)
+        item.setData(CONTROL_NAME_ROLE, control_name)
+        item.setSizeHint(QSize(0, ROW_HEIGHT))
+        self.setItemWidget(item, row_widget)
+        group_item.addListItem(item)
+        return item
+
+
+def buildColumnHeader():
+    """"Control / Shape / Scale" over the list, lined up with the row editors."""
+    header = QtWidgets.QWidget()
+    layout = QtWidgets.QHBoxLayout(header)
+    #the rows' own right margin, plus the list's frame and its scrollbar
+    layout.setContentsMargins(24, 2, 8 + QtWidgets.QApplication.style().pixelMetric(
+        QtWidgets.QStyle.PM_ScrollBarExtent), 2)
+    layout.setSpacing(6)
+
+    for text, width in (("Control", None), ("Shape", SHAPE_COLUMN_WIDTH), ("Scale", SCALE_COLUMN_WIDTH)):
+        label = QtWidgets.QLabel(text)
+        label.setStyleSheet("color: #999999; font-weight: bold;")
+        if width is None:
+            layout.addWidget(label, 1)
+        else:
+            label.setFixedWidth(width)
+            layout.addWidget(label)
+    return header
+
+
 class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
     """Which library shape each control is drawn with, and at what scale.
 
@@ -112,12 +188,15 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
 
         splitter = QtWidgets.QSplitter(Qt.Horizontal)
 
-        self.control_tree = QtWidgets.QTreeWidget()
-        self.control_tree.setHeaderLabels(["Control", "Shape", "Scale"])
-        self.control_tree.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.control_tree.setColumnWidth(COLUMN_CONTROL, 260)
-        self.control_tree.setColumnWidth(COLUMN_SHAPE, 180)
-        splitter.addWidget(self.control_tree)
+        control_panel = QtWidgets.QWidget()
+        control_layout = QtWidgets.QVBoxLayout(control_panel)
+        control_layout.setContentsMargins(0, 0, 0, 0)
+        control_layout.setSpacing(2)
+        control_layout.addWidget(buildColumnHeader())
+
+        self.control_list = ControlShapeList()
+        control_layout.addWidget(self.control_list)
+        splitter.addWidget(control_panel)
 
         library_panel = QtWidgets.QWidget()
         library_layout = QtWidgets.QVBoxLayout(library_panel)
@@ -244,10 +323,11 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
                     self.library_list.setCurrentItem(item)
 
     def refreshControlTree(self):
-        expanded = {self.control_tree.topLevelItem(index).text(COLUMN_CONTROL)
-                    for index in range(self.control_tree.topLevelItemCount())
-                    if self.control_tree.topLevelItem(index).isExpanded()}
-        self.control_tree.clear()
+        #a rebuild keeps what the user had open, selected and scrolled to - the
+        #list is rebuilt after every assignment made from the library
+        selected_ids = {item.data(CONTROL_ID_ROLE) for item in self.getSelectedControlItems()}
+        scroll_position = self.control_list.verticalScrollBar().value()
+        self.control_list.clear()
 
         shape_entries = self.getAllShapeKeys()
 
@@ -255,31 +335,30 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
             if not group["controls"]:
                 continue
 
-            group_item = QtWidgets.QTreeWidgetItem([group["label"]])
-            self.control_tree.addTopLevelItem(group_item)
+            group_item = self.control_list.addGroup(group["label"], [entry["id"] for entry in group["controls"]])
 
             for control_entry in group["controls"]:
                 control_id = str(control_entry["id"])
+                control_name = control_entry["name"]
                 assignment = self.assignments.get(control_id, {})
-
-                control_item = QtWidgets.QTreeWidgetItem([control_entry["name"]])
-                control_item.setData(COLUMN_CONTROL, CONTROL_ID_ROLE, control_id)
-                group_item.addChild(control_item)
 
                 current_key = (makeShapeKey(assignment.get("library"), assignment["shape"])
                                if assignment.get("shape") else None)
-                self.control_tree.setItemWidget(
-                    control_item, COLUMN_SHAPE,
-                    self.buildShapeCombo(control_id, control_entry["name"], current_key, shape_entries))
-                self.control_tree.setItemWidget(
-                    control_item, COLUMN_SCALE,
-                    self.buildScaleSpinBox(control_id, control_entry["name"], assignment.get("scale", 1.0)))
+                row = ControlShapeRow(control_name,
+                                      self.buildShapeCombo(control_id, control_name, current_key, shape_entries),
+                                      self.buildScaleSpinBox(control_id, control_name, assignment.get("scale", 1.0)))
 
-            #a fresh tree opens everything; after that, whatever the user left open
-            group_item.setExpanded(not expanded or group["label"] in expanded)
+                item = self.control_list.addControlRow(group_item, control_id, control_name, row)
+                if control_id in selected_ids:
+                    item.setSelected(True)
+
+        self.control_list.updateGeometries()
+        self.control_list.verticalScrollBar().setValue(scroll_position)
 
     def buildShapeCombo(self, control_id, control_name, current_key, shape_entries):
         combo = QtWidgets.QComboBox()
+        combo.setFocusPolicy(Qt.StrongFocus)
+        combo.wheelEvent = lambda event: event.ignore()
         combo.addItem(DEFAULT_SHAPE_LABEL, None)
         for shape_key, label in shape_entries:
             combo.addItem(label, shape_key)
@@ -297,6 +376,9 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
 
     def buildScaleSpinBox(self, control_id, control_name, current_scale):
         spinbox = QtWidgets.QDoubleSpinBox()
+        #a scroll over the list must scroll the list, not change a scale on the way
+        spinbox.setFocusPolicy(Qt.StrongFocus)
+        spinbox.wheelEvent = lambda event: event.ignore()
         spinbox.setDecimals(3)
         spinbox.setRange(0.01, 100.0)
         spinbox.setSingleStep(0.1)
@@ -335,8 +417,8 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
         control_shape_library.setAssignments(self.assignments)
 
     def getSelectedControlItems(self):
-        return [item for item in self.control_tree.selectedItems()
-                if item.data(COLUMN_CONTROL, CONTROL_ID_ROLE) is not None]
+        return [item for item in self.control_list.selectedItems()
+                if item.data(CONTROL_ID_ROLE) is not None]
 
     def getSelectedLibraryShape(self):
         """The selected library item's shape key, or None."""
@@ -351,13 +433,13 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
 
         shape_key = item.data(Qt.ItemDataRole.UserRole)
         for control_item in control_items:
-            self.setAssignment(control_item.data(COLUMN_CONTROL, CONTROL_ID_ROLE),
-                               control_item.text(COLUMN_CONTROL), shape_key = shape_key)
+            self.setAssignment(control_item.data(CONTROL_ID_ROLE),
+                               control_item.data(CONTROL_NAME_ROLE), shape_key = shape_key)
         self.refreshControlTree()
 
     def onClearSelectedAssignments(self):
         for control_item in self.getSelectedControlItems():
-            self.assignments.pop(control_item.data(COLUMN_CONTROL, CONTROL_ID_ROLE), None)
+            self.assignments.pop(control_item.data(CONTROL_ID_ROLE), None)
         self.pushAssignments()
         self.setModified(True)
         self.refreshControlTree()

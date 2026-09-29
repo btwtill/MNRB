@@ -495,12 +495,29 @@ class NodeEditor_QGraphicView(QtWidgets.QGraphicsView):
 
         self.grScene.scene.history.storeHistory("Delete Cutted Edges", set_modified = True)
 
+    def findStatusBarHost(self):
+        """The editor window above this view, or None if it is not parented to one.
+
+        Walking up beats counting parents: a fixed number of hops breaks the
+        moment a layout gains or loses a wrapper, and it is the kind of break
+        that only shows up while something is already going wrong.
+        """
+        widget = self.parentWidget()
+        while widget is not None:
+            if hasattr(widget, "set_statusBar_color"):
+                return widget
+            widget = widget.parentWidget()
+        return None
+
     def displayErrorMessage(self, message):
-        parent_widget = self.parentWidget().parentWidget().parentWidget().parentWidget().parentWidget().parentWidget()
-        log.debug("parent Widget:: ", parent_widget.__class__)
-        log.debug(dir(parent_widget))
-        parent_widget.statusBar().showMessage(message, 5000)
-        parent_widget.set_statusBar_color("#FFc43721", 5000)
+        host = self.findStatusBarHost()
+        if host is None:
+            #no window to show it in - the message still has to come out somewhere,
+            #and losing it under an AttributeError would bury the real problem
+            log.error("%s:: --displayErrorMessage:: %s" % (self.__class__.__name__, message))
+            return
+        host.statusBar().showMessage(message, 5000)
+        host.set_statusBar_color("#FFc43721", 5000)
         
     def deleteSelected(self):
         selected_items = self.grScene.selectedItems()

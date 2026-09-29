@@ -11,16 +11,18 @@ OVERLAY_STYLE = """
 QWidget#viewOverlayControls {
     background-color: #B4232323;
     border: 1px solid #FF555555;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 QPushButton {
     background-color: #FF3D3D3D;
     border: 1px solid #FF555555;
-    border-radius: 3px;
+    border-radius: 6px;
     color: #FFDDDDDD;
+    padding: 0px;
+    min-height: 0px;
 }
-QPushButton:hover { background-color: #FF4D4D4D; }
-QPushButton:pressed { background-color: #FFFFA637; color: #FF222222; }
+QPushButton:hover { background-color: #FF4A4A4A; border-color: #FF6A6A6A; }
+QPushButton:pressed { background-color: #FFFFA637; border-color: #FFFFA637; color: #FF222222; }
 """
 
 class ViewOverlayControls(QWidget):

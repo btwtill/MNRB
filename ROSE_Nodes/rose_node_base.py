@@ -1143,6 +1143,20 @@ class ROSE_Node(NodeEditorNode):
         #connectComponent override, so there is no deform-only half to call
         return type(self).connectDeforms is not ROSE_Node.connectDeforms
 
+    def isBuiltInScene(self) -> bool:
+        """Whether this component's Maya objects are actually in the scene.
+
+        A component object can outlive the objects it made - the scene was
+        reopened, someone deleted the hierarchy, the rig was rebuilt around it.
+        The Python side looks perfectly healthy in that case: self.deforms is
+        full, the names are right, and nothing goes wrong until a command is
+        handed a name Maya no longer knows.
+        """
+        if not self.deforms:
+            return False
+
+        return all(component_deform.exists() for component_deform in self.deforms)
+
     def connectComponentIsolated(self) -> bool:
         """Connect only this component's own deforms - see connectComponent."""
         if not self.supportsIsolatedConnect():
@@ -1152,11 +1166,24 @@ class ROSE_Node(NodeEditorNode):
             return False
 
         #Connecting reads what componentBuild left on this object - its outputs,
-        #its inputs. The whole-rig connect always runs componentBuild first, so it
-        #never met a component without them; connected on its own, one can be:
-        #reopened since it was built, or built by an older version of its code
-        #that did not make everything the current connect expects. Then it is
-        #built now and connected again - once, so a genuine bug still surfaces.
+        #its inputs - and it drives objects componentBuild made. The whole-rig
+        #connect always runs componentBuild first, so it never met a component
+        #without them. On its own it can, in two different ways.
+        #
+        #The objects may be gone from the scene while the Python side still looks
+        #complete, which surfaces as a Maya error deep inside a command rather
+        #than as a missing attribute - so it is checked for up front rather than
+        #caught.
+        if not self.isBuiltInScene():
+            log.info("%s:: --connectComponentIsolated:: '%s' is not in the scene - "
+                     "building the component first"
+                     % (self.__class__.__name__, self.getComponentFullPrefix()))
+            if not self.componentBuild():
+                return False
+
+        #Or this object may predate the current code and simply not carry what the
+        #connect expects. Then it is built now and connected again - once, so a
+        #genuine bug still surfaces.
         try:
             return self.connectComponent(isolated = True)
         except AttributeError as error:

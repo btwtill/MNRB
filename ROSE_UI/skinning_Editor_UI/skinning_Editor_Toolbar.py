@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QSizePolicy, QHBoxLayout, QPushButton # type: ignore
+from MNRB.ROSE_UI.rose_style import setButtonVariant #type: ignore
 from PySide6.QtCore import QSize, Qt # type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
@@ -39,12 +40,12 @@ class SkinningEditorToolbar(QWidget):
         self.build_all_button.clicked.connect(self.onBuildAll)
 
         self.accept_new_deformers = QPushButton("Accept New")
-        self.accept_new_deformers.setStyleSheet("QPushButton { background-color: #FF2E6B2E; } QPushButton:disabled { background-color: #FF4D4D4D; color: #FF888888; }")
+        setButtonVariant(self.accept_new_deformers, "accept")
         self.accept_new_deformers.setEnabled(False)
         self.accept_new_deformers.clicked.connect(self.onAcceptNew)
 
         self.remove_deprecated_deformers = QPushButton("Remove Deprecated")
-        self.remove_deprecated_deformers.setStyleSheet("QPushButton { background-color: #FF6B2E2E; } QPushButton:disabled { background-color: #FF4D4D4D; color: #FF888888; }")
+        setButtonVariant(self.remove_deprecated_deformers, "danger")
         self.remove_deprecated_deformers.setEnabled(False)
         self.remove_deprecated_deformers.clicked.connect(self.onRemoveDeprecated)
 

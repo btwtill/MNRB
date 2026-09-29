@@ -4,7 +4,7 @@ from PySide6.QtCore import QSize, Qt, QMimeData, QByteArray, QDataStream, QIODev
 from PySide6.QtGui import QPixmap, QIcon, QDrag, QColor #type: ignore
 from MNRB.ROSE_Nodes.node_Editor_conf import (NODELIST_MIMETYPE, ROSE_NODES, #type: ignore
                                               getNodeCategories, getNodeClassesInCategory)
-from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import ExpandableGroupsMixin #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 dragdrop_log = ROSE_Log.get("rose.node_editor.dragdrop")
@@ -12,7 +12,7 @@ log = ROSE_Log.get("rose.node_editor.dragdrop")
 
 ICONPATH = os.path.join(os.path.dirname(__file__), "../icons")
 
-class NodeEditorDragNodeList(QtWidgets.QListWidget):
+class NodeEditorDragNodeList(ExpandableGroupsMixin, QtWidgets.QListWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
         
@@ -23,7 +23,11 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
         self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         self.setDragEnabled(True)
         self.setBaseSize(QSize(150, 600))
-        self.setMaximumWidth(200)
+        #no maximum: the list fills the dock, so resizing the dock resizes it.
+        #A fixed cap left it stranded once the pack buttons above made the dock
+        #wider than the cap
+        self.setMinimumWidth(150)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.addDragListItems()
         
@@ -42,7 +46,8 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
             group_widget = self.addDragListGroupItem(category_label, [c.type_id for c in node_classes])
             group_widget.adjustSize()
             base_item.setSizeHint(group_widget.sizeHint())
-            base_item.setBackground(QColor(50, 50, 50))
+            #the header is not a node - clicking it opens the group, never selects
+            base_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
 
             self.setItemWidget(base_item, group_widget)
 
@@ -67,7 +72,7 @@ class NodeEditorDragNodeList(QtWidgets.QListWidget):
 
     def addDragListGroupItem(self, group_name, node_ids):
         log.debug("DRAGNODELIST:: --addDragListGroupItem:: GroupName:: ", group_name, " NodeIDs:: ", node_ids)
-        item = List_Group_Item(group_name, node_ids, self)
+        item = self.createGroupItem(group_name, node_ids)
 
         return item
 

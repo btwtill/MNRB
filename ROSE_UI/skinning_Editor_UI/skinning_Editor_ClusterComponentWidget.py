@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QCheckBox, QComboBox, QSpinBox, QSizePolicy, QMessageBox #type: ignore
+from MNRB.ROSE_UI.rose_style import setButtonCompact #type: ignore
 from PySide6.QtCore import Qt #type: ignore
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
@@ -421,6 +422,7 @@ class SkinClusterComponentWidget(QWidget):
 
             remove_button = QPushButton("x")
             remove_button.setFixedWidth(20)
+            setButtonCompact(remove_button)
             remove_button.clicked.connect(lambda checked=False, deform_id=ref["id"]: self.onRemoveDeform(deform_id))
             row.addWidget(remove_button)
 

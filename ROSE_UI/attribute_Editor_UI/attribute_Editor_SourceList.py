@@ -2,7 +2,7 @@ import os
 from PySide6.QtWidgets import QListWidget, QListWidgetItem, QAbstractItemView, QSizePolicy #type: ignore
 from PySide6.QtGui import QColor, QDrag #type: ignore
 from PySide6.QtCore import Qt, QSize, QMimeData, QPoint #type: ignore
-from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import List_Group_Item #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import ExpandableGroupsMixin #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.drag_payload import encodeIdNamePayload #type: ignore
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 
@@ -14,9 +14,8 @@ CONTROL_MIMETYPE = "application/x-rose-control"
 
 ENTRY_ID_ROLE = Qt.ItemDataRole.UserRole
 
-GROUP_BACKGROUND = QColor(50, 50, 50)
 
-class AttributeEditorSourceList(QListWidget):
+class AttributeEditorSourceList(ExpandableGroupsMixin, QListWidget):
     """Base for the tab's two source lists - exposed attributes on the left,
     controls on the right. Both are the same thing: entries grouped by component,
     dragged out onto an assignment box, so only the mimetype and where the
@@ -52,12 +51,11 @@ class AttributeEditorSourceList(QListWidget):
                 continue
 
             base_item = QListWidgetItem(self)
-            group_item = List_Group_Item(group.get("label", key), entries, self)
+            group_item = self.createGroupItem(group.get("label", key), entries)
             group_item.setDragCallback(self.startGroupDrag)
             group_item.adjustSize()
 
             base_item.setSizeHint(group_item.sizeHint())
-            base_item.setBackground(GROUP_BACKGROUND)
             self.setItemWidget(base_item, group_item)
             base_item.setFlags(base_item.flags() & ~Qt.ItemIsSelectable)
 
