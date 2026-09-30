@@ -16,6 +16,7 @@ TYPEID_SINGLEDEFORMCOMPONENT = "rose.single_deform"
 TYPEID_MULTIDEFORMCOMPONENT = "rose.multi_deform"
 TYPEID_SIMPLEIKCOMPONENT = "rose.simple_ik"
 TYPEID_CHANNELDEFORMCOMPONENT = "rose.channel_deform"
+TYPEID_CABLECOMPONENT = "rose.cable"
 
 #graphs saved before type ids stored these integers. Permanent - old project
 #files stay openable.

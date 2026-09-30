@@ -511,6 +511,34 @@ class MC:
         pole_vector_constraint = cmds.poleVectorConstraint(source, target_Ik_handle, name=name)
         return pole_vector_constraint
 
+    @staticmethod
+    def createSplineIkSolver(name, start_joint, end_joint, curve) -> list[str]:
+        """A spline IK handle along an existing curve. Returns [handle, effector].
+
+        The curve is used as given - not rebuilt, simplified or reparented - so
+        whatever drives its control points keeps driving the chain.
+        """
+        handle, effector = cmds.ikHandle(
+            name = name + "spline_ikHandle",
+            startJoint = start_joint,
+            endEffector = end_joint,
+            solver = "ikSplineSolver",
+            curve = curve,
+            createCurve = False,
+            parentCurve = False,
+            rootOnCurve = True,
+            simplifyCurve = False)
+        #renamed from what ikHandle returned, not from a guessed default name -
+        #"effector1" is only right in a scene that has no other effector
+        effector = cmds.rename(effector, name + "spline_effector")
+        return [handle, effector]
+
+# Curve Functions
+    @staticmethod
+    def createCurveFromPoints(name, points, degree = 3) -> str:
+        """A NURBS curve through `points` as its control points. Returns the transform."""
+        return cmds.curve(name = name, degree = degree, point = [tuple(point) for point in points])
+
 # Maya Constraints
 #`skip` takes lower-case axes ("x", "z") left undriven. Only passed on to Maya
 #when there is something to skip - an empty list is not a valid flag value.
@@ -938,6 +966,46 @@ class MC:
             return cmds.createNode("aimMatrix", name = name + "_aimMtx_fNode_UW")
         else:
             return cmds.createNode("aimMatrix", name = name + "_aimMtx_fNode")
+
+    #Maya 2027 retired pointMatrixMult for pointMatrixMultDL - same attributes -
+    #and swaps it in with a "Legacy node type" warning for every node asked for
+    #by the old name. Asked for by whichever name this Maya has.
+    _point_matrix_mult_type = None
+
+    @staticmethod
+    def getPointMatrixMultType() -> str:
+        if MC._point_matrix_mult_type is None:
+            MC._point_matrix_mult_type = ("pointMatrixMultDL" if "pointMatrixMultDL" in cmds.allNodeTypes()
+                                          else "pointMatrixMult")
+        return MC._point_matrix_mult_type
+
+    @staticmethod
+    def createPointMatrixMultNode(name) -> str:
+        return cmds.createNode(MC.getPointMatrixMultType(), name = name + "_pmm_fNode")
+
+    @staticmethod
+    def listOutgoingConnections(node) -> list:
+        """(source plug, destination plug) for everything this node feeds."""
+        pairs = cmds.listConnections(node, source = False, destination = True, plugs = True,
+                                     connections = True, skipConversionNodes = False) or []
+        return list(zip(pairs[0::2], pairs[1::2]))
+
+    @staticmethod
+    def disconnectPlugs(source_plug, destination_plug) -> None:
+        if cmds.isConnected(source_plug, destination_plug):
+            cmds.disconnectAttr(source_plug, destination_plug)
+
+    @staticmethod
+    def createMotionPathNode(name) -> str:
+        return cmds.createNode("motionPath", name = name + "_mPath_fNode")
+
+    @staticmethod
+    def createBlendColorsNode(name) -> str:
+        return cmds.createNode("blendColors", name = name + "_blc_fNode")
+
+    @staticmethod
+    def createCurveInfoNode(name) -> str:
+        return cmds.createNode("curveInfo", name = name + "_cInfo_fNode")
 
     @staticmethod
     def createVectorProductNode(name, underworld = False) -> str:

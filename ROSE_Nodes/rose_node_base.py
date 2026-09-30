@@ -708,6 +708,29 @@ class ROSE_NodeProperties(NodeEditorNodeProperties):
         self.validateProperties()
         return True
 
+def deleteNodesTogether(maya_nodes):
+    """Delete a set of nodes without anything evaluating them half-removed.
+
+    Deleting a network node by node - or even in one delete call - lets Maya
+    evaluate between removals: whatever still reads from the network (the deform
+    joints, which outlive a rebuild) pulls through it, and a node whose input was
+    just deleted computes with nothing there. A curveInfo printed "No valid NURBS
+    curve" that way on every cable rebuild.
+
+    So the outgoing connections are cut first. Nothing can pull through the
+    network any more, and those connections go with the delete anyway.
+    """
+    existing = [maya_node for maya_node in dict.fromkeys(maya_nodes) if MC.objectExists(maya_node)]
+    if not existing:
+        return
+
+    for maya_node in existing:
+        for source, destination in MC.listOutgoingConnections(maya_node):
+            MC.disconnectPlugs(source, destination)
+
+    MC.deleteNode(existing)
+
+
 class ROSE_Node(NodeEditorNode):
     #namespaced "<pack>.<name>" - see node_Editor_conf
     type_id = "rose.node"
@@ -840,18 +863,13 @@ class ROSE_Node(NodeEditorNode):
         """Delete every node in the scene tagged as built by this component -
         utility nodes, constraint networks and expressions, including ones from
         builds this session never saw."""
-        for maya_node in MC.getNodesWithTag(ROSE_Names.built_by_attribute_name, self.id):
-            #checked each time: deleting one node can take others with it
-            if MC.objectExists(maya_node):
-                MC.deleteNode(maya_node)
+        deleteNodesTogether(MC.getNodesWithTag(ROSE_Names.built_by_attribute_name, self.id))
 
     def removeBuiltNodes(self, maya_nodes = None):
         """Delete tracked utility nodes - all of them, or just the ones given."""
         to_remove = self.built_utility_nodes if maya_nodes is None else list(maya_nodes)
 
-        for maya_node in to_remove:
-            if MC.objectExists(maya_node):
-                MC.deleteNode(maya_node)
+        deleteNodesTogether(to_remove)
 
         self.built_utility_nodes = [maya_node for maya_node in self.built_utility_nodes
                                     if maya_node not in to_remove]
