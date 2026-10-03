@@ -539,6 +539,73 @@ class MC:
         """A NURBS curve through `points` as its control points. Returns the transform."""
         return cmds.curve(name = name, degree = degree, point = [tuple(point) for point in points])
 
+    @staticmethod
+    def getSelectedCurve():
+        """The first selected NURBS curve's transform (long name), or None. A
+        selected curve shape counts as its transform."""
+        for node in cmds.ls(selection = True, long = True) or []:
+            if cmds.nodeType(node) == "nurbsCurve":
+                node = cmds.listRelatives(node, parent = True, fullPath = True)[0]
+            shapes = cmds.listRelatives(node, shapes = True, type = "nurbsCurve", fullPath = True) or []
+            if shapes:
+                return node
+        return None
+
+    @staticmethod
+    def getCurveShape(curve) -> str:
+        return (cmds.listRelatives(curve, shapes = True, type = "nurbsCurve", fullPath = True) or [curve])[0]
+
+    @staticmethod
+    def isCurvePeriodic(curve) -> bool:
+        #form: 0 open, 1 closed, 2 periodic - closed curves have no start and end either
+        return cmds.getAttr(MC.getCurveShape(curve) + ".form") != 0
+
+    @staticmethod
+    def getCurveLength(curve) -> float:
+        return cmds.arclen(MC.getCurveShape(curve))
+
+    @staticmethod
+    def getRebuiltCurvePoints(curve, point_count, degree) -> list:
+        """The world positions of the control points of `curve` rebuilt as a
+        uniform curve of `point_count` control points. Works on a copy - the
+        curve itself is not touched."""
+        copy = cmds.duplicate(curve, name = "roseCurveRebuild_tmp", returnRootsOnly = True)[0]
+        try:
+            #a uniform rebuild: spans + degree control points
+            cmds.rebuildCurve(copy, rebuildType = 0, spans = point_count - degree, degree = degree,
+                              keepRange = 0, keepEndPoints = True, keepTangents = False,
+                              replaceOriginal = True, constructionHistory = False)
+            shape = MC.getCurveShape(copy)
+            return [tuple(cmds.pointPosition("%s.cv[%d]" % (shape, index), world = True))
+                    for index in range(point_count)]
+        finally:
+            cmds.delete(copy)
+
+    @staticmethod
+    def getMaximumCurveDeviation(source, target, samples = 200) -> float:
+        """How far `source` strays from `target` at worst - sampled evenly along
+        source and measured to the nearest point of target."""
+        import maya.api.OpenMaya as om #type: ignore
+        def curveFn(curve):
+            return om.MFnNurbsCurve(om.MSelectionList().add(MC.getCurveShape(curve)).getDagPath(0))
+        source_fn, target_fn = curveFn(source), curveFn(target)
+        length = source_fn.length()
+        worst = 0.0
+        for index in range(samples):
+            parameter = source_fn.findParamFromLength(length * index / float(samples - 1))
+            point = source_fn.getPointAtParam(parameter, om.MSpace.kWorld)
+            closest, _ = target_fn.closestPoint(point, space = om.MSpace.kWorld)
+            worst = max(worst, point.distanceTo(closest))
+        return worst
+
+    @staticmethod
+    def getObjectWorldTranslation(object_name) -> list:
+        return cmds.xform(object_name, query = True, translation = True, worldSpace = True)
+
+    @staticmethod
+    def setObjectWorldTranslation(object_name, position) -> None:
+        cmds.xform(object_name, translation = tuple(position), worldSpace = True)
+
 # Maya Constraints
 #`skip` takes lower-case axes ("x", "z") left undriven. Only passed on to Maya
 #when there is something to skip - an empty list is not a valid flag value.

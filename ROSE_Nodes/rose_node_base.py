@@ -1192,10 +1192,13 @@ class ROSE_Node(NodeEditorNode):
         #complete, which surfaces as a Maya error deep inside a command rather
         #than as a missing attribute - so it is checked for up front rather than
         #caught.
-        if not self.isBuiltInScene():
-            log.info("%s:: --connectComponentIsolated:: '%s' is not in the scene - "
-                     "building the component first"
-                     % (self.__class__.__name__, self.getComponentFullPrefix()))
+        #built first if it is missing - or out of date: a component flagged for a
+        #rebuild still has its old objects in the scene, and connecting those
+        #would wire up the build the change was meant to replace
+        if not self.isBuiltInScene() or self.properties.needs_rebuild:
+            log.info("%s:: --connectComponentIsolated:: '%s' is %s - building the component first"
+                     % (self.__class__.__name__, self.getComponentFullPrefix(),
+                        "flagged for a rebuild" if self.isBuiltInScene() else "not in the scene"))
             if not self.componentBuild():
                 return False
 
