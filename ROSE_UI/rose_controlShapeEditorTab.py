@@ -5,7 +5,8 @@ from PySide6.QtCore import Qt, QSize #type: ignore
 from PySide6.QtGui import QIcon, QColor #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.ROSE_Controls import control_shape_library #type: ignore
-from MNRB.ROSE_Controls.control_shape_library import GENERAL_LIBRARY_ID #type: ignore
+from MNRB.ROSE_Controls.control_shape_library import (GENERAL_LIBRARY_ID, DEFAULT_FACING, #type: ignore
+                                                      FACING_AXES, getFacing)
 from MNRB.ROSE_UI.control_shape_Editor_UI.control_shape_preview import buildShapePreviewPixmap, LINE_COLOR #type: ignore
 from MNRB.ROSE_UI.rose_ui_utils import findProjectGraphFile #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import ExpandableGroupsMixin #type: ignore
@@ -20,9 +21,10 @@ PREVIEW_SIZE = 96
 CONTROL_ID_ROLE = Qt.ItemDataRole.UserRole
 CONTROL_NAME_ROLE = Qt.ItemDataRole.UserRole + 1
 
-#the two editors on a row, and the header above them, share these
+#the editors on a row, and the header above them, share these
 SHAPE_COLUMN_WIDTH = 170
 SCALE_COLUMN_WIDTH = 72
+FACING_COLUMN_WIDTH = 64
 ROW_HEIGHT = 30
 
 #rig library shapes are drawn in their own colour, so the two kinds tell apart
@@ -74,9 +76,9 @@ class AddShapeDialog(QtWidgets.QDialog):
 
 
 class ControlShapeRow(QtWidgets.QWidget):
-    """One control: its name, then the shape and scale editors."""
+    """One control: its name, then the shape, scale and facing editors."""
 
-    def __init__(self, control_name, shape_combo, scale_spinbox, parent = None):
+    def __init__(self, control_name, shape_combo, scale_spinbox, facing_combo, parent = None):
         super().__init__(parent)
         #the list's own selection highlight shows through
         self.setAttribute(Qt.WA_TranslucentBackground, True)
@@ -92,8 +94,10 @@ class ControlShapeRow(QtWidgets.QWidget):
 
         shape_combo.setFixedWidth(SHAPE_COLUMN_WIDTH)
         scale_spinbox.setFixedWidth(SCALE_COLUMN_WIDTH)
+        facing_combo.setFixedWidth(FACING_COLUMN_WIDTH)
         layout.addWidget(shape_combo)
         layout.addWidget(scale_spinbox)
+        layout.addWidget(facing_combo)
 
 
 class ControlShapeList(ExpandableGroupsMixin, QtWidgets.QListWidget):
@@ -128,7 +132,7 @@ class ControlShapeList(ExpandableGroupsMixin, QtWidgets.QListWidget):
 
 
 def buildColumnHeader():
-    """"Control / Shape / Scale" over the list, lined up with the row editors."""
+    """"Control / Shape / Scale / Facing" over the list, lined up with the row editors."""
     header = QtWidgets.QWidget()
     layout = QtWidgets.QHBoxLayout(header)
     #the rows' own right margin, plus the list's frame and its scrollbar
@@ -136,7 +140,8 @@ def buildColumnHeader():
         QtWidgets.QStyle.PM_ScrollBarExtent), 2)
     layout.setSpacing(6)
 
-    for text, width in (("Control", None), ("Shape", SHAPE_COLUMN_WIDTH), ("Scale", SCALE_COLUMN_WIDTH)):
+    for text, width in (("Control", None), ("Shape", SHAPE_COLUMN_WIDTH), ("Scale", SCALE_COLUMN_WIDTH),
+                        ("Facing", FACING_COLUMN_WIDTH)):
         label = QtWidgets.QLabel(text)
         label.setStyleSheet("color: #999999; font-weight: bold;")
         if width is None:
@@ -166,7 +171,7 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
         self.is_tab_widget = True
         self.node_editor = node_editor
 
-        #{str(control id): {"shape": name or None, "library": id, "scale": float,
+        #{str(control id): {"shape": name or None, "library": id, "scale": float, "facing": axis,
         #"label": control name}}. The label is only for reading the saved file -
         #the id is what matches.
         self.assignments = {}
@@ -346,7 +351,9 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
                                if assignment.get("shape") else None)
                 row = ControlShapeRow(control_name,
                                       self.buildShapeCombo(control_id, control_name, current_key, shape_entries),
-                                      self.buildScaleSpinBox(control_id, control_name, assignment.get("scale", 1.0)))
+                                      self.buildScaleSpinBox(control_id, control_name, assignment.get("scale", 1.0)),
+                                      self.buildFacingCombo(control_id, control_name,
+                                                            getFacing(assignment.get("facing"))))
 
                 item = self.control_list.addControlRow(group_item, control_id, control_name, row)
                 if control_id in selected_ids:
@@ -387,11 +394,26 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
             lambda value: self.setAssignment(control_id, control_name, scale = value))
         return spinbox
 
+    def buildFacingCombo(self, control_id, control_name, current_facing):
+        combo = QtWidgets.QComboBox()
+        combo.setFocusPolicy(Qt.StrongFocus)
+        combo.wheelEvent = lambda event: event.ignore()
+        for axis in FACING_AXES:
+            combo.addItem(axis, axis)
+        combo.setCurrentIndex(max(combo.findData(current_facing), 0))
+        combo.setToolTip("The control axis the shape's front points along. A shape's front is the way it "
+                         "faced when stored - its +Y, the way a circle drawn on the grid faces - so +Y "
+                         "draws it as stored, and one stored shape serves a control facing any way")
+        combo.currentIndexChanged.connect(
+            lambda _index, combo = combo: self.setAssignment(control_id, control_name, facing = combo.currentData()))
+        return combo
+
 # Assigning
 
     _UNCHANGED = object()
 
-    def setAssignment(self, control_id, control_name, shape_key = _UNCHANGED, scale = _UNCHANGED):
+    def setAssignment(self, control_id, control_name, shape_key = _UNCHANGED, scale = _UNCHANGED,
+                      facing = _UNCHANGED):
         """shape_key: a makeShapeKey() string, or None for the default shape."""
         assignment = dict(self.assignments.get(control_id, {"shape": None, "scale": 1.0}))
         if shape_key is not self._UNCHANGED:
@@ -402,10 +424,13 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
                 assignment.pop("library", None)
         if scale is not self._UNCHANGED:
             assignment["scale"] = float(scale)
+        if facing is not self._UNCHANGED:
+            assignment["facing"] = getFacing(facing)
         assignment["label"] = control_name
 
-        #the default shape at the default scale is no assignment at all
-        if not assignment["shape"] and abs(assignment["scale"] - 1.0) < 1e-9:
+        #the default shape at the default scale, facing as stored, is no assignment at all
+        if not assignment["shape"] and abs(assignment["scale"] - 1.0) < 1e-9 \
+                and getFacing(assignment.get("facing")) == DEFAULT_FACING:
             self.assignments.pop(control_id, None)
         else:
             self.assignments[control_id] = assignment
@@ -602,7 +627,9 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
     def serialize(self):
         return OrderedDict([
             ('id', self.id),
-            ('assignments', self.assignments),
+            #copies: the live dictionary handed out would change under whoever
+            #holds the serialized data the next time an assignment is edited
+            ('assignments', {control_id: dict(assignment) for control_id, assignment in self.assignments.items()}),
         ])
 
     def deserialize(self, data, hashmap = {}, restore_id = True):

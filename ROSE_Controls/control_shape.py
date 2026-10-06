@@ -9,15 +9,16 @@ class control_shape():
         self.base_path = os.path.dirname(__file__)
 
     def resolveShape(self):
-        """(shape file, size) for this control: its library shape if the Control
-        Shapes tab assigned one and shapes are enabled, the default otherwise -
-        either way at the component's control size times any scale override."""
-        library_path, scale = control_shape_library.resolveControlShape(self.control.id)
+        """(shape file, size, facing) for this control: its library shape if the
+        Control Shapes tab assigned one and shapes are enabled, the default
+        otherwise - either way at the component's control size times any scale
+        override, turned to any facing override."""
+        library_path, scale, facing = control_shape_library.resolveControlShape(self.control.id)
         path = library_path or os.path.join(self.base_path, self.control.shape_path)
-        return path, self.control.node.properties.control_size * scale
+        return path, self.control.node.properties.control_size * scale, facing
 
     def draw(self):
-        path, size = self.resolveShape()
+        path, size, facing = self.resolveShape()
 
         #picks the curve object out of the file by type rather than taking
         #whichever node the import listed first
@@ -25,8 +26,9 @@ class control_shape():
 
         self.updateColor(self.control.node.properties.component_color.value)
 
-        MC.scaleTransform(self.control.name, [size, size, size])
-        MC.applyTransformScale(self.control.name)
+        #baked into the points while the transform is still fresh - before the
+        #component places it, so the turn is in the control's own space
+        control_shape_library.bakeShapeSizeAndFacing(self.control.name, size, facing)
 
         MC.deleteNodeHistory(self.control.name)
 
@@ -39,8 +41,8 @@ class control_shape():
         if not self.control.exists():
             return False
 
-        path, size = self.resolveShape()
-        control_shape_library.replaceControlShapes(self.control.name, path, size)
+        path, size, facing = self.resolveShape()
+        control_shape_library.replaceControlShapes(self.control.name, path, size, facing)
         self.updateColor(self.control.node.properties.component_color.value)
         return True
 

@@ -250,12 +250,14 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
 
         mirrored_guide_Positions = []
         node_component_names = []
+        node_old_side_prefixes = []
 
         # change the side prefix of the nodes
         for index, node_data in enumerate(data["nodes"]):
             node_component_name = node_data['properties']['component_name']
             node_component_names.append(node_component_name)
             node_old_side_prefix = node_data['properties']['component_side_prefix']
+            node_old_side_prefixes.append(node_old_side_prefix)
 
             # change the side prefix of each node_data
             if node_old_side_prefix == ROSE_Names.left.prefix:
@@ -285,9 +287,26 @@ class rose_NodeEditorTab(QtWidgets.QMainWindow):
 
                 new_node.guideBuild()
 
+                #a component whose guides are not free transforms mirrors itself -
+                #the cable's guides ride its curve, so it mirrors the curve's shape
+                if hasattr(new_node, "applyMirroredGuides"):
+                    source_node = self.findSourceNode(node_component_name, node_old_side_prefixes[index])
+                    if source_node is not None:
+                        new_node.applyMirroredGuides(source_node)
+                    continue
+
                 for guide_index, guide in enumerate(new_node.guides):
                     guide.setPosition(mirrored_guide_Positions[index][guide_index])
  
+    def findSourceNode(self, component_name, side_prefix):
+        """The node a mirror was made from - matched on side as well as name,
+        since a left and a right component can share a name."""
+        for node in self.central_widget.scene.nodes:
+            if (node.properties.component_name == component_name
+                    and node.properties.component_side_prefix == side_prefix):
+                return node
+        return None
+
     def refreshNodeList(self):
         """Rebuild the palette after the registry changed."""
         self.node_list_widget.clear()

@@ -435,6 +435,13 @@ class MC:
         cmds.setAttr(f"{object}.{attribute_name}", value1, value2, value3, type="double3")
 
     @staticmethod
+    def lockAttributes(node_name, attribute_names):
+        """Lock these channels, leaving them visible - e.g. a channel driven by
+        a connection that should show its value but refuse the move tool."""
+        for attribute_name in attribute_names:
+            cmds.setAttr(f"{node_name}.{attribute_name}", lock = True)
+
+    @staticmethod
     def lockAndHideAttributes(node_name, attribute_names):
         """Lock and hide just these channels, e.g. ["translateX", "rotateY"]."""
         for attribute_name in attribute_names:
@@ -1083,8 +1090,16 @@ class MC:
 
 # Skinning Functions
     @staticmethod
-    def getViewportSelection() -> list:
-        return cmds.ls(sl=True)
+    def getViewportSelection(long_names = False) -> list:
+        #long names to restore a selection later: a short name can stop being
+        #unique while the selection is away
+        return cmds.ls(sl=True, long=long_names)
+
+    @staticmethod
+    def restoreSelection(selection) -> None:
+        """Select exactly these again - whichever of them still exist."""
+        surviving = [node for node in selection if cmds.objExists(node)]
+        cmds.select(surviving, replace = True) if surviving else cmds.select(clear = True)
 
     @staticmethod
     def objectIsMesh(name) -> bool:

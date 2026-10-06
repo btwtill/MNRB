@@ -23,15 +23,15 @@ CONTROL_MODE_BLENDED = "blended"
 CONTROL_MODE_FK = "fk"
 CONTROL_MODE_LABELS = [(CONTROL_MODE_BLENDED, "Blended between ends"), (CONTROL_MODE_FK, "FK chain")]
 
-#spacing of a fresh cable's shape guides, along X
-GUIDE_SPACING = 5.0
+#spacing of a fresh cable's shape points, along X
+SHAPE_POINT_SPACING = 5.0
 
-#tag on the guide preview's DG nodes - separate from the build tag, so a
-#component build does not take the preview with it
+#tag on the guide stage's DG nodes - separate from the build tag, so a
+#component build does not take them with it
 GUIDE_PREVIEW_TAG = "rose_guide_preview"
-#where the controls will sit, drawn on the preview curve
-CONTROL_MARKER_COLOR = (1.0, 0.65, 0.2)
-CONTROL_MARKER_SIZE = 0.6
+#the shape points: locators, picked and moved by hand to shape the curve
+SHAPE_POINT_COLOR = (0.35, 0.8, 1.0)
+SHAPE_POINT_SIZE = 0.8
 
 #the position sliders' resolution along the cable
 POSITION_SLIDER_STEPS = 1000
@@ -59,6 +59,10 @@ class CableProperties(ROSE_NodeProperties):
         #where each control sits along the cable, as a share of its length. The
         #ends are always 0 and 1; the middle ones slide between their neighbours
         self.control_fractions = getEvenFractions(self.DEFAULT_CONTROL_COUNT)
+        #the shape points' world positions, [x, y, z] each. Saved with the
+        #project: unlike guides, the locators are not something the guide
+        #rebuild knows to carry over, and a fresh scene would lose the shape
+        self.shape_points = []
         self.position_sliders = []
         super().__init__(node)
 
@@ -80,16 +84,17 @@ class CableProperties(ROSE_NodeProperties):
         self.shape_point_spinbox = QSpinBox()
         self.shape_point_spinbox.setRange(2, 64)
         self.shape_point_spinbox.setValue(self.shape_point_count)
-        self.shape_point_spinbox.setToolTip("Guides that shape the cable's curve - its control points. More of "
-                                            "them, a more detailed shape. They are for shaping only: the rig's "
-                                            "controls sit on the finished curve")
+        self.shape_point_spinbox.setToolTip("Locators that shape the cable's curve - its control points. More "
+                                            "of them, a more detailed shape; changing the count keeps the "
+                                            "current shape. They are for shaping only: the controls sit on the "
+                                            "finished curve")
         self.shape_point_spinbox.valueChanged.connect(self.updateShapePointCount)
         shape_row.addWidget(self.shape_point_spinbox)
         self.layout.addLayout(shape_row)
 
         fit_row = QHBoxLayout()
         self.fit_button = QPushButton("Fit to Selected Curve")
-        self.fit_button.setToolTip("Place the shape guides from a curve selected in the viewport - any curve, "
+        self.fit_button.setToolTip("Place the shape points from a curve selected in the viewport - any curve, "
                                    "any number of points. It is rebuilt to the Shape Points count; the "
                                    "selected curve itself is left untouched")
         self.fit_button.clicked.connect(self.onFitToSelectedCurve)
@@ -111,9 +116,9 @@ class CableProperties(ROSE_NodeProperties):
         self.control_count_spinbox = QSpinBox()
         self.control_count_spinbox.setRange(2, 32)
         self.control_count_spinbox.setValue(self.control_count)
-        self.control_count_spinbox.setToolTip("Animation controls along the shaped curve - the markers on it in "
-                                              "the guide stage. The first and last are the cable's ends; the "
-                                              "ones between are placed with the sliders below")
+        self.control_count_spinbox.setToolTip("Animation controls along the shaped curve - the guides on it. The "
+                                              "first and last are the cable's ends; the ones between are slid "
+                                              "along it with the sliders below")
         self.control_count_spinbox.valueChanged.connect(self.updateControlCount)
         control_row.addWidget(self.control_count_spinbox)
         self.layout.addLayout(control_row)
@@ -164,8 +169,8 @@ class CableProperties(ROSE_NodeProperties):
         #a new count starts evenly spaced - the old positions were for other controls
         self.control_fractions = getEvenFractions(value)
         self.rebuildPositionSliders()
-        #the markers are redrawn straight away; the built cable needs a rebuild
-        self.node.refreshGuidePreview()
+        #the control guides are redrawn straight away; the built cable needs a rebuild
+        self.node.refreshGuideStage()
         self.setNeedsRebuild(True, "Control count changed")
         self.setHasBeenModified()
 
@@ -228,8 +233,8 @@ class CableProperties(ROSE_NodeProperties):
         fractions[index] = fraction
         self.control_fractions = fractions
         value_label.setText("%.2f" % fraction)
-        #the marker slides along with it, live
-        self.node.updateControlMarker(index, fraction)
+        #the control's guide slides along the curve with it, live
+        self.node.updateControlGuide(index, fraction)
 
     def onControlPositionReleased(self):
         self.setNeedsRebuild(True, "Control positions changed")
@@ -238,7 +243,8 @@ class CableProperties(ROSE_NodeProperties):
     def onSpaceControlsEvenly(self):
         self.control_fractions = getEvenFractions(self.control_count)
         self.rebuildPositionSliders()
-        self.node.refreshGuidePreview()
+        for index, fraction in enumerate(self.control_fractions):
+            self.node.updateControlGuide(index, fraction)
         self.setNeedsRebuild(True, "Control positions changed")
         self.setHasBeenModified()
 
@@ -252,9 +258,15 @@ class CableProperties(ROSE_NodeProperties):
             self.setHasBeenModified()
 
     def onFlipDirection(self):
-        success, message = self.node.flipShapeGuides()
+        success, message = self.node.flipShapePoints()
         self.showFitResult(message, success)
         if success:
+            #the controls keep their places on the cable - measured from the
+            #other end now
+            self.control_fractions = [1.0 - fraction for fraction in reversed(self.getControlFractions())]
+            self.rebuildPositionSliders()
+            for index, fraction in enumerate(self.control_fractions):
+                self.node.updateControlGuide(index, fraction)
             self.setNeedsRebuild(True, "Cable direction flipped")
             self.setHasBeenModified()
 
@@ -267,8 +279,9 @@ class CableProperties(ROSE_NodeProperties):
         if value == self.shape_point_count:
             return
         self.shape_point_count = value
-        #one guide per shape point. A component build redraws the guides as well,
-        #so it is the one step that applies this
+        #redrawn straight away, resampled from the current shape - the curve
+        #keeps its course with more or fewer points to hold it
+        self.node.refreshGuideStage()
         self.setNeedsRebuild(True, "Shape point count changed")
         self.setHasBeenModified()
 
@@ -295,6 +308,7 @@ class CableProperties(ROSE_NodeProperties):
         result_data["control_mode"] = self.control_mode
         result_data["stretch_by_default"] = self.stretch_by_default
         result_data["control_fractions"] = self.getControlFractions()
+        result_data["shape_points"] = [list(point) for point in self.node.getShapePointPositions()]
         return result_data
 
     def deserialize(self, data, hashmap = {}, restore_id = True):
@@ -309,6 +323,9 @@ class CableProperties(ROSE_NodeProperties):
         self.stretch_by_default = data.get("stretch_by_default", True)
         #cables saved before controls could be placed were evenly spaced
         self.control_fractions = data.get("control_fractions", getEvenFractions(self.control_count))
+        #older saves kept the shape in their guides only - picked up from the
+        #scene on the next guide build, see Cable.collectShapePoints
+        self.shape_points = data.get("shape_points", [])
 
         self.is_silent = True
         self.deform_count_spinbox.setValue(self.deform_count)
@@ -384,7 +401,8 @@ class Cable(ROSE_Node):
 # Naming
 
     def getGuideNames(self):
-        return ["shape%d" % index for index in range(self.properties.shape_point_count)]
+        """One guide per control - where it will sit on the cable."""
+        return ["point%d" % index for index in range(self.properties.control_count)]
 
     def getControlFractions(self):
         """Where the controls sit, as shares of the curve's length."""
@@ -394,31 +412,130 @@ class Cable(ROSE_Node):
         count = self.properties.deform_count
         return ["seg%d" % index for index in range(count - 1)] + [self.end_name]
 
+    def getShapePointName(self, index):
+        return self.getComponentFullPrefix() + "shape%d_loc" % index
+
 # Guides
 
     def guideBuild(self):
-        #the preview's DG nodes are not under the guide hierarchy, so the rebuild
-        #that deletes it does not take them along
+        """The guide stage: shape points, the curve through them, and a guide
+        on it for every control.
+
+        The shape points are locators - they are moved by hand to shape the
+        curve, and are only that. The guides show where each control will sit
+        and which way it will face, carried along the curve by the position
+        sliders; they cannot be pulled off it.
+        """
+        #read before the base class deletes the guide group they live in
+        shape_points = self.collectShapePoints()
         self.removeGuidePreview()
 
         if not super().guideBuild():
             return False
 
-        #Independent handles, all directly under the component's guide group:
-        #moving one reshapes the curve around it without dragging the rest, and
-        #it is what lets the preview curve read their translate as its own CVs
-        for index, guide_name in enumerate(self.getGuideNames()):
+        self.properties.shape_points = shape_points
+        self.buildShapePoints(shape_points)
+        self.buildPreviewCurves()
+
+        for guide_name in self.getGuideNames():
             new_guide = guide(self, guide_name, None)
             MC.parentObject(new_guide.name, self.guide_component_hierarchy)
             MC.clearTransforms(new_guide.name)
-            MC.addTranslation(new_guide.name, GUIDE_SPACING * index, 0.0, 0.0)
+        self.attachControlGuides(shape_points)
 
-        #a changed count meets positions stored for the old one; the first ones
-        #keep theirs, any new ones their default placement
-        self.reconstructGuides()
-
-        self.buildGuidePreview()
+        #no reconstructGuides(): the guides' places come from the sliders, and
+        #they are driven along the curve - restoring a stored position onto
+        #them would only fight that
         return True
+
+    def isGuideStageBuilt(self):
+        return bool(self.guide_component_hierarchy) and MC.objectExists(self.guide_component_hierarchy) \
+            and self.isAllGuidesExistend()
+
+    def refreshGuideStage(self):
+        """Redraw the guide stage with the current counts, if it is up.
+
+        Keeps the viewport selection: this runs from the properties panel, in
+        the middle of the user's work, and creating the stage's nodes selects
+        them - a curve picked for Fit was lost to a Shape Points change.
+        """
+        if not self.isGuideStageBuilt():
+            return
+        selection = MC.getViewportSelection(long_names = True)
+        self.guideBuild()
+        MC.restoreSelection(selection)
+
+# Shape points
+
+    def readLiveShapePoints(self):
+        """The shape point locators' positions, if there are any in the scene."""
+        points = []
+        while MC.objectExists(self.getShapePointName(len(points))):
+            points.append(tuple(MC.getObjectWorldTranslation(self.getShapePointName(len(points)))))
+        return points if len(points) >= 2 else None
+
+    def readLegacyShapeGuides(self):
+        """Cables built before the swap shaped their curve with guides named
+        shape0, shape1... - read once, the first time such a cable meets the
+        new guide stage."""
+        legacy = [g for g in self.guides if g.guide_name.startswith("shape") and g.exists()]
+        if len(legacy) < 2:
+            return None
+        return [tuple(g.getPosition()[12:15]) for g in legacy]
+
+    def collectShapePoints(self):
+        """The shape, from wherever it is: the locators in the scene, a cable
+        from before the swap, what was saved with the project - or a straight
+        line for a fresh cable. Resampled to the Shape Points count."""
+        points = self.readLiveShapePoints() or self.readLegacyShapeGuides()
+        if points is None and len(self.properties.shape_points) >= 2:
+            points = [tuple(point) for point in self.properties.shape_points]
+        if points is None:
+            points = [(SHAPE_POINT_SPACING * index, 0.0, 0.0)
+                      for index in range(self.properties.shape_point_count)]
+        return self.resamplePoints(points, self.properties.shape_point_count)
+
+    def resamplePoints(self, points, count):
+        """The same curve held by `count` control points instead."""
+        if len(points) == count:
+            return [tuple(point) for point in points]
+        temporary = MC.createCurveFromPoints("roseCableResample_tmp", points,
+                                             degree = self.getCurveDegree(len(points)))
+        try:
+            return MC.getRebuiltCurvePoints(temporary, count, self.getCurveDegree(count))
+        finally:
+            MC.deleteNode(temporary)
+
+    def getShapePointPositions(self):
+        """The current shape - live from the scene when the locators are up."""
+        return self.readLiveShapePoints() or [tuple(point) for point in self.properties.shape_points]
+
+    def setShapePoints(self, points):
+        """Reshape the cable: store the points and move the locators there."""
+        points = [tuple(point) for point in points]
+        self.properties.shape_points = points
+        live = self.readLiveShapePoints()
+        if live is not None and len(live) == len(points):
+            for index, point in enumerate(points):
+                MC.setObjectWorldTranslation(self.getShapePointName(index), point)
+        elif self.isGuideStageBuilt():
+            self.guideBuild()
+
+    def buildShapePoints(self, points):
+        self.shape_point_locators = []
+        for index, point in enumerate(points):
+            locator = MC.createSpaceLocator((0, 0, 0), self.getShapePointName(index), SHAPE_POINT_COLOR)
+            #directly under the guide group, so the preview curve can read its
+            #translate as its own control point
+            MC.parentObject(locator, self.guide_component_hierarchy)
+            MC.clearTransforms(locator)
+            MC.setObjectWorldTranslation(locator, point)
+            MC.setLocatorLocalScale(locator, SHAPE_POINT_SIZE * self.properties.guide_size)
+            self.shape_point_locators.append(locator)
+
+    def getShapePoints(self):
+        """The shape as vectors, for the build."""
+        return [om.MVector(*point) for point in self.collectShapePoints()]
 
 # Guide preview
 
@@ -429,97 +546,82 @@ class Cable(ROSE_Node):
         MC.addTag(maya_node, GUIDE_PREVIEW_TAG, self.id)
         return maya_node
 
-    def buildGuidePreview(self):
-        """The cable's curve, live through the shape guides, and a marker on it
-        wherever a control will go."""
-        if not self.guides or len(self.guides) < 2:
-            return
+    def buildPreviewCurves(self):
+        """The cable's curve, live through the shape points, and its hull."""
         prefix = self.getComponentFullPrefix()
-        hierarchy = self.guide_component_hierarchy
-
-        #the hull - which handle pulls where - thin and straight
+        #the hull - which point pulls where - thin and straight
         self.preview_hull = self.createPreviewCurve(prefix + "cableHull_preview", degree = 1)
+        MC.setDisplayType(self.preview_hull, "template")
         #and the curve itself
         self.preview_curve = self.createPreviewCurve(prefix + "cable_preview",
-                                                     degree = self.getCurveDegree(len(self.guides)))
-        MC.setDisplayType(self.preview_hull, "template")
-
-        self.control_markers = []
-        self.control_marker_paths = []
-        preview_shape = MC.getObjectShapeNode(self.preview_curve)
-        for index, fraction in enumerate(self.getControlFractions()):
-            marker = MC.createSpaceLocator((0, 0, 0), prefix + "controlMarker%d_preview" % index,
-                                           CONTROL_MARKER_COLOR)
-            MC.parentObject(marker, hierarchy)
-            MC.clearTransforms(marker)
-            MC.setLocatorLocalScale(marker, CONTROL_MARKER_SIZE)
-            #shows, but is not something to pick up and move
-            MC.setDisplayType(marker, "reference")
-
-            #the curve's local space is the guide group's, and so is the marker's
-            path = self.tagPreviewNode(MC.createMotionPathNode(prefix + "controlMarker%dPreview" % index))
-            MC.connectAttribute(preview_shape, "local", path, "geometryPath")
-            MC.setAttribute(path, "fractionMode", 1)
-            MC.setAttribute(path, "uValue", fraction)
-            MC.connectAttribute(path, "allCoordinates", marker, "translate", force = True)
-            self.control_markers.append(marker)
-            self.control_marker_paths.append(path)
-
-    def updateControlMarker(self, index, fraction):
-        """Slide one marker along the preview, without rebuilding anything."""
-        paths = getattr(self, "control_marker_paths", [])
-        if index < len(paths) and MC.objectExists(paths[index]):
-            MC.setAttribute(paths[index], "uValue", fraction)
+                                                     degree = self.getCurveDegree(len(self.shape_point_locators)))
 
     def createPreviewCurve(self, name, degree):
-        """A curve under the guide group whose control points are the guides'
-        own translate - the guides sit directly under the same group, so no
-        conversion is needed, and nothing outside the hierarchy is created."""
-        points = [MC.getTranslation(component_guide.name) for component_guide in self.guides]
+        """A curve under the guide group whose control points are the shape
+        point locators' own translate - they sit directly under the same
+        group, so no conversion is needed."""
+        points = [MC.getTranslation(locator) for locator in self.shape_point_locators]
         curve = MC.createCurveFromPoints(name, points, degree = degree)
         MC.parentObject(curve, self.guide_component_hierarchy)
         MC.clearTransforms(curve)
         curve_shape = MC.getObjectShapeNode(curve)
-        for index, component_guide in enumerate(self.guides):
-            MC.connectAttribute(component_guide.name, "translate", curve_shape, "controlPoints[%d]" % index,
-                                force = True)
+        for index, locator in enumerate(self.shape_point_locators):
+            MC.connectAttribute(locator, "translate", curve_shape, "controlPoints[%d]" % index, force = True)
         MC.setDisplayType(curve, "reference")
         return curve
 
-    def refreshGuidePreview(self):
-        """Redraw the preview with the current counts, if the guides are up."""
-        if self.guides and all(component_guide.exists() for component_guide in self.guides):
-            for name in [getattr(self, "preview_hull", None), getattr(self, "preview_curve", None)] \
-                    + list(getattr(self, "control_markers", [])):
-                if name and MC.objectExists(name):
-                    MC.deleteObjectWithHierarchy(name)
-            self.removeGuidePreview()
-            self.buildGuidePreview()
+    def attachControlGuides(self, shape_points):
+        """Each guide rides the preview curve at its control's position,
+        facing along it - so it shows where the control will be and how it
+        will be turned, and follows any reshaping live."""
+        prefix = self.getComponentFullPrefix()
+        preview_shape = MC.getObjectShapeNode(self.preview_curve)
+        rest_up = self.getRestUp([om.MVector(*point) for point in shape_points])
+
+        self.control_guide_paths = []
+        for index, (component_guide, fraction) in enumerate(zip(self.guides, self.getControlFractions())):
+            #the curve's local space is the guide group's, and so is the guide's
+            path = self.tagPreviewNode(MC.createMotionPathNode(prefix + "point%dGuidePath" % index))
+            MC.connectAttribute(preview_shape, "local", path, "geometryPath")
+            MC.setAttribute(path, "fractionMode", 1)
+            MC.setAttribute(path, "uValue", fraction)
+            MC.setAttribute(path, "follow", 1)
+            MC.setAttribute(path, "frontAxis", 0)        #X along the cable, as the control
+            MC.setAttribute(path, "upAxis", 2)
+            MC.setAttribute(path, "worldUpType", 3)
+            for axis, value in zip("XYZ", (rest_up.x, rest_up.y, rest_up.z)):
+                MC.setAttribute(path, "worldUpVector" + axis, value)
+            MC.connectAttribute(path, "allCoordinates", component_guide.name, "translate", force = True)
+            MC.connectAttribute(path, "rotate", component_guide.name, "rotate", force = True)
+            #locked as well as driven: a connection alone still lets the move
+            #tool drag the guide off the curve until the next evaluation snaps
+            #it back. The sliders are how it moves.
+            MC.lockAttributes(component_guide.name, ["translateX", "translateY", "translateZ",
+                                                     "rotateX", "rotateY", "rotateZ"])
+            self.control_guide_paths.append(path)
+
+    def updateControlGuide(self, index, fraction):
+        """Slide one control's guide along the curve, without rebuilding anything."""
+        paths = getattr(self, "control_guide_paths", [])
+        if index < len(paths) and MC.objectExists(paths[index]):
+            MC.setAttribute(paths[index], "uValue", fraction)
 
 # Fitting to a curve
 
     def fitShapeGuidesToSelectedCurve(self):
-        """Place the shape guides on a copy of the selected curve, rebuilt as a
-        uniform curve with exactly as many control points as there are guides.
-        Returns (success, message)."""
+        """Place the shape points on a copy of the selected curve, rebuilt as a
+        uniform curve with exactly as many control points. Returns (success,
+        message)."""
         source = MC.getSelectedCurve()
         if source is None:
             return False, "Select a curve in the viewport first."
         if MC.isCurvePeriodic(source):
             return False, "'%s' is closed - a cable needs a start and an end." % source.split("|")[-1]
 
-        #the guides for the current Shape Points count, if they are not up yet
-        if len(self.guides) != self.properties.shape_point_count \
-                or not all(component_guide.exists() for component_guide in self.guides):
-            if not self.guideBuild():
-                return False, "The guides could not be built."
-
-        count = len(self.guides)
+        count = self.properties.shape_point_count
         degree = self.getCurveDegree(count)
         points = MC.getRebuiltCurvePoints(source, count, degree)
-
-        for component_guide, point in zip(self.guides, points):
-            MC.setObjectWorldTranslation(component_guide.name, point)
+        self.setShapePoints(points)
 
         deviation = self.measureFit(source, points, degree)
         message = "Fitted to '%s' - off by at most %.3f" % (source.split("|")[-1], deviation)
@@ -538,17 +640,21 @@ class Cable(ROSE_Node):
         finally:
             MC.deleteNode(fitted)
 
-    def flipShapeGuides(self):
-        """Reverse the guides' order along the cable - the start becomes the end."""
-        if not self.guides or not all(component_guide.exists() for component_guide in self.guides):
+    def flipShapePoints(self):
+        """Reverse the shape points' order - the start becomes the end."""
+        points = self.getShapePointPositions()
+        if len(points) < 2:
             return False, "Build the guides first."
-        positions = [MC.getObjectWorldTranslation(component_guide.name) for component_guide in self.guides]
-        for component_guide, point in zip(self.guides, reversed(positions)):
-            MC.setObjectWorldTranslation(component_guide.name, point)
+        self.setShapePoints(list(reversed(points)))
         return True, "Flipped - the cable now starts at the other end."
 
-    def getShapePoints(self):
-        return [om.MVector(*component_guide.getPosition()[12:15]) for component_guide in self.guides]
+# Mirroring
+
+    def applyMirroredGuides(self, source_node):
+        """Called by the editor's Mirror instead of setting guide positions:
+        the guides here are carried along the curve, so it is the shape points
+        that are mirrored - across X, like every other component's guides."""
+        self.setShapePoints([(-x, y, z) for x, y, z in source_node.getShapePointPositions()])
 
 # Build-time geometry
 

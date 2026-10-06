@@ -50,6 +50,21 @@ NORMALIZED_EXTENT = 0.5
 #curve rather than its CVs: a smooth curve's CVs sit well outside it
 PREVIEW_SAMPLES = 48
 
+#Which way a shape faces. A stored shape's front is its +Y - the way a circle
+#drawn on the grid faces, and the default control shapes with it. An assignment
+#names the control axis that front should point along, so one stored shape
+#serves a control facing any way: the rotation that takes +Y onto that axis.
+DEFAULT_FACING = "+Y"
+FACING_ROTATIONS = {
+    "+Y": (0.0, 0.0, 0.0),
+    "-Y": (180.0, 0.0, 0.0),
+    "+X": (0.0, 0.0, -90.0),
+    "-X": (0.0, 0.0, 90.0),
+    "+Z": (90.0, 0.0, 0.0),
+    "-Z": (-90.0, 0.0, 0.0),
+}
+FACING_AXES = ["+X", "-X", "+Y", "-Y", "+Z", "-Z"]
+
 IMPORT_NAMESPACE = "roseShapeImport"
 SHAPE_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
 
@@ -272,7 +287,8 @@ _enabled_provider = None
 
 
 def setAssignments(assignments):
-    """{str(control id): {"shape": name or None, "library": library id, "scale": float}}
+    """{str(control id): {"shape": name or None, "library": library id, "scale": float,
+    "facing": one of FACING_AXES}}
 
     An assignment without "library" is from the general library - what every
     assignment was before rig libraries existed."""
@@ -297,31 +313,39 @@ def isEnabled():
         return True
 
 
-def resolveControlShape(control_id):
-    """(library file or None, scale multiplier) for a control.
+def getFacing(facing):
+    """A known facing, or the default - an assignment from before facings existed
+    has none, and an unknown one is not worth failing a build over."""
+    return facing if facing in FACING_ROTATIONS else DEFAULT_FACING
 
-    None as the file means "draw the default shape". The scale override applies
-    either way, so a control can be resized without a custom shape.
+
+def resolveControlShape(control_id):
+    """(library file or None, scale multiplier, facing) for a control.
+
+    None as the file means "draw the default shape". The scale and facing
+    overrides apply either way, so a control can be resized or turned without a
+    custom shape.
     """
     if not isEnabled():
-        return None, 1.0
+        return None, 1.0, DEFAULT_FACING
 
     assignment = _assignments.get(str(control_id))
     if not assignment:
-        return None, 1.0
+        return None, 1.0, DEFAULT_FACING
 
     scale = float(assignment.get("scale", 1.0))
+    facing = getFacing(assignment.get("facing"))
     shape_name = assignment.get("shape")
     if not shape_name:
-        return None, scale
+        return None, scale, facing
 
     library_id = assignment.get("library") or GENERAL_LIBRARY_ID
     path = getShapeFile(shape_name, library_id)
     if path is None:
         log.warning("CONTROLSHAPELIBRARY:: --resolveControlShape:: shape '%s' is not in the %s library, "
                     "using the default shape" % (shape_name, getLibraryLabel(library_id)))
-        return None, scale
-    return path, scale
+        return None, scale, facing
+    return path, scale, facing
 
 
 # Drawing
@@ -384,15 +408,24 @@ def renameShapesAfter(transform):
         cmds.rename(shape, ":%sShape%s" % (short_name, index if index else ""))
 
 
-def replaceControlShapes(control_transform, path, size):
-    """Swap the curves under an existing control for the ones in path, at size.
+def bakeShapeSizeAndFacing(transform, size, facing = DEFAULT_FACING):
+    """Scale and turn a freshly imported shape into its points, leaving the
+    transform at identity. Only on a transform nothing else has touched yet - it
+    bakes whatever the transform holds."""
+    cmds.scale(size, size, size, transform, relative = True)
+    cmds.rotate(*FACING_ROTATIONS[getFacing(facing)], transform, objectSpace = True, relative = True)
+    cmds.makeIdentity(transform, apply = True, rotate = True, scale = True)
+
+
+def replaceControlShapes(control_transform, path, size, facing = DEFAULT_FACING):
+    """Swap the curves under an existing control for the ones in path, at size,
+    facing the given way.
 
     The control transform is untouched - its position, channels, connections and
     attributes stay - only its shape nodes are exchanged."""
     temporary = importShape(path, control_transform + "_shapeSwap")
     try:
-        cmds.scale(size, size, size, temporary, relative = True)
-        cmds.makeIdentity(temporary, apply = True, scale = True)
+        bakeShapeSizeAndFacing(temporary, size, facing)
 
         old_shapes = cmds.listRelatives(control_transform, shapes = True, fullPath = True) or []
         if old_shapes:
