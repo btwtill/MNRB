@@ -57,6 +57,13 @@ class MC:
         MC.clearSelection()
 
     @staticmethod
+    def parentObjectRelative(child, parent):
+        """Parent keeping the child's local values - a node built in its parent's
+        space, at the origin, stays where it was meant to be in that space."""
+        cmds.parent(child, parent, relative = True)
+        MC.clearSelection()
+
+    @staticmethod
     def unparentObject(child):
         cmds.parent(child, world=True)
         MC.clearSelection()
@@ -542,9 +549,177 @@ class MC:
 
 # Curve Functions
     @staticmethod
-    def createCurveFromPoints(name, points, degree = 3) -> str:
-        """A NURBS curve through `points` as its control points. Returns the transform."""
-        return cmds.curve(name = name, degree = degree, point = [tuple(point) for point in points])
+    def createCurveFromPoints(name, points, degree = 3, knots = None) -> str:
+        """A NURBS curve through `points` as its control points. Returns the transform.
+        `knots` only when the default uniform ones will not do - a piecewise
+        bezier, say, repeats each knot `degree` times."""
+        if knots is None:
+            return cmds.curve(name = name, degree = degree, point = [tuple(point) for point in points])
+        return cmds.curve(name = name, degree = degree, point = [tuple(point) for point in points],
+                          knot = list(knots))
+
+    @staticmethod
+    def useLocalSpaceInputs(node) -> None:
+        """Re-source a history node's geometry inputs from 'local' rather than
+        'worldSpace'. Maya's curve and surface tools read world space by default,
+        which only holds while everything sits at the origin: under a moving
+        parent the parent's transform lands in the geometry AND on its transform,
+        twice."""
+        pairs = cmds.listConnections(node, source = True, destination = False, plugs = True,
+                                     connections = True) or []
+        for destination, source in zip(pairs[0::2], pairs[1::2]):
+            source_node, _, source_attribute = source.partition(".")
+            if source_attribute.startswith("worldSpace"):
+                cmds.connectAttr(source_node + ".local", destination, force = True)
+
+    @staticmethod
+    def detachCurveAt(curve, parameters, name):
+        """Split a curve at the given parameters, keeping history so the pieces
+        follow the curve. Returns ([piece transforms], detachCurve node)."""
+        results = cmds.detachCurve(*["%s.u[%s]" % (curve, parameter) for parameter in parameters],
+                                   constructionHistory = True, replaceOriginal = False, name = name)
+        pieces = [node for node in results if cmds.nodeType(node) == "transform"]
+        history = [node for node in results if cmds.nodeType(node) == "detachCurve"]
+        if not history:
+            history = cmds.listConnections(cmds.listRelatives(pieces[0], shapes = True, fullPath = True)[0],
+                                           source = True, destination = False, type = "detachCurve") or []
+        detach = cmds.rename(history[0], name + "_detach") if history else None
+        if detach:
+            MC.useLocalSpaceInputs(detach)
+        return pieces, detach
+
+    @staticmethod
+    def createBoundarySurface(curves, name):
+        """A four-sided NURBS patch filling the given edge curves, with history.
+        Returns (surface transform, boundary node)."""
+        surface, history = cmds.boundary(*curves, order = False, endPoint = False, endPointTolerance = 0.01,
+                                         constructionHistory = True, name = name)
+        history = cmds.rename(history, name + "_boundary")
+        MC.useLocalSpaceInputs(history)
+        return surface, history
+
+    @staticmethod
+    def convertNurbsToPolygons(surface, name, u_count, v_count):
+        """A quad mesh from a NURBS surface at a fixed u by v tessellation, with
+        history - fixed, so the vertex count never changes as the surface
+        deforms. Returns (mesh transform, nurbsTessellate node)."""
+        mesh, history = cmds.nurbsToPoly(surface, name = name, format = 2, polygonType = 1,
+                                         uType = 3, uNumber = u_count, vType = 3, vNumber = v_count,
+                                         constructionHistory = True)
+        history = cmds.rename(history, name + "_tessellate")
+        MC.useLocalSpaceInputs(history)
+        return mesh, history
+
+    @staticmethod
+    def addShrinkWrap(mesh, target_shape, name):
+        """A shrinkWrap deformer projecting `mesh` onto `target_shape` along the
+        mesh's own Z, both ways - so it follows however the mesh is turned."""
+        wrap = cmds.deformer(mesh, type = "shrinkWrap", name = name)[0]
+        cmds.connectAttr(target_shape + ".worldMesh[0]", wrap + ".targetGeom", force = True)
+        cmds.setAttr(wrap + ".projection", 2)        #Parallel To Axes
+        cmds.setAttr(wrap + ".alongX", 0)
+        cmds.setAttr(wrap + ".alongY", 0)
+        cmds.setAttr(wrap + ".alongZ", 1)
+        cmds.setAttr(wrap + ".bidirectional", 1)
+        #a point projected past the face's edge goes to the nearest point on it,
+        #rather than staying behind on the board
+        cmds.setAttr(wrap + ".closestIfNoIntersection", 1)
+        return wrap
+
+    @staticmethod
+    def createShadingNode(node_type, name, as_texture = False) -> str:
+        if as_texture:
+            return cmds.shadingNode(node_type, asTexture = True, name = name, skipSelect = True)
+        return cmds.shadingNode(node_type, asUtility = True, name = name, skipSelect = True)
+
+    @staticmethod
+    def connectPlace2dToFile(place2d, file_node) -> None:
+        """The connections the Hypershade makes between a place2dTexture and a file texture."""
+        for attribute in ("coverage", "translateFrame", "rotateFrame", "mirrorU", "mirrorV", "stagger",
+                          "wrapU", "wrapV", "repeatUV", "offset", "rotateUV", "noiseUV",
+                          "vertexUvOne", "vertexUvTwo", "vertexUvThree", "vertexCameraOne"):
+            cmds.connectAttr("%s.%s" % (place2d, attribute), "%s.%s" % (file_node, attribute), force = True)
+        cmds.connectAttr(place2d + ".outUV", file_node + ".uvCoord", force = True)
+        cmds.connectAttr(place2d + ".outUvFilterSize", file_node + ".uvFilterSize", force = True)
+
+    @staticmethod
+    def getParentName(node):
+        """The parent's full path, or None."""
+        parents = cmds.listRelatives(node, parent = True, fullPath = True) or []
+        return parents[0] if parents else None
+
+    @staticmethod
+    def getSelectedMesh():
+        """The first selected mesh's transform (full path), or None."""
+        for node in cmds.ls(selection = True, long = True) or []:
+            if cmds.nodeType(node) == "mesh":
+                node = MC.getParentName(node)
+            if cmds.listRelatives(node, shapes = True, type = "mesh", noIntermediate = True):
+                return node
+        return None
+
+    @staticmethod
+    def getMeshShape(mesh):
+        """The mesh's visible shape - not the hidden 'Orig' one a deformer
+        leaves behind, which is the undeformed mesh."""
+        if cmds.nodeType(mesh) == "mesh":
+            return mesh
+        shapes = cmds.listRelatives(mesh, shapes = True, type = "mesh", fullPath = True, noIntermediate = True) or []
+        return shapes[0] if shapes else None
+
+    @staticmethod
+    def getVertexPositionsAndUVs(mesh_shape, uv_set_name):
+        """([world position per face-vertex], [uv per face-vertex]) in a UV set -
+        per face-vertex, since one vertex can carry several UVs on a seam."""
+        import maya.api.OpenMaya as om #type: ignore
+        mesh = om.MFnMesh(om.MSelectionList().add(mesh_shape).getDagPath(0))
+        points = mesh.getPoints(om.MSpace.kWorld)
+        us, vs = mesh.getUVs(uv_set_name)
+        _, uv_ids = mesh.getAssignedUVs(uv_set_name)
+        _, vertex_ids = mesh.getVertices()
+        positions, uvs = [], []
+        for vertex_id, uv_id in zip(vertex_ids, uv_ids):
+            point = points[vertex_id]
+            positions.append((point.x, point.y, point.z))
+            uvs.append((us[uv_id], vs[uv_id]))
+        return positions, uvs
+
+    @staticmethod
+    def setStringAttribute(node_name, attribute_name, value) -> None:
+        cmds.setAttr(f"{node_name}.{attribute_name}", value, type = "string")
+
+    @staticmethod
+    def connectPlugs(source_plug, destination_plug) -> None:
+        cmds.connectAttr(source_plug, destination_plug, force = True)
+
+    @staticmethod
+    def getUVSetNames(mesh_shape) -> list:
+        return cmds.polyUVSet(mesh_shape, query = True, allUVSets = True) or []
+
+    @staticmethod
+    def getCurrentUVSet(mesh_shape):
+        current = cmds.polyUVSet(mesh_shape, query = True, currentUVSet = True) or []
+        return current[0] if current else None
+
+    @staticmethod
+    def getUVSetIndex(mesh_shape, uv_set_name):
+        """The index of a mesh's UV set by name in its uvSet array, or None."""
+        for index in cmds.getAttr(mesh_shape + ".uvSet", multiIndices = True) or []:
+            if cmds.getAttr("%s.uvSet[%d].uvSetName" % (mesh_shape, index)) == uv_set_name:
+                return index
+        return None
+
+    @staticmethod
+    def getShadingEngines(mesh) -> list:
+        shapes = cmds.listRelatives(mesh, shapes = True, fullPath = True, noIntermediate = True) or []
+        engines = []
+        for shape in shapes:
+            engines += cmds.listConnections(shape, type = "shadingEngine") or []
+        return list(dict.fromkeys(engines))
+
+    @staticmethod
+    def assignShadingEngine(mesh, shading_engine) -> None:
+        cmds.sets(mesh, edit = True, forceElement = shading_engine)
 
     @staticmethod
     def getSelectedCurve():
