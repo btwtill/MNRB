@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox #type: ignore
 from MNRB.ROSE_Attributes.attribute_types import AttributeType #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.wrapping_line_edit import WrappingLineEdit #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_Node import AttributeGraphNode, AttributeNodeProperties #type: ignore
 from MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_conf import (registerAttributeNode, #type: ignore
@@ -28,7 +29,8 @@ class AttributeNodeProperties_Attribute(AttributeNodeProperties):
         self.options_label = QLabel("Enum options (comma separated):")
         self.layout.addWidget(self.options_label)
 
-        self.options_edit = QLineEdit()
+        #wraps: a long option list was hidden past the panel's edge
+        self.options_edit = WrappingLineEdit()
         self.options_edit.setPlaceholderText("Option A, Option B")
         self.options_edit.editingFinished.connect(self.onOptionsEdited)
         self.layout.addWidget(self.options_edit)

@@ -956,6 +956,14 @@ class ROSE_Node(NodeEditorNode):
         MC.connectAttribute(source_node, source_attribute, target_node, target_attribute, force = force)
         return True
 
+    def getExternalAssets(self):
+        """Files outside the rig that this component uses and that no exported
+        shading network shows - a path kept in an attribute, say. A list of
+        ROSE_UI.pipeline_Editor_UI.rig_assets.RigAsset; the Output Path step
+        copies them next to the export and repoints them there. Textures
+        reached through the exported geometry's shading are found without this."""
+        return []
+
     def exposeAttribute(self, name, attribute_type = AttributeType.FLOAT, default_value = 0,
                         minimum = None, maximum = None, options = None, keyable = True):
         return attribute(self, name, attribute_type, default_value, minimum, maximum, options, keyable)

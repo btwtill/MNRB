@@ -11,6 +11,7 @@ from MNRB.ROSE_UI.rose_skinningEditorTab import rose_SkinningEditorTab #type: ig
 from MNRB.ROSE_UI.rose_pipelineEditorTab import rose_PipelineEditorTab #type: ignore
 from MNRB.ROSE_UI.rose_attributeEditorTab import rose_AttributeEditorTab #type: ignore
 from MNRB.ROSE_UI.rose_controlShapeEditorTab import rose_ControlShapeEditorTab #type: ignore
+from MNRB.ROSE_UI.rose_pickerEditorTab import rose_PickerEditorTab #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.control_shape_switch import areControlShapesEnabled #type: ignore
 from MNRB.ROSE_Controls import control_shape_library #type: ignore
 from MNRB.ROSE_UI.rose_style import applyROSEStyle, setButtonCompact #type: ignore
@@ -64,6 +65,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.rose_attribute_editor_path = None
         self.rose_control_shape_editor_path_name = "rose_control_shape_editor"
         self.rose_control_shape_editor_path = None
+        self.rose_picker_editor_path_name = "rose_picker_editor"
+        self.rose_picker_editor_path = None
 
         self.display_overlay = True
 
@@ -89,6 +92,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.rose_pipeline_editor_path = os.path.join(self._project_path, self.rose_pipeline_editor_path_name)
         self.rose_attribute_editor_path = os.path.join(self._project_path, self.rose_attribute_editor_path_name)
         self.rose_control_shape_editor_path = os.path.join(self._project_path, self.rose_control_shape_editor_path_name)
+        self.rose_picker_editor_path = os.path.join(self._project_path, self.rose_picker_editor_path_name)
 
     @property
     def project_name(self): return self._project_name
@@ -139,6 +143,7 @@ class rose_Editor(QtWidgets.QMainWindow):
         #built after Pipeline, whose scene it needs for the on/off switch, but
         #inserted as the second tab - see setupControlShapeEditorTab
         self.setupControlShapeEditorTab()
+        self.setupPickerEditorTab()
         self.setupStatusBar()
 
         self.getNodeEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
@@ -146,6 +151,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.getPipelineEditorTab().central_widget.scene.connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getAttributeEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
         self.getControlShapeEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
+        self.getPickerEditorTab().connectHasBeenModifiedListenerCallback(self.setTitleText)
+        self.getPickerEditorTab().connectSelectionChangedListenerCallback(self.updateEditMenu)
 
 
         if self.display_overlay:
@@ -241,6 +248,20 @@ class rose_Editor(QtWidgets.QMainWindow):
         #right after the ROSE tab: shapes are set up while building the rig, before
         #skinning and the rest
         self.tabs.insertTab(1, fifth_tab_container, "Control Shapes")
+
+    def setupPickerEditorTab(self):
+        self.pickerEditorTabWindow = rose_PickerEditorTab(self.nodeEditorTabWindow)
+        #the Picker pipeline step writes it out next to the exported rig
+        self.pipelineEditorTabWindow.central_widget.scene.picker_tab = self.pickerEditorTabWindow
+
+        picker_tab_container = QtWidgets.QWidget()
+        picker_tab_layout = QtWidgets.QVBoxLayout(picker_tab_container)
+        picker_tab_container.is_tab_widget = True
+        picker_tab_layout.addWidget(self.pickerEditorTabWindow)
+
+        #before Pipeline: the pipeline is the last thing set up, it ships what the
+        #tabs before it made
+        self.tabs.insertTab(self.tabs.indexOf(self.pipelineEditorTabWindow.parentWidget()), picker_tab_container, "Picker")
 
     def setupControlEditorTab(self):
         self.attributeEditorTabWindow = rose_AttributeEditorTab(self.nodeEditorTabWindow)
@@ -465,6 +486,8 @@ class rose_Editor(QtWidgets.QMainWindow):
                     os.mkdir(self.rose_attribute_editor_path)
                 if self.rose_control_shape_editor_path:
                     os.mkdir(self.rose_control_shape_editor_path)
+                if self.rose_picker_editor_path:
+                    os.mkdir(self.rose_picker_editor_path)
 
                 if self.display_overlay:
                     self.setCentralWidget(self.tabs)
@@ -516,6 +539,8 @@ class rose_Editor(QtWidgets.QMainWindow):
             os.mkdir(self.rose_attribute_editor_path)
         if not os.path.isdir(self.rose_control_shape_editor_path):
             os.mkdir(self.rose_control_shape_editor_path)
+        if not os.path.isdir(self.rose_picker_editor_path):
+            os.mkdir(self.rose_picker_editor_path)
 
         self.getNodeEditorTab().onOpenFile(self.rose_base_editor_path)
         self.getSkinningEditorTab().onOpenFile(self.rose_skinning_editor_path)
@@ -523,6 +548,8 @@ class rose_Editor(QtWidgets.QMainWindow):
         self.getAttributeEditorTab().onOpenFile(self.rose_attribute_editor_path)
         #after the rig graph, whose controls its tree lists
         self.getControlShapeEditorTab().onOpenFile(self.rose_control_shape_editor_path)
+        #after the rig graph too: its buttons point at the graph's controls
+        self.getPickerEditorTab().onOpenFile(self.rose_picker_editor_path)
         self.statusBar().showMessage('Opened project from ' + str(self.project_path), 5000)
 
     def onSaveProject(self):
@@ -536,6 +563,7 @@ class rose_Editor(QtWidgets.QMainWindow):
             self.getPipelineEditorTab().onSaveFile(os.path.join(self.rose_pipeline_editor_path, self.project_name + "_graph.json")) # type: ignore
             self.getAttributeEditorTab().onSaveFile(os.path.join(self.rose_attribute_editor_path, self.project_name + "_graph.json")) # type: ignore
             self.getControlShapeEditorTab().onSaveFile(os.path.join(self.rose_control_shape_editor_path, self.project_name + "_graph.json")) # type: ignore
+            self.getPickerEditorTab().onSaveFile(os.path.join(self.rose_picker_editor_path, self.project_name + "_graph.json")) # type: ignore
 
             self.statusBar().showMessage(' Saved Project to ' + self.project_path, 5000)
             self.setTitleText()
@@ -593,15 +621,25 @@ class rose_Editor(QtWidgets.QMainWindow):
         
     def onEditUndo(self):
         log.debug("ROSE_EDITOR:: --onUndo:: Undo last operation!")
-        try: 
-            self.getNodeEditorTab().onUndo()
-        except Exception as e: print(e)
-    
+        #the tab in front, like Delete - this used to always undo the rig graph,
+        #whichever tab the user was working in
+        self.dispatchToCurrentTab("onUndo")
+
     def onEditRedo(self):
         log.debug("ROSE_EDITOR:: --onRedo:: Redo last operation!")
-        try: 
-            self.getNodeEditorTab().onRedo()
-        except Exception as e: print(e)
+        self.dispatchToCurrentTab("onRedo")
+
+    def dispatchToCurrentTab(self, method_name):
+        current_tab = self.getCurrentTabWidget()
+        if current_tab is None and self.tabs.currentIndex() == 0:
+            current_tab = self.getNodeEditorTab()
+        method = getattr(current_tab, method_name, None) if current_tab is not None else None
+        if method is None:
+            return
+        try:
+            method()
+        except Exception as e:
+            log.error("ROSE_EDITOR:: --%s:: %s" % (method_name, e))
 
     def onEditDelete(self):
         #dispatch to whichever tab is actually active, matching how updateEditMenu
@@ -741,7 +779,7 @@ class rose_Editor(QtWidgets.QMainWindow):
     def isModified(self):
         return (self.getNodeEditorTab().isModified() or self.getSkinningEditorTab().isModified()
                 or self.getPipelineEditorTab().isModified() or self.getAttributeEditorTab().isModified()
-                or self.getControlShapeEditorTab().isModified())
+                or self.getControlShapeEditorTab().isModified() or self.getPickerEditorTab().isModified())
 
     def closeEvent(self, event):
         if self.discard_changes_on_close or self.projectNeedsSaving():
@@ -837,6 +875,9 @@ class rose_Editor(QtWidgets.QMainWindow):
 
     def getControlShapeEditorTab(self):
         return self.controlShapeEditorTabWindow
+
+    def getPickerEditorTab(self):
+        return self.pickerEditorTabWindow
 
     def getMainWindowWidgetsFromTab(self, tab_index):
         return self.tabs.widget(tab_index).findChildren(QtWidgets.QMainWindow)

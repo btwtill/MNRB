@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QLabel #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.wrapping_line_edit import softBreaks #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_Node import NodeEditorNode #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_NodeProperties import NodeEditorNodeProperties #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
@@ -22,7 +23,8 @@ class AttributeNodeProperties(NodeEditorNodeProperties):
         self.layout.addWidget(self.description_label)
 
     def refresh(self):
-        self.description_label.setText(self.node.getDescription())
+        #long plug and node names wrap rather than widen the panel past the dock
+        self.description_label.setText(softBreaks(self.node.getDescription()))
 
     def serialize(self):
         return super().serialize()

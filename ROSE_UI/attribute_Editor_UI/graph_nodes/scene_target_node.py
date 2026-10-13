@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QLabel, QLineEdit #type: ignore
+from PySide6.QtWidgets import QLabel #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
+from MNRB.ROSE_UI.UI_GraphicComponents.wrapping_line_edit import WrappingLineEdit, softBreaks #type: ignore
 from MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_Node import AttributeGraphNode, AttributeNodeProperties #type: ignore
 from MNRB.ROSE_UI.attribute_Editor_UI.attribute_Editor_conf import (registerAttributeNode, #type: ignore
                                                                     OPERATIONCODE_SCENE_TARGET_NODE)
@@ -16,7 +17,7 @@ class SceneTargetNodeProperties(AttributeNodeProperties):
 
         self.layout.addWidget(QLabel("Target plug:"))
 
-        self.target_plug_edit = QLineEdit()
+        self.target_plug_edit = WrappingLineEdit()
         self.target_plug_edit.setPlaceholderText("node.attribute")
         self.target_plug_edit.editingFinished.connect(self.onTargetPlugEdited)
         self.layout.addWidget(self.target_plug_edit)
@@ -41,7 +42,7 @@ class SceneTargetNodeProperties(AttributeNodeProperties):
         self.target_plug_edit.setText(self.node.target_plug)
         self.target_plug_edit.blockSignals(False)
 
-        self.status_label.setText(self.node.getPlugStatus())
+        self.status_label.setText(softBreaks(self.node.getPlugStatus()))
 
 
 @registerAttributeNode(OPERATIONCODE_SCENE_TARGET_NODE)

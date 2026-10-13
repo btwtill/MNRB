@@ -1,9 +1,11 @@
 import os
-from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QFileDialog #type: ignore
+from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QFileDialog, QCheckBox #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_StepNode import PipelineStepNode, PipelineStepProperties #type: ignore
 from MNRB.ROSE_UI.pipeline_Editor_UI.pipeline_Editor_conf import registerPipelineStep #type: ignore
 from MNRB.ROSE_UI.node_Editor_UI.node_Editor_SocketTypes import SocketTypes #type: ignore
 from MNRB.ROSE_cmds_wrapper.cmds_wrapper import MC #type: ignore
+from MNRB.ROSE_UI.pipeline_Editor_UI.rig_assets import (AssetPackage, findSceneAssets, #type: ignore
+                                                        DEFAULT_ASSET_FOLDER)
 
 from MNRB.ROSE_Debug.rose_log import ROSE_Log #type: ignore
 log = ROSE_Log.get("rose.pipeline.steps")
@@ -20,6 +22,9 @@ class OutputPathStepProperties(PipelineStepProperties):
         #then unparented back afterward. Lets the user include static/decorative
         #geometry that isn't bound to anything and so isn't a skinCluster target.
         self.geometry_root = None
+        #textures and other files the rig uses, copied next to the export - see rig_assets
+        self.package_assets = True
+        self.asset_folder = DEFAULT_ASSET_FOLDER
 
     def initUI(self):
         super().initUI()
@@ -55,6 +60,32 @@ class OutputPathStepProperties(PipelineStepProperties):
 
         self.layout.addLayout(geometry_root_row)
 
+        self.package_assets_checkbox = QCheckBox("Package textures with the rig")
+        self.package_assets_checkbox.setChecked(True)
+        self.package_assets_checkbox.setToolTip("Copy every texture and image sequence the rig uses into a folder "
+                                                "next to the exported file, and point the export at the copies - "
+                                                "the working scene keeps its own paths")
+        self.package_assets_checkbox.toggled.connect(self.onPackageAssetsToggled)
+        self.layout.addWidget(self.package_assets_checkbox)
+
+        asset_folder_row = QHBoxLayout()
+        asset_folder_row.addWidget(QLabel("Texture Folder:"))
+        self.asset_folder_edit = QLineEdit(DEFAULT_ASSET_FOLDER)
+        self.asset_folder_edit.setToolTip("The folder's name, inside the output directory")
+        self.asset_folder_edit.editingFinished.connect(self.onAssetFolderEdited)
+        asset_folder_row.addWidget(self.asset_folder_edit)
+        self.layout.addLayout(asset_folder_row)
+
+    def onPackageAssetsToggled(self, checked):
+        self.package_assets = checked
+        self.asset_folder_edit.setEnabled(checked)
+        self.setHasBeenModified()
+
+    def onAssetFolderEdited(self):
+        self.asset_folder = self.asset_folder_edit.text().strip() or DEFAULT_ASSET_FOLDER
+        self.asset_folder_edit.setText(self.asset_folder)
+        self.setHasBeenModified()
+
     def onOutputDirectoryEdited(self):
         self.setOutputDirectory(self.output_directory_edit.text())
 
@@ -82,6 +113,8 @@ class OutputPathStepProperties(PipelineStepProperties):
         result_data = super().serialize()
         result_data['output_directory'] = self.output_directory
         result_data['geometry_root'] = self.geometry_root
+        result_data['package_assets'] = self.package_assets
+        result_data['asset_folder'] = self.asset_folder
         return result_data
 
     def deserialize(self, data, hashmap = {}, restore_id=True):
@@ -90,6 +123,11 @@ class OutputPathStepProperties(PipelineStepProperties):
         self.output_directory_edit.setText(self.output_directory)
         self.geometry_root = data.get('geometry_root', None)
         self.geometry_root_label.setText(self.geometry_root if self.geometry_root else "No Geometry Root Selected")
+        self.package_assets = data.get('package_assets', True)
+        self.asset_folder = data.get('asset_folder', DEFAULT_ASSET_FOLDER)
+        self.package_assets_checkbox.setChecked(self.package_assets)
+        self.asset_folder_edit.setText(self.asset_folder)
+        self.asset_folder_edit.setEnabled(self.package_assets)
         return True
 
 
@@ -162,6 +200,13 @@ class OutputPathStep(PipelineStepNode):
 
         file_path = os.path.join(output_directory, "%s.mb" % rig_name)
 
+        package = None
+        if self.properties.package_assets:
+            try:
+                package = self.packageAssets(rig_scene, rig_hierarchy_name, output_directory)
+            except Exception as e:
+                return False, "Packaging the textures failed: %s" % e
+
         try:
             MC.clearSelection()
             MC.selectObject(rig_hierarchy_name)
@@ -169,8 +214,29 @@ class OutputPathStep(PipelineStepNode):
             MC.clearSelection()
         except Exception as e:
             return False, "Export failed: %s" % e
+        finally:
+            #the workfile goes back to its own paths whether the export worked or not
+            if package is not None:
+                package.restore()
 
-        return True, "Exported to %s" % file_path
+        message = "Exported to %s" % file_path
+        if package is not None:
+            message += " - textures: %s" % package.summary()
+        return True, message
+
+    def packageAssets(self, rig_scene, rig_hierarchy_name, output_directory):
+        """Copy what the rig uses next to the export and point the scene at the
+        copies. The caller restores the scene once exported."""
+        assets = findSceneAssets([rig_hierarchy_name])
+        for node in rig_scene.nodes:
+            if not node.properties.is_disabled:
+                assets += node.getExternalAssets()
+
+        package = AssetPackage(assets, os.path.join(output_directory, self.properties.asset_folder))
+        package.copy()
+        package.repoint()
+        log.info("OutputPathStep:: --packageAssets:: %s" % package.summary())
+        return package
 
     def moveGeometryRootUnderGeometryHierarchy(self, rig_scene):
         geometry_root = self.properties.geometry_root

@@ -29,6 +29,7 @@ class control_shape():
         #baked into the points while the transform is still fresh - before the
         #component places it, so the turn is in the control's own space
         control_shape_library.bakeShapeSizeAndFacing(self.control.name, size, facing)
+        self.updateLineWidth()
 
         MC.deleteNodeHistory(self.control.name)
 
@@ -44,7 +45,13 @@ class control_shape():
         path, size, facing = self.resolveShape()
         control_shape_library.replaceControlShapes(self.control.name, path, size, facing)
         self.updateColor(self.control.node.properties.component_color.value)
+        self.updateLineWidth()
         return True
+
+    def updateLineWidth(self):
+        if self.control.exists():
+            control_shape_library.applyLineWidth(self.control.name,
+                                                 control_shape_library.resolveLineWidth(self.control.id))
 
     def updateColor(self, color):
         if self.control.exists():

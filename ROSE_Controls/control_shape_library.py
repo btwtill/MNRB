@@ -288,7 +288,7 @@ _enabled_provider = None
 
 def setAssignments(assignments):
     """{str(control id): {"shape": name or None, "library": library id, "scale": float,
-    "facing": one of FACING_AXES}}
+    "facing": one of FACING_AXES, "line_width": float}}
 
     An assignment without "library" is from the general library - what every
     assignment was before rig libraries existed."""
@@ -317,6 +317,32 @@ def getFacing(facing):
     """A known facing, or the default - an assignment from before facings existed
     has none, and an unknown one is not worth failing a build over."""
     return facing if facing in FACING_ROTATIONS else DEFAULT_FACING
+
+
+#Maya's own "use the global line width" value for a curve's lineWidth
+DEFAULT_LINE_WIDTH = -1.0
+
+
+def getLineWidth(line_width):
+    """A drawable width, or the default - none set, or not a positive number."""
+    try:
+        line_width = float(line_width)
+    except (TypeError, ValueError):
+        return DEFAULT_LINE_WIDTH
+    return line_width if line_width > 0 else DEFAULT_LINE_WIDTH
+
+
+def resolveLineWidth(control_id):
+    """The curve width a control is drawn with - like the scale, only while
+    library shapes are enabled."""
+    if not isEnabled():
+        return DEFAULT_LINE_WIDTH
+    return getLineWidth((_assignments.get(str(control_id)) or {}).get("line_width"))
+
+
+def applyLineWidth(control_transform, line_width):
+    for shape in cmds.listRelatives(control_transform, shapes = True, fullPath = True, type = "nurbsCurve") or []:
+        cmds.setAttr(shape + ".lineWidth", line_width)
 
 
 def resolveControlShape(control_id):

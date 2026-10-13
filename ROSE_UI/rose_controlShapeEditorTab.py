@@ -6,7 +6,8 @@ from PySide6.QtGui import QIcon, QColor #type: ignore
 from MNRB.ROSE_Data.rose_Editor_Serializable import Serializable #type: ignore
 from MNRB.ROSE_Controls import control_shape_library #type: ignore
 from MNRB.ROSE_Controls.control_shape_library import (GENERAL_LIBRARY_ID, DEFAULT_FACING, #type: ignore
-                                                      FACING_AXES, getFacing)
+                                                      FACING_AXES, getFacing, getLineWidth,
+                                                      DEFAULT_LINE_WIDTH)
 from MNRB.ROSE_UI.control_shape_Editor_UI.control_shape_preview import buildShapePreviewPixmap, LINE_COLOR #type: ignore
 from MNRB.ROSE_UI.rose_ui_utils import findProjectGraphFile #type: ignore
 from MNRB.ROSE_UI.UI_GraphicComponents.list_group_item import ExpandableGroupsMixin #type: ignore
@@ -25,6 +26,7 @@ CONTROL_NAME_ROLE = Qt.ItemDataRole.UserRole + 1
 SHAPE_COLUMN_WIDTH = 170
 SCALE_COLUMN_WIDTH = 72
 FACING_COLUMN_WIDTH = 64
+WIDTH_COLUMN_WIDTH = 64
 ROW_HEIGHT = 30
 
 #rig library shapes are drawn in their own colour, so the two kinds tell apart
@@ -76,9 +78,9 @@ class AddShapeDialog(QtWidgets.QDialog):
 
 
 class ControlShapeRow(QtWidgets.QWidget):
-    """One control: its name, then the shape, scale and facing editors."""
+    """One control: its name, then the shape, scale, facing and line width editors."""
 
-    def __init__(self, control_name, shape_combo, scale_spinbox, facing_combo, parent = None):
+    def __init__(self, control_name, shape_combo, scale_spinbox, facing_combo, width_spinbox, parent = None):
         super().__init__(parent)
         #the list's own selection highlight shows through
         self.setAttribute(Qt.WA_TranslucentBackground, True)
@@ -95,9 +97,11 @@ class ControlShapeRow(QtWidgets.QWidget):
         shape_combo.setFixedWidth(SHAPE_COLUMN_WIDTH)
         scale_spinbox.setFixedWidth(SCALE_COLUMN_WIDTH)
         facing_combo.setFixedWidth(FACING_COLUMN_WIDTH)
+        width_spinbox.setFixedWidth(WIDTH_COLUMN_WIDTH)
         layout.addWidget(shape_combo)
         layout.addWidget(scale_spinbox)
         layout.addWidget(facing_combo)
+        layout.addWidget(width_spinbox)
 
 
 class ControlShapeList(ExpandableGroupsMixin, QtWidgets.QListWidget):
@@ -132,7 +136,7 @@ class ControlShapeList(ExpandableGroupsMixin, QtWidgets.QListWidget):
 
 
 def buildColumnHeader():
-    """"Control / Shape / Scale / Facing" over the list, lined up with the row editors."""
+    """"Control / Shape / Scale / Facing / Width" over the list, lined up with the row editors."""
     header = QtWidgets.QWidget()
     layout = QtWidgets.QHBoxLayout(header)
     #the rows' own right margin, plus the list's frame and its scrollbar
@@ -141,7 +145,7 @@ def buildColumnHeader():
     layout.setSpacing(6)
 
     for text, width in (("Control", None), ("Shape", SHAPE_COLUMN_WIDTH), ("Scale", SCALE_COLUMN_WIDTH),
-                        ("Facing", FACING_COLUMN_WIDTH)):
+                        ("Facing", FACING_COLUMN_WIDTH), ("Width", WIDTH_COLUMN_WIDTH)):
         label = QtWidgets.QLabel(text)
         label.setStyleSheet("color: #999999; font-weight: bold;")
         if width is None:
@@ -353,7 +357,9 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
                                       self.buildShapeCombo(control_id, control_name, current_key, shape_entries),
                                       self.buildScaleSpinBox(control_id, control_name, assignment.get("scale", 1.0)),
                                       self.buildFacingCombo(control_id, control_name,
-                                                            getFacing(assignment.get("facing"))))
+                                                            getFacing(assignment.get("facing"))),
+                                      self.buildLineWidthSpinBox(control_id, control_name,
+                                                                 getLineWidth(assignment.get("line_width"))))
 
                 item = self.control_list.addControlRow(group_item, control_id, control_name, row)
                 if control_id in selected_ids:
@@ -408,12 +414,28 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
             lambda _index, combo = combo: self.setAssignment(control_id, control_name, facing = combo.currentData()))
         return combo
 
+    def buildLineWidthSpinBox(self, control_id, control_name, current_width):
+        spinbox = QtWidgets.QDoubleSpinBox()
+        spinbox.setFocusPolicy(Qt.StrongFocus)
+        spinbox.wheelEvent = lambda event: event.ignore()
+        spinbox.setDecimals(1)
+        spinbox.setRange(0.0, 20.0)
+        spinbox.setSingleStep(0.5)
+        #0 is Maya's own width, whatever the viewport's global line width is set to
+        spinbox.setSpecialValueText("Default")
+        spinbox.setValue(max(current_width, 0.0))
+        spinbox.setToolTip("How thick the control's curves draw in the viewport. Default uses Maya's "
+                           "global line width")
+        spinbox.valueChanged.connect(
+            lambda value: self.setAssignment(control_id, control_name, line_width = value))
+        return spinbox
+
 # Assigning
 
     _UNCHANGED = object()
 
     def setAssignment(self, control_id, control_name, shape_key = _UNCHANGED, scale = _UNCHANGED,
-                      facing = _UNCHANGED):
+                      facing = _UNCHANGED, line_width = _UNCHANGED):
         """shape_key: a makeShapeKey() string, or None for the default shape."""
         assignment = dict(self.assignments.get(control_id, {"shape": None, "scale": 1.0}))
         if shape_key is not self._UNCHANGED:
@@ -426,11 +448,16 @@ class rose_ControlShapeEditorTab(QtWidgets.QMainWindow, Serializable):
             assignment["scale"] = float(scale)
         if facing is not self._UNCHANGED:
             assignment["facing"] = getFacing(facing)
+        if line_width is not self._UNCHANGED:
+            if getLineWidth(line_width) == DEFAULT_LINE_WIDTH:
+                assignment.pop("line_width", None)
+            else:
+                assignment["line_width"] = float(line_width)
         assignment["label"] = control_name
 
-        #the default shape at the default scale, facing as stored, is no assignment at all
+        #the default shape at the default scale and width, facing as stored, is no assignment at all
         if not assignment["shape"] and abs(assignment["scale"] - 1.0) < 1e-9 \
-                and getFacing(assignment.get("facing")) == DEFAULT_FACING:
+                and getFacing(assignment.get("facing")) == DEFAULT_FACING and "line_width" not in assignment:
             self.assignments.pop(control_id, None)
         else:
             self.assignments[control_id] = assignment

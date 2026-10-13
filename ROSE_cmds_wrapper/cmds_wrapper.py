@@ -643,6 +643,24 @@ class MC:
         cmds.connectAttr(place2d + ".outUvFilterSize", file_node + ".uvFilterSize", force = True)
 
     @staticmethod
+    def listObjectsNamed(short_name) -> list:
+        return cmds.ls(short_name, long = True) or []
+
+    @staticmethod
+    def getUUID(node):
+        found = cmds.ls(node, uuid = True) or []
+        return found[0] if found else None
+
+    @staticmethod
+    def findByUUID(uuid):
+        """The node with this UUID (full path), or None - it survives renaming
+        and re-parenting, which a stored path does not."""
+        if not uuid:
+            return None
+        found = cmds.ls(uuid, long = True) or []
+        return found[0] if found else None
+
+    @staticmethod
     def getParentName(node):
         """The parent's full path, or None."""
         parents = cmds.listRelatives(node, parent = True, fullPath = True) or []

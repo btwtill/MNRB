@@ -230,6 +230,63 @@ class NodeEditorNode(Serializable):
         self.scene.removeNode(self)
         log.debug("NODE:: -remove:: Finished Removing Node ", self)
 
+    def getSocketLabel(self, socket):
+        """The label drawn beside a socket - labels are made in socket order, the
+        inputs' first."""
+        if self.content is None:
+            return None
+        sockets = self.inputs + self.outputs
+        labels = self.content.getContentLabels()
+        index = sockets.index(socket) if socket in sockets else -1
+        return labels[index] if 0 <= index < len(labels) else None
+
+    def renameOutputSocket(self, socket, value):
+        """Give a socket a new value - its edges stay where they are."""
+        socket.socket_value = value
+        label = self.getSocketLabel(socket)
+        if label is not None:
+            label.setText(value)
+        self.grNode.wrapGrNodeToSockets()
+
+    def insertOutputSocket(self, position, output_type, output_socket_value, is_output_multi_edged = True):
+        """A new output at `position` among the outputs, the ones from there on
+        moving down. Labels are matched to sockets by order, so the new label goes
+        to the same place."""
+        socket = self.addOutputSocket(output_type, output_socket_value, is_output_multi_edged)
+        if position >= len(self.outputs) - 1:
+            return socket
+        self.outputs.pop()
+        self.outputs.insert(position, socket)
+        if self.content is not None:
+            label = self.content.socket_labels.pop()
+            self.content.socket_labels.insert(len(self.inputs) + position, label)
+        for index, output in enumerate(self.outputs):
+            output.index = len(self.inputs) + index
+            output.index_on_drawn_node_side = index
+        self.grNode.wrapGrNodeToSockets()
+        return socket
+
+    def removeOutputSocket(self, socket):
+        """Remove one output, wherever it is, with its edges and label; the
+        outputs after it move up. removeLastSocket can only take the last one,
+        and shifting values along instead would leave edges on the wrong sockets."""
+        if socket not in self.outputs:
+            return
+        if socket.hasEdge():
+            socket.removeAllEdges()
+        label = self.getSocketLabel(socket)
+        if label is not None:
+            self.content.socket_labels.remove(label)
+            label.setParent(None)
+            label.deleteLater()
+        self.scene.grScene.removeItem(socket.grSocket)
+        position = self.outputs.index(socket)
+        self.outputs.pop(position)
+        for later in self.outputs[position:]:
+            later.index -= 1
+            later.index_on_drawn_node_side -= 1
+        self.grNode.wrapGrNodeToSockets()
+
     def removeLastSocket(self):
         if self.outputs != []:
             last_socket = self.outputs[-1]

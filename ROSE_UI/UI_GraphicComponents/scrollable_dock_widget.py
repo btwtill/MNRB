@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QDockWidget, QScrollArea, QFrame #type: ignore
+from PySide6.QtWidgets import QDockWidget, QScrollArea, QFrame, QComboBox #type: ignore
 
 class ScrollableDockWidget(QDockWidget):
     """A dock whose contents scroll once they outgrow it.
@@ -26,6 +26,16 @@ class ScrollableDockWidget(QDockWidget):
         #panels are owned by their node (node.properties) and shown again later
         self.scroll_area.takeWidget()
         self.scroll_area.setWidget(widget)
+        if widget is not None:
+            #a combo box asks for the width of its longest entry - a long enum
+            #option made the panel wider than the dock and pushed every field's
+            #right end out of sight. Narrower, the popup still shows all of it
+            for combo in widget.findChildren(QComboBox):
+                combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+                combo.setMinimumContentsLength(6)
+                #set explicitly: the combo caches the minimum it computed from its
+                #entries, and the layout would keep using that one
+                combo.setMinimumWidth(60)
 
     def widget(self):
         return self.scroll_area.widget()

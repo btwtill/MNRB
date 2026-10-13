@@ -11,6 +11,7 @@ class SkinningEditorClusterList(QListWidget):
         super().__init__(parent)
 
         self.tab = tab
+        self.filter_terms = []
 
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setSelectionMode(QAbstractItemView.NoSelection)
@@ -36,10 +37,31 @@ class SkinningEditorClusterList(QListWidget):
         for skin_cluster in self.tab.skin_clusters:
             self.addSkinClusterItem(skin_cluster)
 
+        self.applyFilter()
         self.updateGeometries()
         self.verticalScrollBar().setValue(scroll_position)
 
         self.tab.updateRemoveDeprecatedButtonState()
+
+    def setFilterText(self, text):
+        self.filter_terms = text.lower().split()
+        self.applyFilter()
+
+    def matchesFilter(self, skin_cluster):
+        #every word has to turn up somewhere - "arm L" finds the left arm's box
+        if not self.filter_terms:
+            return True
+        searchable = " ".join([skin_cluster.cluster_name, skin_cluster.target_mesh or ""] +
+                              [ref["name"] for ref in skin_cluster.deform_refs]).lower()
+        return all(term in searchable for term in self.filter_terms)
+
+    def applyFilter(self):
+        for index in range(self.count()):
+            widget = self.itemWidget(self.item(index))
+            if widget is not None:
+                self.setRowHidden(index, not self.matchesFilter(widget.skin_cluster))
+        if hasattr(self.tab, "updateSearchCount"):
+            self.tab.updateSearchCount()
 
     def getComponentWidgetSizeHint(self, component_widget):
         component_widget.adjustSize()

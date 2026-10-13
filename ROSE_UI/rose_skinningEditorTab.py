@@ -1,6 +1,6 @@
 from collections import OrderedDict
 import json, os
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout #type: ignore
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel #type: ignore
 from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_DeformList import SkinningEditorDeformList #type: ignore
 from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_Toolbar import SkinningEditorToolbar #type: ignore
 from MNRB.ROSE_UI.skinning_Editor_UI.skinning_Editor_Cluster import SkinningEditorCluster #type: ignore
@@ -90,8 +90,22 @@ class rose_SkinningEditorTab(QWidget, Serializable):
 
         self.skincluster_object_list = SkinningEditorClusterList(self, self)
 
+        #narrows the boxes down to the ones matching every word typed - by
+        #container name, target mesh or any of its deforms
+        search_row = QHBoxLayout()
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("Search skinClusters - name, mesh or deform")
+        self.search_edit.setClearButtonEnabled(True)
+        self.search_edit.textChanged.connect(self.onSearchChanged)
+        self.search_count_label = QLabel()
+        self.search_count_label.setStyleSheet("color: #999999;")
+        search_row.addWidget(self.search_edit, 1)
+        search_row.addWidget(self.search_count_label)
+
         self.cluster_layout.addWidget(self.skincluster_editor_toolbar)
+        self.cluster_layout.addLayout(search_row)
         self.cluster_layout.addWidget(self.skincluster_object_list)
+        self.updateSearchCount()
 
         self.layout.addLayout(self.cluster_layout)
     
@@ -216,6 +230,24 @@ class rose_SkinningEditorTab(QWidget, Serializable):
         self.removeSelectedSkinClusters()
         self.skincluster_object_list.rebuild()
 
+    def onSearchChanged(self, text):
+        self.skincluster_object_list.setFilterText(text)
+
+    def updateSearchCount(self):
+        if not hasattr(self, "search_count_label"):
+            return
+        shown = len(self.getVisibleSkinClusters())
+        total = len(self.skin_clusters)
+        #only worth a word while a search is hiding some
+        self.search_count_label.setText("%d of %d" % (shown, total) if shown != total else "")
+
+    def getVisibleSkinClusters(self):
+        """The containers the search lets through - all of them without one."""
+        cluster_list = getattr(self, "skincluster_object_list", None)
+        if cluster_list is None:
+            return list(self.skin_clusters)
+        return [skin_cluster for skin_cluster in self.skin_clusters if cluster_list.matchesFilter(skin_cluster)]
+
     def addSkinCluster(self, cluster_name):
         new_cluster = SkinningEditorCluster(self)
         new_cluster.cluster_name = cluster_name
@@ -224,7 +256,9 @@ class rose_SkinningEditorTab(QWidget, Serializable):
         return new_cluster
 
     def selectAllSkinClusters(self):
-        for skin_cluster in self.skin_clusters:
+        #the ones the search shows: search, Select All, Build Selected builds
+        #just what was found
+        for skin_cluster in self.getVisibleSkinClusters():
             skin_cluster.is_selected = True
 
     def deselectAllSkinClusters(self):
